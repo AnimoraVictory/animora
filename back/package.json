@@ -1,0 +1,41 @@
+{
+  "name": "back",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon --ext ts --exec tsx src/index.ts",
+    "test": "npm run test",
+    "prisma:m": "prisma migrate dev"
+  },
+  "author": "aki-627",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@hono/node-server": "^1.13.8",
+    "@prisma/client": "^4.10.0",
+    "aws-jwt-verify": "^5.0.0",
+    "aws-sdk": "^2.1692.0",
+    "bcryptjs": "^2.4.3",
+    "cookie": "^1.0.2",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "hono": "^4.6.20",
+    "jose": "^5.9.6",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0",
+    "openid-client": "^5.7.0",
+    "typescript": "^5.7.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/node": "^22.13.1",
+    "nodemon": "^3.1.9",
+    "prisma": "^4.10.0",
+    "tsx": "^4.19.2"
+  }
+}

@@ -1,0 +1,46 @@
+.toast {
+  max-width: 300px;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px); // 初期位置
+  padding: 16px;
+  background-color: white;
+  color: black;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition:
+    opacity 0.3s ease-in-out,
+    transform 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &.success {
+    border-left: 4px solid green;
+  }
+
+  &.error {
+    border-left: 4px solid red;
+  }
+
+  &.show {
+    transform: translateX(-50%) translateY(20px);
+    opacity: 100;
+  }
+}
+
+.toast-content {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.5; // 文字の位置調整
+}
+
+.toast-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 12px;
+}
