@@ -22,7 +22,7 @@ app.use(
 )
 app.route('/users', userRoutes)
 app.route('/auth', authRoutes)
-
+app.use()
 app.route('/pets', petRoutes)
 app.route('/posts', postRoutes)
 

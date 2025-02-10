@@ -70,46 +70,36 @@ petRoutes.get('/owner/:ownerId', async (c) => {
   return c.json({ pets })
 })
 
-// petRoutes.post("/new", async (c) => {
-//   const authUser = c.get("dbUser")
-//   if (!authUser?.email) {
-//     return c.json({ error: "Unauthorized: No email" }, 401)
-//   }
+petRoutes.post("/new", async (c) => {
 
-//   const dbUser = await prisma.user.findUnique({
-//     where: { email: authUser.email },
-//   })
-//   if (!dbUser) {
-//     return c.json({ error: `No local user found for email: ${authUser.email}` }, 404)
-//   }
+  const formData = await c.req.formData()
+  const name = formData.get("name") as string
+  const type = formData.get("type") as string
+  const birthDay = formData.get("birthDay") as string
+  const imageFile = formData.get("image") as File
+  const userId = formData.get("userId") as string
 
-//   const formData = await c.req.formData()
-//   const name = formData.get("name") as string
-//   const type = formData.get("type") as string
-//   const birthDay = formData.get("birthDay") as string
-//   const imageFile = formData.get("image") as File
+  if (!name || !type || !birthDay || !imageFile) {
+    return c.json({ error: "Missing required fields" }, 400)
+  }
+  const imageUrl = await uploadToS3(imageFile)
 
-//   if (!name || !type || !birthDay || !imageFile) {
-//     return c.json({ error: "Missing required fields" }, 400)
-//   }
-//   const imageUrl = await uploadToS3(imageFile)
+  const pet = await prisma.pet.create({
+    data: {
+      name,
+      type,
+      birthDay,
+      imageUrl,
+      owner: {
+        connect: { id: userId },
+      },
+    },
+  })
 
-//   const pet = await prisma.pet.create({
-//     data: {
-//       name,
-//       type,
-//       birthDay,
-//       imageUrl,
-//       owner: {
-//         connect: { id: dbUser.id },
-//       },
-//     },
-//   })
-
-//   return c.json({
-//     message: "Pet successfully registered",
-//     pet,
-//   })
-// })
+  return c.json({
+    message: "Pet successfully registered",
+    pet,
+  })
+})
 
 export default petRoutes

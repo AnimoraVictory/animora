@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { PetInputData, petInputSchema } from "./schema/petInput"
 import { useToast } from "../../utils/toast/useToast"
+import { useAuth } from "../../hooks/auth/useAuth"
 type PetRegistrationModalProps = {
   onClose: () => void
 }
@@ -17,6 +18,7 @@ const PetRegistrationModal = ({ onClose }: PetRegistrationModalProps) => {
   } = useForm<PetInputData>({
     resolver: zodResolver(petInputSchema),
   })
+  const {user} = useAuth()
   const {showToast} = useToast()
 
   
@@ -43,8 +45,14 @@ const PetRegistrationModal = ({ onClose }: PetRegistrationModalProps) => {
     formData.append("name", data.name)
     formData.append("type", data.type)
     formData.append("birthDay", data.birthDay)
+
+    if (user && user.id) {
+      formData.append("userId", user.id);
+    } else {
+      showToast("ユーザー情報が取得できません", "error");
+      return;
+    }
   
-    // 🔹 FileReader の結果ではなく、File オブジェクトを追加
     const fileInput = document.getElementById("pet-image-upload") as HTMLInputElement
     if (fileInput.files?.length) {
       formData.append("image", fileInput.files[0])
