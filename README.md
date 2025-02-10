@@ -1,29 +1,69 @@
-# animalia
-.envは持っている人にもらってください
+以下の内容をそのまま **`README.md`** にコピーして利用できます。
 
-backの立ち上げ手順
+```md
+# **プロジェクトセットアップ手順**
 
-backに移動し
+このプロジェクトをローカルで実行するためのセットアップ手順を記載しています。
 
-npm install
+---
 
-npm run build
+## **環境変数の設定**
+`.env` ファイルが必要です。持っている人から `.env` を受け取って、 `back/` ディレクトリに配置してください。
 
-を実行したのち
+---
 
-docker compose build
-及び
-docker compose up
+## **バックエンドのセットアップ**
+1. **`back` ディレクトリへ移動**
+   ```sh
+   cd back
+   ```
 
-その後
+2. **依存関係のインストール**
+   ```sh
+   npm install
+   ```
 
-npm run prisma:m
-でマイグレーションを実行してください
+3. **ビルドの実行**
+   ```sh
+   npm run build
+   ```
 
-backが立ち上がったら
-frontに移動して
-npm i
-npm run devを実行
+4. **Dockerの起動**
+   ```sh
+   docker compose build
+   docker compose up
+   ```
 
-localhost:5173
-にてfrontにアクセスできます
+5. **データベースのマイグレーション**
+   ```sh
+   npm run prisma:m
+   ```
+
+---
+
+## **フロントエンドのセットアップ**
+1. **`front` ディレクトリへ移動**
+   ```sh
+   cd ../front
+   ```
+
+2. **依存関係のインストール**
+   ```sh
+   npm install
+   ```
+
+3. **開発サーバーの起動**
+   ```sh
+   npm run dev
+   ```
+
+4. **アプリにアクセス**
+   - ブラウザで [`http://localhost:5173`](http://localhost:5173) にアクセス
+
+---
+
+## **補足**
+- `docker compose up` の際にエラーが発生した場合は、`docker compose down` を実行してから再度 `docker compose up` を試してください。  
+- `.env` ファイルがないと正しく動作しませんので、必ず用意してください。  
+- バックエンドが立ち上がっていることを確認してから、フロントエンドを起動してください。  
+```
