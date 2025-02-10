@@ -35,28 +35,42 @@ const PetRegistrationModal = ({ onClose }: PetRegistrationModalProps) => {
   }
 
   const handleRegister = async (data: PetInputData) => {
-
-    const petData = {
-      name: data.name,
-      type: data.type,
-      birthDay: data.birthDay,
-      image: petImage,
+    if (!petImage) {
+      showToast("ペットの画像を選択してください", "error")
+      return
     }
-
+    const formData = new FormData()
+    formData.append("name", data.name)
+    formData.append("type", data.type)
+    formData.append("birthDay", data.birthDay)
+  
+    // 🔹 FileReader の結果ではなく、File オブジェクトを追加
+    const fileInput = document.getElementById("pet-image-upload") as HTMLInputElement
+    if (fileInput.files?.length) {
+      formData.append("image", fileInput.files[0])
+    } else {
+      showToast("画像を選択してください", "error")
+      return
+    }
+  
     try {
-      const res = await fetch("http://localhost:3000/pets", {
+      const res = await fetch("http://localhost:3000/pets/new", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(petData),
+        body: formData, // `Content-Type` は `fetch` 側で自動設定
       })
-
-      if (!res.ok) throw new Error("ペット登録に失敗しました")
-
+  
+      if (!res.ok) {
+        throw new Error("ペット登録に失敗しました")
+      }
+  
+      showToast("ペットが登録されました", "success")
       onClose()
     } catch (err) {
       console.error("❌ ペット登録エラー:", err)
+      showToast("登録に失敗しました", "error")
     }
   }
+  
 
   const handleValidationError = () => {
     if (errors.name) {

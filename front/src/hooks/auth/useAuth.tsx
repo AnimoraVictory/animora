@@ -40,9 +40,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         body: JSON.stringify({ email, password }),
       })
-      if (!res.ok) throw new Error('サインインに失敗しました')
+      if (!res.ok) {
+        throw new Error('サインインに失敗しました')
+      }
       const data = await res.json()
-      localStorage.setItem("token", data.token)
       setUser(data.user)
     } catch (err) {
       console.error('サインイン失敗:', err)

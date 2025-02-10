@@ -3,9 +3,11 @@ import { AWSError, CognitoIdentityServiceProvider } from 'aws-sdk'
 import { generateSecretHash } from './userRoutes'
 import { InitiateAuthResponse } from 'aws-sdk/clients/cognitoidentityserviceprovider'
 import { PromiseResult } from 'aws-sdk/lib/request'
-import cookie from "cookie"
 import { PrismaClient, User } from '@prisma/client'
 import { JwksClient } from "jwks-rsa"
+import {
+  getCookie,
+} from 'hono/cookie'
 import jwt from "jsonwebtoken"
 
 const authRoutes = new Hono<{
@@ -172,8 +174,8 @@ authRoutes.get("/me", async (c) => {
 
 // ログアウト
 authRoutes.post("/signout", async (c) => {
-  const cookies = cookie.parse(c.req.header("Cookie") || "")
-  const accessToken = cookies.accessToken
+  const cookies = getCookie(c)
+  const {accessToken} = cookies
 
   if (!accessToken) {
     return c.json({ error: "Unauthorized - No token provided" }, 401)
@@ -203,35 +205,36 @@ authRoutes.post("/signout", async (c) => {
 
 // セッション取得
 authRoutes.get("/session", async (c) => {
-  const cookies = cookie.parse(c.req.header("Cookie") || "")
+  const cookies = getCookie(c);
+
   const token = cookies.idToken
 
   if (!token) {
-    return c.json({ error: "Unauthorized - No token provided" }, 401)
+    return c.json({ error: "Unauthorized - No token provided" }, 401);
   }
 
   try {
-    const decoded = jwt.decode(token, { complete: true })
+    // JWT をデコード（complete オプションでヘッダーも取得）
+    const decoded = jwt.decode(token, { complete: true });
     if (!decoded || !decoded.header.kid) {
-      throw new Error("Invalid token header")
+      throw new Error("Invalid token header");
     }
 
-    const publicKey = await getSigningKey(decoded.header)
-    const verifiedToken = jwt.verify(token, publicKey) as { email: string }
+    // Cognito から公開鍵を取得し、JWT を検証
+    const publicKey = await getSigningKey(decoded.header);
+    const verifiedToken = jwt.verify(token, publicKey) as { email: string };
 
+    // DB からユーザー情報を取得
     const dbUser = await prisma.user.findUnique({
-      where: {
-        email: verifiedToken.email
-      }
-    })
+      where: { email: verifiedToken.email },
+    });
 
-    return c.json(dbUser)
+    return c.json(dbUser);
   } catch (err) {
-    console.error("❌ JWT verification failed:", err)
-    return c.json({ error: "Invalid token" }, 403)
+    console.error("❌ JWT verification failed:", err);
+    return c.json({ error: "Invalid token" }, 403);
   }
-})
-
+});
 
 
 export default authRoutes

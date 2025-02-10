@@ -35,13 +35,10 @@ const SignIn = () => {
         body: JSON.stringify(data),
         credentials: "include",
       })
-      const responseData = await res.json()
+      await res.json()
       if (!res.ok) {
         throw new Error(`Error: ${res.status}`)
       }
-      localStorage.setItem("accessToken", responseData.accessToken)
-      localStorage.setItem("idToken", responseData.idToken)
-      localStorage.setItem("refreshToken", responseData.refreshToken)
       showToast("認証に成功しました。", "success")
       navigate("/home")
       navigate(0)

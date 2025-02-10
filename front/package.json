@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-amplify/adapter-nextjs": "^1.4.3",
     "@hookform/resolvers": "^3.10.0",
     "@sentry/react": "^8.54.0",
-    "aws-amplify": "^5.3.27",
+    "aws-amplify": "^6.12.3",
+    "crypto-js": "^4.2.0",
     "lucide-react": "^0.474.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
