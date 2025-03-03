@@ -13,16 +13,15 @@ app.get('/', (c) => c.text('Animalia API is running!'))
 app.use(
   '*',
   cors({
-    origin: "http://localhost:5173",
+    origin: 'http://localhost:5173',
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowHeaders: ['Content-Type', 'Authorization'],
     maxAge: 600,
-    credentials: true
+    credentials: true,
   }),
 )
 app.route('/users', userRoutes)
 app.route('/auth', authRoutes)
-app.use()
 app.route('/pets', petRoutes)
 app.route('/posts', postRoutes)
 
