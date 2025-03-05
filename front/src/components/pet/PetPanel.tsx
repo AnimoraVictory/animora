@@ -14,6 +14,7 @@ interface PetPanelProps {
 }
 
 const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
+  console.log(pet.imageUrl)
   return (
     <div className="pet-panel">
       <img src={pet.imageUrl} alt={`${pet.name}のアイコン`} className="pet-image" />
