@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -41,6 +42,10 @@ func InitAuth() {
 	userPoolID := os.Getenv("AWS_COGNITO_POOL_ID")
 	jwksURL := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json", region, userPoolID)
 
+	// Configure the JWK client with the JWKS URL
+	jwksClient.Configure(jwksURL, jwk.WithMinRefreshInterval(15*time.Minute))
+
+	// Perform an initial refresh of the JWKS endpoint
 	if _, err := jwksClient.Refresh(context.Background(), jwksURL); err != nil {
 		log.Fatalf("Failed to refresh JWK endpoint: %v", err)
 	}
