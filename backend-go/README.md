@@ -31,6 +31,8 @@ backend-go/
 │   │   ├── pet_routes.go
 │   │   ├── post_routes.go
 │   │   └── user_routes.go
+│   ├── seed/                 # Database seeding
+│   │   └── seed.go
 │   └── services/             # External services
 │       └── s3_service.go
 ├── .env                      # Environment variables
@@ -80,6 +82,27 @@ go run cmd/api/main.go
 # Build and run with Docker Compose
 docker-compose up --build
 ```
+
+## Database Seeding
+
+The application includes functionality to seed the database with sample data for development and testing purposes. This creates sample users, pets, posts, comments, and likes.
+
+### Seeding the Database
+
+```bash
+# Using Go
+go run cmd/api/main.go -seed
+
+# Using Docker
+docker-compose exec api go run cmd/api/main.go -seed
+```
+
+The seed data includes:
+- 5 users with different profiles
+- 6 pets associated with users
+- 6 posts with content and image URLs
+- 7 comments on various posts
+- 10 likes on different posts
 
 ## API Endpoints
 
