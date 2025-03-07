@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -10,11 +11,16 @@ import (
 	"github.com/htanos/animalia/backend-go/internal/auth"
 	"github.com/htanos/animalia/backend-go/internal/models"
 	"github.com/htanos/animalia/backend-go/internal/routes"
+	"github.com/htanos/animalia/backend-go/internal/seed"
 	"github.com/htanos/animalia/backend-go/internal/services"
 	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Define command-line flags
+	seedFlag := flag.Bool("seed", false, "Seed the database with sample data")
+	flag.Parse()
+
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found")
@@ -22,6 +28,16 @@ func main() {
 
 	// Initialize database
 	models.InitDB()
+
+	// Run seed data if flag is set
+	if *seedFlag {
+		log.Println("Seeding database with sample data...")
+		if err := seed.SeedData(models.DB); err != nil {
+			log.Fatalf("Failed to seed database: %v", err)
+		}
+		log.Println("Database seeding completed successfully")
+		return
+	}
 
 	// Initialize auth services
 	auth.InitAuth()

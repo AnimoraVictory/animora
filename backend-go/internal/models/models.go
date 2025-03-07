@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	pq "github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -21,15 +22,15 @@ type User struct {
 
 // Post represents a post in the system
 type Post struct {
-	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	ImageUrls []string  `json:"imageUrls" gorm:"type:text[]"`
-	AuthorID  string    `json:"authorId"`
-	Author    User      `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
-	Comments  []Comment `json:"comments,omitempty" gorm:"foreignKey:PostID"`
-	Likes     []Like    `json:"likes,omitempty" gorm:"foreignKey:PostID"`
-	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
+	ID        string         `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	Title     string         `json:"title"`
+	Content   string         `json:"content"`
+	ImageUrls pq.StringArray `json:"imageUrls" gorm:"type:text[]"`
+	AuthorID  string         `json:"authorId"`
+	Author    User           `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
+	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:PostID"`
+	Likes     []Like         `json:"likes,omitempty" gorm:"foreignKey:PostID"`
+	CreatedAt time.Time      `json:"createdAt" gorm:"autoCreateTime"`
 }
 
 // Comment represents a comment on a post
@@ -65,6 +66,16 @@ type Pet struct {
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
 
+// Image represents an image associated with a post
+type Image struct {
+	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	URL       string    `json:"url"`
+	PostID    string    `json:"postId"`
+	Post      Post      `json:"post,omitempty" gorm:"foreignKey:PostID"`
+	OrderNum  int       `json:"orderNum"` // 画像の表示順序
+	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
+}
+
 // BeforeCreate is a GORM hook that generates a UUID for the ID field if it's empty
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	if u.ID == "" {
@@ -93,6 +104,14 @@ func (c *Comment) BeforeCreate(tx *gorm.DB) error {
 func (p *Pet) BeforeCreate(tx *gorm.DB) error {
 	if p.ID == "" {
 		p.ID = uuid.New().String()
+	}
+	return nil
+}
+
+// BeforeCreate is a GORM hook that generates a UUID for the ID field if it's empty
+func (i *Image) BeforeCreate(tx *gorm.DB) error {
+	if i.ID == "" {
+		i.ID = uuid.New().String()
 	}
 	return nil
 }
