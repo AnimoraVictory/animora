@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/htanos/animalia/backend-go/internal/auth"
+	"github.com/htanos/animalia/backend-go/internal/models"
 )
 
 // SetupAuthRoutes sets up the auth routes
@@ -30,7 +31,7 @@ func SetupAuthRoutes(app *fiber.App) {
 
 // verifyEmail verifies a user's email address
 func verifyEmail(c *fiber.Ctx) error {
-	// Parse request body
+	// リクエストボディのパース
 	var req struct {
 		Email string `json:"email"`
 		Code  string `json:"code"`
@@ -41,14 +42,14 @@ func verifyEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validate request
+	// リクエスト内容の検証
 	if req.Email == "" || req.Code == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "lack of information",
 		})
 	}
 
-	// Verify email
+	// メール認証の実施
 	if err := auth.VerifyEmail(req.Email, req.Code); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "確認コードが無効です",
@@ -61,8 +62,9 @@ func verifyEmail(c *fiber.Ctx) error {
 }
 
 // signIn signs a user in
+// signIn signs a user in
 func signIn(c *fiber.Ctx) error {
-	// Parse request body
+	// リクエストボディのパース
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -73,14 +75,14 @@ func signIn(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validate request
+	// リクエスト内容の検証
 	if req.Email == "" || req.Password == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "lack of information",
 		})
 	}
 
-	// Sign in
+	// サインイン処理 (Cognito等)
 	result, err := auth.SignIn(req.Email, req.Password)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -88,43 +90,33 @@ func signIn(c *fiber.Ctx) error {
 		})
 	}
 
-	// Set cookies
-	c.Cookie(&fiber.Cookie{
-		Name:     "accessToken",
-		Value:    *result.AuthenticationResult.AccessToken,
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "idToken",
-		Value:    *result.AuthenticationResult.IdToken,
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "refreshToken",
-		Value:    *result.AuthenticationResult.RefreshToken,
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-	})
+	// データベースからユーザー情報を取得
+	// models.GetUserByEmail は、models.DB と email を受け取り、ユーザー情報を返す実装とします。
+	dbUser, err := models.GetUserByEmail(models.DB, req.Email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "ユーザー情報を取得できません",
+		})
+	}
 
+	// Cookie を使用せず、トークンを JSON レスポンスで返す
 	return c.JSON(fiber.Map{
 		"message": "ログイン成功",
 		"user": fiber.Map{
-			"email": req.Email,
+			"id":    dbUser.ID,
+			"email": dbUser.Email,
+			"name":  dbUser.Name,
 		},
+		"accessToken":  *result.AuthenticationResult.AccessToken,
+		"idToken":      *result.AuthenticationResult.IdToken,
+		"refreshToken": *result.AuthenticationResult.RefreshToken,
 	})
 }
 
+
 // refreshToken refreshes a user's authentication tokens
 func refreshToken(c *fiber.Ctx) error {
-	// Parse request body
+	// リクエストボディのパース
 	var req struct {
 		RefreshToken string `json:"refreshToken"`
 	}
@@ -134,14 +126,14 @@ func refreshToken(c *fiber.Ctx) error {
 		})
 	}
 
-	// Validate request
+	// リクエスト内容の検証
 	if req.RefreshToken == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "リフレッシュトークンがありません",
 		})
 	}
 
-	// Refresh token
+	// トークン更新処理
 	result, err := auth.RefreshToken(req.RefreshToken)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -149,42 +141,22 @@ func refreshToken(c *fiber.Ctx) error {
 		})
 	}
 
-	// Set cookies
-	c.Cookie(&fiber.Cookie{
-		Name:     "accessToken",
-		Value:    *result.AuthenticationResult.AccessToken,
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "idToken",
-		Value:    *result.AuthenticationResult.IdToken,
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-	})
+	// 新しいトークンを JSON レスポンスで返す
+	response := fiber.Map{
+		"message":     "トークン更新成功",
+		"accessToken": *result.AuthenticationResult.AccessToken,
+		"idToken":     *result.AuthenticationResult.IdToken,
+	}
 	if result.AuthenticationResult.RefreshToken != nil {
-		c.Cookie(&fiber.Cookie{
-			Name:     "refreshToken",
-			Value:    *result.AuthenticationResult.RefreshToken,
-			HTTPOnly: true,
-			Secure:   true,
-			SameSite: "None",
-			Path:     "/",
-		})
+		response["refreshToken"] = *result.AuthenticationResult.RefreshToken
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "トークン更新成功",
-	})
+	return c.JSON(response)
 }
 
 // getMe gets the current user's information
 func getMe(c *fiber.Ctx) error {
-	// Get the Authorization header
+	// Authorization ヘッダーからトークンを取得
 	authHeader := c.Get("Authorization")
 	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -192,10 +164,10 @@ func getMe(c *fiber.Ctx) error {
 		})
 	}
 
-	// Extract the token
+	// トークンの抽出
 	accessToken := authHeader[7:]
 
-	// Get user information
+	// ユーザー情報の取得
 	userInfo, err := auth.GetUser(accessToken)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -210,50 +182,23 @@ func getMe(c *fiber.Ctx) error {
 
 // signOut signs a user out
 func signOut(c *fiber.Ctx) error {
-	// Get the access token from the cookie
-	accessToken := c.Cookies("accessToken")
-	if accessToken == "" {
+	// Authorization ヘッダーからトークンを取得
+	authHeader := c.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Unauthorized - No token provided",
+			"error": "トークンがありません",
 		})
 	}
+	accessToken := authHeader[7:]
 
-	// Sign out
+	// サインアウト処理
 	if err := auth.SignOut(accessToken); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "ログアウトに失敗しました",
 		})
 	}
 
-	// Clear cookies
-	c.Cookie(&fiber.Cookie{
-		Name:     "accessToken",
-		Value:    "",
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-		MaxAge:   -1,
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "idToken",
-		Value:    "",
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-		MaxAge:   -1,
-	})
-	c.Cookie(&fiber.Cookie{
-		Name:     "refreshToken",
-		Value:    "",
-		HTTPOnly: true,
-		Secure:   true,
-		SameSite: "None",
-		Path:     "/",
-		MaxAge:   -1,
-	})
-
+	// JSON レスポンスで結果を返す
 	return c.JSON(fiber.Map{
 		"message": "ログアウトしました",
 	})
@@ -261,15 +206,16 @@ func signOut(c *fiber.Ctx) error {
 
 // getSession gets the current user's session
 func getSession(c *fiber.Ctx) error {
-	// Get the ID token from the cookie
-	idToken := c.Cookies("idToken")
-	if idToken == "" {
+	// Authorization ヘッダーからIDトークンを取得
+	authHeader := c.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Unauthorized - No token provided",
+			"error": "トークンがありません",
 		})
 	}
+	idToken := authHeader[7:]
 
-	// Verify the token
+	// トークンの検証
 	user, err := auth.VerifyToken(idToken)
 	if err != nil {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{

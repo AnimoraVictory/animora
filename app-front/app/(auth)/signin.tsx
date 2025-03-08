@@ -1,0 +1,128 @@
+import React from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '../../providers/AuthContext';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { router } from 'expo-router';
+
+
+const SignInInputSchema = z.object({
+  email: z.string().email({ message: '有効なメールアドレスを入力してください' }),
+  password: z.string().min(8, { message: 'パスワードは8文字以上必要です' }),
+});
+
+type SignInInput = z.infer<typeof SignInInputSchema>;
+
+
+type SignInStackParamList = {
+  SignIn: undefined;
+  SignUp: undefined;
+  TabsLayout: undefined;
+};
+
+type SignInScreenNavigationProp = StackNavigationProp<SignInStackParamList, 'SignIn'>;
+
+type Props = {
+  navigation: SignInScreenNavigationProp;
+};
+
+const SignInScreen: React.FC<Props> = ({ navigation }) => {
+  const { login } = useAuth();
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignInInput>({
+    resolver: zodResolver(SignInInputSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const onSubmit = async (data: SignInInput) => {
+    try {
+      await login(data.email, data.password);
+    } catch (error: any) {
+      Alert.alert('ログインエラー', error.message || 'ログインに失敗しました');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>サインイン</Text>
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+            {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
+          </>
+        )}
+      />
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+            {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
+          </>
+        )}
+      />
+      <Button
+        title={isSubmitting ? '処理中...' : 'サインイン'}
+        onPress={handleSubmit(onSubmit)}
+        disabled={isSubmitting}
+      />
+      <Button
+        title="アカウントをお持ちでない方はこちら"
+        onPress={() => router.push("./signup")}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 8,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 8,
+  },
+});
+
+export default SignInScreen;
