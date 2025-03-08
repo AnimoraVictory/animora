@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { BACK_END_URL } from '@env';
 
 export interface User {
@@ -15,81 +16,63 @@ export interface LoginResponse {
 }
 
 export const login = async (email: string, password: string): Promise<LoginResponse> => {
-  const response = await fetch(`${BACK_END_URL}/auth/signin`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'ログインに失敗しました');
+  try {
+    const response = await axios.post<LoginResponse>(`${BACK_END_URL}/auth/signin`, { email, password }, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.data;
+  } catch (error: any) {
+    const errMsg = error.response?.data?.error || 'ログインに失敗しました';
+    throw new Error(errMsg);
   }
-
-  const data: LoginResponse = await response.json();
-  return data;
 };
 
 export const signUp = async (email: string, password: string): Promise<void> => {
-  const response = await fetch(`${BACK_END_URL}/auth/signup`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'サインアップに失敗しました');
+  try {
+    await axios.post(`${BACK_END_URL}/auth/signup`, { email, password }, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error: any) {
+    const errMsg = error.response?.data?.error || 'サインアップに失敗しました';
+    throw new Error(errMsg);
   }
 };
 
-
 export const signOut = async (accessToken: string): Promise<void> => {
-  const response = await fetch(`${BACK_END_URL}/auth/signout`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'ログアウトに失敗しました');
+  try {
+    await axios.post(`${BACK_END_URL}/auth/signout`, null, {
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      }
+    });
+  } catch (error: any) {
+    const errMsg = error.response?.data?.error || 'ログアウトに失敗しました';
+    throw new Error(errMsg);
   }
 };
 
 export const getUser = async (accessToken: string): Promise<User> => {
-  const response = await fetch(`${BACK_END_URL}/auth/me`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'ユーザー情報の取得に失敗しました');
+  try {
+    const response = await axios.get<User>(`${BACK_END_URL}/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      }
+    });
+    return response.data;
+  } catch (error: any) {
+    const errMsg = error.response?.data?.error || 'ユーザー情報の取得に失敗しました';
+    throw new Error(errMsg);
   }
-
-  return await response.json();
 };
 
 export const verifyEmail = async (email: string, code: string): Promise<void> => {
-  const response = await fetch(`${BACK_END_URL}/auth/verify-email`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, code }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'メール認証に失敗しました');
+  try {
+    await axios.post(`${BACK_END_URL}/auth/verify-email`, { email, code }, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error: any) {
+    const errMsg = error.response?.data?.error || 'メール認証に失敗しました';
+    throw new Error(errMsg);
   }
 };
