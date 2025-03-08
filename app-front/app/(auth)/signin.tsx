@@ -3,10 +3,8 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '../../providers/AuthContext';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { router } from 'expo-router';
-
+import { useAuth } from '@/providers/AuthContext';
+import { useRouter } from 'expo-router';
 
 const SignInInputSchema = z.object({
   email: z.string().email({ message: '有効なメールアドレスを入力してください' }),
@@ -15,21 +13,9 @@ const SignInInputSchema = z.object({
 
 type SignInInput = z.infer<typeof SignInInputSchema>;
 
-
-type SignInStackParamList = {
-  SignIn: undefined;
-  SignUp: undefined;
-  TabsLayout: undefined;
-};
-
-type SignInScreenNavigationProp = StackNavigationProp<SignInStackParamList, 'SignIn'>;
-
-type Props = {
-  navigation: SignInScreenNavigationProp;
-};
-
-const SignInScreen: React.FC<Props> = ({ navigation }) => {
+export default function SignInScreen() {
   const { login } = useAuth();
+  const router = useRouter();
 
   const {
     control,
@@ -43,6 +29,8 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
   const onSubmit = async (data: SignInInput) => {
     try {
       await login(data.email, data.password);
+      // ログイン成功後、メインタブレイアウトへ遷移
+      router.replace("/(tabs)");
     } catch (error: any) {
       Alert.alert('ログインエラー', error.message || 'ログインに失敗しました');
     }
@@ -93,11 +81,11 @@ const SignInScreen: React.FC<Props> = ({ navigation }) => {
       />
       <Button
         title="アカウントをお持ちでない方はこちら"
-        onPress={() => router.push("./signup")}
+        onPress={() => router.push("/(auth)/signup")}
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -124,5 +112,3 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 });
-
-export default SignInScreen;
