@@ -1,4 +1,3 @@
-// app/index.tsx または WelcomeScreen.tsx
 import React from "react";
 import { View, Text, StyleSheet, Button } from "react-native";
 import { useRouter } from "expo-router";
