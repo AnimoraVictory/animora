@@ -27,9 +27,9 @@ export const login = async (email: string, password: string): Promise<LoginRespo
   }
 };
 
-export const signUp = async (email: string, password: string): Promise<void> => {
+export const signUp = async (email: string, password: string, name: string): Promise<void> => {
   try {
-    await axios.post(`${BACK_END_URL}/auth/signup`, { email, password }, {
+    await axios.post(`${BACK_END_URL}/auth/signup`, { email, password, name }, {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {

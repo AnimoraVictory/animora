@@ -10,6 +10,7 @@ import { Colors } from "@/constants/Colors";
 import { signUp } from "@/constants/api";
 
 const SignUpInputSchema = z.object({
+  name: z.string(),
   email: z.string().email({ message: "有効なメールアドレスを入力してください" }),
   password: z
     .string()
@@ -35,7 +36,7 @@ export default function SignUpScreen() {
 
   const onSubmit = async (data: SignUpInput) => {
     try {
-      await signUp(data.email, data.password);
+      await signUp(data.email, data.password, data.name);
       // サインアップ成功後、verify-email 画面へ email をパラメータとして渡して遷移
       router.push({ pathname: "/(auth)/verify-email", params: { email: data.email } });
     } catch (error: any) {
@@ -48,6 +49,24 @@ export default function SignUpScreen() {
       <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>
         サインアップ
       </Text>
+      <Controller
+        control={control}
+        name="name"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="UserName"
+              autoCapitalize="none"
+              keyboardType="default"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              value={value}
+            />
+            {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
+          </>
+        )}
+      />
       <Controller
         control={control}
         name="email"

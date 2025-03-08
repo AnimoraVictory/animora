@@ -1,9 +1,12 @@
 package routes
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/htanos/animalia/backend-go/internal/auth"
 	"github.com/htanos/animalia/backend-go/internal/models"
+	"gorm.io/gorm"
 )
 
 // SetupAuthRoutes sets up the auth routes
@@ -15,6 +18,9 @@ func SetupAuthRoutes(app *fiber.App) {
 
 	// Sign in
 	authGroup.Post("/signin", signIn)
+
+	// Sign up
+	authGroup.Post("/signup", signUp)
 
 	// Refresh token
 	authGroup.Post("/refresh", refreshToken)
@@ -58,6 +64,59 @@ func verifyEmail(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "メール認証が完了しました",
+	})
+}
+
+// signUp signs a user up: ユーザーを Cognito に追加し、その後 dbUser を作成
+func signUp(c *fiber.Ctx) error {
+	// リクエストボディのパース
+	var req struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Name     string `json:"name"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// 入力値の検証
+	if req.Email == "" || req.Password == "" || req.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "情報が不足しています",
+		})
+	}
+
+	// DB に同じメールアドレスのユーザーが既に存在しないかチェック
+	existingUser, err := models.GetUserByEmail(models.DB, req.Email)
+	// 存在していた場合はエラー
+	if err == nil && existingUser != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "このメールアドレスは既に登録されています",
+		})
+	}
+	// もし他の DB エラーがあれば、そのまま返す
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "データベースエラー",
+		})
+	}
+
+	// Cognito にユーザー登録を実施
+	// auth.SignUp は、内部で Cognito の API を呼び出し、2 つの値（結果とエラー）を返す想定です
+	dbUser, err := auth.SignUp(req.Name, req.Email, req.Password)
+	if err != nil {
+		log.Printf("Cognito signUp error: %v", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "ユーザー登録に失敗しました",
+		})
+	}
+	
+	// サインアップ成功時のレスポンスを返す
+	return c.JSON(fiber.Map{
+		"message": "アカウントが作成されました",
+		"user":    dbUser,
 	})
 }
 
