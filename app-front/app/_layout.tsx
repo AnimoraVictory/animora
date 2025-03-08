@@ -21,8 +21,7 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-// AuthSwitch は、AuthProvider の loading 状態が完了してから、
-// ユーザーの有無に応じてリダイレクトし、最終的に <Slot /> をレンダリングする
+// ユーザーの有無に応じてリダイレクトする
 function AuthSwitch() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -39,10 +38,12 @@ function AuthSwitch() {
   }, [loading, user, router]);
 
   if (loading) {
-    // ローディング中は ActivityIndicator を表示
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors[colorScheme ?? "light"].tint} />
+        <ActivityIndicator
+          size="large"
+          color={Colors[colorScheme ?? "light"].tint}
+        />
       </View>
     );
   }
@@ -65,22 +66,26 @@ export default function RootLayout() {
   if (!loaded) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors[colorScheme ?? "light"].tint} />
+        <ActivityIndicator
+          size="large"
+          color={Colors[colorScheme ?? "light"].tint}
+        />
       </View>
     );
   }
 
+  // QueryClientProvider を最上位に配置し、その中に AuthProvider を配置する
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
           <AuthSwitch />
           <StatusBar style="auto" />
         </ThemeProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
