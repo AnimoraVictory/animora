@@ -69,9 +69,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         user: userData,
       }: LoginResponse = await loginApi(email, password);
 
-      console.log("accessToken:", accessToken);
-
-      // それぞれのトークンを SecureStore に保存
       await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
       await SecureStore.setItemAsync(ID_TOKEN_KEY, idToken);
       await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);

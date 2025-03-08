@@ -28,8 +28,6 @@ export const login = async (email: string, password: string): Promise<LoginRespo
     throw new Error(errorData.error || 'ログインに失敗しました');
   }
 
-  console.log("response:", response);
-
   const data: LoginResponse = await response.json();
   return data;
 };

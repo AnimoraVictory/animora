@@ -163,23 +163,42 @@ func getMe(c *fiber.Ctx) error {
 			"error": "トークンがありません",
 		})
 	}
-
-	// トークンの抽出
 	accessToken := authHeader[7:]
 
-	// ユーザー情報の取得
-	userInfo, err := auth.GetUser(accessToken)
+	// Cognito のユーザー情報を取得する（claims ではなく）
+	cognitoUser, err := auth.GetUser(accessToken)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "ユーザー情報を取得できません",
+			"error": "Cognito からユーザー情報を取得できません",
+		})
+	}
+
+	// cognitoUser から email を取得する
+	var email string
+	for _, attr := range cognitoUser.UserAttributes {
+		if *attr.Name == "email" {
+			email = *attr.Value
+			break
+		}
+	}
+	if email == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cognito ユーザー情報にメールアドレスが含まれていません",
+		})
+	}
+
+	// データベースからユーザー情報を取得（models.DB はグローバル変数、または依存性注入済み）
+	dbUser, err := models.GetUserByEmail(models.DB, email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "ユーザー情報が見つかりません",
 		})
 	}
 
 	return c.JSON(fiber.Map{
-		"user": userInfo,
+		"user": dbUser,
 	})
 }
-
 // signOut signs a user out
 func signOut(c *fiber.Ctx) error {
 	// Authorization ヘッダーからトークンを取得
