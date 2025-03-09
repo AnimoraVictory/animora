@@ -50,7 +50,7 @@ const ProfileScreen: React.FC = () => {
 
   const [selectedTab, setSelectedTab] = useState<TabType>('posts');
   const { user, loading: authLoading, logout } = useAuth();
-  console.log(user)
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -63,6 +63,32 @@ const ProfileScreen: React.FC = () => {
   // モーダル表示状態の管理
   const [modalVisible, setModalVisible] = useState(false);
 
+  // ペット情報を取得
+  const { data: petData, isLoading: petLoading, error: petError } = useQuery<Pet[]>({
+    queryKey: ['pets', user?.id],
+    queryFn: async () => {
+      const response = await axios.get('http://localhost:3000/pets/owner', {
+        params: { ownerId: user?.id },
+      });
+      const parsedResponse = getPetResponseSchema.parse(response.data);
+      return parsedResponse.pets;
+    },
+    enabled: !!user?.id,
+  });
+
+  // ユーザーの投稿一覧を取得
+  const { data: postData, isLoading: postLoading, error: postError } = useQuery<Post[]>({
+    queryKey: ['posts', user?.id],
+    queryFn: async () => {
+      const response = await axios.get('http://localhost:3000/posts/user', {
+        params: { authorId: user?.id },
+      });
+      const parsedResponse = getPostResponseSchema.parse(response.data);
+      return parsedResponse.posts;
+    },
+    enabled: !!user?.id,
+  });
+
   if (authLoading || !user) {
     return (
       <View style={styles.loadingContainer}>
@@ -70,37 +96,11 @@ const ProfileScreen: React.FC = () => {
       </View>
     );
   }
-
-  // ペット情報を取得
-  const { data: petData, isLoading: petLoading, error: petError } = useQuery<Pet[]>({
-    queryKey: ['pets', user.id],
-    queryFn: async () => {
-      const response = await axios.get('http://localhost:3000/pets/owner', {
-        params: { ownerId: user.id },
-      });
-      const parsedResponse = getPetResponseSchema.parse(response.data);
-      return parsedResponse.pets;
-    },
-    enabled: !!user.id,
-  });
-
-  // ユーザーの投稿一覧を取得
-  const { data: postData, isLoading: postLoading, error: postError } = useQuery<Post[]>({
-    queryKey: ['posts', user.id],
-    queryFn: async () => {
-      const response = await axios.get('http://localhost:3000/posts/user', {
-        params: { authorId: user.id },
-      });
-      const parsedResponse = getPostResponseSchema.parse(response.data);
-      return parsedResponse.posts;
-    },
-    enabled: !!user.id,
-  });
   const ListHeader = () => (
     <View>
       {/* プロフィール上部セクション */}
-      <TouchableOpacity style={styles.editButton} onPress={() => handleLogout()}>
-        <Text style={{ color: colors.tint }}>編集</Text>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => handleLogout()}>
+        <Text style={{ color: colors.tint }}>ログアウト</Text>
       </TouchableOpacity>
       <View style={styles.profileHeader}>
         <Image
@@ -197,7 +197,7 @@ const getStyles = (colors: typeof Colors.light) =>
       alignItems: 'center',
       backgroundColor: colors.background,
     },
-    editButton: {
+    logoutButton: {
       alignSelf: 'flex-end',
       position: 'fixed',
       borderRadius: 10,
