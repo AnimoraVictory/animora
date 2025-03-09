@@ -14,6 +14,8 @@ func SetupPostRoutes(app *fiber.App) {
 
 	// Create a new post
 	postGroup.Post("/", createPost)
+
+	postGroup.Get("/user", getPostsByUser)
 }
 
 // getAllPosts gets all posts
@@ -21,6 +23,20 @@ func getAllPosts(c *fiber.Ctx) error {
 	// Get all posts from the database
 	var posts []models.Post
 	if err := models.DB.Find(&posts).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get posts",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"posts": posts,
+	})
+}
+
+func getPostsByUser(c *fiber.Ctx) error {
+	var posts []models.Post
+	authorId := c.Query("authorId")
+	if err := models.DB.Where("author_id = ?", authorId).Find(&posts).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to get posts",
 		})

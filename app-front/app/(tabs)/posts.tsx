@@ -5,13 +5,13 @@ import axios from "axios";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 
-const postSchema = z.object({
+export const postSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(1),
   content: z.string().min(1),
 });
 
-const getPostResponseSchema = z.object({
+export const getPostResponseSchema = z.object({
   posts: z.array(postSchema),
 });
 

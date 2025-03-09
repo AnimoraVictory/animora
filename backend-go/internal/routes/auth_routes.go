@@ -103,8 +103,6 @@ func signUp(c *fiber.Ctx) error {
 		})
 	}
 
-	// Cognito にユーザー登録を実施
-	// auth.SignUp は、内部で Cognito の API を呼び出し、2 つの値（結果とエラー）を返す想定です
 	dbUser, err := auth.SignUp(req.Name, req.Email, req.Password)
 	if err != nil {
 		log.Printf("Cognito signUp error: %v", err)
@@ -112,11 +110,17 @@ func signUp(c *fiber.Ctx) error {
 			"error": "ユーザー登録に失敗しました",
 		})
 	}
+
+	user := models.User{
+		Name: dbUser.Name,
+		Email: dbUser.Email,
+		ID: dbUser.ID,
+	}
 	
 	// サインアップ成功時のレスポンスを返す
 	return c.JSON(fiber.Map{
 		"message": "アカウントが作成されました",
-		"user":    dbUser,
+		"user":    user,
 	})
 }
 
@@ -158,14 +162,16 @@ func signIn(c *fiber.Ctx) error {
 		})
 	}
 
+	user := models.User{
+		Name: dbUser.Name,
+		Email: dbUser.Email,
+		ID: dbUser.ID,
+	}
+
 	// Cookie を使用せず、トークンを JSON レスポンスで返す
 	return c.JSON(fiber.Map{
 		"message": "ログイン成功",
-		"user": fiber.Map{
-			"id":    dbUser.ID,
-			"email": dbUser.Email,
-			"name":  dbUser.Name,
-		},
+		"user": user,
 		"accessToken":  *result.AuthenticationResult.AccessToken,
 		"idToken":      *result.AuthenticationResult.IdToken,
 		"refreshToken": *result.AuthenticationResult.RefreshToken,
@@ -254,8 +260,14 @@ func getMe(c *fiber.Ctx) error {
 		})
 	}
 
+	user:= models.User{
+		Name: dbUser.Name,
+		Email: dbUser.Email,
+		ID: dbUser.ID,
+	}
+
 	return c.JSON(fiber.Map{
-		"user": dbUser,
+		"user": user,
 	})
 }
 // signOut signs a user out

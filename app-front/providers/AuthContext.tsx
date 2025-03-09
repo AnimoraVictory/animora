@@ -10,7 +10,7 @@ import {
 } from "../constants/api";
 
 interface AuthContextType {
-  user: User | null;
+  user: User | undefined | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <AuthContext.Provider
       value={{
-        user: user || null,
+        user,
         login,
         logout,
         loading: isLoading,
