@@ -30,7 +30,7 @@ function AuthSwitch() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/posts");
       } else {
         router.replace("/(auth)");
       }
