@@ -1,4 +1,3 @@
-// TODO: メール認証の動作確認をする
 import React from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { useForm, Controller } from "react-hook-form";

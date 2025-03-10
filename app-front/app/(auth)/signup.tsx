@@ -1,4 +1,3 @@
-// TODO: サインアップの動作確認をする。
 import React from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { useForm, Controller } from "react-hook-form";
@@ -108,7 +107,6 @@ export default function SignUpScreen() {
         disabled={isSubmitting}
         color={Colors[colorScheme ?? "light"].tint}
       />
-      {/* WelcomeScreen へ戻るボタン */}
       <Button
         title="戻る"
         onPress={() => router.push("/")}

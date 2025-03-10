@@ -11,7 +11,7 @@ func SetupPetRoutes(app *fiber.App) {
 	petGroup := app.Group("/pets")
 
 	// Get pets by owner ID
-	petGroup.Get("/owner/:ownerId", getPetsByOwner)
+	petGroup.Get("/owner", getPetsByOwner)
 
 	// Create a new pet
 	petGroup.Post("/new", createPet)
@@ -19,15 +19,13 @@ func SetupPetRoutes(app *fiber.App) {
 
 // getPetsByOwner gets pets by owner ID
 func getPetsByOwner(c *fiber.Ctx) error {
-	// Get the owner ID from the URL
-	ownerID := c.Params("ownerId")
+	ownerID := c.Query("ownerId")
 	if ownerID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Owner ID is required",
 		})
 	}
 
-	// Get the pets from the database
 	var pets []models.Pet
 	if err := models.DB.Where("owner_id = ?", ownerID).Find(&pets).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
