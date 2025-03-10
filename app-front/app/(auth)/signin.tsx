@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert, useColorScheme } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/providers/AuthContext';
 import { useRouter } from 'expo-router';
+import { Colors } from "@/constants/Colors";
 
 const SignInInputSchema = z.object({
   email: z.string().email({ message: '有効なメールアドレスを入力してください' }),
@@ -14,6 +15,7 @@ const SignInInputSchema = z.object({
 type SignInInput = z.infer<typeof SignInInputSchema>;
 
 export default function SignInScreen() {
+  const colorScheme = useColorScheme();
   const { login } = useAuth();
   const router = useRouter();
 
@@ -78,10 +80,12 @@ export default function SignInScreen() {
         title={isSubmitting ? '処理中...' : 'サインイン'}
         onPress={handleSubmit(onSubmit)}
         disabled={isSubmitting}
+        color={Colors[colorScheme ?? "light"].tint}
       />
       <Button
         title="アカウントをお持ちでない方はこちら"
         onPress={() => router.push("/(auth)/signup")}
+        color={Colors[colorScheme ?? "light"].tint}
       />
     </View>
   );
