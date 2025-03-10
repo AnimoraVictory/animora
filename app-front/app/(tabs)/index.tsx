@@ -17,7 +17,6 @@ import {
 import z from 'zod';
 import { postSchema } from './posts';
 import { Colors } from '@/constants/Colors';
-import PostModal from '../../components/postmodal';
 import { router } from 'expo-router';
 
 type TabType = 'posts' | 'mypet';
@@ -59,9 +58,6 @@ const ProfileScreen: React.FC = () => {
     }
     router.replace('/(auth)');
   }
-
-  // モーダル表示状態の管理
-  const [modalVisible, setModalVisible] = useState(false);
 
   // ペット情報を取得
   const { data: petData, isLoading: petLoading, error: petError } = useQuery<Pet[]>({
@@ -175,16 +171,6 @@ const ProfileScreen: React.FC = () => {
           )
         }
       />
-      {/* 右下に配置する+ボタン */}
-      <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
-      {/* 投稿作成用モーダル */}
-      <Modal visible={modalVisible} transparent animationType="none">
-        <View style={styles.modalOverlay}>
-          <PostModal visible={modalVisible} onClose={() => setModalVisible(false)} />
-        </View>
-      </Modal>
     </>
   );
 };
@@ -199,7 +185,6 @@ const getStyles = (colors: typeof Colors.light) =>
     },
     logoutButton: {
       alignSelf: 'flex-end',
-      position: 'fixed',
       borderRadius: 10,
       paddingTop: 50,
       paddingRight: 20,
