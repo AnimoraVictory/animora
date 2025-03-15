@@ -13,7 +13,7 @@ from metrics import MetronAtK
 class Engine(object):
     """
     NCFモデルを訓練・評価するためのベースクラス
-    Engineeを継承することで、具体的なモデルをトレーニングできる
+    Engineを継承することで、具体的なモデルをトレーニングできる
     """
 
     def __init__(self, config):

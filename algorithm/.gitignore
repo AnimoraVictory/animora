@@ -4,3 +4,9 @@ data/
 runs/
 checkpoints/
 recommend-system/src/__pycache__/
+recommend-system/base/
+common/__init__.py
+recommend-system/models/__init__.py
+recommend-system/utils/__init__.py
+recommend-system/checkpoints/
+recommend-system/__init__.py
