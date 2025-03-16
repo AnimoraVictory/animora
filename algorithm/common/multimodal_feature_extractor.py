@@ -165,16 +165,19 @@ def update_post_features():
     # 特徴抽出がまだ行われていない投稿を取得
     cur.execute(
         """
-        SELECT id, image_path, text_content
-        FROM posts
-        WHERE feature_computed = false
+        SELECT 
+            PostID AS post_id, 
+            ImageURL AS image_path, 
+            Caption AS text_content
+        FROM Post
+        WHERE EmbeddedFlg = FALSE
         """
     )
     posts = cur.fetchall()
     print(f"Found {len(posts)} posts to process")
 
     for post in posts:
-        post_id, image_path, text_content = post["id"], post["image_path"], post["text_content"]
+        post_id, image_path, text_content = post["post_id"], post["image_path"], post["text_content"]
         print(f"Processing post {post_id}")
 
         try:
@@ -191,9 +194,9 @@ def update_post_features():
 
             # データベースに特徴を保存(特徴ベクトルはJSON文字列として保存)
             update_query = """
-                UPDATE posts
-                SET text_features = %s, image_features = %s, feature_computed = true
-                WHERE id = %s
+                UPDATE Post
+                SET TextFeature = %s, ImageFeature = %s, EmbeddedFlg = true
+                WHERE PostID = %s
             """
             cur.execute(update_query, 
                     (json.dumps(text_features_list), json.dumps(image_features_list), post_id)

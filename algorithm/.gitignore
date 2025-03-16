@@ -1,12 +1,18 @@
+# 仮想環境
 .venv
+
+# 機密情報・環境変数
 .env
+
+# データ
 data/
-runs/
-checkpoints/
-recommend-system/src/__pycache__/
-recommend-system/base/
-common/__init__.py
-recommend-system/models/__init__.py
-recommend-system/utils/__init__.py
-recommend-system/checkpoints/
-recommend-system/__init__.py
+
+# 不要なファイル
+recommend_system/base/
+recommend_system/checkpoints/
+
+# Pythonキャッシュ
+**/__pycache__/**
+*.pyc
+*.pyo
+*.pyd
