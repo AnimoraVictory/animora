@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, useColorScheme } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, useColorScheme, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/providers/AuthContext';
 import { Colors } from '@/constants/Colors';
@@ -10,12 +10,16 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import z from 'zod';
 import { postSchema } from './posts';
+import { ProfileEditModal } from '@/components/ProfileEditModal';
+import { RegisterPetModal } from '@/components/RegisterPetModal';
+import PetPanel from '@/components/PetPanel';
 
-const petSchema = z.object({
+export const petSchema = z.object({
   id: z.string().uuid(),
-  imageURL: z.string().min(1),
+  imageUrl: z.string().min(1),
   name: z.string().min(1),
   type: z.string().min(1),
+  species: z.string().min(1),
 });
 
 const getPetResponseSchema = z.object({
@@ -29,13 +33,56 @@ const getPostResponseSchema = z.object({
 type Pet = z.infer<typeof petSchema>;
 type Post = z.infer<typeof postSchema>;
 
-const HEADER_HEIGHT = 200;
+const HEADER_HEIGHT = 250;
 const ProfileScreen: React.FC = () => {
+  const windowWidth = Dimensions.get('window').width;
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const styles = getStyles(colors);
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>('posts');
   const { user, loading: authLoading, logout } = useAuth();
+  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
+  const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] = useState<boolean>(false);
+  const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
+  const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
+  const openEditProfileModal = () => {
+    setIsEditModalVisible(true);
+    Animated.timing(slideAnimProfile, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeEditProfileModal = () => {
+    Animated.timing(slideAnimProfile, {
+      toValue: windowWidth,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsEditModalVisible(false);
+    });
+  };
+  
+  const openRegisterPetModal = () => {
+    setIsRegisterPetModalVisible(true);
+    Animated.timing(slideAnimPet, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeRegisterPetModal = () => {
+    Animated.timing(slideAnimPet, {
+      toValue: windowWidth,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsRegisterPetModalVisible(false);
+    });
+  };
+
 
   const handleLogout = async () => {
     try {
@@ -47,7 +94,7 @@ const ProfileScreen: React.FC = () => {
   };
 
   // ペット情報取得
-  const { data: petData, isLoading: petLoading, error: petError } = useQuery<Pet[]>({
+  const { data: petData, isLoading: petLoading, error: petError, refetch: refetchPets } = useQuery<Pet[]>({
     queryKey: ['pets', user?.id],
     queryFn: async () => {
       const response = await axios.get('http://localhost:3000/pets/owner', {
@@ -89,7 +136,9 @@ const ProfileScreen: React.FC = () => {
     if (selectedTab === 'mypet') {
       return (
         <View style={styles.petContainer}>
-          <Text>{item.name}</Text>
+          <PetPanel
+          pet={item}
+          />
         </View>
       );
     } else {
@@ -105,6 +154,15 @@ const ProfileScreen: React.FC = () => {
     <ThemedView style={styles.container}>
       <View style={styles.fixedHeader}>
         <ProfileHeader userName={user.name} onLogout={handleLogout} />
+        <View style={styles.editButtonsContainer}>
+          <TouchableOpacity style={styles.editButton} onPress={openEditProfileModal}>
+            <Text style={styles.buttonText}>プロフィールを編集</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.editButton} onPress={openRegisterPetModal}>
+            <Text style={styles.buttonText}>ペットを登録する</Text>
+          </TouchableOpacity>
+        </View>
+
         <ProfileTabSelector selectedTab={selectedTab} onSelectTab={setSelectedTab} />
       </View>
       <FlatList
@@ -124,6 +182,19 @@ const ProfileScreen: React.FC = () => {
           )
         }
       />
+       <ProfileEditModal
+       visible={isEditModalVisible}
+       onClose={() => closeEditProfileModal()}
+       slideAnim={slideAnimProfile}
+        />
+        <RegisterPetModal
+       visible={isRegisterPetModalVisible}
+       onClose={() => closeRegisterPetModal()}
+       slideAnim={slideAnimPet}
+       colorScheme={colorScheme}
+       refetchPets={refetchPets}
+
+        />
     </ThemedView>
   );
 };
@@ -153,12 +224,11 @@ const getStyles = (colors: typeof Colors.light) =>
       paddingBottom: 20,
     },
     petContainer: {
-      borderBottomWidth: 1,
+      padding: 10,
       borderColor: colors.icon,
     },
     postContainer: {
       padding: 10,
-      borderBottomWidth: 1,
       borderColor: colors.icon,
     },
     emptyText: {
@@ -166,6 +236,27 @@ const getStyles = (colors: typeof Colors.light) =>
       fontSize: 16,
       color: colors.text,
     },
+    editButtonsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      marginTop: 10,
+      marginBottom: 10,
+    },
+    editButton: {
+      borderWidth: 1,
+      borderColor: colors.icon,
+      borderRadius: 4,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      width: 160,
+      alignItems: 'center',
+      backgroundColor: colors.background,
+    },
+    buttonText: {
+      color: colors.text,
+      fontWeight: 'bold',
+    },
+
   });
 
 export default ProfileScreen;

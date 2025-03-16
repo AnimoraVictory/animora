@@ -51,6 +51,7 @@ func createPet(c *fiber.Ctx) error {
 	// Get form values
 	name := form.Value["name"][0]
 	petType := form.Value["type"][0]
+	species := form.Value["species"][0]
 	birthDay := form.Value["birthDay"][0]
 	userID := form.Value["userId"][0]
 
@@ -80,7 +81,8 @@ func createPet(c *fiber.Ctx) error {
 	// Create the pet in the database
 	pet := models.Pet{
 		Name:     name,
-		Type:     petType,
+		Type:     models.PetType(petType),
+		Species:  species,
 		BirthDay: birthDay,
 		ImageURL: imageURL,
 		OwnerID:  userID,
