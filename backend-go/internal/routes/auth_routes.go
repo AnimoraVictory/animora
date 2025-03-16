@@ -266,9 +266,7 @@ func getMe(c *fiber.Ctx) error {
 		ID: dbUser.ID,
 	}
 
-	return c.JSON(fiber.Map{
-		"user": user,
-	})
+	return c.JSON(user)
 }
 // signOut signs a user out
 func signOut(c *fiber.Ctx) error {
