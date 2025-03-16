@@ -59,7 +59,8 @@ type Pet struct {
 	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	Name      string    `json:"name"`
 	BirthDay  string    `json:"birthDay"`
-	Type      string    `json:"type"`
+	Type      PetType   `json:"type" gorm:"type:pet_type"`
+	Species   string    `json:"species" gorm:"type:pet_species"`
 	ImageURL  string    `json:"imageUrl"`
 	OwnerID   string    `json:"ownerId"`
 	Owner     User      `json:"owner,omitempty" gorm:"foreignKey:OwnerID"`
@@ -74,6 +75,114 @@ type Image struct {
 	Post      Post      `json:"post,omitempty" gorm:"foreignKey:PostID"`
 	OrderNum  int       `json:"orderNum"` // 画像の表示順序
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
+}
+
+type PetType string
+
+const (
+	PetTypeDog PetType = "dog"
+	PetTypeCat PetType = "cat"
+)
+
+// 犬用の品種を示す型
+type DogSpecies string
+
+const (
+	DogSpeciesLabrador                     DogSpecies = "labrador"
+	DogSpeciesPoodle                       DogSpecies = "poodle"
+	DogSpeciesGermanShepherd               DogSpecies = "german_shepherd"
+	DogSpeciesIrishWolfhound               DogSpecies = "irish_wolfhound"
+	DogSpeciesIrishSetter                  DogSpecies = "irish_setter"
+	DogSpeciesAfghanHound                  DogSpecies = "afghan_hound"
+	DogSpeciesAmericanCockerSpaniel        DogSpecies = "american_cocker_spaniel"
+	DogSpeciesAmericanStaffordshireTerrier DogSpecies = "american_staffordshire_terrier"
+	DogSpeciesEnglishCockerSpaniel         DogSpecies = "english_cocker_spaniel"
+	DogSpeciesEnglishSpringerSpaniel       DogSpecies = "english_springer_spaniel"
+	DogSpeciesWestHighlandWhiteTerrier     DogSpecies = "west_highland_white_terrier"
+	DogSpeciesWelshCorgiPembroke           DogSpecies = "welsh_corgi_pembroke"
+	DogSpeciesAiredaleTerrier              DogSpecies = "airedale_terrier"
+	DogSpeciesAustralianShepherd           DogSpecies = "australian_shepherd"
+	DogSpeciesKaiKen                       DogSpecies = "kai_ken"
+	DogSpeciesCavalierKingCharlesSpaniel   DogSpecies = "cavalier_king_charles_spaniel"
+	DogSpeciesGreatPyrenees                DogSpecies = "great_pyrenees"
+	DogSpeciesKeeshond                     DogSpecies = "keeshond"
+	DogSpeciesCairnTerrier                 DogSpecies = "cairn_terrier"
+	DogSpeciesGoldenRetriever              DogSpecies = "golden_retriever"
+	DogSpeciesSaluki                       DogSpecies = "saluki"
+	DogSpeciesShihTzu                      DogSpecies = "shih_tzu"
+	DogSpeciesShetlandSheepdog             DogSpecies = "shetland_sheepdog"
+	DogSpeciesShibaInu                     DogSpecies = "shiba_inu"
+	DogSpeciesSiberianHusky                DogSpecies = "siberian_husky"
+	DogSpeciesJackRussellTerrier           DogSpecies = "jack_russell_terrier"
+	DogSpeciesScottishTerrier              DogSpecies = "scottish_terrier"
+	DogSpeciesStBernard                    DogSpecies = "st_bernard"
+	DogSpeciesDachshund                    DogSpecies = "dachshund"
+	DogSpeciesDalmatian                    DogSpecies = "dalmatian"
+	DogSpeciesChineseCrestedDog            DogSpecies = "chinese_crested_dog"
+	DogSpeciesChihuahua                    DogSpecies = "chihuahua"
+	DogSpeciesDogoArgentino                DogSpecies = "dogo_argentino"
+	DogSpeciesDoberman                     DogSpecies = "doberman"
+	DogSpeciesJapaneseSpitz                DogSpecies = "japanese_spitz"
+	DogSpeciesBerneseMountainDog           DogSpecies = "bernese_mountain_dog"
+	DogSpeciesPug                          DogSpecies = "pug"
+	DogSpeciesBassetHound                  DogSpecies = "basset_hound"
+	DogSpeciesPapillon                     DogSpecies = "papillon"
+	DogSpeciesBeardedCollie                DogSpecies = "bearded_collie"
+	DogSpeciesBeagle                       DogSpecies = "beagle"
+	DogSpeciesBichonFrise                  DogSpecies = "bichon_frise"
+	DogSpeciesBouvierDesFlandres           DogSpecies = "bouvier_des_flandres"
+	DogSpeciesFlatCoatedRetriever          DogSpecies = "flat_coated_retriever"
+	DogSpeciesBullTerrier                  DogSpecies = "bull_terrier"
+	DogSpeciesBulldog                      DogSpecies = "bulldog"
+	DogSpeciesFrenchBulldog                DogSpecies = "french_bulldog"
+	DogSpeciesPekinese                     DogSpecies = "pekinese"
+	DogSpeciesBedlingtonTerrier            DogSpecies = "bedlington_terrier"
+	DogSpeciesBelgianTervuren              DogSpecies = "belgian_tervuren"
+	DogSpeciesBorderCollie                 DogSpecies = "border_collie"
+	DogSpeciesBoxer                        DogSpecies = "boxer"
+	DogSpeciesBostonTerrier                DogSpecies = "boston_terrier"
+	DogSpeciesPomeranian                   DogSpecies = "pomeranian"
+	DogSpeciesBorzoi                       DogSpecies = "borzoi"
+	DogSpeciesMaltese                      DogSpecies = "maltese"
+	DogSpeciesMiniatureSchnauzer           DogSpecies = "miniature_schnauzer"
+	DogSpeciesMiniaturePincher             DogSpecies = "miniature_pincher"
+	DogSpeciesYorkshireTerrier             DogSpecies = "yorkshire_terrier"
+	DogSpeciesRoughCollie                  DogSpecies = "rough_collie"
+	DogSpeciesLabradorRetriever            DogSpecies = "labrador_retriever"
+	DogSpeciesRottweiler                   DogSpecies = "rottweiler"
+	DogSpeciesWeimaraner                   DogSpecies = "weimaraner"
+)
+
+// 猫用の品種を示す型
+type CatSpecies string
+
+const (
+	CatSpeciesSiamese            CatSpecies = "siamese"
+	CatSpeciesPersian            CatSpecies = "persian"
+	CatSpeciesMaineCoon          CatSpecies = "maine_coon"
+	CatSpeciesAmericanCurl       CatSpecies = "american_curl"
+	CatSpeciesAmericanShorthair  CatSpecies = "american_shorthair"
+	CatSpeciesEgyptianMau        CatSpecies = "egyptian_mau"
+	CatSpeciesCornishRex         CatSpecies = "cornish_rex"
+	CatSpeciesJapaneseBobtail    CatSpecies = "japanese_bobtail"
+	CatSpeciesSingapura          CatSpecies = "singapura"
+	CatSpeciesScottishFold       CatSpecies = "scottish_fold"
+	CatSpeciesSomali             CatSpecies = "somali"
+	CatSpeciesTurkishAngora      CatSpecies = "turkish_angora"
+	CatSpeciesTonkinese          CatSpecies = "tonkinese"
+	CatSpeciesNorwegianForestCat CatSpecies = "norwegian_forest_cat"
+	CatSpeciesBurmilla           CatSpecies = "burmilla"
+	CatSpeciesBritishShorthair   CatSpecies = "british_shorthair"
+	CatSpeciesHouseholdPet       CatSpecies = "household_pet"
+	CatSpeciesBengal             CatSpecies = "bengal"
+	CatSpeciesMunchkin           CatSpecies = "munchkin"
+	CatSpeciesRagdoll            CatSpecies = "ragdoll"
+	CatSpeciesRussianBlue        CatSpecies = "russian_blue"
+)
+
+var ValidSpeciesByPetType = map[PetType][]string{
+	PetTypeDog: {string(DogSpeciesLabrador), string(DogSpeciesPoodle), string(DogSpeciesGermanShepherd)},
+	PetTypeCat: {string(CatSpeciesSiamese), string(CatSpeciesPersian), string(CatSpeciesMaineCoon)},
 }
 
 // BeforeCreate is a GORM hook that generates a UUID for the ID field if it's empty

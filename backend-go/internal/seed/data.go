@@ -53,7 +53,8 @@ func PetData(users []models.User) []models.Pet {
 			ID:       uuid.New().String(),
 			Name:     "Max",
 			BirthDay: "2023-01-15",
-			Type:     "Dog",
+			Type:     "dog",
+			Species:  "saluki",
 			ImageURL: "https://example.com/images/max.jpg",
 			OwnerID:  users[0].ID, // John's pet
 		},
@@ -61,7 +62,8 @@ func PetData(users []models.User) []models.Pet {
 			ID:       uuid.New().String(),
 			Name:     "Luna",
 			BirthDay: "2022-05-10",
-			Type:     "Cat",
+			Type:     "cat",
+			Species:  "siamese",
 			ImageURL: "https://example.com/images/luna.jpg",
 			OwnerID:  users[1].ID, // Jane's pet
 		},
@@ -69,7 +71,8 @@ func PetData(users []models.User) []models.Pet {
 			ID:       uuid.New().String(),
 			Name:     "Buddy",
 			BirthDay: "2021-11-22",
-			Type:     "Dog",
+			Type:     "dog",
+			Species:  "beagle",
 			ImageURL: "https://example.com/images/buddy.jpg",
 			OwnerID:  users[2].ID, // Alex's pet
 		},
@@ -77,7 +80,8 @@ func PetData(users []models.User) []models.Pet {
 			ID:       uuid.New().String(),
 			Name:     "Coco",
 			BirthDay: "2023-03-05",
-			Type:     "Rabbit",
+			Type:     "dog",
+			Species:  "poodle",
 			ImageURL: "https://example.com/images/coco.jpg",
 			OwnerID:  users[3].ID, // Emily's pet
 		},
@@ -85,7 +89,8 @@ func PetData(users []models.User) []models.Pet {
 			ID:       uuid.New().String(),
 			Name:     "Rocky",
 			BirthDay: "2022-08-17",
-			Type:     "Dog",
+			Type:     "dog",
+			Species:  "golden_retriever",
 			ImageURL: "https://example.com/images/rocky.jpg",
 			OwnerID:  users[4].ID, // Michael's pet
 		},
@@ -93,7 +98,8 @@ func PetData(users []models.User) []models.Pet {
 			ID:       uuid.New().String(),
 			Name:     "Milo",
 			BirthDay: "2023-02-28",
-			Type:     "Cat",
+			Type:     "cat",
+			Species:  "munchkin",
 			ImageURL: "https://example.com/images/milo.jpg",
 			OwnerID:  users[0].ID, // John's second pet
 		},

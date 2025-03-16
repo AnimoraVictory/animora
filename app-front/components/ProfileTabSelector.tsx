@@ -38,12 +38,13 @@ const getStyles = (colors: typeof Colors.light) =>
     tabContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
-      borderBottomWidth: 1,
       borderColor: colors.icon,
     },
     tabButton: {
-      paddingVertical: 10,
+      width: "50%",
+      paddingVertical: 15,
       paddingHorizontal: 20,
+      alignItems: "center",
     },
     tabButtonActive: {
       borderBottomWidth: 2,

@@ -46,7 +46,6 @@ const getStyles = (colors: typeof Colors.light) =>
     },
     profileSection: {
       alignItems: 'center',
-      borderBottomWidth: 1,
       borderColor: colors.icon,
       paddingVertical: 20,
     },
