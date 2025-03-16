@@ -32,7 +32,7 @@ export default function SignInScreen() {
     try {
       await login(data.email, data.password);
       // ログイン成功後、メインタブレイアウトへ遷移
-      router.replace("/(tabs)");
+      router.replace("/(tabs)/posts");
     } catch (error: any) {
       Alert.alert('ログインエラー', error.message || 'ログインに失敗しました');
     }
