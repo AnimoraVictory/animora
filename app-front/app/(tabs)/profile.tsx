@@ -203,6 +203,7 @@ const getStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      paddingBottom: 70,
       backgroundColor: colors.background,
     },
     fixedHeader: {

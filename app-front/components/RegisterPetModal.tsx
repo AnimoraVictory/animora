@@ -70,7 +70,7 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       quality: 0.7,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -124,7 +124,7 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
     }
 
     try {
-      const response = await registerPetMutation.mutateAsync(fd);
+      await registerPetMutation.mutateAsync(fd);
       Alert.alert('成功', 'ペットが正常に登録されました');
       await refetchPets()
       setFormData(initialFormState);
