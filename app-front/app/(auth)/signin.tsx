@@ -31,7 +31,6 @@ export default function SignInScreen() {
   const onSubmit = async (data: SignInInput) => {
     try {
       await login(data.email, data.password);
-      // ログイン成功後、メインタブレイアウトへ遷移
       router.replace("/(tabs)/posts");
     } catch (error: any) {
       Alert.alert('ログインエラー', error.message || 'ログインに失敗しました');
@@ -40,14 +39,14 @@ export default function SignInScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>サインイン</Text>
+      <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>サインイン</Text>
       <Controller
         control={control}
         name="email"
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {color: Colors[colorScheme ?? "light"].text }]}
               placeholder="Email"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -65,7 +64,7 @@ export default function SignInScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {color: Colors[colorScheme ?? "light"].text }]}
               placeholder="Password"
               secureTextEntry
               onBlur={onBlur}
@@ -96,7 +95,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: 'center',
-    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
@@ -109,6 +107,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
     marginBottom: 12,
+    borderRadius: 8,
     paddingHorizontal: 8,
   },
   error: {

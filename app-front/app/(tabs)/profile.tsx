@@ -63,7 +63,7 @@ const ProfileScreen: React.FC = () => {
       setIsEditModalVisible(false);
     });
   };
-  
+
   const openRegisterPetModal = () => {
     setIsRegisterPetModalVisible(true);
     Animated.timing(slideAnimPet, {
@@ -132,23 +132,23 @@ const ProfileScreen: React.FC = () => {
   const isDataLoading = selectedTab === 'mypet' ? petLoading : postLoading;
   const isDataError = selectedTab === 'mypet' ? petError : postError;
 
-  const renderItem = ({ item }: { item: any }) => {
-    if (selectedTab === 'mypet') {
-      return (
-        <View style={styles.petContainer}>
-          <PetPanel
+  const renderPets = (item: Pet) => {
+    return (
+      <View style={styles.petContainer}>
+        <PetPanel
           pet={item}
-          />
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.postContainer}>
-          <Text>{item.title}</Text>
-        </View>
-      );
-    }
+        />
+      </View>
+    );
   };
+
+  const renderPosts = (item: Post) => {
+    return (
+      <View style={styles.postContainer}>
+        <Text>{item.title}</Text>
+      </View>
+    )
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -166,9 +166,9 @@ const ProfileScreen: React.FC = () => {
         <ProfileTabSelector selectedTab={selectedTab} onSelectTab={setSelectedTab} />
       </View>
       <FlatList
-        data={listData}
+        data={listData as (Pet | Post)[]}
         keyExtractor={(item) => item.id}
-        renderItem={renderItem}
+        renderItem={({ item }) => selectedTab === 'mypet' ? renderPets(item as Pet) : renderPosts(item as Post)}
         contentContainerStyle={[styles.contentContainer, { paddingTop: HEADER_HEIGHT }]}
         ListEmptyComponent={
           isDataLoading ? (
@@ -182,19 +182,19 @@ const ProfileScreen: React.FC = () => {
           )
         }
       />
-       <ProfileEditModal
-       visible={isEditModalVisible}
-       onClose={() => closeEditProfileModal()}
-       slideAnim={slideAnimProfile}
-        />
-        <RegisterPetModal
-       visible={isRegisterPetModalVisible}
-       onClose={() => closeRegisterPetModal()}
-       slideAnim={slideAnimPet}
-       colorScheme={colorScheme}
-       refetchPets={refetchPets}
+      <ProfileEditModal
+        visible={isEditModalVisible}
+        onClose={() => closeEditProfileModal()}
+        slideAnim={slideAnimProfile}
+      />
+      <RegisterPetModal
+        visible={isRegisterPetModalVisible}
+        onClose={() => closeRegisterPetModal()}
+        slideAnim={slideAnimPet}
+        colorScheme={colorScheme}
+        refetchPets={refetchPets}
 
-        />
+      />
     </ThemedView>
   );
 };
