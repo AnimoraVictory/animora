@@ -48,7 +48,7 @@ export default function PostsScreen() {
         data={data}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <ThemedView style={styles.postContainer}>
+          <ThemedView style={[styles.postContainer,{backgroundColor: colorScheme === 'dark' ? '#353636' : '#D0D0D0'}]}>
             <ThemedText style={styles.postTitle}>{item.title}</ThemedText>
             <ThemedText>{item.content}</ThemedText>
           </ThemedView>
@@ -62,6 +62,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    paddingTop: 65,
+    paddingBottom:75,
   },
   postContainer: {
     padding: 16,
