@@ -1,6 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { StyleSheet, FlatList, ActivityIndicator } from "react-native";
+import { StyleSheet, FlatList, ActivityIndicator, useColorScheme } from "react-native";
 import axios from "axios";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ export const getPostResponseSchema = z.object({
 });
 
 export default function PostsScreen() {
+  const colorScheme = useColorScheme()
   const { data, isLoading, error } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
@@ -66,7 +67,6 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     borderRadius: 8,
-    backgroundColor: "#f5f5f5",
   },
   postTitle: {
     fontSize: 18,

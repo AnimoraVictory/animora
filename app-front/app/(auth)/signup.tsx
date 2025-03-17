@@ -54,7 +54,7 @@ export default function SignUpScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {color:Colors[colorScheme ?? "light"].text}]}
               placeholder="UserName"
               autoCapitalize="none"
               keyboardType="default"
@@ -72,7 +72,7 @@ export default function SignUpScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {color:Colors[colorScheme ?? "light"].text}]}
               placeholder="Email"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -90,7 +90,7 @@ export default function SignUpScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {color:Colors[colorScheme ?? "light"].text}]}
               placeholder="Password"
               secureTextEntry
               onBlur={onBlur}
@@ -121,7 +121,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: "center",
-    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,
@@ -134,6 +133,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
     marginBottom: 12,
+    borderRadius: 8,
     paddingHorizontal: 8,
   },
   error: {
