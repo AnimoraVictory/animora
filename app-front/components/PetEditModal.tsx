@@ -21,7 +21,7 @@ import axios from "axios";
 import { useAuth } from "@/providers/AuthContext";
 import Constants from "expo-constants";
 import { Pet } from "@/app/(tabs)/profile";
-import { isValidDate, PetForm, petInputSchema } from "./PetRegisterModal";
+import { PetForm, petInputSchema } from "./PetRegisterModal";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -41,7 +41,7 @@ type PetEditModalProps = {
   slideAnim: Animated.Value;
   colorScheme: ColorSchemeName;
   refetchPets: () => void;
-  pet: any; // 編集対象のペット情報（必要なフィールド: id, name, type, species, birthDay, imageUrl）
+  pet: Pet;
 };
 
 export const PetEditModal: React.FC<PetEditModalProps> = ({
