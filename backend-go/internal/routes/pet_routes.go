@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/htanos/animalia/backend-go/internal/models"
+	"github.com/htanos/animalia/backend-go/internal/models/responses"
 	"github.com/htanos/animalia/backend-go/internal/services"
 )
 
@@ -37,8 +38,19 @@ func getPetsByOwner(c *fiber.Ctx) error {
 		})
 	}
 
+	petResponses := make([]responses.PetResponse, len(pets))
+	for i, pet := range pets {
+		url, err := services.GetUrl(pet.ImageKey)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Failed to get pet image URL",
+			})
+		}
+		petResponses[i] = responses.NewPetResponse(&pet, url)
+	}
+
 	return c.JSON(fiber.Map{
-		"pets": pets,
+		"pets": petResponses,
 	})
 }
 
@@ -75,7 +87,7 @@ func createPet(c *fiber.Ctx) error {
 	}
 
 	// Upload the image to S3
-	imageURL, err := services.UploadToS3(file, "pets")
+	fileKey, err := services.UploadToS3(file, "pets")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to upload image",
@@ -88,7 +100,7 @@ func createPet(c *fiber.Ctx) error {
 		Type:     models.PetType(petType),
 		Species:  species,
 		BirthDay: birthDay,
-		ImageURL: imageURL,
+		ImageKey: fileKey,
 		OwnerID:  userID,
 	}
 
@@ -125,9 +137,9 @@ func updatePet(c *fiber.Ctx) error {
 	birthDay := form.Value["birthDay"][0]
 
 	if err := models.DB.Model(&models.Pet{}).Where("id = ?", petId).Updates(map[string]interface{}{
-		"name": name,
-		"type": petType,
-		"species": species,
+		"name":      name,
+		"type":      petType,
+		"species":   species,
 		"birth_day": birthDay,
 	}).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

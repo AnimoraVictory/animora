@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -68,9 +69,22 @@ func UploadToS3(file *multipart.FileHeader, keyName string) (string, error) {
 	}
 
 	// Return the URL of the uploaded file
-	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s",
-		os.Getenv("AWS_S3_BUCKET_NAME"),
-		os.Getenv("AWS_REGION"),
-		fileKey,
-	), nil
+	return fileKey, nil
+}
+
+func GetUrl(fileKey string) (string, error) {
+	// プリサインドURLを生成するためのプレスイグナーを作成
+	presigner := s3.NewPresignClient(s3Client)
+
+	// プリサインドURLを生成(有効期限は1時間)
+	presignedURL, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(os.Getenv("AWS_S3_BUCKET_NAME")),
+		Key:    aws.String(fileKey),
+	}, s3.WithPresignExpires(time.Hour))
+
+	if err != nil {
+		return "", fmt.Errorf("failed to generate presigned URL: %w", err)
+	}
+
+	return presignedURL.URL, nil
 }
