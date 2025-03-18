@@ -1,4 +1,7 @@
-.PHONY: 
+include .env
+export
+
+.PHONY: run seed build up-db down-db psql
 
 run: up-db
 	go run cmd/api/main.go
@@ -14,3 +17,6 @@ up-db:
 
 down-db:
 	docker compose down db
+
+psql:
+	psql ${DATABASE_URL}
