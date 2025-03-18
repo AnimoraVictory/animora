@@ -11,3 +11,6 @@ build:
 
 up-db:
 	docker compose up db -d
+
+down-db:
+	docker compose down db

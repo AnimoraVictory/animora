@@ -61,7 +61,7 @@ type Pet struct {
 	BirthDay  string    `json:"birthDay"`
 	Type      PetType   `json:"type" gorm:"type:pet_type"`
 	Species   string    `json:"species" gorm:"type:pet_species"`
-	ImageURL  string    `json:"imageUrl"`
+	ImageKey  string   `json:"imageKey"`
 	OwnerID   string    `json:"ownerId"`
 	Owner     User      `json:"owner,omitempty" gorm:"foreignKey:OwnerID"`
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
