@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Animated,
@@ -13,61 +13,61 @@ import {
   Image,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
-import { z } from "zod";
-import { speciesMap, speciesOptions } from "@/constants/petSpecies";
+import {
+  reverseSpeciesMap,
+  speciesMap,
+  speciesOptions,
+} from "@/constants/petSpecies";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useAuth } from "@/providers/AuthContext";
 import Constants from "expo-constants";
+import { PetForm, petInputSchema } from "./PetRegisterModal";
+import { Pet } from "@/app/(tabs)/profile";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-const petInputSchema = z.object({
-  name: z.string().min(1, { message: "名前は必須です" }),
-  petType: z.enum(["dog", "cat"], { required_error: "種類は必須です" }),
-  species: z.string().min(1, { message: "品種を選択してください" }),
-  birthDay: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, {
-      message: "誕生日はYYYY-MM-DD形式で入力してください",
-    }),
-  iconImageUri: z.string().nullable(),
+// 編集時は初期値に既存のペット情報をセット
+const getInitialFormState = (pet: Pet): PetForm => ({
+  name: pet.name || "",
+  petType: pet.type || "dog",
+  species: reverseSpeciesMap[pet.type][pet.species] || "",
+  birthDay: pet.birthDay || "",
+  iconImageUri: pet.imageUrl || null,
 });
 
-type PetForm = z.infer<typeof petInputSchema>;
-
-const initialFormState: PetForm = {
-  name: "",
-  petType: "dog",
-  species: "",
-  birthDay: "",
-  iconImageUri: null,
-};
-
-type RegisterPetModalProps = {
+type PetEditModalProps = {
   visible: boolean;
   onClose: () => void;
   slideAnim: Animated.Value;
   colorScheme: ColorSchemeName;
   refetchPets: () => void;
+  pet: Pet;
 };
 
-export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
+export const PetEditModal: React.FC<PetEditModalProps> = ({
   visible,
   onClose,
   slideAnim,
   colorScheme,
   refetchPets,
+  pet,
 }) => {
   const { user } = useAuth();
   const colors = colorScheme === "light" ? Colors.light : Colors.dark;
 
-  const [formData, setFormData] = useState<PetForm>(initialFormState);
+  const [formData, setFormData] = useState<PetForm>(getInitialFormState(pet));
+
+  // 編集の場合、pet prop の変更に合わせてフォームの初期値を更新する
+  useEffect(() => {
+    setFormData(getInitialFormState(pet));
+  }, [pet]);
 
   // セレクター用のモーダル表示状態
   const [showPetTypeSelector, setShowPetTypeSelector] = useState(false);
   const [showSpeciesSelector, setShowSpeciesSelector] = useState(false);
+
   const pickIconImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -83,9 +83,10 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
     }
   };
 
-  const registerPetMutation = useMutation({
+  // 編集用の更新API（PUT や PATCH を使用してください）
+  const updatePetMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.post(`${API_URL}/pets/new`, data, {
+      return axios.put(`${API_URL}/pets/update`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
@@ -110,11 +111,12 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
       Alert.alert("エラー", "ユーザー情報が取得できませんでした");
       return;
     }
+    // 編集対象のペットIDを送信するためのフィールド（例: petId）
+    fd.append("petId", pet.id);
     fd.append("name", formData.name);
     fd.append("type", formData.petType);
     fd.append("species", backendSpecies);
     fd.append("birthDay", formData.birthDay);
-    fd.append("userId", user?.id);
     // アイコン画像が選択されている場合
     if (formData.iconImageUri) {
       const filename = formData.iconImageUri.split("/").pop();
@@ -128,14 +130,13 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
     }
 
     try {
-      await registerPetMutation.mutateAsync(fd);
-      Alert.alert("成功", "ペットが正常に登録されました");
+      await updatePetMutation.mutateAsync(fd);
+      Alert.alert("成功", "ペット情報が更新されました");
       await refetchPets();
-      setFormData(initialFormState);
       onClose();
     } catch (error) {
       console.error(error);
-      Alert.alert("登録エラー", "ペットの登録に失敗しました");
+      Alert.alert("更新エラー", "ペット情報の更新に失敗しました");
     }
   };
 
@@ -151,7 +152,7 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
           style={[
             styles.modalContainer,
             {
-              transform: [{ translateX: slideAnim }],
+              transform: [{ translateY: slideAnim }],
               backgroundColor: colors.background,
             },
           ]}
@@ -160,7 +161,7 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
             <Text style={{ color: colors.tint }}>キャンセル</Text>
           </TouchableOpacity>
           <Text style={[styles.modalTitle, { color: colors.text }]}>
-            ペットを登録する
+            ペット情報を編集する
           </Text>
           <TouchableOpacity
             style={styles.iconContainer}
@@ -222,11 +223,12 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
             style={[styles.submitButton, { backgroundColor: colors.tint }]}
           >
             <Text style={{ color: colors.background, fontWeight: "bold" }}>
-              登録する
+              更新する
             </Text>
           </TouchableOpacity>
         </Animated.View>
 
+        {/* ペット種セレクター */}
         <Modal transparent visible={showPetTypeSelector} animationType="fade">
           <TouchableOpacity
             style={styles.selectorOverlay}
@@ -264,6 +266,8 @@ export const RegisterPetModal: React.FC<RegisterPetModalProps> = ({
             </View>
           </TouchableOpacity>
         </Modal>
+
+        {/* 品種セレクター */}
         <Modal transparent visible={showSpeciesSelector} animationType="fade">
           <TouchableOpacity
             style={styles.selectorOverlay}
@@ -360,7 +364,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
   },
-  // 固定高さのコンテナ（例: 300px）
   selectorContainerFixed: {
     width: "80%",
     height: 300,
@@ -400,4 +403,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterPetModal;
+export default PetEditModal;

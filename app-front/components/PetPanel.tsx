@@ -1,5 +1,5 @@
 import { reverseSpeciesMap } from "@/constants/petSpecies";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,15 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
+  Animated,
+  Dimensions,
+  ColorSchemeName,
 } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import z from "zod";
 import Constants from "expo-constants";
+import PetEditModal from "./PetEditModal";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -20,7 +24,7 @@ export const petSchema = z.object({
   id: z.string().uuid(),
   imageUrl: z.string().min(1),
   name: z.string().min(1),
-  type: z.string().min(1),
+  type: z.enum(["dog", "cat"], { required_error: "種類は必須です" }),
   species: z.string().min(1),
   birthDay: z.string().min(1),
 });
@@ -29,6 +33,8 @@ type Pet = z.infer<typeof petSchema>;
 
 type PetPanelProps = {
   pet: Pet;
+  refetchPets: () => void;
+  colorScheme: ColorSchemeName;
 };
 
 const birthDayParser = (birthDay: string) => {
@@ -36,10 +42,36 @@ const birthDayParser = (birthDay: string) => {
   return `${year}年${month}月${day}日`;
 };
 
-export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
+export const PetPanel: React.FC<PetPanelProps> = ({ 
+  pet,
+  refetchPets,
+  colorScheme,
+ }) => {
+  const windowHeight = Dimensions.get("window").height;
   const [menuVisible, setMenuVisible] = useState(false);
   const [isFullScreenVisible, setIsFullScreenVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
+  const slideAnimEditPet = useRef(new Animated.Value(windowHeight)).current;
   const queryClient = useQueryClient();
+
+  const openEditPetModal = () => {
+    setIsEditModalVisible(true);
+    Animated.timing(slideAnimEditPet, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeEditPetModal = () => {
+    Animated.timing(slideAnimEditPet, {
+      toValue: windowHeight,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsEditModalVisible(false);
+    });
+  };
 
   const handleDelete = () => {
     Alert.alert(
@@ -77,8 +109,8 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
     setMenuVisible(false);
   };
 
-  const handleEdit = () => {
-    // 編集処理の実装（例: 編集画面への遷移など）
+  const handleOpenEditPetModal = () => {
+    openEditPetModal();
     setMenuVisible(false);
   };
 
@@ -110,7 +142,7 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
             <TouchableOpacity onPress={handleDelete} style={styles.menuItem}>
               <Text>削除</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleEdit} style={styles.menuItem}>
+            <TouchableOpacity onPress={handleOpenEditPetModal} style={styles.menuItem}>
               <Text>編集</Text>
             </TouchableOpacity>
           </View>
@@ -127,6 +159,14 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
           />
         </TouchableOpacity>
       </Modal>
+      <PetEditModal
+        visible={isEditModalVisible}
+        onClose={closeEditPetModal}
+        slideAnim={slideAnimEditPet}
+        colorScheme={colorScheme}
+        refetchPets={refetchPets}
+        pet={pet}
+      />
     </View>
   );
 };
