@@ -16,7 +16,7 @@ func SetupPetRoutes(app *fiber.App) {
 	// Create a new pet
 	petGroup.Post("/new", createPet)
 
-	petGroup.Post("/update", updatePet)
+	petGroup.Put("/update", updatePet)
 
 	petGroup.Post("/delete", deletePet)
 }
