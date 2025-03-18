@@ -13,18 +13,20 @@ import {
   Image,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
-import { z } from "zod";
-import { reverseSpeciesMap, speciesMap, speciesOptions } from "@/constants/petSpecies";
+import {
+  reverseSpeciesMap,
+  speciesMap,
+  speciesOptions,
+} from "@/constants/petSpecies";
 import * as ImagePicker from "expo-image-picker";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useAuth } from "@/providers/AuthContext";
 import Constants from "expo-constants";
-import { Pet } from "@/app/(tabs)/profile";
 import { PetForm, petInputSchema } from "./PetRegisterModal";
+import { Pet } from "@/app/(tabs)/profile";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
-
 
 // 編集時は初期値に既存のペット情報をセット
 const getInitialFormState = (pet: Pet): PetForm => ({
