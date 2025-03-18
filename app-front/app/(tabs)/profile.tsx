@@ -23,21 +23,13 @@ import { router } from "expo-router";
 import z from "zod";
 import { postSchema } from "./posts";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
-import { RegisterPetModal } from "@/components/RegisterPetModal";
-import PetPanel from "@/components/PetPanel";
+import { PetRegiserModal } from "@/components/PetRegisterModal";
+import PetPanel, { petSchema } from "@/components/PetPanel";
 
 import Constants from "expo-constants";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-export const petSchema = z.object({
-  id: z.string().uuid(),
-  imageUrl: z.string().min(1),
-  name: z.string().min(1),
-  type: z.string().min(1),
-  species: z.string().min(1),
-  birthDay: z.string().min(1),
-});
 
 const getPetResponseSchema = z.object({
   pets: z.array(petSchema),
@@ -47,7 +39,7 @@ const getPostResponseSchema = z.object({
   posts: z.array(postSchema),
 });
 
-type Pet = z.infer<typeof petSchema>;
+export type Pet = z.infer<typeof petSchema>;
 type Post = z.infer<typeof postSchema>;
 
 const HEADER_HEIGHT = 250;
@@ -161,7 +153,11 @@ const ProfileScreen: React.FC = () => {
   const renderPets = (item: Pet) => {
     return (
       <View style={styles.petContainer}>
-        <PetPanel pet={item} />
+        <PetPanel
+         pet={item}
+         refetchPets={refetchPets}
+         colorScheme={colorScheme}
+          />
       </View>
     );
   };
@@ -229,7 +225,7 @@ const ProfileScreen: React.FC = () => {
         onClose={() => closeEditProfileModal()}
         slideAnim={slideAnimProfile}
       />
-      <RegisterPetModal
+      <PetRegiserModal
         visible={isRegisterPetModalVisible}
         onClose={() => closeRegisterPetModal()}
         slideAnim={slideAnimPet}

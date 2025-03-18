@@ -117,12 +117,6 @@ func createPet(c *fiber.Ctx) error {
 }
 
 func updatePet(c *fiber.Ctx) error {
-	petId := c.Query("petId")
-	if petId == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Pet ID is required",
-		})
-	}
 	form, err := c.MultipartForm()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -130,7 +124,7 @@ func updatePet(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get form values
+	petId := form.Value["petId"][0]
 	name := form.Value["name"][0]
 	petType := form.Value["type"][0]
 	species := form.Value["species"][0]
