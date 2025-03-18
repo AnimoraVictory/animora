@@ -20,6 +20,7 @@ export const petSchema = z.object({
   name: z.string().min(1),
   type: z.string().min(1),
   species: z.string().min(1),
+  birthDay: z.string().min(1),
 });
 
 const getPetResponseSchema = z.object({
