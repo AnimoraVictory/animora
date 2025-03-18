@@ -55,7 +55,7 @@ func PetData(users []models.User) []models.Pet {
 			BirthDay: "2023-01-15",
 			Type:     "dog",
 			Species:  "saluki",
-			ImageKey: "",
+			ImageKey: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 			OwnerID:  users[0].ID, // John's pet
 		},
 		{
@@ -64,7 +64,7 @@ func PetData(users []models.User) []models.Pet {
 			BirthDay: "2022-05-10",
 			Type:     "cat",
 			Species:  "siamese",
-			ImageKey: "",
+			ImageKey: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 			OwnerID:  users[1].ID, // Jane's pet
 		},
 		{
@@ -73,7 +73,7 @@ func PetData(users []models.User) []models.Pet {
 			BirthDay: "2021-11-22",
 			Type:     "dog",
 			Species:  "beagle",
-			ImageKey: "",
+			ImageKey: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 			OwnerID:  users[2].ID, // Alex's pet
 		},
 		{
@@ -82,7 +82,7 @@ func PetData(users []models.User) []models.Pet {
 			BirthDay: "2023-03-05",
 			Type:     "dog",
 			Species:  "poodle",
-			ImageKey: "",
+			ImageKey: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 			OwnerID:  users[3].ID, // Emily's pet
 		},
 		{
@@ -91,7 +91,7 @@ func PetData(users []models.User) []models.Pet {
 			BirthDay: "2022-08-17",
 			Type:     "dog",
 			Species:  "golden_retriever",
-			ImageKey: "",
+			ImageKey: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 			OwnerID:  users[4].ID, // Michael's pet
 		},
 		{
@@ -100,7 +100,7 @@ func PetData(users []models.User) []models.Pet {
 			BirthDay: "2023-02-28",
 			Type:     "cat",
 			Species:  "munchkin",
-			ImageKey: "",
+			ImageKey: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 			OwnerID:  users[0].ID, // John's second pet
 		},
 	}
