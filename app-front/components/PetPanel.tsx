@@ -1,9 +1,20 @@
-import { reverseSpeciesMap } from '@/constants/petSpecies';
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
-import { useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import z from 'zod';
+import { reverseSpeciesMap } from "@/constants/petSpecies";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Modal,
+} from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import z from "zod";
+import Constants from "expo-constants";
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export const petSchema = z.object({
   id: z.string().uuid(),
@@ -11,7 +22,7 @@ export const petSchema = z.object({
   name: z.string().min(1),
   type: z.string().min(1),
   species: z.string().min(1),
-  birthDay: z.string().min(1)
+  birthDay: z.string().min(1),
 });
 
 type Pet = z.infer<typeof petSchema>;
@@ -21,7 +32,7 @@ type PetPanelProps = {
 };
 
 const birthDayParser = (birthDay: string) => {
-  const [year, month, day] = birthDay.split('-');
+  const [year, month, day] = birthDay.split("-");
   return `${year}年${month}月${day}日`;
 };
 
@@ -32,21 +43,21 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
 
   const handleDelete = () => {
     Alert.alert(
-      '削除の確認',
-      '本当に削除してよろしいですか？',
+      "削除の確認",
+      "本当に削除してよろしいですか？",
       [
         {
-          text: 'キャンセル',
+          text: "キャンセル",
           onPress: () => {},
-          style: 'cancel'
+          style: "cancel",
         },
         {
-          text: '削除',
+          text: "削除",
           onPress: async () => {
             try {
               // axiosを使用してDELETEリクエストを送信
-              const response = await axios.delete(`http://localhost:3000/pets/delete`, {
-                params: { petId: pet.id }
+              const response = await axios.delete(`${API_URL}/pets/delete`, {
+                params: { petId: pet.id },
               });
               if (response.status === 200) {
                 // queryKey: ["pets"] のキャッシュを無効化して最新状態に更新
@@ -56,10 +67,10 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
               }
             } catch (error) {
               console.error(error);
-              Alert.alert('エラー', '削除に失敗しました');
+              Alert.alert("エラー", "削除に失敗しました");
             }
-          }
-        }
+          },
+        },
       ],
       { cancelable: true }
     );
@@ -68,7 +79,6 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
 
   const handleEdit = () => {
     // 編集処理の実装（例: 編集画面への遷移など）
-    console.log('編集が選択されました');
     setMenuVisible(false);
   };
 
@@ -79,10 +89,15 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
       </TouchableOpacity>
       <View style={styles.info}>
         <Text style={styles.name}>{pet.name}</Text>
-        <Text style={styles.species}>{reverseSpeciesMap[pet.type][pet.species]}</Text>
+        <Text style={styles.species}>
+          {reverseSpeciesMap[pet.type][pet.species]}
+        </Text>
         <Text style={styles.birthDay}>{birthDayParser(pet.birthDay)}</Text>
       </View>
-      <TouchableOpacity style={styles.menuButton} onPress={() => setMenuVisible(!menuVisible)}>
+      <TouchableOpacity
+        style={styles.menuButton}
+        onPress={() => setMenuVisible(!menuVisible)}
+      >
         <Text style={styles.menuButtonText}>⋮</Text>
       </TouchableOpacity>
       {menuVisible && (
@@ -102,8 +117,14 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
         </TouchableOpacity>
       )}
       <Modal visible={isFullScreenVisible} transparent={true}>
-        <TouchableOpacity style={styles.fullScreenOverlay} onPress={() => setIsFullScreenVisible(false)}>
-          <Image source={{ uri: pet.imageUrl }} style={styles.fullScreenImage} />
+        <TouchableOpacity
+          style={styles.fullScreenOverlay}
+          onPress={() => setIsFullScreenVisible(false)}
+        >
+          <Image
+            source={{ uri: pet.imageUrl }}
+            style={styles.fullScreenImage}
+          />
         </TouchableOpacity>
       </Modal>
     </View>
@@ -112,84 +133,84 @@ export const PetPanel: React.FC<PetPanelProps> = ({ pet }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
     padding: 10,
     height: 200,
     borderRadius: 25,
-    borderColor: 'rgba(0, 0, 0, 0.3)',
-    position: 'relative'
+    borderColor: "rgba(0, 0, 0, 0.3)",
+    position: "relative",
   },
   icon: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'transparent'
+    backgroundColor: "transparent",
   },
   info: {
     marginLeft: 50,
-    flex: 1
+    flex: 1,
   },
   name: {
     paddingBottom: 10,
     fontSize: 24,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
   species: {
     fontSize: 16,
-    color: '#666'
+    color: "#666",
   },
   birthDay: {
     paddingTop: 5,
     fontSize: 16,
-    color: '#666'
+    color: "#666",
   },
   menuButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    padding: 5
+    padding: 5,
   },
   menuButtonText: {
     fontSize: 24,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
   overlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'transparent',
-    zIndex: 90
+    backgroundColor: "transparent",
+    zIndex: 90,
   },
   menu: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     right: 10,
     width: 60,
     borderWidth: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    alignItems: 'center',
-    borderColor: '#ccc',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    alignItems: "center",
+    borderColor: "#ccc",
     borderRadius: 5,
-    zIndex: 100
+    zIndex: 100,
   },
   menuItem: {
-    padding: 10
+    padding: 10,
   },
   fullScreenOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   fullScreenImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain'
-  }
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
+  },
 });
 
 export default PetPanel;
