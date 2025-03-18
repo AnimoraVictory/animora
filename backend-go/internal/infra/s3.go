@@ -1,4 +1,4 @@
-package services
+package infra
 
 import (
 	"bytes"
@@ -18,30 +18,34 @@ import (
 	"github.com/google/uuid"
 )
 
-var s3Client *s3.Client
+type S3Repository struct {
+	s3Client   *s3.Client
+	bucketName string
+}
 
-// InitS3 initializes the S3 client
-func InitS3() {
-	// Configure AWS SDK
+func NewS3Repository(bucketName string) *S3Repository {
+	region := os.Getenv("AWS_REGION")
+	accessKeyId := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion(os.Getenv("AWS_REGION")),
+		config.WithRegion(region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			os.Getenv("AWS_ACCESS_KEY_ID"),
-			os.Getenv("AWS_SECRET_ACCESS_KEY"),
+			accessKeyId,
+			secretAccessKey,
 			"",
 		)),
 	)
 	if err != nil {
 		log.Fatalf("Failed to load AWS config: %v", err)
 	}
-
-	// Create S3 client
-	s3Client = s3.NewFromConfig(cfg)
+	s3Client := s3.NewFromConfig(cfg)
+	return &S3Repository{
+		s3Client:   s3Client,
+		bucketName: bucketName,
+	}
 }
 
-// UploadToS3 uploads a file to S3 and returns the URL of the uploaded file
-func UploadToS3(file *multipart.FileHeader, keyName string) (string, error) {
-	// Open the file
+func (r *S3Repository) UploadImage(file *multipart.FileHeader, directory string) (string, error) {
 	src, err := file.Open()
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %w", err)
@@ -54,12 +58,11 @@ func UploadToS3(file *multipart.FileHeader, keyName string) (string, error) {
 		return "", fmt.Errorf("failed to read file: %w", err)
 	}
 
-	// Generate a unique file key
-	fileKey := fmt.Sprintf("%s/%s-%s", keyName, uuid.New().String(), filepath.Base(file.Filename))
+	fileKey := fmt.Sprintf("%s/%s-%s", directory, uuid.New().String(), filepath.Base(file.Filename))
 
 	// Upload the file to S3
-	_, err = s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket:      aws.String(os.Getenv("AWS_S3_BUCKET_NAME")),
+	_, err = r.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
+		Bucket:      aws.String(r.bucketName),
 		Key:         aws.String(fileKey),
 		Body:        bytes.NewReader(buffer),
 		ContentType: aws.String(file.Header.Get("Content-Type")),
@@ -68,20 +71,15 @@ func UploadToS3(file *multipart.FileHeader, keyName string) (string, error) {
 		return "", fmt.Errorf("failed to upload file to S3: %w", err)
 	}
 
-	// Return the URL of the uploaded file
 	return fileKey, nil
 }
 
-func GetUrl(fileKey string) (string, error) {
-	// プリサインドURLを生成するためのプレスイグナーを作成
-	presigner := s3.NewPresignClient(s3Client)
-
-	// プリサインドURLを生成(有効期限は1時間)
+func (r *S3Repository) GetUrl(fileKey string) (string, error) {
+	presigner := s3.NewPresignClient(r.s3Client)
 	presignedURL, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
-		Bucket: aws.String(os.Getenv("AWS_S3_BUCKET_NAME")),
+		Bucket: aws.String(r.bucketName),
 		Key:    aws.String(fileKey),
 	}, s3.WithPresignExpires(time.Hour))
-
 	if err != nil {
 		return "", fmt.Errorf("failed to generate presigned URL: %w", err)
 	}

@@ -2,7 +2,7 @@ package seed
 
 import (
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/internal/models"
+	"github.com/htanos/animalia/backend-go/internal/domain/models"
 )
 
 // UserData returns a list of sample users
@@ -111,59 +111,39 @@ func PostData(users []models.User) []models.Post {
 	return []models.Post{
 		{
 			ID:       uuid.New().String(),
-			Title:    "My Dog's First Day at the Park",
-			Content:  "Today I took Max to the park for the first time. He had so much fun running around and meeting other dogs!",
-			AuthorID: users[0].ID, // John's post
-			ImageUrls: []string{
-				"https://example.com/images/max_park1.jpg",
-				"https://example.com/images/max_park2.jpg",
-			},
+			Caption:  "Max's first day at the park",
+			UserID:   users[0].ID, // John's post
+			ImageKey: "posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 		},
 		{
 			ID:       uuid.New().String(),
-			Title:    "Luna's New Toy",
-			Content:  "I bought Luna a new toy today and she absolutely loves it. She's been playing with it non-stop!",
-			AuthorID: users[1].ID, // Jane's post
-			ImageUrls: []string{
-				"https://example.com/images/luna_toy.jpg",
-			},
+			Caption:  "Luna's New Toy",
+			UserID:   users[1].ID, // Jane's post
+			ImageKey: "posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 		},
 		{
 			ID:       uuid.New().String(),
-			Title:    "Buddy's Birthday Celebration",
-			Content:  "We celebrated Buddy's 2nd birthday today with a special doggy cake and some new toys. He was so happy!",
-			AuthorID: users[2].ID, // Alex's post
-			ImageUrls: []string{
-				"https://example.com/images/buddy_birthday1.jpg",
-				"https://example.com/images/buddy_birthday2.jpg",
-			},
+			Caption:  "Buddy's Birthday Celebration",
+			UserID:   users[2].ID, // Alex's post
+			ImageKey: "posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 		},
 		{
 			ID:       uuid.New().String(),
-			Title:    "Coco's New Hutch",
-			Content:  "We got Coco a new hutch today and she seems to really like it. It's much more spacious than her old one.",
-			AuthorID: users[3].ID, // Emily's post
-			ImageUrls: []string{
-				"https://example.com/images/coco_hutch.jpg",
-			},
+			Caption:  "Coco's New Hutch",
+			UserID:   users[3].ID, // Emily's post
+			ImageKey: "posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 		},
 		{
 			ID:       uuid.New().String(),
-			Title:    "Rocky's First Swimming Lesson",
-			Content:  "Took Rocky to the lake today for his first swimming lesson. He was a bit hesitant at first but then loved it!",
-			AuthorID: users[4].ID, // Michael's post
-			ImageUrls: []string{
-				"https://example.com/images/rocky_swimming.jpg",
-			},
+			Caption:  "Rocky's First Swimming Lesson",
+			UserID:   users[4].ID, // Michael's post
+			ImageKey: "posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 		},
 		{
 			ID:       uuid.New().String(),
-			Title:    "Milo's Favorite Napping Spot",
-			Content:  "Milo has found his favorite spot for napping - right on top of my laptop when I'm trying to work!",
-			AuthorID: users[0].ID, // John's second post
-			ImageUrls: []string{
-				"https://example.com/images/milo_napping.jpg",
-			},
+			Caption:  "Milo's Favorite Napping Spot",
+			UserID:   users[0].ID, // John's second post
+			ImageKey: "posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg",
 		},
 	}
 }
