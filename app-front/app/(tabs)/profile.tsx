@@ -26,6 +26,10 @@ import { ProfileEditModal } from "@/components/ProfileEditModal";
 import { RegisterPetModal } from "@/components/RegisterPetModal";
 import PetPanel from "@/components/PetPanel";
 
+import Constants from "expo-constants";
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
+
 export const petSchema = z.object({
   id: z.string().uuid(),
   imageUrl: z.string().min(1),
@@ -115,7 +119,7 @@ const ProfileScreen: React.FC = () => {
   } = useQuery<Pet[]>({
     queryKey: ["pets", user?.id],
     queryFn: async () => {
-      const response = await axios.get("http://localhost:3000/pets/owner", {
+      const response = await axios.get(`${API_URL}/pets/owner`, {
         params: { ownerId: user?.id },
       });
       const parsedResponse = getPetResponseSchema.parse(response.data);
@@ -132,7 +136,7 @@ const ProfileScreen: React.FC = () => {
   } = useQuery<Post[]>({
     queryKey: ["posts", user?.id],
     queryFn: async () => {
-      const response = await axios.get("http://localhost:3000/posts/user", {
+      const response = await axios.get(`${API_URL}/posts/user`, {
         params: { authorId: user?.id },
       });
       const parsedResponse = getPostResponseSchema.parse(response.data);

@@ -1,4 +1,7 @@
 import axios from 'axios';
+import Constants from 'expo-constants';
+
+const API_URL = Constants.expoConfig?.extra?.API_URL
 
 export interface User {
   id: string;
@@ -28,7 +31,7 @@ export const login = async (email: string, password: string): Promise<LoginRespo
 
 export const signUp = async (email: string, password: string, name: string): Promise<void> => {
   try {
-    await axios.post(`http://localhost:3000/auth/signup`, { email, password, name }, {
+    await axios.post(`${API_URL}/auth/signup`, { email, password, name }, {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
@@ -39,7 +42,7 @@ export const signUp = async (email: string, password: string, name: string): Pro
 
 export const signOut = async (accessToken: string): Promise<void> => {
   try {
-    await axios.post(`http://localhost:3000/auth/signout`, null, {
+    await axios.post(`${API_URL}/auth/signout`, null, {
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
@@ -53,7 +56,7 @@ export const signOut = async (accessToken: string): Promise<void> => {
 
 export const getUser = async (accessToken: string): Promise<User> => {
   try {
-    const response = await axios.get<User>(`http://localhost:3000/auth/me`, {
+    const response = await axios.get<User>(`${API_URL}/auth/me`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       }
@@ -67,7 +70,7 @@ export const getUser = async (accessToken: string): Promise<User> => {
 
 export const verifyEmail = async (email: string, code: string): Promise<void> => {
   try {
-    await axios.post(`http://localhost:3000/auth/verify-email`, { email, code }, {
+    await axios.post(`${API_URL}/auth/verify-email`, { email, code }, {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
