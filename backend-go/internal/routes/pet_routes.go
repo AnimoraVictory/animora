@@ -18,7 +18,7 @@ func SetupPetRoutes(app *fiber.App) {
 
 	petGroup.Put("/update", updatePet)
 
-	petGroup.Post("/delete", deletePet)
+	petGroup.Delete("/delete", deletePet)
 }
 
 // getPetsByOwner gets pets by owner ID
