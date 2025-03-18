@@ -1,4 +1,3 @@
-// PetPanel.tsx
 import { reverseSpeciesMap } from '@/constants/petSpecies';
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';

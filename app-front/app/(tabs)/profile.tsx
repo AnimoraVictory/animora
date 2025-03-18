@@ -172,9 +172,9 @@ const ProfileScreen: React.FC = () => {
         contentContainerStyle={[styles.contentContainer, { paddingTop: HEADER_HEIGHT }]}
         ListEmptyComponent={
           isDataLoading ? (
-            <Text>読み込み中...</Text>
+            <Text style={{ color: colors.text}}>読み込み中...</Text>
           ) : isDataError ? (
-            <Text>エラーが発生しました</Text>
+            <Text style={{ color: colors.text }}>エラーが発生しました</Text>
           ) : (
             <Text style={styles.emptyText}>
               {selectedTab === 'mypet' ? 'マイペットを登録しましょう！' : '投稿しましょう！'}
