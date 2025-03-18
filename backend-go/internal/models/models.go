@@ -31,6 +31,7 @@ type Post struct {
 	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:PostID"`
 	Likes     []Like         `json:"likes,omitempty" gorm:"foreignKey:PostID"`
 	CreatedAt time.Time      `json:"createdAt" gorm:"autoCreateTime"`
+	DeletedAt gorm.DeletedAt `json:"deletedAt"`
 }
 
 // Comment represents a comment on a post
@@ -56,15 +57,16 @@ type Like struct {
 
 // Pet represents a pet in the system
 type Pet struct {
-	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	Name      string    `json:"name"`
-	BirthDay  string    `json:"birthDay"`
-	Type      PetType   `json:"type" gorm:"type:pet_type"`
-	Species   string    `json:"species" gorm:"type:pet_species"`
-	ImageKey  string   `json:"imageKey"`
-	OwnerID   string    `json:"ownerId"`
-	Owner     User      `json:"owner,omitempty" gorm:"foreignKey:OwnerID"`
-	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
+	ID        string         `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	Name      string         `json:"name"`
+	BirthDay  string         `json:"birthDay"`
+	Type      PetType        `json:"type" gorm:"type:pet_type"`
+	Species   string         `json:"species" gorm:"type:pet_species"`
+	ImageKey  string         `json:"imageKey"`
+	OwnerID   string         `json:"ownerId"`
+	Owner     User           `json:"owner,omitempty" gorm:"foreignKey:OwnerID"`
+	CreatedAt time.Time      `json:"createdAt" gorm:"autoCreateTime"`
+	DeletedAt gorm.DeletedAt `json:"deletedAt"`
 }
 
 // Image represents an image associated with a post

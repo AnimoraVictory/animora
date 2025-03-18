@@ -4,7 +4,7 @@ include .env
 
 run-all: up-db up-adminer run
 
-run: up-db
+run: build up-db
 	go run cmd/api/main.go
 
 seed:

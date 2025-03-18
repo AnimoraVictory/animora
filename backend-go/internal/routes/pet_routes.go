@@ -160,7 +160,16 @@ func deletePet(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := models.DB.Where("id = ?", petId).Delete(&models.Pet{}).Error; err != nil {
+	// 削除対象のPetレコードを取得
+	var pet models.Pet
+	if err := models.DB.Where("id = ?", petId).First(&pet).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Pet not found",
+		})
+	}
+
+	// 論理削除（gorm.DeletedAtフィールドに値がセットされる）
+	if err := models.DB.Delete(&pet).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to delete pet",
 		})
