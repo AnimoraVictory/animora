@@ -39,7 +39,7 @@ func InitS3() {
 }
 
 // UploadToS3 uploads a file to S3 and returns the URL of the uploaded file
-func UploadToS3(file *multipart.FileHeader) (string, error) {
+func UploadToS3(file *multipart.FileHeader, keyName string) (string, error) {
 	// Open the file
 	src, err := file.Open()
 	if err != nil {
@@ -54,7 +54,7 @@ func UploadToS3(file *multipart.FileHeader) (string, error) {
 	}
 
 	// Generate a unique file key
-	fileKey := fmt.Sprintf("pets/%s-%s", uuid.New().String(), filepath.Base(file.Filename))
+	fileKey := fmt.Sprintf("%s/%s-%s", keyName, uuid.New().String(), filepath.Base(file.Filename))
 
 	// Upload the file to S3
 	_, err = s3Client.PutObject(context.TODO(), &s3.PutObjectInput{

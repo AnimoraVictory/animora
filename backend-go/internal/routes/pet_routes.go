@@ -15,6 +15,10 @@ func SetupPetRoutes(app *fiber.App) {
 
 	// Create a new pet
 	petGroup.Post("/new", createPet)
+
+	petGroup.Post("/update", updatePet)
+
+	petGroup.Post("/delete", deletePet)
 }
 
 // getPetsByOwner gets pets by owner ID
@@ -71,7 +75,7 @@ func createPet(c *fiber.Ctx) error {
 	}
 
 	// Upload the image to S3
-	imageURL, err := services.UploadToS3(file)
+	imageURL, err := services.UploadToS3(file, "pets")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to upload image",
@@ -97,5 +101,60 @@ func createPet(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Pet successfully registered",
 		"pet":     pet,
+	})
+}
+
+func updatePet(c *fiber.Ctx) error {
+	petId := c.Query("petId")
+	if petId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Pet ID is required",
+		})
+	}
+	form, err := c.MultipartForm()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid form data",
+		})
+	}
+
+	// Get form values
+	name := form.Value["name"][0]
+	petType := form.Value["type"][0]
+	species := form.Value["species"][0]
+	birthDay := form.Value["birthDay"][0]
+
+	if err := models.DB.Model(&models.Pet{}).Where("id = ?", petId).Updates(map[string]interface{}{
+		"name": name,
+		"type": petType,
+		"species": species,
+		"birth_day": birthDay,
+	}).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update pet",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Pet successfully updated",
+	})
+}
+
+func deletePet(c *fiber.Ctx) error {
+	petId := c.Query("petId")
+	if petId == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Pet ID is required",
+		})
+	}
+
+	if err := models.DB.Where("id = ?", petId).Delete(&models.Pet{}).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete pet",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Pet successfully deleted",
 	})
 }
