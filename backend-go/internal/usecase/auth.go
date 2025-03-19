@@ -1,8 +1,7 @@
 package usecase
 
 import (
-	"fmt"
-
+	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/htanos/animalia/backend-go/internal/domain/models"
 	"github.com/htanos/animalia/backend-go/internal/domain/repository"
 )
@@ -20,98 +19,29 @@ func NewAuthUsecase(authRepository repository.AuthRepository, userRepository rep
 }
 
 func (u *AuthUsecase) VerifyEmail(email, code string) error {
-	if err := u.authRepository.VerifyEmail(email, code); err != nil {
-		return fmt.Errorf("確認コードが無効です: %w", err)
-	}
-
-	return nil
+	return u.authRepository.VerifyEmail(email, code)
 }
 
-func (u *AuthUsecase) SignUp(name, email, password string) (*models.User, error) {
-	// DB に同じメールアドレスのユーザーが既に存在しないかチェック
-	exists, err := u.userRepository.ExistsEmail(email)
-	if err != nil {
-		return nil, fmt.Errorf("ユーザーの存在チェックに失敗しました: %w", err)
-	}
-	if exists {
-		return nil, fmt.Errorf("このメールアドレスは既に登録されています")
-	}
-
-	// Cognitoにユーザーを作成
-	if err := u.authRepository.CreateUser(name, email, password); err != nil {
-		return nil, fmt.Errorf("failed to create user in Cognito: %w", err)
-	}
-
-	// DBにユーザーを作成
-	user, err := u.userRepository.Create(name, email)
-	if err != nil {
-		return nil, fmt.Errorf("ユーザーの作成に失敗しました: %w", err)
-	}
-
-	return user, nil
+func (u *AuthUsecase) CreateUser(name, email, password string) error {
+	return u.authRepository.CreateUser(name, email, password)
 }
 
-type SignInResponse struct {
-	User         models.User
-	AccessToken  string
-	IdToken      string
-	RefreshToken string
+func (u *AuthUsecase) SignIn(email, password string) (*cognitoidentityprovider.InitiateAuthOutput, error) {
+	return u.authRepository.SignIn(email, password)
 }
 
-func (u *AuthUsecase) SignIn(email, password string) (*SignInResponse, error) {
-	result, err := u.authRepository.SignIn(email, password)
-	if err != nil {
-		return nil, fmt.Errorf("サインインに失敗しました: %w", err)
-	}
-
-	user, err := u.userRepository.FindByEmail(email)
-	if err != nil {
-		return nil, fmt.Errorf("ユーザーの取得に失敗しました: %w", err)
-	}
-
-	return &SignInResponse{
-		User:         *user,
-		AccessToken:  *result.AuthenticationResult.AccessToken,
-		IdToken:      *result.AuthenticationResult.IdToken,
-		RefreshToken: *result.AuthenticationResult.RefreshToken,
-	}, nil
+func (u *AuthUsecase) FindByEmail(email string) (*models.User, error) {
+	return u.userRepository.FindByEmail(email)
 }
 
-type RefreshTokenResponse struct {
-	AccessToken string
-	IdToken     string
+func (u *AuthUsecase) RefreshToken(refreshToken string) (*cognitoidentityprovider.InitiateAuthOutput, error) {
+	return u.authRepository.RefreshToken(refreshToken)
 }
 
-func (u *AuthUsecase) RefreshToken(refreshToken string) (*RefreshTokenResponse, error) {
-	result, err := u.authRepository.RefreshToken(refreshToken)
-	if err != nil {
-		return nil, fmt.Errorf("リフレッシュトークンの更新に失敗しました: %w", err)
-	}
-
-	return &RefreshTokenResponse{
-		AccessToken: *result.AuthenticationResult.AccessToken,
-		IdToken:     *result.AuthenticationResult.IdToken,
-	}, nil
-}
-
-func (u *AuthUsecase) GetUser(accessToken string) (*models.User, error) {
-	email, err := u.authRepository.GetUserEmail(accessToken)
-	if err != nil {
-		return nil, fmt.Errorf("ユーザーの取得に失敗しました: %w", err)
-	}
-
-	user, err := u.userRepository.FindByEmail(email)
-	if err != nil {
-		return nil, fmt.Errorf("ユーザーの取得に失敗しました: %w", err)
-	}
-
-	return user, nil
+func (u *AuthUsecase) GetUserEmail(accessToken string) (string, error) {
+	return u.authRepository.GetUserEmail(accessToken)
 }
 
 func (u *AuthUsecase) SignOut(accessToken string) error {
-	if err := u.authRepository.SignOut(accessToken); err != nil {
-		return fmt.Errorf("ログアウトに失敗しました: %w", err)
-	}
-
-	return nil
+	return u.authRepository.SignOut(accessToken)
 }

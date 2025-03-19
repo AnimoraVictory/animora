@@ -60,8 +60,13 @@ func InjectStorageUsecase() usecase.StorageUsecase {
 	return *storageUsecase
 }
 
+func InjectUserUsecase() usecase.UserUsecase {
+	userUsecase := usecase.NewUserUsecase(InjectUserRepository())
+	return *userUsecase
+}
+
 func InjectAuthHandler() handler.AuthHandler {
-	authHandler := handler.NewAuthHandler(InjectAuthUsecase())
+	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase())
 	return *authHandler
 }
 
