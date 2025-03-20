@@ -12,6 +12,7 @@ type User struct {
 	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	Email     string    `json:"email" gorm:"unique"`
 	Name      string    `json:"name"`
+	Bio       string    `json:"bio"`
 	Posts     []Post    `json:"posts,omitempty" gorm:"foreignKey:UserID"`
 	Comments  []Comment `json:"comments,omitempty" gorm:"foreignKey:AuthorID"`
 	Likes     []Like    `json:"likes,omitempty" gorm:"foreignKey:UserID"`

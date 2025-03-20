@@ -79,3 +79,8 @@ func InjectPetHandler() handler.PetHandler {
 	petHandler := handler.NewPetHandler(InjectPetUsecase(), InjectStorageUsecase())
 	return *petHandler
 }
+
+func InjectUserHandler() handler.UserHandler {
+	userHandler := handler.NewUserHandler(InjectUserUsecase())
+	return *userHandler
+}

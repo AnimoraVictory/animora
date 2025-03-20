@@ -56,3 +56,19 @@ func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 
 	return &user, nil
 }
+
+func (r *UserRepository) Update(id string, name string, description string) error {
+	var user models.User
+	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
+		return err
+	}
+
+	user.Name = name
+	user.Bio = description
+
+	if err := r.db.Save(&user).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
