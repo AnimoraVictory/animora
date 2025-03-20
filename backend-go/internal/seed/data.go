@@ -12,36 +12,43 @@ func UserData() []models.User {
 			ID:    uuid.New().String(),
 			Email: "john.doe@example.com",
 			Name:  "John Doe",
+			Bio:   "I'm a pet shop owner",
 		},
 		{
 			ID:    uuid.New().String(),
 			Email: "jane.smith@example.com",
 			Name:  "Jane Smith",
+			Bio:   "I'm a cat lover",
 		},
 		{
 			ID:    uuid.New().String(),
 			Email: "alex.johnson@example.com",
 			Name:  "Alex Johnson",
+			Bio:   "I'm a dog lover",
 		},
 		{
 			ID:    uuid.New().String(),
 			Email: "emily.wilson@example.com",
 			Name:  "Emily Wilson",
+			Bio:   "I'm a food lover",
 		},
 		{
 			ID:    uuid.New().String(),
 			Email: "michael.brown@example.com",
 			Name:  "Michael Brown",
+			Bio:   "I'm a flower shop owner",
 		},
 		{
 			ID:    uuid.New().String(),
 			Email: "tanomitsu2002@gmail.com",
 			Name:  "Mitsuru Hatano",
+			Bio:   "I'm a software engineer",
 		},
 		{
 			ID:    uuid.New().String(),
 			Email: "aki.kaku0627@gmail.com",
 			Name:  "Akihiro Kaku",
+			Bio:   "I'm a software engineer",
 		},
 	}
 }
