@@ -2,174 +2,21 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/htanos/animalia/backend-go/internal/models"
-	"github.com/htanos/animalia/backend-go/internal/models/responses"
-	"github.com/htanos/animalia/backend-go/internal/services"
+	"github.com/htanos/animalia/backend-go/internal/injector"
 )
 
 // SetupPetRoutes sets up the pet routes
 func SetupPetRoutes(app *fiber.App) {
+	petHandler := injector.InjectPetHandler()
 	petGroup := app.Group("/pets")
 
 	// Get pets by owner ID
-	petGroup.Get("/owner", getPetsByOwner)
+	petGroup.Get("/owner", petHandler.GetByOwner())
 
 	// Create a new pet
-	petGroup.Post("/new", createPet)
+	petGroup.Post("/new", petHandler.Create())
 
-	petGroup.Put("/update", updatePet)
+	petGroup.Put("/update", petHandler.Update())
 
-	petGroup.Delete("/delete", deletePet)
-}
-
-// getPetsByOwner gets pets by owner ID
-func getPetsByOwner(c *fiber.Ctx) error {
-	ownerID := c.Query("ownerId")
-	if ownerID == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Owner ID is required",
-		})
-	}
-
-	var pets []models.Pet
-	if err := models.DB.Where("owner_id = ?", ownerID).Find(&pets).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to get pets",
-		})
-	}
-
-	petResponses := make([]responses.PetResponse, len(pets))
-	for i, pet := range pets {
-		url, err := services.GetUrl(pet.ImageKey)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Failed to get pet image URL",
-			})
-		}
-		petResponses[i] = responses.NewPetResponse(&pet, url)
-	}
-
-	return c.JSON(fiber.Map{
-		"pets": petResponses,
-	})
-}
-
-// createPet creates a new pet
-func createPet(c *fiber.Ctx) error {
-	// Parse multipart form
-	form, err := c.MultipartForm()
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid form data",
-		})
-	}
-
-	// Get form values
-	name := form.Value["name"][0]
-	petType := form.Value["type"][0]
-	species := form.Value["species"][0]
-	birthDay := form.Value["birthDay"][0]
-	userID := form.Value["userId"][0]
-
-	// Get the image file
-	file, err := c.FormFile("image")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Image file is required",
-		})
-	}
-
-	// Validate form values
-	if name == "" || petType == "" || birthDay == "" || userID == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Missing required fields",
-		})
-	}
-
-	// Upload the image to S3
-	fileKey, err := services.UploadToS3(file, "pets")
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to upload image",
-		})
-	}
-
-	// Create the pet in the database
-	pet := models.Pet{
-		Name:     name,
-		Type:     models.PetType(petType),
-		Species:  species,
-		BirthDay: birthDay,
-		ImageKey: fileKey,
-		OwnerID:  userID,
-	}
-
-	if err := models.DB.Create(&pet).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create pet",
-		})
-	}
-
-	return c.JSON(fiber.Map{
-		"message": "Pet successfully registered",
-		"pet":     pet,
-	})
-}
-
-func updatePet(c *fiber.Ctx) error {
-	form, err := c.MultipartForm()
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid form data",
-		})
-	}
-
-	petId := form.Value["petId"][0]
-	name := form.Value["name"][0]
-	petType := form.Value["type"][0]
-	species := form.Value["species"][0]
-	birthDay := form.Value["birthDay"][0]
-
-	if err := models.DB.Model(&models.Pet{}).Where("id = ?", petId).Updates(map[string]interface{}{
-		"name":      name,
-		"type":      petType,
-		"species":   species,
-		"birth_day": birthDay,
-	}).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to update pet",
-		})
-	}
-
-	return c.JSON(fiber.Map{
-		"message": "Pet successfully updated",
-	})
-}
-
-func deletePet(c *fiber.Ctx) error {
-	petId := c.Query("petId")
-	if petId == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Pet ID is required",
-		})
-	}
-
-	// 削除対象のPetレコードを取得
-	var pet models.Pet
-	if err := models.DB.Where("id = ?", petId).First(&pet).Error; err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Pet not found",
-		})
-	}
-
-	// 論理削除（gorm.DeletedAtフィールドに値がセットされる）
-	if err := models.DB.Delete(&pet).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to delete pet",
-		})
-	}
-
-	return c.JSON(fiber.Map{
-		"message": "Pet successfully deleted",
-	})
+	petGroup.Delete("/delete", petHandler.Delete())
 }

@@ -8,11 +8,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/htanos/animalia/backend-go/internal/auth"
-	"github.com/htanos/animalia/backend-go/internal/models"
+	"github.com/htanos/animalia/backend-go/internal/domain/models"
 	"github.com/htanos/animalia/backend-go/internal/routes"
 	"github.com/htanos/animalia/backend-go/internal/seed"
-	"github.com/htanos/animalia/backend-go/internal/services"
 	"github.com/joho/godotenv"
 )
 
@@ -39,12 +37,6 @@ func main() {
 		return
 	}
 
-	// Initialize auth services
-	auth.InitAuth()
-
-	// Initialize S3 service
-	services.InitS3()
-
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
 		AppName: "Animalia API",
@@ -67,7 +59,6 @@ func main() {
 
 	// Set up API routes
 	routes.SetupAuthRoutes(app)
-	routes.SetupUserRoutes(app)
 	routes.SetupPetRoutes(app)
 	routes.SetupPostRoutes(app)
 

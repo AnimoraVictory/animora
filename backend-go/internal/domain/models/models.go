@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	pq "github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -13,7 +12,7 @@ type User struct {
 	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	Email     string    `json:"email" gorm:"unique"`
 	Name      string    `json:"name"`
-	Posts     []Post    `json:"posts,omitempty" gorm:"foreignKey:AuthorID"`
+	Posts     []Post    `json:"posts,omitempty" gorm:"foreignKey:UserID"`
 	Comments  []Comment `json:"comments,omitempty" gorm:"foreignKey:AuthorID"`
 	Likes     []Like    `json:"likes,omitempty" gorm:"foreignKey:UserID"`
 	Pets      []Pet     `json:"pets,omitempty" gorm:"foreignKey:OwnerID"`
@@ -23,11 +22,10 @@ type User struct {
 // Post represents a post in the system
 type Post struct {
 	ID        string         `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	Title     string         `json:"title"`
-	Content   string         `json:"content"`
-	ImageUrls pq.StringArray `json:"imageUrls" gorm:"type:text[]"`
-	AuthorID  string         `json:"authorId"`
-	Author    User           `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
+	Caption   string         `json:"caption"`
+	ImageKey  string         `json:"imageKey"`
+	UserID    string         `json:"userId"`
+	User      User           `json:"user,omitempty" gorm:"foreignKey:UserID"`
 	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:PostID"`
 	Likes     []Like         `json:"likes,omitempty" gorm:"foreignKey:PostID"`
 	CreatedAt time.Time      `json:"createdAt" gorm:"autoCreateTime"`

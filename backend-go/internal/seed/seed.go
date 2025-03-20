@@ -5,7 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/htanos/animalia/backend-go/internal/models"
+	"github.com/htanos/animalia/backend-go/internal/domain/models"
 )
 
 // SeedData populates the database with sample data

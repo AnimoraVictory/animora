@@ -3,7 +3,7 @@ package responses
 import (
 	"time"
 
-	"github.com/htanos/animalia/backend-go/internal/models"
+	"github.com/htanos/animalia/backend-go/internal/domain/models"
 )
 
 // PetResponse represents the API response structure for a pet
@@ -13,7 +13,7 @@ type PetResponse struct {
 	BirthDay  string         `json:"birthDay"`
 	Type      models.PetType `json:"type"`
 	Species   string         `json:"species"`
-	ImageURL  string        `json:"imageUrl"`
+	ImageURL  string         `json:"imageUrl"`
 	OwnerID   string         `json:"ownerId"`
 	Owner     models.User    `json:"owner,omitempty"`
 	CreatedAt time.Time      `json:"createdAt"`
