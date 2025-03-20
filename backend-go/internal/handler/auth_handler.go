@@ -50,8 +50,6 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 			})
 		}
 
-		println(*result.AuthenticationResult.AccessToken)
-
 		return c.JSON(fiber.Map{
 			"message":      "ログイン成功",
 			"user":         user,
