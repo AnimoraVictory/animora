@@ -50,15 +50,15 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 			})
 		}
 
-		// レスポンスの作成
-		resp := responses.SignInResponse{
-			User:         *user,
-			AccessToken:  *result.AuthenticationResult.AccessToken,
-			IdToken:      *result.AuthenticationResult.IdToken,
-			RefreshToken: *result.AuthenticationResult.RefreshToken,
-		}
+		println(*result.AuthenticationResult.AccessToken)
 
-		return c.JSON(resp)
+		return c.JSON(fiber.Map{
+			"message":      "ログイン成功",
+			"user":         user,
+			"accessToken":  *result.AuthenticationResult.AccessToken,
+			"idToken":      *result.AuthenticationResult.IdToken,
+			"refreshToken": *result.AuthenticationResult.RefreshToken,
+		})
 	}
 }
 
