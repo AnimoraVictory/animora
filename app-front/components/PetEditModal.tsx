@@ -83,7 +83,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
   // 編集用の更新API（PUT や PATCH を使用してください）
   const updatePetMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.put(`${API_URL}/pets/update`, data, {
+      return axios.put(`${API_URL}/pets/update?petId=${pet.id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },

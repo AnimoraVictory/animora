@@ -4,7 +4,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Slot, useRouter } from "expo-router";
+import { Slot, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -25,12 +25,17 @@ const queryClient = new QueryClient();
 function AuthSwitch() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const colorScheme = useColorScheme();
 
   useEffect(() => {
     if (!loading) {
       if (user) {
-        router.replace("/(tabs)/posts");
+        if (pathname !== "/(tabs)/profile") {
+          router.replace("/(tabs)/profile");
+        } else {
+          router.replace("/(tabs)/posts");
+        }
       } else {
         router.replace("/(auth)");
       }

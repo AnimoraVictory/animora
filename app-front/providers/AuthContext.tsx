@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import * as SecureStore from "expo-secure-store";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, QueryObserverResult } from "@tanstack/react-query";
 import {
   login as loginApi,
   signOut as signOutApi,
@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  refetch: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: async () => {},
   loading: true,
+  refetch: async () => {},
 });
 
 // SecureStore のキー
@@ -58,6 +60,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     retry: false,
     staleTime: Infinity,
   });
+
+  const refetchUser = async (): Promise<void> => {
+    await refetch();
+  };
 
   // login 用の mutation
   const loginMutation = useMutation<User, Error, { email: string; password: string }>({
@@ -115,6 +121,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         login,
         logout,
         loading: isLoading,
+        refetch: refetchUser,
       }}
     >
       {children}
