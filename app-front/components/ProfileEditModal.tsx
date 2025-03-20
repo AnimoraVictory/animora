@@ -20,6 +20,16 @@ import { z } from "zod";
 import { User } from "@/constants/api";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
+const DEFAULT_PROFILE_PIC_URL = 'https://example.com/fallback_profile.jpg';
+
+function isValidUrl(urlString: string): boolean {
+  try {
+    new URL(urlString);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
 export const profileEditSchema = z.object({
   imageUri: z.string().nullable(),
@@ -158,9 +168,9 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
           >
             {formData.imageUri ? (
               <Image
-                source={{ uri: formData.imageUri }}
-                style={styles.iconImage}
-              />
+              source={{ uri: isValidUrl(user.iconImageUrl) ? user.iconImageUrl : DEFAULT_PROFILE_PIC_URL }}
+              style={styles.iconImage}
+            />
             ) : (
               <Text style={[styles.iconPlaceholder, { color: colors.icon }]}>
                 アイコン画像
