@@ -61,6 +61,7 @@ func main() {
 	routes.SetupAuthRoutes(app)
 	routes.SetupPetRoutes(app)
 	routes.SetupPostRoutes(app)
+	routes.SetupUserRoutes(app)
 
 	// Get port from environment variable or use default
 	port := os.Getenv("PORT")

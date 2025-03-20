@@ -66,7 +66,7 @@ func InjectUserUsecase() usecase.UserUsecase {
 }
 
 func InjectAuthHandler() handler.AuthHandler {
-	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase())
+	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase(), InjectStorageUsecase())
 	return *authHandler
 }
 
@@ -78,4 +78,9 @@ func InjectPostHandler() handler.PostHandler {
 func InjectPetHandler() handler.PetHandler {
 	petHandler := handler.NewPetHandler(InjectPetUsecase(), InjectStorageUsecase())
 	return *petHandler
+}
+
+func InjectUserHandler() handler.UserHandler {
+	userHandler := handler.NewUserHandler(InjectUserUsecase(), InjectStorageUsecase())
+	return *userHandler
 }

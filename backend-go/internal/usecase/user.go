@@ -18,3 +18,11 @@ func NewUserUsecase(userRepository repository.UserRepository) *UserUsecase {
 func (u *UserUsecase) CreateUser(name, email string) (*models.User, error) {
 	return u.userRepository.Create(name, email)
 }
+
+func (u *UserUsecase) Update(id string, name string, description string, newImageKey string) error {
+	return u.userRepository.Update(id, name, description, newImageKey)
+}
+
+func (u *UserUsecase) GetById(id string) (*models.User, error) {
+	return u.userRepository.GetById(id)
+}

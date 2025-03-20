@@ -7,6 +7,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  bio: string;
+  iconImageUrl: string;
 }
 
 export interface LoginResponse {

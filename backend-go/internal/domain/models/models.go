@@ -9,14 +9,16 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	Email     string    `json:"email" gorm:"unique"`
-	Name      string    `json:"name"`
-	Posts     []Post    `json:"posts,omitempty" gorm:"foreignKey:UserID"`
-	Comments  []Comment `json:"comments,omitempty" gorm:"foreignKey:AuthorID"`
-	Likes     []Like    `json:"likes,omitempty" gorm:"foreignKey:UserID"`
-	Pets      []Pet     `json:"pets,omitempty" gorm:"foreignKey:OwnerID"`
-	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
+	ID           string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	Email        string    `json:"email" gorm:"unique"`
+	Name         string    `json:"name"`
+	Bio          string    `json:"bio"`
+	IconImageKey string    `json:"iconImageKey"`
+	Posts        []Post    `json:"posts,omitempty" gorm:"foreignKey:UserID"`
+	Comments     []Comment `json:"comments,omitempty" gorm:"foreignKey:AuthorID"`
+	Likes        []Like    `json:"likes,omitempty" gorm:"foreignKey:UserID"`
+	Pets         []Pet     `json:"pets,omitempty" gorm:"foreignKey:OwnerID"`
+	CreatedAt    time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
 
 // Post represents a post in the system

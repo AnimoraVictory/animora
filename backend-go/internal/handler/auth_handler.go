@@ -2,22 +2,24 @@ package handler
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
 	"github.com/htanos/animalia/backend-go/internal/domain/models/responses"
 	"github.com/htanos/animalia/backend-go/internal/usecase"
 )
 
 type AuthHandler struct {
-	authUsecase usecase.AuthUsecase
-	userUsecase usecase.UserUsecase
+	authUsecase    usecase.AuthUsecase
+	userUsecase    usecase.UserUsecase
+	storageUsecase usecase.StorageUsecase
 }
 
-func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase) *AuthHandler {
+func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase, storageUsecase usecase.StorageUsecase) *AuthHandler {
 	return &AuthHandler{
-		authUsecase: authUsecase,
-		userUsecase: userUsecase,
+		authUsecase:    authUsecase,
+		userUsecase:    userUsecase,
+		storageUsecase: storageUsecase,
 	}
 }
 
@@ -49,10 +51,29 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 				"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
 			})
 		}
+		if user.IconImageKey != "" {
+			url, err := h.storageUsecase.GetUrl(user.IconImageKey)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
+				})
+			}
+			userResponse := responses.NewUserResponse(user, url)
 
+			return c.JSON(fiber.Map{
+				"message":      "ログイン成功",
+				"user":         userResponse,
+				"accessToken":  *result.AuthenticationResult.AccessToken,
+				"idToken":      *result.AuthenticationResult.IdToken,
+				"refreshToken": *result.AuthenticationResult.RefreshToken,
+			})
+		}
+
+		// IconImageKey が空の場合は URL を生成せずにレスポンスを返す
+		userResponse := responses.NewUserResponse(user, "")
 		return c.JSON(fiber.Map{
 			"message":      "ログイン成功",
-			"user":         user,
+			"user":         userResponse,
 			"accessToken":  *result.AuthenticationResult.AccessToken,
 			"idToken":      *result.AuthenticationResult.IdToken,
 			"refreshToken": *result.AuthenticationResult.RefreshToken,
@@ -169,15 +190,43 @@ func (h *AuthHandler) SignUp() fiber.Handler {
 
 func (h *AuthHandler) GetMe() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// Authorization ヘッダーからトークンを取得
-		user := h.getAuthUser(c)
-		if user == nil {
+		// リクエストヘッダーから Authorization トークンを取得
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "ユーザーが認証されていません",
+				"error": "アクセストークンが必要です",
 			})
 		}
 
-		return c.JSON(user)
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		email, err := h.authUsecase.GetUserEmail(tokenString)
+		if err != nil {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "無効なアクセストークンです",
+			})
+		}
+
+		user, err := h.authUsecase.FindByEmail(email)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": fmt.Sprintf("ユーザー情報の取得に失敗しました: %v", err),
+			})
+		}
+		// ユーザーのアイコン画像がある場合は URL を取得
+		if user.IconImageKey != "" {
+			url, err := h.storageUsecase.GetUrl(user.IconImageKey)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("ユーザー情報の取得に失敗しました: %v", err),
+				})
+			}
+			userResponse := responses.NewUserResponse(user, url)
+			return c.JSON(userResponse)
+		}
+
+		userResponse := responses.NewUserResponse(user, "")
+		return c.JSON(userResponse)
 	}
 }
 
@@ -224,12 +273,4 @@ func (h *AuthHandler) GetSession() fiber.Handler {
 
 		return c.JSON(user)
 	}
-}
-
-func (h *AuthHandler) getAuthUser(c *fiber.Ctx) *models.User {
-	user, ok := c.Locals("user").(*models.User)
-	if !ok {
-		return nil
-	}
-	return user
 }

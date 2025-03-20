@@ -56,3 +56,28 @@ func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 
 	return &user, nil
 }
+
+func (r *UserRepository) GetById(id string) (*models.User, error) {
+	var user models.User
+	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) Update(id string, name string, description string, newImageKey string) error {
+	var user models.User
+	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
+		return err
+	}
+
+	user.Name = name
+	user.Bio = description
+	user.IconImageKey = newImageKey
+
+	if err := r.db.Save(&user).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

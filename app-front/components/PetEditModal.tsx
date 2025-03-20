@@ -28,7 +28,6 @@ import { Pet } from "@/app/(tabs)/profile";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-// 編集時は初期値に既存のペット情報をセット
 const getInitialFormState = (pet: Pet): PetForm => ({
   name: pet.name || "",
   petType: pet.type || "dog",
@@ -59,12 +58,10 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
 
   const [formData, setFormData] = useState<PetForm>(getInitialFormState(pet));
 
-  // 編集の場合、pet prop の変更に合わせてフォームの初期値を更新する
   useEffect(() => {
     setFormData(getInitialFormState(pet));
   }, [pet]);
 
-  // セレクター用のモーダル表示状態
   const [showPetTypeSelector, setShowPetTypeSelector] = useState(false);
   const [showSpeciesSelector, setShowSpeciesSelector] = useState(false);
 
@@ -86,7 +83,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
   // 編集用の更新API（PUT や PATCH を使用してください）
   const updatePetMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.put(`${API_URL}/pets/update`, data, {
+      return axios.put(`${API_URL}/pets/update?petId=${pet.id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
