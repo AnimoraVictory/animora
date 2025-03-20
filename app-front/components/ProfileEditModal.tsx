@@ -2,12 +2,20 @@ import React from 'react';
 import { Modal, Animated, StyleSheet, View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme.web';
+import { z } from 'zod';
 
 type ProfileEditModalProps = {
   visible: boolean;
   onClose: () => void;
   slideAnim: Animated.Value;
 };
+
+const profileEditInputSchema = z.object({
+  name: z.string().min(1, { message: '名前は必須です' }),
+  bio: z.string().min(1, { message: '自己紹介を入力してください' }),
+})
+
+type ProfileEditInput = z.infer<typeof profileEditInputSchema>;
 
 export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({ visible, onClose, slideAnim }) => {
     const colorScheme = useColorScheme();

@@ -86,3 +86,15 @@ func (r *S3Repository) GetUrl(fileKey string) (string, error) {
 
 	return presignedURL.URL, nil
 }
+
+func (r *S3Repository) DeleteImage(fileKey string) error {
+	_, err := r.s3Client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
+		Bucket: aws.String(r.bucketName),
+		Key:    aws.String(fileKey),
+	})
+	if err != nil {
+		return fmt.Errorf("画像の削除に失敗しました: %w", err)
+	}
+
+	return nil
+}

@@ -21,3 +21,7 @@ func (u *StorageUsecase) UploadImage(file *multipart.FileHeader, directory strin
 func (u *StorageUsecase) GetUrl(fileKey string) (string, error) {
 	return u.storageRepository.GetUrl(fileKey)
 }
+
+func (u *StorageUsecase) DeleteImage(fileKey string) error {
+	return u.storageRepository.DeleteImage(fileKey)
+}

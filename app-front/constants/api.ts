@@ -8,6 +8,7 @@ export interface User {
   email: string;
   name: string;
   bio: string;
+  iconImageUrl: string;
 }
 
 export interface LoginResponse {

@@ -10,14 +10,16 @@ import (
 )
 
 type AuthHandler struct {
-	authUsecase usecase.AuthUsecase
-	userUsecase usecase.UserUsecase
+	authUsecase    usecase.AuthUsecase
+	userUsecase    usecase.UserUsecase
+	storageUsecase usecase.StorageUsecase
 }
 
-func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase) *AuthHandler {
+func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase, storageUsecase usecase.StorageUsecase) *AuthHandler {
 	return &AuthHandler{
-		authUsecase: authUsecase,
-		userUsecase: userUsecase,
+		authUsecase:    authUsecase,
+		userUsecase:    userUsecase,
+		storageUsecase: storageUsecase,
 	}
 }
 
@@ -49,10 +51,29 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 				"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
 			})
 		}
+		if user.IconImageKey != "" {
+			url, err := h.storageUsecase.GetUrl(user.IconImageKey)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
+				})
+			}
+			userResponse := responses.NewUserResponse(user, url)
 
+			return c.JSON(fiber.Map{
+				"message":      "ログイン成功",
+				"user":         userResponse,
+				"accessToken":  *result.AuthenticationResult.AccessToken,
+				"idToken":      *result.AuthenticationResult.IdToken,
+				"refreshToken": *result.AuthenticationResult.RefreshToken,
+			})
+		}
+
+		// IconImageKey が空の場合は URL を生成せずにレスポンスを返す
+		userResponse := responses.NewUserResponse(user, "")
 		return c.JSON(fiber.Map{
 			"message":      "ログイン成功",
-			"user":         user,
+			"user":         userResponse,
 			"accessToken":  *result.AuthenticationResult.AccessToken,
 			"idToken":      *result.AuthenticationResult.IdToken,
 			"refreshToken": *result.AuthenticationResult.RefreshToken,
