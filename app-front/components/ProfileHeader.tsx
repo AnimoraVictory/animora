@@ -24,7 +24,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onLogout }) 
       </TouchableOpacity>
       <View style={styles.profileSection}>
         <Image
-          source={{ uri: 'https://example.com/profile.jpg' }}
+          source={{ uri: user.iconImageUrl }}
           style={styles.profileImage}
         />
         <Text style={styles.profileName}>{user.name}</Text>
@@ -48,7 +48,8 @@ const getStyles = (colors: typeof Colors.light) =>
     profileSection: {
       alignItems: 'center',
       borderColor: colors.icon,
-      paddingVertical: 20,
+      paddingTop: 60,
+      paddingBottom: 0,
     },
     profileImage: {
       width: 50,

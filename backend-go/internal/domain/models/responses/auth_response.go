@@ -12,7 +12,7 @@ type UserResponse struct {
 	Email        string `json:"email" gorm:"unique"`
 	Name         string `json:"name"`
 	Bio          string `json:"bio"`
-	IconImageUrl string `json:"iconImageKey"`
+	IconImageUrl string `json:"iconImageUrl"`
 }
 
 // NewPetResponse converts a Pet to a PetResponse

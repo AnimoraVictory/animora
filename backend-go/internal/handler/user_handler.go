@@ -46,32 +46,31 @@ func (h *UserHandler) UpdateUser() fiber.Handler {
 			})
 		}
 
-		// 古い画像があれば削除する
-		if user.IconImageKey != "" {
-			if err := h.storageUsecase.DeleteImage(user.IconImageKey); err != nil {
+		// 画像ファイルが存在するか確認
+		file, fileErr := c.FormFile("image")
+		var newImageKey string
+		if fileErr == nil {
+			// 画像ファイルが送られてきた場合、古い画像があれば削除して新しい画像をアップロードする
+			if user.IconImageKey != "" {
+				if err := h.storageUsecase.DeleteImage(user.IconImageKey); err != nil {
+					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+						"error": "既存画像の削除に失敗しました",
+					})
+				}
+			}
+
+			newImageKey, err = h.storageUsecase.UploadImage(file, "profile")
+			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "既存画像の削除に失敗しました",
+					"error": "新しい画像のアップロードに失敗しました",
 				})
 			}
+		} else {
+			// 画像ファイルが送られてこなかった場合は既存の画像キーを維持する
+			newImageKey = user.IconImageKey
 		}
 
-		// 新しい画像ファイルの取得
-		file, err := c.FormFile("image")
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Image file is required",
-			})
-		}
-
-		// 新しい画像をアップロードする
-		newImageKey, err := h.storageUsecase.UploadImage(file, "profile")
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "新しい画像のアップロードに失敗しました",
-			})
-		}
-
-		// ユーザー情報を更新（新しい画像キーも含む）
+		// ユーザー情報を更新（画像キーは新しい画像があればその値、なければ既存のもの）
 		if err := h.userUsecase.Update(id, name, bio, newImageKey); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "プロフィール更新に失敗しました",

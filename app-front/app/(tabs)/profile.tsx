@@ -42,14 +42,16 @@ const getPostResponseSchema = z.object({
 export type Pet = z.infer<typeof petSchema>;
 type Post = z.infer<typeof postSchema>;
 
-const HEADER_HEIGHT = 250;
+const windowHeight = Dimensions.get("window").height;
+
+const HEADER_HEIGHT = windowHeight * 0.31;
 const ProfileScreen: React.FC = () => {
   const windowWidth = Dimensions.get("window").width;
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const styles = getStyles(colors);
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, refetch: refetchUser } = useAuth();
   const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
   const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] =
     useState<boolean>(false);
@@ -224,6 +226,9 @@ const ProfileScreen: React.FC = () => {
         visible={isEditModalVisible}
         onClose={() => closeEditProfileModal()}
         slideAnim={slideAnimProfile}
+        colorScheme={colorScheme}
+        refetchUser={refetchUser}
+        user={user}
       />
       <PetRegiserModal
         visible={isRegisterPetModalVisible}
