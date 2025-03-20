@@ -173,7 +173,7 @@ const ProfileScreen: React.FC = () => {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.fixedHeader}>
-        <ProfileHeader userName={user.name} onLogout={handleLogout} />
+        <ProfileHeader user={user} onLogout={handleLogout} />
         <View style={styles.editButtonsContainer}>
           <TouchableOpacity
             style={styles.editButton}

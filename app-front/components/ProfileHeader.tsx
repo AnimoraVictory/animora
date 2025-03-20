@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
+import { User } from '@/constants/api';
 
 type ProfileHeaderProps = {
-  userName: string;
+  user: User
   onLogout: () => void;
 };
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userName, onLogout }) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onLogout }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const styles = getStyles(colors);
@@ -26,8 +27,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ userName, onLogout
           source={{ uri: 'https://example.com/profile.jpg' }}
           style={styles.profileImage}
         />
-        <Text style={styles.profileName}>{userName}</Text>
-        <Text style={styles.profileBio}>ここに自己紹介文を記載</Text>
+        <Text style={styles.profileName}>{user.name}</Text>
+        <Text style={styles.profileBio}>{user.bio}</Text>
       </View>
     </View>
   );
