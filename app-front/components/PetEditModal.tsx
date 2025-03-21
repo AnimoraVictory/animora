@@ -11,6 +11,8 @@ import {
   ColorSchemeName,
   Alert,
   Image,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import {
@@ -144,6 +146,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
       visible={visible}
       onRequestClose={onClose}
     >
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.modalOverlay}>
         <Animated.View
           style={[
@@ -298,6 +301,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
           </TouchableOpacity>
         </Modal>
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

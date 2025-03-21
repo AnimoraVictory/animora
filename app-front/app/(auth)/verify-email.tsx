@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,6 +37,7 @@ export default function VerifyEmailScreen() {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <View style={styles.container}>
       <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>
         メール認証
@@ -82,6 +83,7 @@ export default function VerifyEmailScreen() {
         color={Colors[colorScheme ?? "light"].tint}
       />
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -90,7 +92,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: "center",
-    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,

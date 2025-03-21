@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, useColorScheme } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, useColorScheme, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,6 +38,7 @@ export default function SignInScreen() {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <View style={styles.container}>
       <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>サインイン</Text>
       <Controller
@@ -87,6 +88,7 @@ export default function SignInScreen() {
         color={Colors[colorScheme ?? "light"].tint}
       />
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 

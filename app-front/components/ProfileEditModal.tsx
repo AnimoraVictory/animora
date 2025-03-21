@@ -10,6 +10,8 @@ import {
   Alert,
   Image,
   ColorSchemeName,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import * as ImagePicker from "expo-image-picker";
@@ -98,7 +100,6 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     }
 
     const fd = new FormData();
-
     fd.append("name", formData.name);
     fd.append("bio", formData.bio);
 
@@ -133,71 +134,76 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
       visible={visible}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <Animated.View
-          style={[
-            styles.modalContainer,
-            {
-              transform: [{ translateX: slideAnim }],
-              backgroundColor: colors.background,
-            },
-          ]}
-        >
-          <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={{ color: colors.tint }}>キャンセル</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={{ color: colors.tint }}>キャンセル</Text>
-          </TouchableOpacity>
-          <Text style={[styles.modalTitle, { color: colors.text }]}>
-            プロフィール編集
-          </Text>
-          <TouchableOpacity
-            onPress={pickProfileImage}
-            style={styles.iconContainer}
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[
+              styles.modalContainer,
+              {
+                transform: [{ translateX: slideAnim }],
+                backgroundColor: colors.background,
+              },
+            ]}
           >
-            {formData.imageUri ? (
-              <Image
-              source={ {uri: formData.imageUri}}
-              style={styles.iconImage}
-            />
-            ) : (
-              <Text style={[styles.iconPlaceholder, { color: colors.icon }]}>
-                アイコン画像
-              </Text>
-            )}
-          </TouchableOpacity>
-          <Text style={styles.inputTitle}>名前</Text>
-          <TextInput
-            style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
-            placeholder="名前"
-            placeholderTextColor={colors.icon}
-            value={formData.name}
-            onChangeText={(value) =>
-              setFormData({ ...formData, name: value })
-            }
-          />
-          <Text style={styles.inputTitle}>自己紹介</Text>
-          <TextInput
-            style={[styles.input, { borderColor: colors.icon, color: colors.text }]}
-            placeholder="自己紹介"
-            placeholderTextColor={colors.icon}
-            value={formData.bio}
-            onChangeText={(value) =>
-              setFormData({ ...formData, bio: value })
-            }
-            multiline
-          />
-          <TouchableOpacity
-            onPress={handleSubmit}
-            style={[styles.submitButton, { backgroundColor: colors.tint }]}
-          >
-            <Text style={{ color: colors.background, fontWeight: "bold" }}>
-              更新する
+            <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
+              <Text style={{ color: colors.tint }}>キャンセル</Text>
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              プロフィール編集
             </Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+            <TouchableOpacity
+              onPress={pickProfileImage}
+              style={styles.iconContainer}
+            >
+              {formData.imageUri ? (
+                <Image
+                  source={{ uri: formData.imageUri }}
+                  style={styles.iconImage}
+                />
+              ) : (
+                <Text style={[styles.iconPlaceholder, { color: colors.icon }]}>
+                  アイコン画像
+                </Text>
+              )}
+            </TouchableOpacity>
+            <Text style={styles.inputTitle}>名前</Text>
+            <TextInput
+              style={[
+                styles.input,
+                { borderColor: colors.icon, color: colors.text },
+              ]}
+              placeholder="名前"
+              placeholderTextColor={colors.icon}
+              value={formData.name}
+              onChangeText={(value) =>
+                setFormData({ ...formData, name: value })
+              }
+            />
+            <Text style={styles.inputTitle}>自己紹介</Text>
+            <TextInput
+              style={[
+                styles.input,
+                { borderColor: colors.icon, color: colors.text },
+              ]}
+              placeholder="自己紹介"
+              placeholderTextColor={colors.icon}
+              value={formData.bio}
+              onChangeText={(value) =>
+                setFormData({ ...formData, bio: value })
+              }
+              multiline
+            />
+            <TouchableOpacity
+              onPress={handleSubmit}
+              style={[styles.submitButton, { backgroundColor: colors.tint }]}
+            >
+              <Text style={{ color: colors.background, fontWeight: "bold" }}>
+                更新する
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,6 +44,7 @@ export default function SignUpScreen() {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <View style={styles.container}>
       <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>
         サインアップ
@@ -113,6 +114,7 @@ export default function SignUpScreen() {
         color={Colors[colorScheme ?? "light"].tint}
       />
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 
