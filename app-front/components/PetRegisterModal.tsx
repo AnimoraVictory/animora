@@ -11,6 +11,8 @@ import {
   ColorSchemeName,
   Alert,
   Image,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { z } from "zod";
@@ -159,6 +161,7 @@ export const PetRegiserModal: React.FC<PetRegiserModalProps> = ({
       visible={visible}
       onRequestClose={onClose}
     >
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.modalOverlay}>
         <Animated.View
           style={[
@@ -310,6 +313,7 @@ export const PetRegiserModal: React.FC<PetRegiserModalProps> = ({
           </TouchableOpacity>
         </Modal>
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
