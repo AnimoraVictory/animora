@@ -12,8 +12,8 @@ func SetupUserRoutes(app *fiber.App) {
 	userGroup.Put("/update", userHandler.UpdateUser())
 	userGroup.Post("/follow", userHandler.Follow())
 	userGroup.Get("/follower_count", userHandler.GetFollowerCount())
-	userGroup.Get("/followed_count", userHandler.GetFollowedCount())
+	userGroup.Get("/follows_count", userHandler.GetFollowsCount())
 	userGroup.Get("/follower_users", userHandler.GetFollowerUsers())
-	userGroup.Get("/followed_users", userHandler.GetFollowedUsers())
+	userGroup.Get("/follows_users", userHandler.GetFollowsUsers())
 
 }

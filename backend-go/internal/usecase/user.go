@@ -46,12 +46,12 @@ func (u *UserUsecase) countFollowRelations(id, column string) (int, error) {
 	return int(count), nil
 }
 
-func (u *UserUsecase) FollowerCount(id string) (int, error) {
-	return u.countFollowRelations(id, "followed_id")
+func (u *UserUsecase) FollowsCount(id string) (int, error) {
+	return u.countFollowRelations(id, "from_id")
 }
 
-func (u *UserUsecase) FollowedCount(id string) (int, error) {
-	return u.countFollowRelations(id, "follower_id")
+func (u *UserUsecase) FollowerCount(id string) (int, error) {
+	return u.countFollowRelations(id, "to_id")
 }
 
 func (u *UserUsecase) fetchUserRelations(id, column, preloadField string) ([]models.FollowRelation, error) {
@@ -64,27 +64,26 @@ func (u *UserUsecase) fetchUserRelations(id, column, preloadField string) ([]mod
 	}
 	return relations, nil
 }
-
-func (u *UserUsecase) FollowerUsers(id string) ([]models.User, error) {
-	relations, err := u.fetchUserRelations(id, "followed_id", "Follower")
-	if err != nil {
-		return nil, err
-	}
-	users := make([]models.User, len(relations))
-	for i, rel := range relations {
-		users[i] = rel.Follower
-	}
-	return users, nil
-}
-
-func (u *UserUsecase) FollowedUsers(id string) ([]models.User, error) {
-	relations, err := u.fetchUserRelations(id, "follower_id", "Followed")
+func (u *UserUsecase) FollowsUsers(id string) ([]models.User, error) {
+	relations, err := u.fetchUserRelations(id, "from_id", "Followed")
 	if err != nil {
 		return nil, err
 	}
 	users := make([]models.User, len(relations))
 	for i, rel := range relations {
 		users[i] = rel.Followed
+	}
+	return users, nil
+}
+
+func (u *UserUsecase) FollowerUsers(id string) ([]models.User, error) {
+	relations, err := u.fetchUserRelations(id, "to_id", "Follower")
+	if err != nil {
+		return nil, err
+	}
+	users := make([]models.User, len(relations))
+	for i, rel := range relations {
+		users[i] = rel.Follower
 	}
 	return users, nil
 }

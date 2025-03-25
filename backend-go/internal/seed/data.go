@@ -259,24 +259,24 @@ func LikeData(posts []models.Post, users []models.User) []models.Like {
 func FollowRelationData(users []models.User) []models.FollowRelation {
 	return []models.FollowRelation{
 		{
-			FollowerID: users[0].ID,
-			FollowedID: users[1].ID,
+			FromID: users[0].ID,
+			ToID:   users[1].ID,
 		},
 		{
-			FollowerID: users[2].ID,
-			FollowedID: users[3].ID,
+			FromID: users[2].ID,
+			ToID:   users[3].ID,
 		},
 		{
-			FollowerID: users[4].ID,
-			FollowedID: users[3].ID,
+			FromID: users[4].ID,
+			ToID:   users[3].ID,
 		},
 		{
-			FollowerID: users[5].ID,
-			FollowedID: users[6].ID,
+			FromID: users[5].ID,
+			ToID:   users[6].ID,
 		},
 		{
-			FollowerID: users[6].ID,
-			FollowedID: users[5].ID,
+			FromID: users[6].ID,
+			ToID:   users[5].ID,
 		},
 	}
 }

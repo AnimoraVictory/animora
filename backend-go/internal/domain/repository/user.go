@@ -10,5 +10,5 @@ type UserRepository interface {
 	FindByEmail(email string) (*models.User, error)
 	GetById(id string) (*models.User, error)
 	Update(id string, name string, description string, newImageKey string) error
-	Follow(followerId string, followedId string) error
+	Follow(fromId string, toId string) error
 }

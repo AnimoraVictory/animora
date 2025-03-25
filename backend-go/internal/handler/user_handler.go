@@ -103,6 +103,20 @@ func (h *UserHandler) Follow() fiber.Handler {
 	}
 }
 
+func (h *UserHandler) GetFollowsCount() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id := c.Query("id")
+		if id == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ユーザーIDが必要です"})
+		}
+		count, err := h.userUsecase.FollowsCount(id)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロー中数の取得に失敗しました"})
+		}
+		return c.JSON(fiber.Map{"followed_count": count})
+	}
+}
+
 func (h *UserHandler) GetFollowerCount() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Query("id")
@@ -117,29 +131,15 @@ func (h *UserHandler) GetFollowerCount() fiber.Handler {
 	}
 }
 
-func (h *UserHandler) GetFollowedCount() fiber.Handler {
+func (h *UserHandler) GetFollowsUsers() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Query("id")
 		if id == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ユーザーIDが必要です"})
 		}
-		count, err := h.userUsecase.FollowedCount(id)
+		users, err := h.userUsecase.FollowsUsers(id)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロー中数の取得に失敗しました"})
-		}
-		return c.JSON(fiber.Map{"followed_count": count})
-	}
-}
-
-func (h *UserHandler) GetFollowedUsers() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		id := c.Query("id")
-		if id == "" {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ユーザーIDが必要です"})
-		}
-		users, err := h.userUsecase.FollowedUsers(id)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロー中ユーザーの取得に失敗しました"})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロー中のユーザー一覧取得に失敗しました"})
 		}
 		return c.JSON(fiber.Map{"followed_users": users})
 	}
@@ -153,7 +153,7 @@ func (h *UserHandler) GetFollowerUsers() fiber.Handler {
 		}
 		users, err := h.userUsecase.FollowerUsers(id)
 		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロワーユーザーの取得に失敗しました"})
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロワーの取得に失敗しました"})
 		}
 		return c.JSON(fiber.Map{"follower_users": users})
 	}

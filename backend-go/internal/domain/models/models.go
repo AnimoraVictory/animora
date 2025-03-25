@@ -70,12 +70,12 @@ type Pet struct {
 }
 
 type FollowRelation struct {
-	ID         string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	FollowerID string    `json:"followerId" gorm:"uniqueIndex:idx_follower_followed"`
-	FollowedID string    `json:"followedId" gorm:"uniqueIndex:idx_follower_followed"`
-	Follower   User      `json:"follower,omitempty" gorm:"foreignKey:FollowerID;constraint:OnDelete:CASCADE;"`
-	Followed   User      `json:"followed,omitempty" gorm:"foreignKey:FollowedID;constraint:OnDelete:CASCADE;"`
-	CreatedAt  time.Time `json:"createdAt" gorm:"autoCreateTime"`
+	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	FromID    string    `json:"fromId" gorm:"uniqueIndex:idx_fromId_toId"`
+	ToID      string    `json:"toId" gorm:"uniqueIndex:idx_fromId_toId"`
+	Follower  User      `json:"follower,omitempty" gorm:"foreignKey:FromID;constraint:OnDelete:CASCADE;"`
+	Followed  User      `json:"followed,omitempty" gorm:"foreignKey:ToID;constraint:OnDelete:CASCADE;"`
+	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
 
 type PetType string
