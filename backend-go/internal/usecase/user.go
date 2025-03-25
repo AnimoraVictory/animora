@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"fmt"
+
 	"github.com/htanos/animalia/backend-go/internal/domain/models"
 	"github.com/htanos/animalia/backend-go/internal/domain/repository"
 	"gorm.io/gorm"
@@ -33,37 +35,39 @@ func (u *UserUsecase) Follow(followerId string, followedId string) error {
 	return u.userRepository.Follow(followerId, followedId)
 }
 
-// 自分のフォロワーの総数
+func (u *UserUsecase) countFollowRelations(id, column string) (int, error) {
+	var count int64
+	if err := u.db.
+		Model(&models.FollowRelation{}).
+		Where(fmt.Sprintf("%s = ?", column), id).
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (u *UserUsecase) FollowerCount(id string) (int, error) {
-	var count int64
-	// 自分をフォローしているユーザーは、followed_idが対象のユーザーIDになっている
-	if err := u.db.Model(&models.FollowRelation{}).
-		Where("followed_id = ?", id).
-		Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return int(count), nil
+	return u.countFollowRelations(id, "followed_id")
 }
 
-// 自分がフォローをしたユーザーの総数
 func (u *UserUsecase) FollowedCount(id string) (int, error) {
-	var count int64
-	// 自分がフォローしているユーザーは、follower_idが対象のユーザーIDになっている
-	if err := u.db.Model(&models.FollowRelation{}).
-		Where("follower_id = ?", id).
-		Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return int(count), nil
+	return u.countFollowRelations(id, "follower_id")
 }
 
-// 自分のフォロワーを全て取得する
-func (u *UserUsecase) FollowerUsers(id string) ([]models.User, error) {
+func (u *UserUsecase) fetchUserRelations(id, column, preloadField string) ([]models.FollowRelation, error) {
 	var relations []models.FollowRelation
 	if err := u.db.
-		Where("followed_id = ?", id).
-		Preload("Follower").
+		Where(fmt.Sprintf("%s = ?", column), id).
+		Preload(preloadField).
 		Find(&relations).Error; err != nil {
+		return nil, err
+	}
+	return relations, nil
+}
+
+func (u *UserUsecase) FollowerUsers(id string) ([]models.User, error) {
+	relations, err := u.fetchUserRelations(id, "followed_id", "Follower")
+	if err != nil {
 		return nil, err
 	}
 	users := make([]models.User, len(relations))
@@ -73,13 +77,9 @@ func (u *UserUsecase) FollowerUsers(id string) ([]models.User, error) {
 	return users, nil
 }
 
-// 自分がフォローしたユーザーを全て取得する
 func (u *UserUsecase) FollowedUsers(id string) ([]models.User, error) {
-	var relations []models.FollowRelation
-	if err := u.db.
-		Where("follower_id = ?", id).
-		Preload("Followed").
-		Find(&relations).Error; err != nil {
+	relations, err := u.fetchUserRelations(id, "follower_id", "Followed")
+	if err != nil {
 		return nil, err
 	}
 	users := make([]models.User, len(relations))
