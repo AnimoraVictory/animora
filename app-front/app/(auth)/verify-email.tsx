@@ -16,7 +16,6 @@ const VerifyEmailInputSchema = z.object({
 type VerifyEmailInput = z.infer<typeof VerifyEmailInputSchema>;
 
 export default function VerifyEmailScreen() {
-  // URL パラメータから email を取得（signup から渡される）
   const { email } = useLocalSearchParams<{ email?: string }>();
   const router = useRouter();
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<VerifyEmailInput>({
@@ -29,7 +28,6 @@ export default function VerifyEmailScreen() {
     try {
       await verifyEmail(data.email, data.code);
       Alert.alert("認証成功", "メール認証が完了しました");
-      // 認証成功後はサインイン画面へ遷移する
       router.push("/(auth)/signin");
     } catch (error: any) {
       Alert.alert("認証エラー", error.message || "メール認証に失敗しました");
@@ -48,7 +46,7 @@ export default function VerifyEmailScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {color: Colors[colorScheme ?? "light"].text }]}
               placeholder="Email"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -66,7 +64,7 @@ export default function VerifyEmailScreen() {
         render={({ field: { onChange, onBlur, value } }) => (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, {color: Colors[colorScheme ?? "light"].text }]}
               placeholder="確認コード"
               onBlur={onBlur}
               onChangeText={onChange}
@@ -102,6 +100,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: "#ccc",
+    borderRadius: 8,
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
