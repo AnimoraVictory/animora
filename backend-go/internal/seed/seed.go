@@ -45,6 +45,10 @@ func SeedData(db *gorm.DB) error {
 		return err
 	}
 
+	if err := createFollowRelations(db, users); err != nil {
+		return err
+	}
+
 	log.Println("Database seeding completed successfully")
 	return nil
 }
@@ -67,6 +71,9 @@ func clearData(db *gorm.DB) error {
 		return err
 	}
 	if err := db.Exec("DELETE FROM users").Error; err != nil {
+		return err
+	}
+	if err := db.Exec("DELETE FROM follow_relations").Error; err != nil {
 		return err
 	}
 
@@ -141,6 +148,20 @@ func createLikes(db *gorm.DB, posts []models.Post, users []models.User) error {
 
 	for i := range likes {
 		if err := db.Create(&likes[i]).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func createFollowRelations(db *gorm.DB, users []models.User) error {
+	log.Println("Creating sample follow_relations...")
+
+	followRelations := FollowRelationData(users)
+
+	for i := range followRelations {
+		if err := db.Create(&followRelations[i]).Error; err != nil {
 			return err
 		}
 	}
