@@ -69,13 +69,12 @@ type Pet struct {
 	DeletedAt gorm.DeletedAt `json:"deletedAt"`
 }
 
-// Image represents an image associated with a post
-type Image struct {
+type FollowRelation struct {
 	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	URL       string    `json:"url"`
-	PostID    string    `json:"postId"`
-	Post      Post      `json:"post,omitempty" gorm:"foreignKey:PostID"`
-	OrderNum  int       `json:"orderNum"` // 画像の表示順序
+	FromID    string    `json:"fromId" gorm:"uniqueIndex:idx_fromId_toId"`
+	ToID      string    `json:"toId" gorm:"uniqueIndex:idx_fromId_toId"`
+	Follower  User      `json:"follower,omitempty" gorm:"foreignKey:FromID;constraint:OnDelete:CASCADE;"`
+	Followed  User      `json:"followed,omitempty" gorm:"foreignKey:ToID;constraint:OnDelete:CASCADE;"`
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
 
@@ -219,10 +218,9 @@ func (p *Pet) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// BeforeCreate is a GORM hook that generates a UUID for the ID field if it's empty
-func (i *Image) BeforeCreate(tx *gorm.DB) error {
-	if i.ID == "" {
-		i.ID = uuid.New().String()
+func (f *FollowRelation) BeforeCreate(tx *gorm.DB) error {
+	if f.ID == "" {
+		f.ID = uuid.New().String()
 	}
 	return nil
 }

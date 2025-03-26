@@ -1,6 +1,8 @@
 package repository
 
-import "github.com/htanos/animalia/backend-go/internal/domain/models"
+import (
+	"github.com/htanos/animalia/backend-go/internal/domain/models"
+)
 
 type UserRepository interface {
 	Create(name, email string) (*models.User, error)
@@ -8,4 +10,5 @@ type UserRepository interface {
 	FindByEmail(email string) (*models.User, error)
 	GetById(id string) (*models.User, error)
 	Update(id string, name string, description string, newImageKey string) error
+	Follow(fromId string, toId string) error
 }

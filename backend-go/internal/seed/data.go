@@ -256,56 +256,27 @@ func LikeData(posts []models.Post, users []models.User) []models.Like {
 	}
 }
 
-// ImageData returns a list of sample images
-func ImageData(posts []models.Post) []models.Image {
-	return []models.Image{
+func FollowRelationData(users []models.User) []models.FollowRelation {
+	return []models.FollowRelation{
 		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/max_park1.jpg",
-			PostID:   posts[0].ID, // First post's first image
-			OrderNum: 1,
+			FromID: users[0].ID,
+			ToID:   users[1].ID,
 		},
 		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/max_park2.jpg",
-			PostID:   posts[0].ID, // First post's second image
-			OrderNum: 2,
+			FromID: users[2].ID,
+			ToID:   users[3].ID,
 		},
 		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/luna_toy.jpg",
-			PostID:   posts[1].ID, // Second post's image
-			OrderNum: 1,
+			FromID: users[4].ID,
+			ToID:   users[3].ID,
 		},
 		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/buddy_birthday1.jpg",
-			PostID:   posts[2].ID, // Third post's first image
-			OrderNum: 1,
+			FromID: users[5].ID,
+			ToID:   users[6].ID,
 		},
 		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/buddy_birthday2.jpg",
-			PostID:   posts[2].ID, // Third post's second image
-			OrderNum: 2,
-		},
-		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/coco_hutch.jpg",
-			PostID:   posts[3].ID, // Fourth post's image
-			OrderNum: 1,
-		},
-		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/rocky_swimming.jpg",
-			PostID:   posts[4].ID, // Fifth post's image
-			OrderNum: 1,
-		},
-		{
-			ID:       uuid.New().String(),
-			URL:      "https://example.com/images/milo_napping.jpg",
-			PostID:   posts[5].ID, // Sixth post's image
-			OrderNum: 1,
+			FromID: users[6].ID,
+			ToID:   users[5].ID,
 		},
 	}
 }

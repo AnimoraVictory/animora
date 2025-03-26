@@ -148,7 +148,7 @@ func InitDB() {
 	}
 
 	// Auto-migrate the schema
-	err = DB.AutoMigrate(&User{}, &Post{}, &Comment{}, &Like{}, &Pet{})
+	err = DB.AutoMigrate(&User{}, &Post{}, &Comment{}, &Like{}, &Pet{}, &FollowRelation{})
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}

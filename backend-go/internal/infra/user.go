@@ -81,3 +81,15 @@ func (r *UserRepository) Update(id string, name string, description string, newI
 
 	return nil
 }
+
+func (r *UserRepository) Follow(fromId string, toId string) error {
+	follow_relation := models.FollowRelation{
+		FromID: fromId,
+		ToID:   toId,
+	}
+	if err := r.db.Create(&follow_relation).Error; err != nil {
+		return fmt.Errorf("failed to create follow relation in database: %w", err)
+	}
+
+	return nil
+}
