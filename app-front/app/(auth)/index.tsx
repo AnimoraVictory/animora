@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
+import { View, Text, StyleSheet, Button, ImageBackground, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
@@ -7,30 +7,41 @@ import { Colors } from "@/constants/Colors";
 export default function WelcomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <View style={styles.container}>
-      <Text
-        style={[
-          styles.title,
-          { color: Colors[colorScheme ?? "light"].text },
-        ]}
-      >
+    <ImageBackground
+      /* The line `// source={require("../../assets/images/noise.png")}` is a commented-out line of code in
+the `ImageBackground` component. It appears to be attempting to set the background image of the
+`ImageBackground` component to an image file located at `"../../assets/images/noise.png"`. */
+      source={require("../../assets/images/noise2.png")}
+      resizeMode="repeat"
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <Image
+      source={require("../../assets/images/icon-green.png")}
+      style={styles.icon}
+      resizeMode="contain"
+    />
+      <Text style={[styles.title, { color: theme.text }]}>
         Welcome to the App!
       </Text>
       <View style={styles.buttonContainer}>
-        <Button
-          title="Sign In"
+      <TouchableOpacity
+          style={[styles.button, { borderColor: theme.tint }]}
           onPress={() => router.push("/(auth)/signin")}
-          color={Colors[colorScheme ?? "light"].tint}
-        />
-        <Button
-          title="Sign Up"
+        >
+          <Text style={[styles.buttonText, { color: theme.tint }]}>Sign In</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, { borderColor: theme.tint }]}
           onPress={() => router.push("/(auth)/signup")}
-          color={Colors[colorScheme ?? "light"].tint}
-        />
+        >
+          <Text style={[styles.buttonText, { color: theme.tint }]}>Sign Up</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
@@ -48,8 +59,24 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    justifyContent: "space-evenly",
     alignItems: "center",
     gap: 16,
+  },
+  button: {
+    width: "60%",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderWidth: 2,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  icon: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
   },
 });

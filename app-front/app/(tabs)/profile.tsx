@@ -100,6 +100,7 @@ const ProfileScreen: React.FC = () => {
       await logout();
     } catch (error) {
       console.error(error);
+      throw Error(`error: ${error}`)
     }
     router.replace("/(auth)");
   };
@@ -116,8 +117,12 @@ const ProfileScreen: React.FC = () => {
       const response = await axios.get(`${API_URL}/pets/owner`, {
         params: { ownerId: user?.id },
       });
-      const parsedResponse = getPetResponseSchema.parse(response.data);
-      return parsedResponse.pets;
+      const result = getPetResponseSchema.safeParse(response.data);
+      if(result.error) {
+        console.error(result.error)
+        throw new Error(`error: ${result.error}`)
+      }
+      return result.data.pets;
     },
     enabled: !!user?.id,
   });
@@ -133,8 +138,12 @@ const ProfileScreen: React.FC = () => {
       const response = await axios.get(`${API_URL}/posts/user`, {
         params: { authorId: user?.id },
       });
-      const parsedResponse = getPostResponseSchema.parse(response.data);
-      return parsedResponse.posts;
+      const result = getPostResponseSchema.safeParse(response.data);
+      if(result.error) {
+        console.error(result.error)
+        throw new Error(`error: ${result.error}`)
+      }
+      return result.data.posts;
     },
     enabled: !!user?.id,
   });
