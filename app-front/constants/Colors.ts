@@ -1,5 +1,5 @@
 const tintColorLight = '#264534'; // 濃い緑
-const tintColorDark = '#FFD966';  // 明るい黄色
+const tintColorDark = '#fff';  // 明るい黄色
 
 export const Colors = {
   light: {
@@ -11,10 +11,10 @@ export const Colors = {
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#FFD966', // 黄（文字色）
+    text: '#fff', // 黄（文字色）
     background: '#000000', // 黒（背景）
     tint: tintColorDark,
-    icon: '#FFD966',
+    icon: '#fff',
     tabIconDefault: '#FFD966',
     tabIconSelected: tintColorDark,
   },

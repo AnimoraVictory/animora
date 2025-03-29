@@ -6,7 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { verifyEmail } from "@/constants/api";
+import { useVerifyEmail } from "@/constants/api";
+import { FormInput } from "@/components/FormInput";
 
 const VerifyEmailInputSchema = z.object({
   email: z.string().email({ message: "無効なメールアドレス" }),
@@ -23,15 +24,22 @@ export default function VerifyEmailScreen() {
     defaultValues: { email: email || "", code: "" },
   });
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  const {mutate: verifyEmail} = useVerifyEmail()
 
-  const onSubmit = async (data: VerifyEmailInput) => {
-    try {
-      await verifyEmail(data.email, data.code);
-      Alert.alert("認証成功", "メール認証が完了しました");
-      router.push("/(auth)/signin");
-    } catch (error: any) {
-      Alert.alert("認証エラー", error.message || "メール認証に失敗しました");
-    }
+  const onSubmit = (data: VerifyEmailInput) => {
+    verifyEmail(
+      { email: data.email, code: data.code },
+      {
+        onSuccess: () => {
+          Alert.alert("認証成功", "メール認証が完了しました");
+          router.push("/(auth)/signin");
+        },
+        onError: (error: Error) => {
+          Alert.alert("認証エラー", error.message || "メール認証に失敗しました");
+        }
+      }
+    );
   };
 
   return (
@@ -43,35 +51,30 @@ export default function VerifyEmailScreen() {
       <Controller
         control={control}
         name="email"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <TextInput
-              style={[styles.input, {color: Colors[colorScheme ?? "light"].text }]}
-              placeholder="Email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-            {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
-          </>
+        render={({ field: { onChange, value } }) => (
+          <FormInput
+                label="Email"
+                value={value}
+                onChangeText={onChange}
+                theme={theme}
+                secureTextEntry
+                autoCapitalize="none"
+                error={errors.email?.message}
+              />
         )}
       />
       <Controller
         control={control}
         name="code"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <TextInput
-              style={[styles.input, {color: Colors[colorScheme ?? "light"].text }]}
-              placeholder="確認コード"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-            {errors.code && <Text style={styles.error}>{errors.code.message}</Text>}
-          </>
+        render={({ field: { onChange, value } }) => (
+          <FormInput
+                label="Code"
+                value={value}
+                onChangeText={onChange}
+                theme={theme}
+                autoCapitalize="none"
+                error={errors.code?.message}
+              />
         )}
       />
       <Button

@@ -1,16 +1,30 @@
 import React from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { signUp } from "@/constants/api";
+import { useSignUp } from "@/constants/api";
+import { FormInput } from "@/components/FormInput";
 
 const SignUpInputSchema = z.object({
   name: z.string(),
-  email: z.string().email({ message: "有効なメールアドレスを入力してください" }),
+  email: z
+    .string()
+    .email({ message: "有効なメールアドレスを入力してください" }),
   password: z
     .string()
     .min(8, { message: "パスワードは8文字以上必要です" })
@@ -32,88 +46,113 @@ export default function SignUpScreen() {
   });
   const router = useRouter();
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+
+  const { mutate: signUp, isPending } = useSignUp();
 
   const onSubmit = async (data: SignUpInput) => {
     try {
-      await signUp(data.email, data.password, data.name);
+      await signUp(
+        { email: data.email, password: data.password, name: data.name },
+        {
+          onSuccess: () => {
+            Alert.alert("ユーザー登録が完了しました");
+            router.push({
+              pathname: "/(auth)/verify-email",
+              params: { email: data.email },
+            });
+          },
+          onError: (error: Error) => {
+            Alert.alert(
+              "サインアップエラー",
+              error.message || "ユーザーの登録に失敗しました"
+            );
+          },
+        }
+      );
       // サインアップ成功後、verify-email 画面へ email をパラメータとして渡して遷移
-      router.push({ pathname: "/(auth)/verify-email", params: { email: data.email } });
+      router.push({
+        pathname: "/(auth)/verify-email",
+        params: { email: data.email },
+      });
     } catch (error: any) {
-      Alert.alert("サインアップエラー", error.message || "サインアップに失敗しました");
+      Alert.alert(
+        "サインアップエラー",
+        error.message || "サインアップに失敗しました"
+      );
     }
   };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>
-        サインアップ
-      </Text>
-      <Controller
-        control={control}
-        name="name"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <TextInput
-              style={[styles.input, {color:Colors[colorScheme ?? "light"].text}]}
-              placeholder="UserName"
-              autoCapitalize="none"
-              keyboardType="default"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-            {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
-          </>
-        )}
-      />
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <TextInput
-              style={[styles.input, {color:Colors[colorScheme ?? "light"].text}]}
-              placeholder="Email"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-            {errors.email && <Text style={styles.error}>{errors.email.message}</Text>}
-          </>
-        )}
-      />
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <>
-            <TextInput
-              style={[styles.input, {color:Colors[colorScheme ?? "light"].text}]}
-              placeholder="Password"
-              secureTextEntry
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-            {errors.password && <Text style={styles.error}>{errors.password.message}</Text>}
-          </>
-        )}
-      />
-      <Button
-        title={isSubmitting ? "処理中..." : "サインアップ"}
-        onPress={handleSubmit(onSubmit)}
-        disabled={isSubmitting}
-        color={Colors[colorScheme ?? "light"].tint}
-      />
-      <Button
-        title="戻る"
-        onPress={() => router.push("/")}
-        color={Colors[colorScheme ?? "light"].tint}
-      />
-    </View>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={styles.formContainer}>
+          <Text style={[styles.title, { color: theme.text }]}>サインアップ</Text>
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, value } }) => (
+              <FormInput
+                label="Name"
+                value={value}
+                onChangeText={onChange}
+                theme={theme}
+                autoCapitalize="none"
+                error={errors.name?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <FormInput
+                label="Email"
+                value={value}
+                onChangeText={onChange}
+                theme={theme}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                error={errors.email?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <FormInput
+                label="Password"
+                value={value}
+                onChangeText={onChange}
+                theme={theme}
+                secureTextEntry
+                autoCapitalize="none"
+                error={errors.password?.message}
+              />
+            )}
+          />
+          {isPending ? (
+            <ActivityIndicator size="large" color={theme.tint} />
+          ) : (
+            <TouchableOpacity
+              style={[styles.button, { borderColor: theme.tint }]}
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+            >
+              <Text style={[styles.buttonText, { color: theme.tint }]}>
+                {isSubmitting ? "処理中..." : "サインアップ"}
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={[styles.button, { borderColor: theme.tint }]}
+            onPress={() => router.push("/")}
+          >
+            <Text style={[styles.buttonText, { color: theme.tint }]}>戻る</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </TouchableWithoutFeedback>
   );
 }
@@ -121,25 +160,47 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  formContainer: {
+    flex: 1,
     padding: 16,
     justifyContent: "center",
+    alignItems: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
+    marginBottom: 24,
   },
   input: {
+    width: "100%",
     height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    marginBottom: 12,
+    borderWidth: 2,
     borderRadius: 8,
+    marginBottom: 12,
     paddingHorizontal: 8,
   },
   error: {
     color: "red",
     marginBottom: 8,
+    alignSelf: "flex-start",
+  },
+  buttonContainer: {
+    width: "100%",
+    alignItems: "center",
+    gap: 16,
+  },
+  button: {
+    width: "60%",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderWidth: 2,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

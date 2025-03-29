@@ -1,12 +1,10 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import * as SecureStore from "expo-secure-store";
-import { useQuery, useMutation, useQueryClient, QueryObserverResult } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  login as loginApi,
-  signOut as signOutApi,
-  getUser as getUserApi,
-  LoginResponse,
+  api,
   User,
+  LoginResponse,
 } from "../constants/api";
 
 interface AuthContextType {
@@ -30,35 +28,30 @@ const ACCESS_TOKEN_KEY = "accessToken";
 const ID_TOKEN_KEY = "idToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 
-// currentUser を取得する fetcher 関数
-const fetchCurrentUser = async (): Promise<User | null> => {
-  const token = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-  if (!token) {
-    return null;
-  }
-  try {
-    return await getUserApi(token);
-  } catch (error) {
-    // 無効なトークンの場合は削除して null を返す
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-    return null;
-  }
-};
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const queryClient = useQueryClient();
+  const [token, setToken] = React.useState<string | null>(null);
 
+  // トークンの取得
+  React.useEffect(() => {
+    const getToken = async () => {
+      const storedToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+      setToken(storedToken);
+    };
+    getToken();
+  }, []);
+
+  // ユーザー情報の取得
   const {
     data: user,
     isLoading,
     refetch,
-  } = useQuery<User | null>({
-    queryKey: ["currentUser"],
-    queryFn: fetchCurrentUser,
-    retry: false,
-    staleTime: Infinity,
+  } = useQuery({
+    queryKey: ['user', token],
+    queryFn: () => token ? api.getUser(token) : null,
+    enabled: !!token,
   });
 
   const refetchUser = async (): Promise<void> => {
@@ -66,43 +59,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   // login 用の mutation
-  const loginMutation = useMutation<User, Error, { email: string; password: string }>({
-    mutationFn: async ({ email, password }) => {
-      const { accessToken, idToken, refreshToken, user: userData }: LoginResponse =
-        await loginApi(email, password);
-      if (!accessToken || accessToken.trim() === "") {
-        throw new Error("無効なアクセストークンが返されました");
+  const loginMutation = useMutation<LoginResponse, Error, { email: string; password: string }>({
+    mutationFn: ({ email, password }) => api.login(email, password),
+    onSuccess: async (response) => {
+      if (response.accessToken) {
+        await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, response.accessToken);
+        await SecureStore.setItemAsync(ID_TOKEN_KEY, response.idToken);
+        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, response.refreshToken);
+        setToken(response.accessToken);
+        queryClient.setQueryData(["user", response.accessToken], response.user);
       }
-      await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, accessToken);
-      await SecureStore.setItemAsync(ID_TOKEN_KEY, idToken);
-      await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
-      return userData;
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(["currentUser"], data);
     },
     onError: async () => {
       await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
       await SecureStore.deleteItemAsync(ID_TOKEN_KEY);
       await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-      queryClient.setQueryData(["currentUser"], null);
+      setToken(null);
+      queryClient.setQueryData(["user", null], null);
     },
   });
 
   // logout 用の mutation
   const logoutMutation = useMutation<void, Error, void>({
-    mutationFn: async () => {
-      const token = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-      if (token) {
-        await signOutApi(token);
-      }
+    mutationFn: () => token ? api.signOut(token) : Promise.resolve(),
+    onSuccess: async () => {
       // ログアウト時は全トークン削除
       await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
       await SecureStore.deleteItemAsync(ID_TOKEN_KEY);
       await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+      setToken(null);
+      queryClient.setQueryData(["user", null], null);
     },
-    onSuccess: () => {
-      queryClient.setQueryData(["currentUser"], null);
+    onError: async (error) => {
+      // エラー時も全トークンを削除（セッションが無効な可能性があるため）
+      await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+      await SecureStore.deleteItemAsync(ID_TOKEN_KEY);
+      await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+      setToken(null);
+      queryClient.setQueryData(["user", null], null);
+      throw error; // エラーを上位に伝播させる
     },
   });
 
