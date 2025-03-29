@@ -12,6 +12,7 @@ import (
 	"github.com/htanos/animalia/backend-go/internal/routes"
 	"github.com/htanos/animalia/backend-go/internal/seed"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
 )
 
 func main() {
@@ -26,6 +27,20 @@ func main() {
 
 	// Initialize database
 	models.InitDB()
+
+	// Set time format for zerolog
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
+	// Set log level based on ENV environment variable
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development" // デフォルト値として development を設定
+	}
+	if env == "production" {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
 
 	// Run seed data if flag is set
 	if *seedFlag {
