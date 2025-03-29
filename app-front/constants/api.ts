@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 const API_URL = Constants.expoConfig?.extra?.API_URL
 
@@ -19,64 +20,78 @@ export interface LoginResponse {
   refreshToken: string;
 }
 
-export const login = async (email: string, password: string): Promise<LoginResponse> => {
-  try {
+// APIクライアント関数
+export const api = {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
     const response = await axios.post<LoginResponse>(`${API_URL}/auth/signin`, { email, password }, {
       headers: { 'Content-Type': 'application/json' }
     });
     return response.data;
-  } catch (error: any) {
-    const errMsg = error.response?.data?.error || 'ログインに失敗しました';
-    throw new Error(errMsg);
-  }
-};
+  },
 
-export const signUp = async (email: string, password: string, name: string): Promise<void> => {
-  try {
+  signUp: async (email: string, password: string, name: string): Promise<void> => {
     await axios.post(`${API_URL}/auth/signup`, { email, password, name }, {
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    const errMsg = error.response?.data?.error || 'サインアップに失敗しました';
-    throw new Error(errMsg);
-  }
-};
+  },
 
-export const signOut = async (accessToken: string): Promise<void> => {
-  try {
+  signOut: async (accessToken: string): Promise<void> => {
     await axios.post(`${API_URL}/auth/signout`, null, {
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       }
     });
-  } catch (error: any) {
-    const errMsg = error.response?.data?.error || 'ログアウトに失敗しました';
-    throw new Error(errMsg);
-  }
-};
+  },
 
-export const getUser = async (accessToken: string): Promise<User> => {
-  try {
+  getUser: async (accessToken: string): Promise<User> => {
     const response = await axios.get<User>(`${API_URL}/auth/me`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       }
     });
     return response.data;
-  } catch (error: any) {
-    const errMsg = error.response?.data?.error || 'ユーザー情報の取得に失敗しました';
-    throw new Error(errMsg);
-  }
-};
+  },
 
-export const verifyEmail = async (email: string, code: string): Promise<void> => {
-  try {
+  verifyEmail: async (email: string, code: string): Promise<void> => {
     await axios.post(`${API_URL}/auth/verify-email`, { email, code }, {
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    const errMsg = error.response?.data?.error || 'メール認証に失敗しました';
-    throw new Error(errMsg);
-  }
+  },
+};
+
+// React Query Hooks
+export const useLogin = () => {
+  return useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) => 
+      api.login(email, password),
+  });
+};
+
+export const useSignUp = () => {
+  return useMutation({
+    mutationFn: ({ email, password, name }: { email: string; password: string; name: string }) => 
+      api.signUp(email, password, name),
+  });
+};
+
+export const useSignOut = () => {
+  return useMutation({
+    mutationFn: (accessToken: string) => api.signOut(accessToken),
+  });
+};
+
+export const useGetUser = (accessToken: string | null) => {
+  return useQuery({
+    queryKey: ['user', accessToken],
+    queryFn: () => accessToken ? api.getUser(accessToken) : null,
+    enabled: !!accessToken,
+  });
+};
+
+export const useVerifyEmail = () => {
+  return useMutation({
+    mutationFn: ({ email, code }: { email: string; code: string }) => 
+      api.verifyEmail(email, code),
+  });
 };

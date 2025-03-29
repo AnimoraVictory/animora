@@ -24,21 +24,21 @@ the `ImageBackground` component. It appears to be attempting to set the backgrou
       resizeMode="contain"
     />
       <Text style={[styles.title, { color: theme.text }]}>
-        Welcome to the App!
+        Animaliaへようこそ!
       </Text>
       <View style={styles.buttonContainer}>
       <TouchableOpacity
           style={[styles.button, { borderColor: theme.tint }]}
           onPress={() => router.push("/(auth)/signin")}
         >
-          <Text style={[styles.buttonText, { color: theme.tint }]}>Sign In</Text>
+          <Text style={[styles.buttonText, { color: theme.tint }]}>ログイン</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, { borderColor: theme.tint }]}
           onPress={() => router.push("/(auth)/signup")}
         >
-          <Text style={[styles.buttonText, { color: theme.tint }]}>Sign Up</Text>
+          <Text style={[styles.buttonText, { color: theme.tint }]}>新規ユーザー登録</Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>
