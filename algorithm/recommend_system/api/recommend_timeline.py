@@ -3,27 +3,14 @@
 # ---------------------------------------------------------------------------------  #
 
 # ライブラリのインポート
-import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import torch
 import uvicorn
-import psycopg2
 import json
 from recommend_system.models.mmneumf import MultiModalNeuMF
-from dotenv import load_dotenv, find_dotenv
-
-_ = load_dotenv(find_dotenv())
-
-# PostgreSQLデータベースへの接続
-def get_connection():
-    return psycopg2.connect(
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        database=os.getenv('DB_NAME'),
-        host=os.getenv('DB_HOST'),
-        port=os.getenv('DB_PORT')
-    )
+from recommend_system.utils.database import get_connection
+from recommend_system.utils.utils import resume_checkpoint
 
 # ----------------------------------
 # APIリクエストとレスポンスのデータモデル
@@ -57,7 +44,7 @@ def get_candidate_posts():
                 ImageFeature AS image_feature, -- JSON文字列
                 TextFeature AS text_feature -- JSON文字列
             FROM Post
-            WHERE EmbeddedFlg = TRUE
+            WHERE ImageFeature IS NOT NULL AND TextFeature IS NOT NULL;
             """
     cur.execute(query)
     rows = cur.fetchall()

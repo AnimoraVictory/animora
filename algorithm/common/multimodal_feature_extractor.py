@@ -5,26 +5,19 @@
 # ライブラリのインポート
 import os
 import json
+import boto3
+import requests
 from typing import List, Union
+from io import BytesIO
 import ftfy, html, re
 import torch
 from PIL import Image
 from transformers import AutoModel, AutoTokenizer, AutoImageProcessor, BatchFeature
-import psycopg2
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv, find_dotenv
+from recommend_system.utils.database import get_connection
 
 _ = load_dotenv(find_dotenv())
-
-# PostgreSQLデータベースへの接続
-def get_connection():
-    return psycopg2.connect(
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        database=os.getenv('DB_NAME'),
-        host=os.getenv('DB_HOST'),
-        port=os.getenv('DB_PORT')
-    )
 
 #  Japanese Stable CLIPモデルのロード
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -155,6 +148,18 @@ def compute_image_embeddings(image):
 	    # 異なる画像間の比較を公平にする
     return image_features.cpu().detach()
 
+def get_presigned_url(bucket_name, object_key, expiration=3600):
+    """
+    S3オブジェクトの署名付きURLを取得する関数
+    """
+    s3 = boto3.client("s3")
+    response = s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket_name, "Key": object_key},
+        ExpiresIn=expiration
+    )
+    return response
+
 def update_post_features():
     """
     データベースの投稿情報に画像とテキストのマルチモーダル埋め込みベクトルを追加する関数
@@ -167,25 +172,33 @@ def update_post_features():
         """
         SELECT 
             ID AS post_id, 
-            ImageURL AS image_path, 
+            ImageKey AS image_key, 
             Caption AS text_content
         FROM Post
-        WHERE EmbeddedFlg = FALSE
+        WHERE TextFeature IS NULL OR ImageFeature IS NULL
         """
     )
     posts = cur.fetchall()
     print(f"Found {len(posts)} posts to process")
 
     for post in posts:
-        post_id, image_path, text_content = post["post_id"], post["image_path"], post["text_content"]
+        post_id, image_key, text_content = post["post_id"], post["image_key"], post["text_content"]
         print(f"Processing post {post_id}")
 
         try:
             # テキスト特徴の計算
             text_features = compute_text_embeddings(text_content) # shape: (1, feature_dim)
 
-            # 画像の読み込みと特徴の計算
-            image = Image.open(image_path).convert("RGB")
+            # S3から署名付きURL取得 -> 画像のダウンロード
+            image_url = get_presigned_url(
+                bucket_name=os.getenv("AWS_S3_BUCKET_NAME"),
+                object_key=image_key,
+                expiration=3600
+            )
+            response = requests.get(image_url)
+            image = Image.open(BytesIO(response.content).convert("RGB"))
+
+            # 画像特徴の計算
             image_features = compute_image_embeddings(image) # shape: (1, feature_dim)
 
             # Tensorをリストへ変換
@@ -195,14 +208,15 @@ def update_post_features():
             # データベースに特徴を保存(特徴ベクトルはJSON文字列として保存)
             update_query = """
                 UPDATE Post
-                SET TextFeature = %s, ImageFeature = %s, EmbeddedFlg = true
-                WHERE PostID = %s
+                SET TextFeature = %s, ImageFeature = %s
+                WHERE ID = %s
             """
             cur.execute(update_query, 
                     (json.dumps(text_features_list), json.dumps(image_features_list), post_id)
             )
             conn.commit()
             print(f"Post id {post_id} updated successfully")
+
         except Exception as e:
             print(f"Error processing post id {post_id}: {e}")
             conn.rollback()
