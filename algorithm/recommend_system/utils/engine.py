@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------------  #
 
 # ライブラリのインポート
+from datetime import datetime
 import torch
 from torch.autograd import Variable
 from tqdm import tqdm
@@ -140,7 +141,13 @@ class Engine(object):
         print(f"[Evaluation Epoch {epoch_id}] HR@10 {hit_ratio:.4f}, NDCG@10 {ndcg:.4f}")
         return hit_ratio, ndcg
     
-    def save(self, alias, epoch_id, hit_ratio, ndcg):
+    def save_sim(self, hit_ratio, ndcg):
         assert hasattr(self, "model"), "Please specify the exact model !"
-        model_dir = self.config["model_dir"].format(alias, epoch_id, hit_ratio, ndcg)
+        model_dir = self.config["model_dir"].format(hit_ratio, ndcg)
+        save_checkpoint(self.model, model_dir)
+
+    def save_prod(self, hit_ratio, ndcg):
+        assert hasattr(self, "model"), "Please specify the exact model !"
+        now = datetime.now()
+        model_dir = self.config["model_dir"].format(now.strftime("%Y%m%d_%H%M%S"), hit_ratio, ndcg)
         save_checkpoint(self.model, model_dir)

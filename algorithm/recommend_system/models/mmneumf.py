@@ -140,6 +140,9 @@ class MultiModalNeuMFEngine(Engine):
         print(self.model)
 
         if config["pretrain"]:
-            self.model.load_pretrain_weights()
+            self.model.load_state_dict(torch.load(
+                config["pretrain_model_dir"],
+                map_location = torch.device("cuda" if config["use_cuda"] else "cpu")
+            ))
 
 
