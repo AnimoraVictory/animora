@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/htanos/animalia/backend-go/internal/usecase"
 )
 
@@ -21,6 +22,7 @@ func (h *PostHandler) GetAllPosts() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		posts, err := h.postUsecase.GetAllPosts()
 		if err != nil {
+			log.Error("Failed to get all posts: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})
@@ -35,12 +37,14 @@ func (h *PostHandler) GetPostsByUser() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		userID := c.Query("userId")
 		if userID == "" {
+			log.Error("Failed to get posts by user: userID is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "User ID is required",
 			})
 		}
 		posts, err := h.postUsecase.GetPostsByUser(userID)
 		if err != nil {
+			log.Error("Failed to get posts by user: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})
@@ -58,6 +62,7 @@ func (h *PostHandler) CreatePost() fiber.Handler {
 			UserId  string `json:"userId"`
 		}
 		if err := c.BodyParser(&req); err != nil {
+			log.Error("Failed to create post: invalid request body")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid request body",
 			})
@@ -65,6 +70,7 @@ func (h *PostHandler) CreatePost() fiber.Handler {
 
 		// Validate request
 		if req.Caption == "" {
+			log.Error("Failed to create post: caption is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "情報が不足しています",
 			})
@@ -72,6 +78,7 @@ func (h *PostHandler) CreatePost() fiber.Handler {
 
 		file, err := c.FormFile("image")
 		if err != nil {
+			log.Error("Failed to create post: image file is required")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "画像ファイルが必要です",
 			})
@@ -80,6 +87,7 @@ func (h *PostHandler) CreatePost() fiber.Handler {
 		// Upload the image
 		fileKey, err := h.storageUsecase.UploadImage(file, "posts")
 		if err != nil {
+			log.Error("Failed to create post: failed to upload image")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "画像のアップロードに失敗しました",
 			})
@@ -87,6 +95,7 @@ func (h *PostHandler) CreatePost() fiber.Handler {
 
 		post, err := h.postUsecase.CreatePost(req.Caption, req.UserId, fileKey)
 		if err != nil {
+			log.Error("Failed to create post: failed to create post")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "投稿の作成に失敗しました",
 			})

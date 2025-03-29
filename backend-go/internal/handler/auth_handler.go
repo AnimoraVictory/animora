@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/htanos/animalia/backend-go/internal/domain/models/responses"
 	"github.com/htanos/animalia/backend-go/internal/usecase"
 )
@@ -31,6 +32,7 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 			Password string `json:"password"`
 		}
 		if err := c.BodyParser(&req); err != nil {
+			log.Error("Failed to parse request body: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "リクエストのパースに失敗しました",
 			})
@@ -39,6 +41,7 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 		// サインイン処理の実行
 		result, err := h.authUsecase.SignIn(req.Email, req.Password)
 		if err != nil {
+			log.Error("Failed to sign in: %v", err)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": fmt.Sprintf("サインインに失敗しました: %v", err),
 			})
@@ -47,6 +50,7 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 		// ユーザー情報の取得
 		user, err := h.authUsecase.FindByEmail(req.Email)
 		if err != nil {
+			log.Error("Failed to get user: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
 			})
@@ -54,6 +58,7 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 		if user.IconImageKey != "" {
 			url, err := h.storageUsecase.GetUrl(user.IconImageKey)
 			if err != nil {
+				log.Error("Failed to get url: %v", err)
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
 				})
@@ -88,11 +93,13 @@ func (h *AuthHandler) RefreshToken() fiber.Handler {
 			RefreshToken string `json:"refreshToken"`
 		}
 		if err := c.BodyParser(&req); err != nil {
+			log.Error("Failed to parse request body: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "リクエストのパースに失敗しました",
 			})
 		}
 		if req.RefreshToken == "" {
+			log.Error("Failed to refresh token: refreshToken is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "リフレッシュトークンが不足しています",
 			})
@@ -101,6 +108,7 @@ func (h *AuthHandler) RefreshToken() fiber.Handler {
 		// リフレッシュトークンの更新処理
 		result, err := h.authUsecase.RefreshToken(req.RefreshToken)
 		if err != nil {
+			log.Error("Failed to refresh token: %v", err)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": fmt.Sprintf("リフレッシュトークンの更新に失敗しました: %v", err),
 			})
@@ -123,6 +131,7 @@ func (h *AuthHandler) VerifyEmail() fiber.Handler {
 			Code  string `json:"code"`
 		}
 		if err := c.BodyParser(&req); err != nil {
+			log.Error("Failed to parse request body: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid request body",
 			})
@@ -130,6 +139,7 @@ func (h *AuthHandler) VerifyEmail() fiber.Handler {
 
 		// リクエスト内容の検証
 		if req.Email == "" || req.Code == "" {
+			log.Error("Failed to verify email: email or code is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "lack of information",
 			})
@@ -137,6 +147,7 @@ func (h *AuthHandler) VerifyEmail() fiber.Handler {
 
 		// メール認証の実施
 		if err := h.authUsecase.VerifyEmail(req.Email, req.Code); err != nil {
+			log.Error("Failed to verify email: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "確認コードが無効です",
 			})
@@ -156,6 +167,7 @@ func (h *AuthHandler) SignUp() fiber.Handler {
 			Password string `json:"password"`
 		}
 		if err := c.BodyParser(&req); err != nil {
+			log.Error("Failed to parse request body: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid request body",
 			})
@@ -163,12 +175,14 @@ func (h *AuthHandler) SignUp() fiber.Handler {
 
 		// Validate request
 		if req.Name == "" || req.Email == "" || req.Password == "" {
+			log.Error("Failed to sign up: information is missing")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "情報が不足しています",
 			})
 		}
 
 		if err := h.authUsecase.CreateUser(req.Name, req.Email, req.Password); err != nil {
+			log.Error("Failed to create user: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "ユーザーの作成に失敗しました",
 			})
@@ -176,6 +190,7 @@ func (h *AuthHandler) SignUp() fiber.Handler {
 
 		user, err := h.userUsecase.CreateUser(req.Name, req.Email)
 		if err != nil {
+			log.Error("Failed to create user: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "ユーザーの作成に失敗しました",
 			})
@@ -193,6 +208,7 @@ func (h *AuthHandler) GetMe() fiber.Handler {
 		// リクエストヘッダーから Authorization トークンを取得
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
+			log.Error("Failed to get user email: token is empty")
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "アクセストークンが必要です",
 			})
@@ -202,6 +218,7 @@ func (h *AuthHandler) GetMe() fiber.Handler {
 
 		email, err := h.authUsecase.GetUserEmail(tokenString)
 		if err != nil {
+			log.Error("Failed to get user email: %v", err)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "無効なアクセストークンです",
 			})
@@ -209,6 +226,7 @@ func (h *AuthHandler) GetMe() fiber.Handler {
 
 		user, err := h.authUsecase.FindByEmail(email)
 		if err != nil {
+			log.Error("Failed to get user: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": fmt.Sprintf("ユーザー情報の取得に失敗しました: %v", err),
 			})
@@ -217,6 +235,7 @@ func (h *AuthHandler) GetMe() fiber.Handler {
 		if user.IconImageKey != "" {
 			url, err := h.storageUsecase.GetUrl(user.IconImageKey)
 			if err != nil {
+				log.Error("Failed to get url: %v", err)
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"error": fmt.Sprintf("ユーザー情報の取得に失敗しました: %v", err),
 				})
@@ -235,6 +254,7 @@ func (h *AuthHandler) SignOut() fiber.Handler {
 		// Authorization ヘッダーからトークンを取得
 		authHeader := c.Get("Authorization")
 		if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+			log.Error("Failed to sign out: token is empty")
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "トークンがありません",
 			})
@@ -242,6 +262,7 @@ func (h *AuthHandler) SignOut() fiber.Handler {
 		accessToken := authHeader[7:]
 
 		if err := h.authUsecase.SignOut(accessToken); err != nil {
+			log.Error("Failed to sign out: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "ログアウトに失敗しました",
 			})
@@ -258,6 +279,7 @@ func (h *AuthHandler) GetSession() fiber.Handler {
 		// Authorization ヘッダーからIDトークンを取得
 		authHeader := c.Get("Authorization")
 		if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+			log.Error("Failed to get session: token is empty")
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error": "トークンがありません",
 			})
@@ -266,6 +288,7 @@ func (h *AuthHandler) GetSession() fiber.Handler {
 
 		user, err := h.authUsecase.GetUserEmail(idToken)
 		if err != nil {
+			log.Error("Failed to get session: %v", err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "ユーザーの取得に失敗しました",
 			})
