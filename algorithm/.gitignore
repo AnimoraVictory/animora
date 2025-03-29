@@ -15,3 +15,4 @@ recommend_system/checkpoints/
 *.pyc
 *.pyo
 *.pyd
+**/__pycache__
