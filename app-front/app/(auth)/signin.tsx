@@ -137,7 +137,7 @@ export default function SignInScreen() {
                 theme={theme}
                 secureTextEntry
                 autoCapitalize="none"
-                error={errors.email?.message}
+                error={errors.password?.message}
               />
             )}
           />

@@ -23,9 +23,6 @@ export default function WelcomeScreen() {
 
   return (
     <ImageBackground
-      /* The line `// source={require("../../assets/images/noise.png")}` is a commented-out line of code in
-the `ImageBackground` component. It appears to be attempting to set the background image of the
-`ImageBackground` component to an image file located at `"../../assets/images/noise.png"`. */
       source={require("../../assets/images/noise2.png")}
       resizeMode="repeat"
       style={[styles.container, { backgroundColor: theme.background }]}
