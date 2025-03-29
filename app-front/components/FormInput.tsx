@@ -73,6 +73,7 @@ export const FormInput: React.FC<FormInputProps> = ({
       <Animated.Text style={labelStyle}>{label}</Animated.Text>
       <TextInput
         {...props}
+        accessibilityLabel={label}
         value={value}
         onChangeText={onChangeText}
         onFocus={handleFocus}
