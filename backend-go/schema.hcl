@@ -1170,11 +1170,11 @@ table "posts" {
   }
   column "text_feature" {
     null = true
-    type = sql("public.vector(768)")
+    type = sql("extensions.vector(768)")
   }
   column "image_feature" {
     null = true
-    type = sql("public.vector(768)")
+    type = sql("extensions.vector(768)")
   }
   primary_key {
     columns = [column.id]
