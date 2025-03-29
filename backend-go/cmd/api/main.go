@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/htanos/animalia/backend-go/internal/domain/models"
 	"github.com/htanos/animalia/backend-go/internal/routes"
+	"github.com/htanos/animalia/backend-go/internal/seed"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 )
@@ -34,6 +35,11 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	isSeed := os.Getenv("SEED")
+	if isSeed == "true" {
+		seed.SeedData(models.DB)
 	}
 
 	// Create Fiber app

@@ -1,14 +1,14 @@
 include .env
 
-.PHONY: run run-all seed build psql down-all
+.PHONY: run run-seed run-all seed build psql down-all
 
 run-all: up-adminer run
 
-run: build up-db
+run: build
 	docker compose up api -d
 
-seed:
-	docker compose up api -d
+run-seed:
+	SEED=true docker compose up api -d
 
 build:
 	docker compose build

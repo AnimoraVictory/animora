@@ -9,6 +9,7 @@ services:
       - "3000:3000"
     environment:
       - ENV=${ENV}
+      - SEED=${SEED}
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - AWS_COGNITO_CLIENT_ID=${AWS_COGNITO_CLIENT_ID}

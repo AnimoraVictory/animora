@@ -1,12 +1,12 @@
 package models
 
 import (
-	"log"
+	"fmt"
 	"os"
 
+	"github.com/gofiber/fiber/v2/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
@@ -18,24 +18,19 @@ func InitDB() {
 	// Get database URL from environment variable
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		log.Fatal("DATABASE_URL environment variable is not set")
+		log.Error("DATABASE_URL environment variable is not set")
 	}
 
-	// Configure GORM logger
-	gormLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
-			LogLevel: logger.Info,
-		},
-	)
+	log.Info(fmt.Sprintf("DATABASE_URL: %s", dbURL))
 
 	// Connect to the database
-	DB, err = gorm.Open(postgres.Open(dbURL), &gorm.Config{
-		Logger: gormLogger,
-	})
+	DB, err = gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dbURL,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	log.Println("Connected to database")
+	log.Info("Connected to database")
 }
