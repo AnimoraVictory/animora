@@ -3,39 +3,27 @@
 # ---------------------------------------------------------------------------------  #
 
 # ライブラリのインポート
-import os
 import pandas as pd
-import psycopg2
 import json
 import torch
 from recommend_system.models.mmneumf import MultiModalNeuMFEngine
 from recommend_system.utils.data import SampleGenerator
-from dotenv import load_dotenv, find_dotenv
-
-_ = load_dotenv(find_dotenv())
+from recommend_system.utils.database import get_connection
 
 # ----------------------------------
 # 1. PostgreSQLから実データを取得
 # ----------------------------------
-# PostgreSQLデータベースへの接続(接続確認済み)
-def get_connection():
-    return psycopg2.connect(
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        database=os.getenv('DB_NAME'),
-        host=os.getenv('DB_HOST'),
-        port=os.getenv('DB_PORT')
-    )
+# PostgreSQLデータベースへの接続
 conn = get_connection()
 
 # ratingsデータフレームを作成
 query = """
         -- 投稿自体のインタラクション(投稿者による投稿)
         SELECT
-            UserID AS user_id, PostID AS post_id, 1 AS rating, CreatedAt AS timestamp, 
+            UserID AS user_id, ID AS post_id, 1 AS rating, CreatedAt AS timestamp, 
             ImageFeature AS image_feature, TextFeature AS text_feature
         FROM Post
-        WHERE EmbeddedFlg = TRUE
+        WHERE TextFeature IS NOT NULL AND ImageFeature IS NOT NULL
 
         UNION -- 縦結合＋重複削除
 
@@ -44,8 +32,8 @@ query = """
             L.UserID AS user_id, L.PostID AS post_id, 1 AS rating, L.CreatedAt AS timestamp,
             P.ImageFeature AS image_feature, P.TextFeature AS text_feature
         FROM "Like" L
-        JOIN Post P ON L.PostID = P.PostID
-        WHERE P.EmbeddedFlg = TRUE
+        JOIN Post P ON L.PostID = P.ID
+        WHERE P.TextFeature IS NOT NULL AND P.ImageFeature IS NOT NULL
 
         UNION
 
@@ -54,8 +42,8 @@ query = """
             C.UserID AS user_id, C.PostID AS post_id, 1 AS rating, C.CreatedAt AS timestamp,
             P.ImageFeature AS image_feature, P.TextFeature AS text_feature
         FROM Comment C
-        JOIN Post P ON C.PostID = P.PostID
-        WHERE P.EmbeddedFlg = TRUE;
+        JOIN Post P ON C.PostID = P.ID
+        WHERE P.TextFeature IS NOT NULL AND P.ImageFeature IS NOT NULL;
         """
 prod_df = pd.read_sql(query, conn)
 conn.close()

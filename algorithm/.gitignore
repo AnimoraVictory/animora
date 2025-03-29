@@ -10,6 +10,7 @@ data/
 # 不要なファイル
 recommend_system/base/
 recommend_system/checkpoints/
+recommend_system/runs/
 
 # Pythonキャッシュ
 *.pyc
