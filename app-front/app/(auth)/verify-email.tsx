@@ -53,7 +53,7 @@ export default function VerifyEmailScreen() {
         name="email"
         render={({ field: { onChange, value } }) => (
           <FormInput
-                label="Password"
+                label="Email"
                 value={value}
                 onChangeText={onChange}
                 theme={theme}
