@@ -25,5 +25,8 @@ up-adminer:
 down-all:
 	docker compoes down
 
+migrate:
+	cd backend-go && atlas schema apply -u $(DATABASE_URL) --to file://schema.hcl
+
 psql:
 	psql $(DATABASE_URL)

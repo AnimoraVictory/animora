@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 
@@ -10,16 +9,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/htanos/animalia/backend-go/internal/domain/models"
 	"github.com/htanos/animalia/backend-go/internal/routes"
-	"github.com/htanos/animalia/backend-go/internal/seed"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 )
 
 func main() {
-	// Define command-line flags
-	seedFlag := flag.Bool("seed", false, "Seed the database with sample data")
-	flag.Parse()
-
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found")
@@ -40,16 +34,6 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
-
-	// Run seed data if flag is set
-	if *seedFlag {
-		log.Println("Seeding database with sample data...")
-		if err := seed.SeedData(models.DB); err != nil {
-			log.Fatalf("Failed to seed database: %v", err)
-		}
-		log.Println("Database seeding completed successfully")
-		return
 	}
 
 	// Create Fiber app
