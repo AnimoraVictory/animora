@@ -28,12 +28,16 @@ export default function PostsScreen() {
     queryKey: ["posts"],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/posts`);
-      const parsedResponse = getPostResponseSchema.parse(response.data);
-      return parsedResponse.posts;
+      const result = getPostResponseSchema.safeParse(response.data);
+      if (result.error) {
+        console.error(result.error);
+        throw new Error(`error: ${result.error}`);
+      }
+      return result.data.posts;
     },
   });
 
-  if (isLoading || data === undefined) {
+  if (isLoading) {
     return (
       <ThemedView style={styles.container}>
         <ActivityIndicator size="large" />
@@ -44,7 +48,7 @@ export default function PostsScreen() {
   if (error) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText>{error.message}</ThemedText>
+        <ThemedText>ポストが取得できませんでした</ThemedText>
       </ThemedView>
     );
   }
