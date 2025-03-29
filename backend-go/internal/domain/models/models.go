@@ -27,6 +27,7 @@ type Post struct {
 	Caption   string         `json:"caption"`
 	ImageKey  string         `json:"imageKey"`
 	UserID    string         `json:"userId"`
+	
 	User      User           `json:"user,omitempty" gorm:"foreignKey:UserID"`
 	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:PostID"`
 	Likes     []Like         `json:"likes,omitempty" gorm:"foreignKey:PostID"`

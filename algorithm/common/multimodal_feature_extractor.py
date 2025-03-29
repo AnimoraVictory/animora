@@ -166,7 +166,7 @@ def update_post_features():
     cur.execute(
         """
         SELECT 
-            PostID AS post_id, 
+            ID AS post_id, 
             ImageURL AS image_path, 
             Caption AS text_content
         FROM Post
