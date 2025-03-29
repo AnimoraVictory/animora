@@ -16,7 +16,7 @@ type User struct {
 	Bio          string    `json:"bio"`
 	IconImageKey string    `json:"iconImageKey"`
 	Posts        []Post    `json:"posts,omitempty" gorm:"foreignKey:UserID"`
-	Comments     []Comment `json:"comments,omitempty" gorm:"foreignKey:AuthorID"`
+	Comments     []Comment `json:"comments,omitempty" gorm:"foreignKey:UserID"`
 	Likes        []Like    `json:"likes,omitempty" gorm:"foreignKey:UserID"`
 	Pets         []Pet     `json:"pets,omitempty" gorm:"foreignKey:OwnerID"`
 	CreatedAt    time.Time `json:"createdAt" gorm:"autoCreateTime"`
@@ -43,8 +43,8 @@ type Comment struct {
 	Content   string    `json:"content"`
 	PostID    string    `json:"postId"`
 	Post      Post      `json:"post,omitempty" gorm:"foreignKey:PostID"`
-	AuthorID  string    `json:"authorId"`
-	Author    User      `json:"author,omitempty" gorm:"foreignKey:AuthorID"`
+	UserID    string    `json:"userId"`
+	User      User      `json:"user,omitempty" gorm:"foreignKey:UserID"`
 	CreatedAt time.Time `json:"createdAt" gorm:"autoCreateTime"`
 }
 
