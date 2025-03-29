@@ -21,7 +21,6 @@ WORKDIR /app
 
 # Copy the binary from the builder stage
 COPY --from=builder /app/api .
-COPY --from=builder /app/.env .
 
 # Expose the port
 EXPOSE 3000

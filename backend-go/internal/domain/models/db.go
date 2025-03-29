@@ -39,6 +39,12 @@ func InitDB() {
 
 	log.Println("Connected to database")
 
+	// Enable vector extension
+	err = DB.Exec(`CREATE EXTENSION IF NOT EXISTS vector;`).Error
+	if err != nil {
+		log.Fatalf("Failed to create vector extension: %v", err)
+	}
+
 	err = DB.Exec(`DROP TYPE IF EXISTS pet_type CASCADE;`).Error
 	if err != nil {
 		log.Fatalf("Failed to drop pet_type enum: %v", err)

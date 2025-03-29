@@ -1,9 +1,9 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api:
     build:
-      context: .
+      context: ./backend-go
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
@@ -17,22 +17,32 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     depends_on:
       - db
-    restart: always
+    # restart: always
 
   db:
-    image: postgres:15-alpine
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypass
-      - POSTGRES_DB=mydatabase
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
-  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   adminer:
     image: adminer
     ports:
