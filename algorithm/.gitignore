@@ -12,7 +12,7 @@ recommend_system/base/
 recommend_system/checkpoints/
 
 # Pythonキャッシュ
-**/__pycache__/**
 *.pyc
 *.pyo
 *.pyd
+**/__pycache__
