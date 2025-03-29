@@ -22,7 +22,7 @@ func (h *PostHandler) GetAllPosts() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		posts, err := h.postUsecase.GetAllPosts()
 		if err != nil {
-			log.Error("Failed to get all posts: %v", err)
+			log.Error("Failed to get all posts:", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": err.Error(),
 			})

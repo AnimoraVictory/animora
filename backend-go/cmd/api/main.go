@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 
@@ -16,10 +15,6 @@ import (
 )
 
 func main() {
-	// Define command-line flags
-	seedFlag := flag.Bool("seed", false, "Seed the database with sample data")
-	flag.Parse()
-
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found")
@@ -42,14 +37,9 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	// Run seed data if flag is set
-	if *seedFlag {
-		log.Println("Seeding database with sample data...")
-		if err := seed.SeedData(models.DB); err != nil {
-			log.Fatalf("Failed to seed database: %v", err)
-		}
-		log.Println("Database seeding completed successfully")
-		return
+	isSeed := os.Getenv("SEED")
+	if isSeed == "true" {
+		seed.SeedData(models.DB)
 	}
 
 	// Create Fiber app
