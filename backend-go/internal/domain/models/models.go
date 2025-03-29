@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -23,16 +24,17 @@ type User struct {
 
 // Post represents a post in the system
 type Post struct {
-	ID        string         `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	Caption   string         `json:"caption"`
-	ImageKey  string         `json:"imageKey"`
-	UserID    string         `json:"userId"`
-	
-	User      User           `json:"user,omitempty" gorm:"foreignKey:UserID"`
-	Comments  []Comment      `json:"comments,omitempty" gorm:"foreignKey:PostID"`
-	Likes     []Like         `json:"likes,omitempty" gorm:"foreignKey:PostID"`
-	CreatedAt time.Time      `json:"createdAt" gorm:"autoCreateTime"`
-	DeletedAt gorm.DeletedAt `json:"deletedAt"`
+	ID           string           `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	Caption      string           `json:"caption"`
+	ImageKey     string           `json:"imageKey"`
+	UserID       string           `json:"userId"`
+	User         User             `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	Comments     []Comment        `json:"comments,omitempty" gorm:"foreignKey:PostID"`
+	Likes        []Like           `json:"likes,omitempty" gorm:"foreignKey:PostID"`
+	CreatedAt    time.Time        `json:"createdAt" gorm:"autoCreateTime"`
+	DeletedAt    gorm.DeletedAt   `json:"deletedAt"`
+	TextFeature  *pq.Float64Array `json:"textFeature,omitempty"  gorm:"type:vector(768)"`
+	ImageFeature *pq.Float64Array `json:"imageFeature,omitempty" gorm:"type:vector(768)"`
 }
 
 // Comment represents a comment on a post

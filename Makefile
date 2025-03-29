@@ -5,13 +5,13 @@ include .env
 run-all: up-db up-adminer run
 
 run: build up-db
-	go run cmd/api/main.go
+	docker compose up api -d
 
 seed:
-	go run cmd/api/main.go -seed
+	docker compose up api -d
 
 build:
-	docker-compose build
+	docker compose build
 
 up-db:
 	docker compose up db -d

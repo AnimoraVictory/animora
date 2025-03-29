@@ -1,9 +1,9 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api:
     build:
-      context: .
+      context: ./backend-go
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
@@ -19,20 +19,18 @@ services:
       - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
     depends_on:
       - db
-    restart: always
+    # restart: always
 
   db:
-    image: postgres:15-alpine
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypass
-      - POSTGRES_DB=mydatabase
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
-  
+
   adminer:
     image: adminer
     ports:
