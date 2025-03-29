@@ -136,7 +136,7 @@ const ProfileScreen: React.FC = () => {
     queryKey: ["posts", user?.id],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/posts/user`, {
-        params: { authorId: user?.id },
+        params: { userId: user?.id },
       });
       const result = getPostResponseSchema.safeParse(response.data);
       if(result.error) {

@@ -166,46 +166,46 @@ func PostData(users []models.User) []models.Post {
 func CommentData(posts []models.Post, users []models.User) []models.Comment {
 	return []models.Comment{
 		{
-			ID:       uuid.New().String(),
-			Content:  "He looks so happy! What breed is he?",
-			PostID:   posts[0].ID, // Comment on John's post
-			AuthorID: users[1].ID, // Comment by Jane
+			ID:      uuid.New().String(),
+			Content: "He looks so happy! What breed is he?",
+			PostID:  posts[0].ID, // Comment on John's post
+			UserID:  users[1].ID, // Comment by Jane
 		},
 		{
-			ID:       uuid.New().String(),
-			Content:  "That's such a cute toy! Where did you get it?",
-			PostID:   posts[1].ID, // Comment on Jane's post
-			AuthorID: users[2].ID, // Comment by Alex
+			ID:      uuid.New().String(),
+			Content: "That's such a cute toy! Where did you get it?",
+			PostID:  posts[1].ID, // Comment on Jane's post
+			UserID:  users[2].ID, // Comment by Alex
 		},
 		{
-			ID:       uuid.New().String(),
-			Content:  "Happy birthday, Buddy! That cake looks delicious.",
-			PostID:   posts[2].ID, // Comment on Alex's post
-			AuthorID: users[3].ID, // Comment by Emily
+			ID:      uuid.New().String(),
+			Content: "Happy birthday, Buddy! That cake looks delicious.",
+			PostID:  posts[2].ID, // Comment on Alex's post
+			UserID:  users[3].ID, // Comment by Emily
 		},
 		{
-			ID:       uuid.New().String(),
-			Content:  "What a nice hutch! Coco must be very happy.",
-			PostID:   posts[3].ID, // Comment on Emily's post
-			AuthorID: users[4].ID, // Comment by Michael
+			ID:      uuid.New().String(),
+			Content: "What a nice hutch! Coco must be very happy.",
+			PostID:  posts[3].ID, // Comment on Emily's post
+			UserID:  users[4].ID, // Comment by Michael
 		},
 		{
-			ID:       uuid.New().String(),
-			Content:  "Swimming is great exercise for dogs! Rocky looks like he's having fun.",
-			PostID:   posts[4].ID, // Comment on Michael's post
-			AuthorID: users[0].ID, // Comment by John
+			ID:      uuid.New().String(),
+			Content: "Swimming is great exercise for dogs! Rocky looks like he's having fun.",
+			PostID:  posts[4].ID, // Comment on Michael's post
+			UserID:  users[0].ID, // Comment by John
 		},
 		{
-			ID:       uuid.New().String(),
-			Content:  "Haha, classic cat behavior! Milo is adorable.",
-			PostID:   posts[5].ID, // Comment on John's second post
-			AuthorID: users[1].ID, // Comment by Jane
+			ID:      uuid.New().String(),
+			Content: "Haha, classic cat behavior! Milo is adorable.",
+			PostID:  posts[5].ID, // Comment on John's second post
+			UserID:  users[1].ID, // Comment by Jane
 		},
 		{
-			ID:       uuid.New().String(),
-			Content:  "I love the park too! We should arrange a playdate for our dogs.",
-			PostID:   posts[0].ID, // Second comment on John's post
-			AuthorID: users[2].ID, // Comment by Alex
+			ID:      uuid.New().String(),
+			Content: "I love the park too! We should arrange a playdate for our dogs.",
+			PostID:  posts[0].ID, // Second comment on John's post
+			UserID:  users[2].ID, // Comment by Alex
 		},
 	}
 }
