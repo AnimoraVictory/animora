@@ -45,6 +45,11 @@ func InitDB() {
 		log.Fatalf("Failed to create vector extension: %v", err)
 	}
 
+	err = DB.Exec(`DROP TYPE IF EXISTS daily_task_type CASCADE;`).Error
+	if err != nil {
+		log.Fatalf("Failed to drop daily_task_type enum: %v", err)
+	}
+
 	err = DB.Exec(`DROP TYPE IF EXISTS pet_type CASCADE;`).Error
 	if err != nil {
 		log.Fatalf("Failed to drop pet_type enum: %v", err)
@@ -52,6 +57,11 @@ func InitDB() {
 	err = DB.Exec(`DROP TYPE IF EXISTS pet_species CASCADE;`).Error
 	if err != nil {
 		log.Fatalf("Failed to drop pet_species enum: %v", err)
+	}
+
+	err = DB.Exec(`CREATE TYPE daily_task_type AS ENUM ('eating', 'sleeping', 'playing');`).Error
+	if err != nil {
+		log.Fatalf("Failed to create daily_task_type enum: %v", err)
 	}
 
 	err = DB.Exec(`

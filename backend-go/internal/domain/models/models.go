@@ -37,6 +37,16 @@ type Post struct {
 	ImageFeature *pq.Float64Array `json:"imageFeature,omitempty" gorm:"type:vector(768)"`
 }
 
+type DairyTask struct {
+	ID        string        `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	UserID    string        `json:"userId"`
+	User      User          `json:"user,omitempty" gorm:"foreignKey:AuthorID"`
+	TaskType  DailyTaskType `json:"taskType"`
+	PostID    *string       `json:"postId,omitempty"`
+	Post      Post          `json:"post,omitempty" gorm:"foreignKey:PostId"`
+	CreatedAt time.Time     `json:"createdAt" gorm:"autoCreateTime"`
+}
+
 // Comment represents a comment on a post
 type Comment struct {
 	ID        string    `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
@@ -86,6 +96,14 @@ type PetType string
 const (
 	PetTypeDog PetType = "dog"
 	PetTypeCat PetType = "cat"
+)
+
+type DailyTaskType string
+
+const (
+	TaskTypeEating   DailyTaskType = "eating"   // 0: 食事を食べているところを撮影して
+	TaskTypeSleeping DailyTaskType = "sleeping" // 1: 寝ているところを撮影して
+	TaskTypePlaying  DailyTaskType = "playing"  // 2: 遊んでいるところを撮影して
 )
 
 // 犬用の品種を示す型
