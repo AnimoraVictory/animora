@@ -25,7 +25,7 @@ export default function VerifyEmailScreen() {
   });
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const {mutate: verifyEmail, isPending} = useVerifyEmail()
+  const {mutate: verifyEmail} = useVerifyEmail()
 
   const onSubmit = (data: VerifyEmailInput) => {
     verifyEmail(

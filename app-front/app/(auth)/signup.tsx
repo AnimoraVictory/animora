@@ -91,7 +91,7 @@ export default function SignUpScreen() {
           <Controller
             control={control}
             name="name"
-            render={({ field: { onChange, onBlur, value } }) => (
+            render={({ field: { onChange, value } }) => (
               <FormInput
                 label="Name"
                 value={value}
@@ -105,7 +105,7 @@ export default function SignUpScreen() {
           <Controller
             control={control}
             name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
+            render={({ field: { onChange, value } }) => (
               <FormInput
                 label="Email"
                 value={value}
@@ -120,7 +120,7 @@ export default function SignUpScreen() {
           <Controller
             control={control}
             name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
+            render={({ field: { onChange, value } }) => (
               <FormInput
                 label="Password"
                 value={value}
