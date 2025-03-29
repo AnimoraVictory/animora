@@ -5,12 +5,18 @@
 # ライブラリのインポート
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 import torch
 import uvicorn
 import json
 from recommend_system.models.mmneumf import MultiModalNeuMF
 from recommend_system.utils.database import get_connection
-from recommend_system.utils.utils import resume_checkpoint
+from recommend_system.src.download_model import download_latest_model 
+
+# モデル・デバイスのグローバル変数
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = None
+MODEL_PATH = "recommend_system/models/latest.model"
 
 # ----------------------------------
 # APIリクエストとレスポンスのデータモデル
@@ -86,16 +92,41 @@ def get_recommended_timeline(user_id, candidates, model, device, score_threshold
     return sorted_recommend
 
 # ----------------------------------
+# モデルの初期ロード
+# ----------------------------------
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global model
+    model = MultiModalNeuMF().to(device)
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device(device)))
+    model.eval()
+    print("モデル初期ロード完了")
+    yield # アプリのライフサイクルの本体がここ
+
+# ----------------------------------
 # FastAPIアプリの構築
 # ----------------------------------
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
-# デバイス設定とモデルのロード
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model = MultiModalNeuMF().to(device)
-model.eval()
+# ----------------------------------
+# /reload エンドポイント
+# ----------------------------------
+@app.post("/reload")
+def reload_model():
+    try:
+        download_latest_model()
+        global model
+        model = MultiModalNeuMF().to(device)
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device(device)))
+        model.eval()
+        return {"message": "モデルをリロードしました"}
+    except Exception as e:
+        return {"message": str(e)}
 
-@app.post("/recommend/timeline", response_model=TimelineResponse)
+# ----------------------------------
+# /timeline エンドポイント
+# ----------------------------------
+@app.post("/timeline", response_model=TimelineResponse)
 def recommend_timeline(request: TimelineRequest):
     try:
         # PostgreSQLから候補投稿画像を取得

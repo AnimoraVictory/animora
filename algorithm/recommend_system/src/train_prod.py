@@ -5,7 +5,8 @@
 # ライブラリのインポート
 import pandas as pd
 import json
-import torch
+import subprocess
+import requests
 from recommend_system.models.mmneumf import MultiModalNeuMFEngine
 from recommend_system.utils.data import SampleGenerator
 from recommend_system.utils.database import get_connection
@@ -69,7 +70,7 @@ print(f"Production data loaded: {prod_df.shape[0]} records")
 # 3. プロダクション用の設定(config)
 # ----------------------------------
 prod_config = {
-    "alias": "multimodal_neumf_prod",
+    "alias": "prod",
     "num_epoch": 50,
     "batch_size": 512,
     "optimizer": "adam",
@@ -85,8 +86,9 @@ prod_config = {
     "use_cuda": True,
     "use_bachify_eval": False,
     "device_id": 0,
-    "pretrain": False,
-    "model_dir": "recommend_system/checkpoints/prod_checkpoints_1/{}_Epoch{}_HR{:.4f}_NDCG{:.4f}.model",
+    "pretrain": True,
+    "model_dir": "recommend_system/models/checkpoints/prod_{}_HR{:.4f}_NDCG{:.4f}.model",
+    "pretrain_model_dir": "recommend_system/models/latest.model",
     "image_emb_dim": 16,
     "text_emb_dim": 16,
     "image_feature_dim": 1024,
@@ -111,4 +113,21 @@ for epoch in range(prod_config["num_epoch"]):
     train_loader = sample_generator.instance_a_train_loader(prod_config["num_negative"], prod_config["batch_size"])
     engine.train_an_epoch(train_loader, epoch_id=epoch)
     hit_ratio, ndcg = engine.evaluate(evaluate_data, epoch_id=epoch)
-    engine.save(prod_config["alias"], epoch, hit_ratio, ndcg)
+    engine.save_prod(hit_ratio, ndcg)
+
+# ----------------------------------
+# 6. 最新モデルのアップロードとモデルのリロード
+# ----------------------------------
+# upload_model.pyを実行
+subprocess.run(["python", "recommend_system/src/upload_model.py"], check=True)
+
+# 推論APIの /reload を叩く
+try:
+    response = requests.post("http://localhost:8000/reload")
+    if response.status_code == 200:
+        print("Model reloaded successfully", response.json())
+    else:
+        print("Failed to reload model", response.json())
+except Exception as e:
+    print("Failed to reload model", str(e))
+

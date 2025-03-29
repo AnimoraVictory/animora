@@ -38,7 +38,7 @@ def generate_sim_data(num_users, num_items, num_records):
 # 2. シミュレーション用の設定(config)
 # ----------------------------------
 sim_config = {
-    "alias": "multimodal_neumf_sim",
+    "alias": "sim",
     "num_epoch": 50,
     "batch_size": 512,
     "optimizer": "adam",
@@ -55,7 +55,7 @@ sim_config = {
     "use_bachify_eval": False,
     "device_id": 0,
     "pretrain": False,
-    "model_dir": "recommend_system/checkpoints/{}_Epoch{}_HR{:.4f}_NDCG{:.4f}.model",
+    "model_dir": "recommend_system/models/checkpoints/sim_HR{:.4f}_NDCG{:.4f}.model",
     "image_emb_dim": 16,
     "text_emb_dim": 16,
     "image_feature_dim": 1024,
@@ -90,5 +90,5 @@ for epoch in range(sim_config["num_epoch"]):
     train_loader = sample_generator.instance_a_train_loader(sim_config["num_negative"], sim_config["batch_size"])
     engine.train_an_epoch(train_loader, epoch_id=epoch)
     hit_ratio, ndcg = engine.evaluate(evaluate_data, epoch_id=epoch)
-    engine.save(sim_config["alias"], epoch, hit_ratio, ndcg)
+    engine.save_sim(hit_ratio, ndcg)
 
