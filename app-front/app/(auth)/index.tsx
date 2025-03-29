@@ -1,5 +1,13 @@
 import React from "react";
-import { View, Text, StyleSheet, Button, ImageBackground, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  ImageBackground,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
@@ -8,6 +16,10 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const icon =
+    colorScheme === "light"
+      ? require("../../assets/images/icon-green.png")
+      : require("../../assets/images/icon-dark.png");
 
   return (
     <ImageBackground
@@ -18,27 +30,27 @@ the `ImageBackground` component. It appears to be attempting to set the backgrou
       resizeMode="repeat"
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-      <Image
-      source={require("../../assets/images/icon-green.png")}
-      style={styles.icon}
-      resizeMode="contain"
-    />
+      <Image source={icon} style={styles.icon} resizeMode="contain" />
       <Text style={[styles.title, { color: theme.text }]}>
         Animaliaへようこそ!
       </Text>
       <View style={styles.buttonContainer}>
-      <TouchableOpacity
+        <TouchableOpacity
           style={[styles.button, { borderColor: theme.tint }]}
           onPress={() => router.push("/(auth)/signin")}
         >
-          <Text style={[styles.buttonText, { color: theme.tint }]}>ログイン</Text>
+          <Text style={[styles.buttonText, { color: theme.tint }]}>
+            ログイン
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, { borderColor: theme.tint }]}
           onPress={() => router.push("/(auth)/signup")}
         >
-          <Text style={[styles.buttonText, { color: theme.tint }]}>新規ユーザー登録</Text>
+          <Text style={[styles.buttonText, { color: theme.tint }]}>
+            新規ユーザー登録
+          </Text>
         </TouchableOpacity>
       </View>
     </ImageBackground>

@@ -65,6 +65,7 @@ export const FormInput: React.FC<FormInputProps> = ({
     backgroundColor: theme.background,
     paddingHorizontal: 4,
     zIndex: 1,
+    pointerEvents: "none" as const,
   };
 
   return (
