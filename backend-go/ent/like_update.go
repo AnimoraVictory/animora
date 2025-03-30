@@ -51,14 +51,6 @@ func (lu *LikeUpdate) SetUserID(id uuid.UUID) *LikeUpdate {
 	return lu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (lu *LikeUpdate) SetNillableUserID(id *uuid.UUID) *LikeUpdate {
-	if id != nil {
-		lu = lu.SetUserID(*id)
-	}
-	return lu
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (lu *LikeUpdate) SetUser(u *User) *LikeUpdate {
 	return lu.SetUserID(u.ID)
@@ -67,14 +59,6 @@ func (lu *LikeUpdate) SetUser(u *User) *LikeUpdate {
 // SetPostID sets the "post" edge to the Post entity by ID.
 func (lu *LikeUpdate) SetPostID(id uuid.UUID) *LikeUpdate {
 	lu.mutation.SetPostID(id)
-	return lu
-}
-
-// SetNillablePostID sets the "post" edge to the Post entity by ID if the given value is not nil.
-func (lu *LikeUpdate) SetNillablePostID(id *uuid.UUID) *LikeUpdate {
-	if id != nil {
-		lu = lu.SetPostID(*id)
-	}
 	return lu
 }
 
@@ -127,7 +111,21 @@ func (lu *LikeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (lu *LikeUpdate) check() error {
+	if lu.mutation.UserCleared() && len(lu.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Like.user"`)
+	}
+	if lu.mutation.PostCleared() && len(lu.mutation.PostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Like.post"`)
+	}
+	return nil
+}
+
 func (lu *LikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := lu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeUUID))
 	if ps := lu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -237,14 +235,6 @@ func (luo *LikeUpdateOne) SetUserID(id uuid.UUID) *LikeUpdateOne {
 	return luo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (luo *LikeUpdateOne) SetNillableUserID(id *uuid.UUID) *LikeUpdateOne {
-	if id != nil {
-		luo = luo.SetUserID(*id)
-	}
-	return luo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (luo *LikeUpdateOne) SetUser(u *User) *LikeUpdateOne {
 	return luo.SetUserID(u.ID)
@@ -253,14 +243,6 @@ func (luo *LikeUpdateOne) SetUser(u *User) *LikeUpdateOne {
 // SetPostID sets the "post" edge to the Post entity by ID.
 func (luo *LikeUpdateOne) SetPostID(id uuid.UUID) *LikeUpdateOne {
 	luo.mutation.SetPostID(id)
-	return luo
-}
-
-// SetNillablePostID sets the "post" edge to the Post entity by ID if the given value is not nil.
-func (luo *LikeUpdateOne) SetNillablePostID(id *uuid.UUID) *LikeUpdateOne {
-	if id != nil {
-		luo = luo.SetPostID(*id)
-	}
 	return luo
 }
 
@@ -326,7 +308,21 @@ func (luo *LikeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (luo *LikeUpdateOne) check() error {
+	if luo.mutation.UserCleared() && len(luo.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Like.user"`)
+	}
+	if luo.mutation.PostCleared() && len(luo.mutation.PostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Like.post"`)
+	}
+	return nil
+}
+
 func (luo *LikeUpdateOne) sqlSave(ctx context.Context) (_node *Like, err error) {
+	if err := luo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(like.Table, like.Columns, sqlgraph.NewFieldSpec(like.FieldID, field.TypeUUID))
 	id, ok := luo.mutation.ID()
 	if !ok {

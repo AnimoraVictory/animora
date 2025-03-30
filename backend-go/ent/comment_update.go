@@ -65,14 +65,6 @@ func (cu *CommentUpdate) SetPostID(id uuid.UUID) *CommentUpdate {
 	return cu
 }
 
-// SetNillablePostID sets the "post" edge to the Post entity by ID if the given value is not nil.
-func (cu *CommentUpdate) SetNillablePostID(id *uuid.UUID) *CommentUpdate {
-	if id != nil {
-		cu = cu.SetPostID(*id)
-	}
-	return cu
-}
-
 // SetPost sets the "post" edge to the Post entity.
 func (cu *CommentUpdate) SetPost(p *Post) *CommentUpdate {
 	return cu.SetPostID(p.ID)
@@ -81,14 +73,6 @@ func (cu *CommentUpdate) SetPost(p *Post) *CommentUpdate {
 // SetUserID sets the "user" edge to the User entity by ID.
 func (cu *CommentUpdate) SetUserID(id uuid.UUID) *CommentUpdate {
 	cu.mutation.SetUserID(id)
-	return cu
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (cu *CommentUpdate) SetNillableUserID(id *uuid.UUID) *CommentUpdate {
-	if id != nil {
-		cu = cu.SetUserID(*id)
-	}
 	return cu
 }
 
@@ -147,6 +131,12 @@ func (cu *CommentUpdate) check() error {
 		if err := comment.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Comment.content": %w`, err)}
 		}
+	}
+	if cu.mutation.PostCleared() && len(cu.mutation.PostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Comment.post"`)
+	}
+	if cu.mutation.UserCleared() && len(cu.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
 	}
 	return nil
 }
@@ -281,14 +271,6 @@ func (cuo *CommentUpdateOne) SetPostID(id uuid.UUID) *CommentUpdateOne {
 	return cuo
 }
 
-// SetNillablePostID sets the "post" edge to the Post entity by ID if the given value is not nil.
-func (cuo *CommentUpdateOne) SetNillablePostID(id *uuid.UUID) *CommentUpdateOne {
-	if id != nil {
-		cuo = cuo.SetPostID(*id)
-	}
-	return cuo
-}
-
 // SetPost sets the "post" edge to the Post entity.
 func (cuo *CommentUpdateOne) SetPost(p *Post) *CommentUpdateOne {
 	return cuo.SetPostID(p.ID)
@@ -297,14 +279,6 @@ func (cuo *CommentUpdateOne) SetPost(p *Post) *CommentUpdateOne {
 // SetUserID sets the "user" edge to the User entity by ID.
 func (cuo *CommentUpdateOne) SetUserID(id uuid.UUID) *CommentUpdateOne {
 	cuo.mutation.SetUserID(id)
-	return cuo
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (cuo *CommentUpdateOne) SetNillableUserID(id *uuid.UUID) *CommentUpdateOne {
-	if id != nil {
-		cuo = cuo.SetUserID(*id)
-	}
 	return cuo
 }
 
@@ -376,6 +350,12 @@ func (cuo *CommentUpdateOne) check() error {
 		if err := comment.ContentValidator(v); err != nil {
 			return &ValidationError{Name: "content", err: fmt.Errorf(`ent: validator failed for field "Comment.content": %w`, err)}
 		}
+	}
+	if cuo.mutation.PostCleared() && len(cuo.mutation.PostIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Comment.post"`)
+	}
+	if cuo.mutation.UserCleared() && len(cuo.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Comment.user"`)
 	}
 	return nil
 }

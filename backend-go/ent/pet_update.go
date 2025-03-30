@@ -140,14 +140,6 @@ func (pu *PetUpdate) SetOwnerID(id uuid.UUID) *PetUpdate {
 	return pu
 }
 
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (pu *PetUpdate) SetNillableOwnerID(id *uuid.UUID) *PetUpdate {
-	if id != nil {
-		pu = pu.SetOwnerID(*id)
-	}
-	return pu
-}
-
 // SetOwner sets the "owner" edge to the User entity.
 func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
@@ -217,6 +209,9 @@ func (pu *PetUpdate) check() error {
 		if err := pet.ImageKeyValidator(v); err != nil {
 			return &ValidationError{Name: "image_key", err: fmt.Errorf(`ent: validator failed for field "Pet.image_key": %w`, err)}
 		}
+	}
+	if pu.mutation.OwnerCleared() && len(pu.mutation.OwnerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Pet.owner"`)
 	}
 	return nil
 }
@@ -416,14 +411,6 @@ func (puo *PetUpdateOne) SetOwnerID(id uuid.UUID) *PetUpdateOne {
 	return puo
 }
 
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (puo *PetUpdateOne) SetNillableOwnerID(id *uuid.UUID) *PetUpdateOne {
-	if id != nil {
-		puo = puo.SetOwnerID(*id)
-	}
-	return puo
-}
-
 // SetOwner sets the "owner" edge to the User entity.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
@@ -506,6 +493,9 @@ func (puo *PetUpdateOne) check() error {
 		if err := pet.ImageKeyValidator(v); err != nil {
 			return &ValidationError{Name: "image_key", err: fmt.Errorf(`ent: validator failed for field "Pet.image_key": %w`, err)}
 		}
+	}
+	if puo.mutation.OwnerCleared() && len(puo.mutation.OwnerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Pet.owner"`)
 	}
 	return nil
 }

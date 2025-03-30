@@ -60,14 +60,6 @@ func (lc *LikeCreate) SetUserID(id uuid.UUID) *LikeCreate {
 	return lc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (lc *LikeCreate) SetNillableUserID(id *uuid.UUID) *LikeCreate {
-	if id != nil {
-		lc = lc.SetUserID(*id)
-	}
-	return lc
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (lc *LikeCreate) SetUser(u *User) *LikeCreate {
 	return lc.SetUserID(u.ID)
@@ -76,14 +68,6 @@ func (lc *LikeCreate) SetUser(u *User) *LikeCreate {
 // SetPostID sets the "post" edge to the Post entity by ID.
 func (lc *LikeCreate) SetPostID(id uuid.UUID) *LikeCreate {
 	lc.mutation.SetPostID(id)
-	return lc
-}
-
-// SetNillablePostID sets the "post" edge to the Post entity by ID if the given value is not nil.
-func (lc *LikeCreate) SetNillablePostID(id *uuid.UUID) *LikeCreate {
-	if id != nil {
-		lc = lc.SetPostID(*id)
-	}
 	return lc
 }
 
@@ -141,6 +125,12 @@ func (lc *LikeCreate) defaults() {
 func (lc *LikeCreate) check() error {
 	if _, ok := lc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Like.created_at"`)}
+	}
+	if len(lc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Like.user"`)}
+	}
+	if len(lc.mutation.PostIDs()) == 0 {
+		return &ValidationError{Name: "post", err: errors.New(`ent: missing required edge "Like.post"`)}
 	}
 	return nil
 }

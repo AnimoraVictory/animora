@@ -116,14 +116,6 @@ func (pc *PostCreate) SetUserID(id uuid.UUID) *PostCreate {
 	return pc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (pc *PostCreate) SetNillableUserID(id *uuid.UUID) *PostCreate {
-	if id != nil {
-		pc = pc.SetUserID(*id)
-	}
-	return pc
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (pc *PostCreate) SetUser(u *User) *PostCreate {
 	return pc.SetUserID(u.ID)
@@ -224,6 +216,9 @@ func (pc *PostCreate) check() error {
 	}
 	if _, ok := pc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Post.created_at"`)}
+	}
+	if len(pc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Post.user"`)}
 	}
 	return nil
 }

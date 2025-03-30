@@ -52,6 +52,6 @@ func (Pet) Fields() []ent.Field {
 // Edges of the Pet.
 func (Pet) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("owner", User.Type).Ref("pets").Unique(),
+		edge.From("owner", User.Type).Ref("pets").Unique().Required(),
 	}
 }

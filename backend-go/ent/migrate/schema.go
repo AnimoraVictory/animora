@@ -13,8 +13,8 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "content", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "post_comments", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_comments", Type: field.TypeUUID, Nullable: true},
+		{Name: "post_comments", Type: field.TypeUUID},
+		{Name: "user_comments", Type: field.TypeUUID},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
@@ -26,13 +26,13 @@ var (
 				Symbol:     "comments_posts_comments",
 				Columns:    []*schema.Column{CommentsColumns[3]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "comments_users_comments",
 				Columns:    []*schema.Column{CommentsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -40,8 +40,8 @@ var (
 	FollowRelationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "user_following", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_followers", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_following", Type: field.TypeUUID},
+		{Name: "user_followers", Type: field.TypeUUID},
 	}
 	// FollowRelationsTable holds the schema information for the "follow_relations" table.
 	FollowRelationsTable = &schema.Table{
@@ -53,13 +53,13 @@ var (
 				Symbol:     "follow_relations_users_following",
 				Columns:    []*schema.Column{FollowRelationsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "follow_relations_users_followers",
 				Columns:    []*schema.Column{FollowRelationsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -67,8 +67,8 @@ var (
 	LikesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "post_likes", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_likes", Type: field.TypeUUID, Nullable: true},
+		{Name: "post_likes", Type: field.TypeUUID},
+		{Name: "user_likes", Type: field.TypeUUID},
 	}
 	// LikesTable holds the schema information for the "likes" table.
 	LikesTable = &schema.Table{
@@ -80,13 +80,13 @@ var (
 				Symbol:     "likes_posts_likes",
 				Columns:    []*schema.Column{LikesColumns[2]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "likes_users_likes",
 				Columns:    []*schema.Column{LikesColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -100,7 +100,7 @@ var (
 		{Name: "image_key", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_pets", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_pets", Type: field.TypeUUID},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
@@ -112,7 +112,7 @@ var (
 				Symbol:     "pets_users_pets",
 				Columns:    []*schema.Column{PetsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -125,7 +125,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "text_feature", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "vector(768)"}},
 		{Name: "image_feature", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "vector(768)"}},
-		{Name: "user_posts", Type: field.TypeUUID, Nullable: true},
+		{Name: "user_posts", Type: field.TypeUUID},
 	}
 	// PostsTable holds the schema information for the "posts" table.
 	PostsTable = &schema.Table{
@@ -137,7 +137,7 @@ var (
 				Symbol:     "posts_users_posts",
 				Columns:    []*schema.Column{PostsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}

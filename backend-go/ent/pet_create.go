@@ -103,14 +103,6 @@ func (pc *PetCreate) SetOwnerID(id uuid.UUID) *PetCreate {
 	return pc
 }
 
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (pc *PetCreate) SetNillableOwnerID(id *uuid.UUID) *PetCreate {
-	if id != nil {
-		pc = pc.SetOwnerID(*id)
-	}
-	return pc
-}
-
 // SetOwner sets the "owner" edge to the User entity.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
@@ -205,6 +197,9 @@ func (pc *PetCreate) check() error {
 	}
 	if _, ok := pc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Pet.created_at"`)}
+	}
+	if len(pc.mutation.OwnerIDs()) == 0 {
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Pet.owner"`)}
 	}
 	return nil
 }
