@@ -1,11 +1,14 @@
 include .env
 
-.PHONY: run run-seed run-all seed build psql down-all
+.PHONY: run run-seed run-all seed build psql down-all codegen
 
 run-all: up-adminer run
 
 run: build
 	docker compose up api -d
+
+run-attach: build
+	docker compose up api
 
 run-seed:
 	SEED=true docker compose up api -d
@@ -25,8 +28,12 @@ up-adminer:
 down-all:
 	docker compoes down
 
-migrate:
-	cd backend-go && atlas schema apply -u $(DATABASE_URL) --to file://schema.hcl
+create-model:
+# make create-model NAME=Userなど
+	cd backend-go && go run -mod=mod entgo.io/ent/cmd/ent new $(NAME)
+
+codegen:
+	cd backend-go && go generate ./ent
 
 psql:
 	psql $(DATABASE_URL)

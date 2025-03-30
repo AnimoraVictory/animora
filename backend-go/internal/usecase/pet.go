@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
+	"github.com/htanos/animalia/backend-go/ent"
 	"github.com/htanos/animalia/backend-go/internal/domain/repository"
 )
 
@@ -15,11 +15,11 @@ func NewPetUsecase(petRepository repository.PetRepository) *PetUsecase {
 	}
 }
 
-func (u *PetUsecase) GetByOwner(ownerID string) ([]*models.Pet, error) {
+func (u *PetUsecase) GetByOwner(ownerID string) ([]*ent.Pet, error) {
 	return u.petRepository.GetByOwner(ownerID)
 }
 
-func (u *PetUsecase) Create(name, petType, species, birthDay, fileKey, userID string) (*models.Pet, error) {
+func (u *PetUsecase) Create(name, petType, species, birthDay, fileKey, userID string) (*ent.Pet, error) {
 	return u.petRepository.Create(name, petType, species, birthDay, fileKey, userID)
 }
 

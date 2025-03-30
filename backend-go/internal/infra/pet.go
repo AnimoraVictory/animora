@@ -1,61 +1,78 @@
 package infra
 
 import (
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
-	"gorm.io/gorm"
+	"context"
+
+	"github.com/google/uuid"
+	"github.com/htanos/animalia/backend-go/ent"
+	"github.com/htanos/animalia/backend-go/ent/pet"
+	"github.com/htanos/animalia/backend-go/ent/user"
 )
 
 type PetRepository struct {
-	db *gorm.DB
+	db *ent.Client
 }
 
-func NewPetRepository(db *gorm.DB) *PetRepository {
+func NewPetRepository(db *ent.Client) *PetRepository {
 	return &PetRepository{
 		db: db,
 	}
 }
 
-func (r *PetRepository) GetByOwner(ownerID string) ([]*models.Pet, error) {
-	var pets []*models.Pet
-	if err := r.db.Where("owner_id = ?", ownerID).Find(&pets).Error; err != nil {
+func (r *PetRepository) GetByOwner(ownerID string) ([]*ent.Pet, error) {
+	ownerUUID, err := uuid.Parse(ownerID)
+	if err != nil {
+		return nil, err
+	}
+
+	pets, err := r.db.Pet.Query().Where(pet.HasOwnerWith(user.ID(ownerUUID))).All(context.Background())
+	if err != nil {
 		return nil, err
 	}
 	return pets, nil
 }
 
-func (r *PetRepository) Create(name, petType, species, birthDay, fileKey, userID string) (*models.Pet, error) {
-
-	pet := models.Pet{
-		Name:     name,
-		Type:     models.PetType(petType),
-		Species:  species,
-		BirthDay: birthDay,
-		ImageKey: fileKey,
-		OwnerID:  userID,
-	}
-
-	if err := r.db.Create(&pet).Error; err != nil {
+func (r *PetRepository) Create(name, petType, species, birthDay, fileKey, userID string) (*ent.Pet, error) {
+	ownerID, err := uuid.Parse(userID)
+	if err != nil {
 		return nil, err
 	}
 
-	return &pet, nil
-}
-
-func (r *PetRepository) Update(petId, name, petType, species, birthDay string) error {
-	pet := models.Pet{
-		Name:     name,
-		Type:     models.PetType(petType),
-		Species:  species,
-		BirthDay: birthDay,
+	pet, err := r.db.Pet.Create().
+		SetName(name).
+		SetType(pet.Type(petType)).
+		SetSpecies(pet.Species(species)).
+		SetBirthDay(birthDay).
+		SetImageKey(fileKey).
+		SetOwnerID(ownerID).
+		Save(context.Background())
+	if err != nil {
+		return nil, err
 	}
 
-	if err := r.db.Model(&models.Pet{}).Where("id = ?", petId).Updates(&pet).Error; err != nil {
+	return pet, nil
+}
+
+func (r *PetRepository) Update(petID, name, petType, species, birthDay string) error {
+	petUUID, err := uuid.Parse(petID)
+	if err != nil {
 		return err
 	}
 
-	return nil
+	_, err = r.db.Pet.UpdateOneID(petUUID).
+		SetName(name).
+		SetType(pet.Type(petType)).
+		SetSpecies(pet.Species(species)).
+		SetBirthDay(birthDay).
+		Save(context.Background())
+	return err
 }
 
-func (r *PetRepository) Delete(petId string) error {
-	return r.db.Delete(&models.Pet{}, petId).Error
+func (r *PetRepository) Delete(petID string) error {
+	petUUID, err := uuid.Parse(petID)
+	if err != nil {
+		return err
+	}
+
+	return r.db.Pet.DeleteOneID(petUUID).Exec(context.Background())
 }
