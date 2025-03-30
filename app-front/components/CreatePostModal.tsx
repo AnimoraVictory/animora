@@ -34,8 +34,7 @@ const postInputSchema = z.object({
 type PostForm = z.infer<typeof postInputSchema>;
 
 export function CreatePostModal({ photoUri, onClose }: Props) {
-  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   const { user } = useAuth();
   const initialFormState = {
@@ -96,7 +95,7 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
             <Text style={styles.postButton}>投稿</Text>
           </TouchableOpacity>
         </View>
-  
+
         <View style={styles.imageWrapper}>
           <Image
             source={{ uri: photoUri }}
@@ -105,13 +104,10 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
           />
         </View>
         <KeyboardAvoidingView
-        style={styles.container}
+          style={styles.container}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <View style={[
-    styles.captionWrapper,
-    { paddingBottom: isKeyboardVisible ? 12 : 32 },
-  ]}>
+          <View style={styles.captionWrapper}>
             <TextInput
               placeholder="キャプションを入力"
               placeholderTextColor="#fff"
@@ -126,7 +122,7 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
         </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
@@ -160,13 +156,13 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   image: {
-    
     width: "80%",
     height: "100%",
     borderRadius: 30,
   },
   captionWrapper: {
     paddingHorizontal: 20,
+    paddingBottom: 25,
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   input: {
@@ -178,4 +174,3 @@ const styles = StyleSheet.create({
     color: "#000",
   },
 });
-
