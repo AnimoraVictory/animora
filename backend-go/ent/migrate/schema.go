@@ -146,7 +146,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "bio", Type: field.TypeString},
+		{Name: "bio", Type: field.TypeString, Default: ""},
 		{Name: "icon_image_key", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 	}
