@@ -1,6 +1,6 @@
 include .env
 
-.PHONY: run run-seed run-all seed build psql down-all
+.PHONY: run run-seed run-all seed build psql down-all codegen
 
 run-all: up-adminer run
 
@@ -31,6 +31,9 @@ down-all:
 create-model:
 # make create-model NAME=Userなど
 	cd backend-go && go run -mod=mod entgo.io/ent/cmd/ent new $(NAME)
+
+codegen:
+	cd backend-go && go generate ./ent
 
 psql:
 	psql $(DATABASE_URL)
