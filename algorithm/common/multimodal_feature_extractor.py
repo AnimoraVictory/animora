@@ -23,8 +23,8 @@ _ = load_dotenv(find_dotenv())
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model_path = "stabilityai/japanese-stable-clip-vit-l-16"
 model = AutoModel.from_pretrained(model_path, trust_remote_code=True).eval().to(device)
-tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
-processor = AutoImageProcessor.from_pretrained(model_path, use_fast=True)
+tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
+processor = AutoImageProcessor.from_pretrained(model_path, use_fast=False)
 
 # テキストをクリーンアップする関数
 def basic_clean(text):
@@ -196,7 +196,7 @@ def update_post_features():
                 expiration=3600
             )
             response = requests.get(image_url)
-            image = Image.open(BytesIO(response.content).convert("RGB"))
+            image = Image.open(BytesIO(response.content)).convert("RGB")
 
             # 画像特徴の計算
             image_features = compute_image_embeddings(image) # shape: (1, feature_dim)
