@@ -1,6 +1,6 @@
 module github.com/aki-13627/animalia/backend-go
 
-go 1.23.0
+go 1.24.1
 
 require (
 	entgo.io/ent v0.14.4
