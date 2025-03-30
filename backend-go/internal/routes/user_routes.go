@@ -2,18 +2,17 @@ package routes
 
 import (
 	"github.com/aki-13627/animalia/backend-go/internal/injector"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
-func SetupUserRoutes(app *fiber.App) {
+func SetupUserRoutes(app *echo.Echo) {
 	userHandler := injector.InjectUserHandler()
 	userGroup := app.Group("/users")
 
-	userGroup.Put("/update", userHandler.UpdateUser())
-	userGroup.Post("/follow", userHandler.Follow())
-	userGroup.Get("/follower_count", userHandler.GetFollowerCount())
-	userGroup.Get("/follows_count", userHandler.GetFollowsCount())
-	userGroup.Get("/follower_users", userHandler.GetFollowerUsers())
-	userGroup.Get("/follows_users", userHandler.GetFollowsUsers())
-
+	userGroup.PUT("/update", userHandler.UpdateUser)
+	userGroup.POST("/follow", userHandler.Follow)
+	userGroup.GET("/follower_count", userHandler.GetFollowerCount)
+	userGroup.GET("/follows_count", userHandler.GetFollowsCount)
+	userGroup.GET("/follower_users", userHandler.GetFollowerUsers)
+	userGroup.GET("/follows_users", userHandler.GetFollowsUsers)
 }

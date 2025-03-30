@@ -16,8 +16,7 @@ func NewPostUsecase(postRepository repository.PostRepository) *PostUsecase {
 }
 
 func (u *PostUsecase) GetAllPosts() ([]*ent.Post, error) {
-	posts, err := u.postRepository.GetAllPosts()
-	return posts, err
+	return u.postRepository.GetAllPosts()
 }
 
 func (u *PostUsecase) GetPostsByUser(userId string) ([]*ent.Post, error) {

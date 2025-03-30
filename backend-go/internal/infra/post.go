@@ -7,6 +7,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
+	"github.com/labstack/gommon/log"
 )
 
 type PostRepository struct {
@@ -26,6 +27,7 @@ func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
 	if err != nil {
+		log.Errorf("Failed to get all posts: %v", err)
 		return nil, err
 	}
 	return posts, nil

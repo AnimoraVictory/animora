@@ -2,17 +2,15 @@ package main
 
 import (
 	"context"
-	"log"
+	"log" // Standard log package
 	"os"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/internal/routes"
 	"github.com/aki-13627/animalia/backend-go/internal/seed"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
-	"github.com/rs/zerolog"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -37,8 +35,9 @@ func main() {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
-	// Set time format for zerolog
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	// Create Echo app
+	app := echo.New()
+	app.HideBanner = true
 
 	// Set log level based on ENV environment variable
 	env := os.Getenv("ENV")
@@ -46,9 +45,9 @@ func main() {
 		env = "development" // デフォルト値として development を設定
 	}
 	if env == "production" {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		app.Logger.SetLevel(2)
 	} else {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		app.Logger.SetLevel(1)
 	}
 
 	isSeed := os.Getenv("SEED")
@@ -56,31 +55,50 @@ func main() {
 		seed.SeedData(client)
 	}
 
-	// Create Fiber app
-	app := fiber.New(fiber.Config{
-		AppName: "Animalia API",
-	})
-
 	// Set up middleware
-	app.Use(logger.New())
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173",
-		AllowMethods:     "GET,POST,PUT,DELETE",
-		AllowHeaders:     "Content-Type,Authorization",
+	app.Use(middleware.Logger())
+	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+		AllowHeaders:     []string{echo.HeaderContentType, echo.HeaderAuthorization},
 		AllowCredentials: true,
 		MaxAge:           600,
 	}))
 
 	// Set up routes
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Animalia API is running!")
+	app.GET("/", func(c echo.Context) error {
+		return c.String(200, "Animalia API is running!")
+	})
+
+	// Add health check endpoint
+	app.GET("/health", func(c echo.Context) error {
+		log.Printf("Health check endpoint called")
+		return c.JSON(200, map[string]interface{}{
+			"status": "healthy",
+		})
+	})
+
+	// Add debug route to check all routes
+	app.GET("/debug/routes", func(c echo.Context) error {
+		routes := []map[string]string{}
+		for _, r := range app.Routes() {
+			routes = append(routes, map[string]string{
+				"method": r.Method,
+				"path":   r.Path,
+			})
+		}
+		return c.JSON(200, map[string]interface{}{
+			"routes": routes,
+		})
 	})
 
 	// Set up API routes
+	log.Println("Setting up API routes...")
 	routes.SetupAuthRoutes(app)
 	routes.SetupPetRoutes(app)
 	routes.SetupPostRoutes(app)
 	routes.SetupUserRoutes(app)
+	log.Println("API routes setup completed")
 
 	// Get port from environment variable or use default
 	port := os.Getenv("PORT")
@@ -90,7 +108,7 @@ func main() {
 
 	// Start server
 	log.Printf("Server is running on http://localhost:%s", port)
-	if err := app.Listen(":" + port); err != nil {
+	if err := app.Start(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }

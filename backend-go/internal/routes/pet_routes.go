@@ -2,21 +2,21 @@ package routes
 
 import (
 	"github.com/aki-13627/animalia/backend-go/internal/injector"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
 // SetupPetRoutes sets up the pet routes
-func SetupPetRoutes(app *fiber.App) {
+func SetupPetRoutes(app *echo.Echo) {
 	petHandler := injector.InjectPetHandler()
 	petGroup := app.Group("/pets")
 
 	// Get pets by owner ID
-	petGroup.Get("/owner", petHandler.GetByOwner())
+	petGroup.GET("/owner", petHandler.GetByOwner)
 
 	// Create a new pet
-	petGroup.Post("/new", petHandler.Create())
+	petGroup.POST("/new", petHandler.Create)
 
-	petGroup.Put("/update", petHandler.Update())
+	petGroup.PUT("/update", petHandler.Update)
 
-	petGroup.Delete("/delete", petHandler.Delete())
+	petGroup.DELETE("/delete", petHandler.Delete)
 }
