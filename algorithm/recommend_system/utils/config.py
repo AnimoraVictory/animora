@@ -26,7 +26,7 @@ sim_config = {
     "model_dir": "recommend_system/models/checkpoints/sim_HR{:.4f}_NDCG{:.4f}.model",
     "image_emb_dim": 16,
     "text_emb_dim": 16,
-    "image_feature_dim": 1024,
+    "image_feature_dim": 768,
     "text_feature_dim": 768
 }
 
@@ -55,12 +55,11 @@ prod_config = {
     "pretrain_model_dir": "recommend_system/models/latest.model",
     "image_emb_dim": 16,
     "text_emb_dim": 16,
-    "image_feature_dim": 1024,
+    "image_feature_dim": 768,
     "text_feature_dim": 768
 }
-
 # ----------------------------------
-# 新規ユーザーに対する投稿を取得するクエリと閾値
+# 学習済みユーザーに対する投稿を取得するクエリと閾値
 # ----------------------------------
 existing_user_query = """
                       SELECT 
@@ -71,14 +70,17 @@ existing_user_query = """
                       FROM posts
                       WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL;
                       """
-existing_user_threshold = 0.5
+existing_user_threshold = 0.45
 
+# ----------------------------------
+# 新規ユーザーに対する投稿を取得するクエリと閾値
+# ----------------------------------
 new_user_query = """
                  SELECT
-                     P.id AS post_id,
+                     P.index AS post_id,
                      P.created_at AS timestamp,
-                     image_feature AS image_feature,
-                     text_feature AS text_feature,
+                     P.image_feature AS image_feature,
+                     P.text_feature AS text_feature,
                      COUNT(DISTINCT L.id) + COUNT(DISTINCT C.id) AS score
                  FROM posts P
                  LEFT JOIN likes L ON L.post_likes = P.id
@@ -86,4 +88,39 @@ new_user_query = """
                  WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL
                  GROUP BY P.id, P.created_at, P.image_feature, P.text_feature;
                  """
-new_user_threshold = 10
+new_user_threshold = 2
+
+# ----------------------------------
+# ratingsデータフレームを作成するクエリ
+# ----------------------------------
+rating_query =  """
+                -- 投稿自体のインタラクション(投稿者による投稿)
+                SELECT
+                    U.index AS user_id, P.index AS post_id, 1 AS rating, P.created_at AS timestamp, 
+                    P.image_feature AS image_feature, P.text_feature AS text_feature
+                FROM posts P
+                JOIN users U ON P.user_posts = U.id
+                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL
+
+                UNION -- 縦結合＋重複削除
+
+                -- 「いいね」のインタラクション
+                SELECT
+                    U.index AS user_id, P.index AS post_id, 1 AS rating, L.created_at AS timestamp,
+                    P.image_feature AS image_feature, P.text_feature AS text_feature
+                FROM likes L
+                JOIN posts P ON L.post_likes = P.id
+                JOIN users U ON L.user_likes = U.id
+                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL
+
+                UNION
+
+                -- コメントのインタラクション
+                SELECT
+                    U.index AS user_id, P.index AS post_id, 1 AS rating, C.created_at AS timestamp,
+                    P.image_feature AS image_feature, P.text_feature AS text_feature
+                FROM comments C
+                JOIN posts P ON C.post_comments = P.id
+                JOIN users U ON C.user_comments = U.id
+                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL;
+                """
