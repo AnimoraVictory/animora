@@ -50,9 +50,11 @@ type UserEdges struct {
 	Following []*FollowRelation `json:"following,omitempty"`
 	// Followers holds the value of the followers edge.
 	Followers []*FollowRelation `json:"followers,omitempty"`
+	// DailyTasks holds the value of the daily_tasks edge.
+	DailyTasks []*DailyTask `json:"daily_tasks,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // PostsOrErr returns the Posts value or an error if the edge
@@ -107,6 +109,15 @@ func (e UserEdges) FollowersOrErr() ([]*FollowRelation, error) {
 		return e.Followers, nil
 	}
 	return nil, &NotLoadedError{edge: "followers"}
+}
+
+// DailyTasksOrErr returns the DailyTasks value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DailyTasksOrErr() ([]*DailyTask, error) {
+	if e.loadedTypes[6] {
+		return e.DailyTasks, nil
+	}
+	return nil, &NotLoadedError{edge: "daily_tasks"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -220,6 +231,11 @@ func (u *User) QueryFollowing() *FollowRelationQuery {
 // QueryFollowers queries the "followers" edge of the User entity.
 func (u *User) QueryFollowers() *FollowRelationQuery {
 	return NewUserClient(u.config).QueryFollowers(u)
+}
+
+// QueryDailyTasks queries the "daily_tasks" edge of the User entity.
+func (u *User) QueryDailyTasks() *DailyTaskQuery {
+	return NewUserClient(u.config).QueryDailyTasks(u)
 }
 
 // Update returns a builder for updating this User.

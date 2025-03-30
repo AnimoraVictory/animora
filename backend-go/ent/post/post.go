@@ -35,6 +35,8 @@ const (
 	EdgeComments = "comments"
 	// EdgeLikes holds the string denoting the likes edge name in mutations.
 	EdgeLikes = "likes"
+	// EdgeDailyTasks holds the string denoting the daily_tasks edge name in mutations.
+	EdgeDailyTasks = "daily_tasks"
 	// Table holds the table name of the post in the database.
 	Table = "posts"
 	// UserTable is the table that holds the user relation/edge.
@@ -58,6 +60,13 @@ const (
 	LikesInverseTable = "likes"
 	// LikesColumn is the table column denoting the likes relation/edge.
 	LikesColumn = "post_likes"
+	// DailyTasksTable is the table that holds the daily_tasks relation/edge.
+	DailyTasksTable = "daily_tasks"
+	// DailyTasksInverseTable is the table name for the DailyTask entity.
+	// It exists in this package in order to avoid circular dependency with the "dailytask" package.
+	DailyTasksInverseTable = "daily_tasks"
+	// DailyTasksColumn is the table column denoting the daily_tasks relation/edge.
+	DailyTasksColumn = "post_daily_tasks"
 )
 
 // Columns holds all SQL columns for post fields.
@@ -183,6 +192,13 @@ func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByDailyTasksField orders the results by daily_tasks field.
+func ByDailyTasksField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDailyTasksStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -202,5 +218,12 @@ func newLikesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LikesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LikesTable, LikesColumn),
+	)
+}
+func newDailyTasksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DailyTasksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, DailyTasksTable, DailyTasksColumn),
 	)
 }

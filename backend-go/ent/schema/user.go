@@ -36,5 +36,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type),
 		edge.To("following", FollowRelation.Type),
 		edge.To("followers", FollowRelation.Type),
+		edge.To("daily_tasks", DailyTask.Type),
 	}
 }

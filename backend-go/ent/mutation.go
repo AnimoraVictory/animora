@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -32,6 +33,7 @@ const (
 
 	// Node types.
 	TypeComment        = "Comment"
+	TypeDailyTask      = "DailyTask"
 	TypeFollowRelation = "FollowRelation"
 	TypeLike           = "Like"
 	TypePet            = "Pet"
@@ -549,6 +551,518 @@ func (m *CommentMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Comment edge %s", name)
+}
+
+// DailyTaskMutation represents an operation that mutates the DailyTask nodes in the graph.
+type DailyTaskMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	_type         *dailytask.Type
+	clearedFields map[string]struct{}
+	user          *uuid.UUID
+	cleareduser   bool
+	post          *uuid.UUID
+	clearedpost   bool
+	done          bool
+	oldValue      func(context.Context) (*DailyTask, error)
+	predicates    []predicate.DailyTask
+}
+
+var _ ent.Mutation = (*DailyTaskMutation)(nil)
+
+// dailytaskOption allows management of the mutation configuration using functional options.
+type dailytaskOption func(*DailyTaskMutation)
+
+// newDailyTaskMutation creates new mutation for the DailyTask entity.
+func newDailyTaskMutation(c config, op Op, opts ...dailytaskOption) *DailyTaskMutation {
+	m := &DailyTaskMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDailyTask,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDailyTaskID sets the ID field of the mutation.
+func withDailyTaskID(id uuid.UUID) dailytaskOption {
+	return func(m *DailyTaskMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DailyTask
+		)
+		m.oldValue = func(ctx context.Context) (*DailyTask, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DailyTask.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDailyTask sets the old DailyTask of the mutation.
+func withDailyTask(node *DailyTask) dailytaskOption {
+	return func(m *DailyTaskMutation) {
+		m.oldValue = func(context.Context) (*DailyTask, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DailyTaskMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DailyTaskMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DailyTask entities.
+func (m *DailyTaskMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DailyTaskMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DailyTaskMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DailyTask.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DailyTaskMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DailyTaskMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the DailyTask entity.
+// If the DailyTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyTaskMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DailyTaskMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetType sets the "type" field.
+func (m *DailyTaskMutation) SetType(d dailytask.Type) {
+	m._type = &d
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *DailyTaskMutation) GetType() (r dailytask.Type, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the DailyTask entity.
+// If the DailyTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyTaskMutation) OldType(ctx context.Context) (v dailytask.Type, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *DailyTaskMutation) ResetType() {
+	m._type = nil
+}
+
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *DailyTaskMutation) SetUserID(id uuid.UUID) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *DailyTaskMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *DailyTaskMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *DailyTaskMutation) UserID() (id uuid.UUID, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *DailyTaskMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *DailyTaskMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// SetPostID sets the "post" edge to the Post entity by id.
+func (m *DailyTaskMutation) SetPostID(id uuid.UUID) {
+	m.post = &id
+}
+
+// ClearPost clears the "post" edge to the Post entity.
+func (m *DailyTaskMutation) ClearPost() {
+	m.clearedpost = true
+}
+
+// PostCleared reports if the "post" edge to the Post entity was cleared.
+func (m *DailyTaskMutation) PostCleared() bool {
+	return m.clearedpost
+}
+
+// PostID returns the "post" edge ID in the mutation.
+func (m *DailyTaskMutation) PostID() (id uuid.UUID, exists bool) {
+	if m.post != nil {
+		return *m.post, true
+	}
+	return
+}
+
+// PostIDs returns the "post" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PostID instead. It exists only for internal usage by the builders.
+func (m *DailyTaskMutation) PostIDs() (ids []uuid.UUID) {
+	if id := m.post; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPost resets all changes to the "post" edge.
+func (m *DailyTaskMutation) ResetPost() {
+	m.post = nil
+	m.clearedpost = false
+}
+
+// Where appends a list predicates to the DailyTaskMutation builder.
+func (m *DailyTaskMutation) Where(ps ...predicate.DailyTask) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DailyTaskMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DailyTaskMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DailyTask, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DailyTaskMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DailyTaskMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DailyTask).
+func (m *DailyTaskMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DailyTaskMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.created_at != nil {
+		fields = append(fields, dailytask.FieldCreatedAt)
+	}
+	if m._type != nil {
+		fields = append(fields, dailytask.FieldType)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DailyTaskMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case dailytask.FieldCreatedAt:
+		return m.CreatedAt()
+	case dailytask.FieldType:
+		return m.GetType()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DailyTaskMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case dailytask.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case dailytask.FieldType:
+		return m.OldType(ctx)
+	}
+	return nil, fmt.Errorf("unknown DailyTask field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DailyTaskMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case dailytask.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case dailytask.FieldType:
+		v, ok := value.(dailytask.Type)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DailyTask field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DailyTaskMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DailyTaskMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DailyTaskMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DailyTask numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DailyTaskMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DailyTaskMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DailyTaskMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DailyTask nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DailyTaskMutation) ResetField(name string) error {
+	switch name {
+	case dailytask.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case dailytask.FieldType:
+		m.ResetType()
+		return nil
+	}
+	return fmt.Errorf("unknown DailyTask field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DailyTaskMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.user != nil {
+		edges = append(edges, dailytask.EdgeUser)
+	}
+	if m.post != nil {
+		edges = append(edges, dailytask.EdgePost)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DailyTaskMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case dailytask.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case dailytask.EdgePost:
+		if id := m.post; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DailyTaskMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DailyTaskMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DailyTaskMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.cleareduser {
+		edges = append(edges, dailytask.EdgeUser)
+	}
+	if m.clearedpost {
+		edges = append(edges, dailytask.EdgePost)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DailyTaskMutation) EdgeCleared(name string) bool {
+	switch name {
+	case dailytask.EdgeUser:
+		return m.cleareduser
+	case dailytask.EdgePost:
+		return m.clearedpost
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DailyTaskMutation) ClearEdge(name string) error {
+	switch name {
+	case dailytask.EdgeUser:
+		m.ClearUser()
+		return nil
+	case dailytask.EdgePost:
+		m.ClearPost()
+		return nil
+	}
+	return fmt.Errorf("unknown DailyTask unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DailyTaskMutation) ResetEdge(name string) error {
+	switch name {
+	case dailytask.EdgeUser:
+		m.ResetUser()
+		return nil
+	case dailytask.EdgePost:
+		m.ResetPost()
+		return nil
+	}
+	return fmt.Errorf("unknown DailyTask edge %s", name)
 }
 
 // FollowRelationMutation represents an operation that mutates the FollowRelation nodes in the graph.
@@ -2215,29 +2729,31 @@ func (m *PetMutation) ResetEdge(name string) error {
 // PostMutation represents an operation that mutates the Post nodes in the graph.
 type PostMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *uuid.UUID
-	index           *int
-	addindex        *int
-	caption         *string
-	image_key       *string
-	created_at      *time.Time
-	deleted_at      *time.Time
-	text_feature    *pgvector.Vector
-	image_feature   *pgvector.Vector
-	clearedFields   map[string]struct{}
-	user            *uuid.UUID
-	cleareduser     bool
-	comments        map[uuid.UUID]struct{}
-	removedcomments map[uuid.UUID]struct{}
-	clearedcomments bool
-	likes           map[uuid.UUID]struct{}
-	removedlikes    map[uuid.UUID]struct{}
-	clearedlikes    bool
-	done            bool
-	oldValue        func(context.Context) (*Post, error)
-	predicates      []predicate.Post
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	index              *int
+	addindex           *int
+	caption            *string
+	image_key          *string
+	created_at         *time.Time
+	deleted_at         *time.Time
+	text_feature       *pgvector.Vector
+	image_feature      *pgvector.Vector
+	clearedFields      map[string]struct{}
+	user               *uuid.UUID
+	cleareduser        bool
+	comments           map[uuid.UUID]struct{}
+	removedcomments    map[uuid.UUID]struct{}
+	clearedcomments    bool
+	likes              map[uuid.UUID]struct{}
+	removedlikes       map[uuid.UUID]struct{}
+	clearedlikes       bool
+	daily_tasks        *uuid.UUID
+	cleareddaily_tasks bool
+	done               bool
+	oldValue           func(context.Context) (*Post, error)
+	predicates         []predicate.Post
 }
 
 var _ ent.Mutation = (*PostMutation)(nil)
@@ -2816,6 +3332,45 @@ func (m *PostMutation) ResetLikes() {
 	m.removedlikes = nil
 }
 
+// SetDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by id.
+func (m *PostMutation) SetDailyTasksID(id uuid.UUID) {
+	m.daily_tasks = &id
+}
+
+// ClearDailyTasks clears the "daily_tasks" edge to the DailyTask entity.
+func (m *PostMutation) ClearDailyTasks() {
+	m.cleareddaily_tasks = true
+}
+
+// DailyTasksCleared reports if the "daily_tasks" edge to the DailyTask entity was cleared.
+func (m *PostMutation) DailyTasksCleared() bool {
+	return m.cleareddaily_tasks
+}
+
+// DailyTasksID returns the "daily_tasks" edge ID in the mutation.
+func (m *PostMutation) DailyTasksID() (id uuid.UUID, exists bool) {
+	if m.daily_tasks != nil {
+		return *m.daily_tasks, true
+	}
+	return
+}
+
+// DailyTasksIDs returns the "daily_tasks" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DailyTasksID instead. It exists only for internal usage by the builders.
+func (m *PostMutation) DailyTasksIDs() (ids []uuid.UUID) {
+	if id := m.daily_tasks; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDailyTasks resets all changes to the "daily_tasks" edge.
+func (m *PostMutation) ResetDailyTasks() {
+	m.daily_tasks = nil
+	m.cleareddaily_tasks = false
+}
+
 // Where appends a list predicates to the PostMutation builder.
 func (m *PostMutation) Where(ps ...predicate.Post) {
 	m.predicates = append(m.predicates, ps...)
@@ -3093,7 +3648,7 @@ func (m *PostMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PostMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.user != nil {
 		edges = append(edges, post.EdgeUser)
 	}
@@ -3102,6 +3657,9 @@ func (m *PostMutation) AddedEdges() []string {
 	}
 	if m.likes != nil {
 		edges = append(edges, post.EdgeLikes)
+	}
+	if m.daily_tasks != nil {
+		edges = append(edges, post.EdgeDailyTasks)
 	}
 	return edges
 }
@@ -3126,13 +3684,17 @@ func (m *PostMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case post.EdgeDailyTasks:
+		if id := m.daily_tasks; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PostMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedcomments != nil {
 		edges = append(edges, post.EdgeComments)
 	}
@@ -3164,7 +3726,7 @@ func (m *PostMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PostMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.cleareduser {
 		edges = append(edges, post.EdgeUser)
 	}
@@ -3173,6 +3735,9 @@ func (m *PostMutation) ClearedEdges() []string {
 	}
 	if m.clearedlikes {
 		edges = append(edges, post.EdgeLikes)
+	}
+	if m.cleareddaily_tasks {
+		edges = append(edges, post.EdgeDailyTasks)
 	}
 	return edges
 }
@@ -3187,6 +3752,8 @@ func (m *PostMutation) EdgeCleared(name string) bool {
 		return m.clearedcomments
 	case post.EdgeLikes:
 		return m.clearedlikes
+	case post.EdgeDailyTasks:
+		return m.cleareddaily_tasks
 	}
 	return false
 }
@@ -3197,6 +3764,9 @@ func (m *PostMutation) ClearEdge(name string) error {
 	switch name {
 	case post.EdgeUser:
 		m.ClearUser()
+		return nil
+	case post.EdgeDailyTasks:
+		m.ClearDailyTasks()
 		return nil
 	}
 	return fmt.Errorf("unknown Post unique edge %s", name)
@@ -3215,6 +3785,9 @@ func (m *PostMutation) ResetEdge(name string) error {
 	case post.EdgeLikes:
 		m.ResetLikes()
 		return nil
+	case post.EdgeDailyTasks:
+		m.ResetDailyTasks()
+		return nil
 	}
 	return fmt.Errorf("unknown Post edge %s", name)
 }
@@ -3222,38 +3795,41 @@ func (m *PostMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *uuid.UUID
-	index            *int
-	addindex         *int
-	email            *string
-	name             *string
-	bio              *string
-	icon_image_key   *string
-	created_at       *time.Time
-	clearedFields    map[string]struct{}
-	posts            map[uuid.UUID]struct{}
-	removedposts     map[uuid.UUID]struct{}
-	clearedposts     bool
-	comments         map[uuid.UUID]struct{}
-	removedcomments  map[uuid.UUID]struct{}
-	clearedcomments  bool
-	likes            map[uuid.UUID]struct{}
-	removedlikes     map[uuid.UUID]struct{}
-	clearedlikes     bool
-	pets             map[uuid.UUID]struct{}
-	removedpets      map[uuid.UUID]struct{}
-	clearedpets      bool
-	following        map[uuid.UUID]struct{}
-	removedfollowing map[uuid.UUID]struct{}
-	clearedfollowing bool
-	followers        map[uuid.UUID]struct{}
-	removedfollowers map[uuid.UUID]struct{}
-	clearedfollowers bool
-	done             bool
-	oldValue         func(context.Context) (*User, error)
-	predicates       []predicate.User
+	op                 Op
+	typ                string
+	id                 *uuid.UUID
+	index              *int
+	addindex           *int
+	email              *string
+	name               *string
+	bio                *string
+	icon_image_key     *string
+	created_at         *time.Time
+	clearedFields      map[string]struct{}
+	posts              map[uuid.UUID]struct{}
+	removedposts       map[uuid.UUID]struct{}
+	clearedposts       bool
+	comments           map[uuid.UUID]struct{}
+	removedcomments    map[uuid.UUID]struct{}
+	clearedcomments    bool
+	likes              map[uuid.UUID]struct{}
+	removedlikes       map[uuid.UUID]struct{}
+	clearedlikes       bool
+	pets               map[uuid.UUID]struct{}
+	removedpets        map[uuid.UUID]struct{}
+	clearedpets        bool
+	following          map[uuid.UUID]struct{}
+	removedfollowing   map[uuid.UUID]struct{}
+	clearedfollowing   bool
+	followers          map[uuid.UUID]struct{}
+	removedfollowers   map[uuid.UUID]struct{}
+	clearedfollowers   bool
+	daily_tasks        map[uuid.UUID]struct{}
+	removeddaily_tasks map[uuid.UUID]struct{}
+	cleareddaily_tasks bool
+	done               bool
+	oldValue           func(context.Context) (*User, error)
+	predicates         []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -3947,6 +4523,60 @@ func (m *UserMutation) ResetFollowers() {
 	m.removedfollowers = nil
 }
 
+// AddDailyTaskIDs adds the "daily_tasks" edge to the DailyTask entity by ids.
+func (m *UserMutation) AddDailyTaskIDs(ids ...uuid.UUID) {
+	if m.daily_tasks == nil {
+		m.daily_tasks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.daily_tasks[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDailyTasks clears the "daily_tasks" edge to the DailyTask entity.
+func (m *UserMutation) ClearDailyTasks() {
+	m.cleareddaily_tasks = true
+}
+
+// DailyTasksCleared reports if the "daily_tasks" edge to the DailyTask entity was cleared.
+func (m *UserMutation) DailyTasksCleared() bool {
+	return m.cleareddaily_tasks
+}
+
+// RemoveDailyTaskIDs removes the "daily_tasks" edge to the DailyTask entity by IDs.
+func (m *UserMutation) RemoveDailyTaskIDs(ids ...uuid.UUID) {
+	if m.removeddaily_tasks == nil {
+		m.removeddaily_tasks = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.daily_tasks, ids[i])
+		m.removeddaily_tasks[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDailyTasks returns the removed IDs of the "daily_tasks" edge to the DailyTask entity.
+func (m *UserMutation) RemovedDailyTasksIDs() (ids []uuid.UUID) {
+	for id := range m.removeddaily_tasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DailyTasksIDs returns the "daily_tasks" edge IDs in the mutation.
+func (m *UserMutation) DailyTasksIDs() (ids []uuid.UUID) {
+	for id := range m.daily_tasks {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDailyTasks resets all changes to the "daily_tasks" edge.
+func (m *UserMutation) ResetDailyTasks() {
+	m.daily_tasks = nil
+	m.cleareddaily_tasks = false
+	m.removeddaily_tasks = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -4195,7 +4825,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.posts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -4213,6 +4843,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.followers != nil {
 		edges = append(edges, user.EdgeFollowers)
+	}
+	if m.daily_tasks != nil {
+		edges = append(edges, user.EdgeDailyTasks)
 	}
 	return edges
 }
@@ -4257,13 +4890,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeDailyTasks:
+		ids := make([]ent.Value, 0, len(m.daily_tasks))
+		for id := range m.daily_tasks {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.removedposts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -4281,6 +4920,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedfollowers != nil {
 		edges = append(edges, user.EdgeFollowers)
+	}
+	if m.removeddaily_tasks != nil {
+		edges = append(edges, user.EdgeDailyTasks)
 	}
 	return edges
 }
@@ -4325,13 +4967,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeDailyTasks:
+		ids := make([]ent.Value, 0, len(m.removeddaily_tasks))
+		for id := range m.removeddaily_tasks {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 7)
 	if m.clearedposts {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -4349,6 +4997,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedfollowers {
 		edges = append(edges, user.EdgeFollowers)
+	}
+	if m.cleareddaily_tasks {
+		edges = append(edges, user.EdgeDailyTasks)
 	}
 	return edges
 }
@@ -4369,6 +5020,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedfollowing
 	case user.EdgeFollowers:
 		return m.clearedfollowers
+	case user.EdgeDailyTasks:
+		return m.cleareddaily_tasks
 	}
 	return false
 }
@@ -4402,6 +5055,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeFollowers:
 		m.ResetFollowers()
+		return nil
+	case user.EdgeDailyTasks:
+		m.ResetDailyTasks()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

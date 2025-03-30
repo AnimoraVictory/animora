@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// DailyTask is the client for interacting with the DailyTask builders.
+	DailyTask *DailyTaskClient
 	// FollowRelation is the client for interacting with the FollowRelation builders.
 	FollowRelation *FollowRelationClient
 	// Like is the client for interacting with the Like builders.
@@ -156,6 +158,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Comment = NewCommentClient(tx.config)
+	tx.DailyTask = NewDailyTaskClient(tx.config)
 	tx.FollowRelation = NewFollowRelationClient(tx.config)
 	tx.Like = NewLikeClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)

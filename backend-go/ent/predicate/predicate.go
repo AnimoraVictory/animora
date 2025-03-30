@@ -9,6 +9,9 @@ import (
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
+// DailyTask is the predicate function for dailytask builders.
+type DailyTask func(*sql.Selector)
+
 // FollowRelation is the predicate function for followrelation builders.
 type FollowRelation func(*sql.Selector)
 

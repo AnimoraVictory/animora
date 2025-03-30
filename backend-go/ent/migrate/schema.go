@@ -36,6 +36,34 @@ var (
 			},
 		},
 	}
+	// DailyTasksColumns holds the columns for the "daily_tasks" table.
+	DailyTasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"eating", "sleeping", "playing"}},
+		{Name: "post_daily_tasks", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "user_daily_tasks", Type: field.TypeUUID},
+	}
+	// DailyTasksTable holds the schema information for the "daily_tasks" table.
+	DailyTasksTable = &schema.Table{
+		Name:       "daily_tasks",
+		Columns:    DailyTasksColumns,
+		PrimaryKey: []*schema.Column{DailyTasksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "daily_tasks_posts_daily_tasks",
+				Columns:    []*schema.Column{DailyTasksColumns[3]},
+				RefColumns: []*schema.Column{PostsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "daily_tasks_users_daily_tasks",
+				Columns:    []*schema.Column{DailyTasksColumns[4]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// FollowRelationsColumns holds the columns for the "follow_relations" table.
 	FollowRelationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -161,6 +189,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CommentsTable,
+		DailyTasksTable,
 		FollowRelationsTable,
 		LikesTable,
 		PetsTable,
@@ -172,6 +201,8 @@ var (
 func init() {
 	CommentsTable.ForeignKeys[0].RefTable = PostsTable
 	CommentsTable.ForeignKeys[1].RefTable = UsersTable
+	DailyTasksTable.ForeignKeys[0].RefTable = PostsTable
+	DailyTasksTable.ForeignKeys[1].RefTable = UsersTable
 	FollowRelationsTable.ForeignKeys[0].RefTable = UsersTable
 	FollowRelationsTable.ForeignKeys[1].RefTable = UsersTable
 	LikesTable.ForeignKeys[0].RefTable = PostsTable

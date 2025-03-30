@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -33,6 +34,16 @@ func init() {
 	commentDescID := commentFields[0].Descriptor()
 	// comment.DefaultID holds the default value on creation for the id field.
 	comment.DefaultID = commentDescID.Default.(func() uuid.UUID)
+	dailytaskFields := schema.DailyTask{}.Fields()
+	_ = dailytaskFields
+	// dailytaskDescCreatedAt is the schema descriptor for created_at field.
+	dailytaskDescCreatedAt := dailytaskFields[1].Descriptor()
+	// dailytask.DefaultCreatedAt holds the default value on creation for the created_at field.
+	dailytask.DefaultCreatedAt = dailytaskDescCreatedAt.Default.(func() time.Time)
+	// dailytaskDescID is the schema descriptor for id field.
+	dailytaskDescID := dailytaskFields[0].Descriptor()
+	// dailytask.DefaultID holds the default value on creation for the id field.
+	dailytask.DefaultID = dailytaskDescID.Default.(func() uuid.UUID)
 	followrelationFields := schema.FollowRelation{}.Fields()
 	_ = followrelationFields
 	// followrelationDescCreatedAt is the schema descriptor for created_at field.

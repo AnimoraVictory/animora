@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
@@ -176,6 +177,25 @@ func (pu *PostUpdate) AddLikes(l ...*Like) *PostUpdate {
 	return pu.AddLikeIDs(ids...)
 }
 
+// SetDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID.
+func (pu *PostUpdate) SetDailyTasksID(id uuid.UUID) *PostUpdate {
+	pu.mutation.SetDailyTasksID(id)
+	return pu
+}
+
+// SetNillableDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID if the given value is not nil.
+func (pu *PostUpdate) SetNillableDailyTasksID(id *uuid.UUID) *PostUpdate {
+	if id != nil {
+		pu = pu.SetDailyTasksID(*id)
+	}
+	return pu
+}
+
+// SetDailyTasks sets the "daily_tasks" edge to the DailyTask entity.
+func (pu *PostUpdate) SetDailyTasks(d *DailyTask) *PostUpdate {
+	return pu.SetDailyTasksID(d.ID)
+}
+
 // Mutation returns the PostMutation object of the builder.
 func (pu *PostUpdate) Mutation() *PostMutation {
 	return pu.mutation
@@ -227,6 +247,12 @@ func (pu *PostUpdate) RemoveLikes(l ...*Like) *PostUpdate {
 		ids[i] = l[i].ID
 	}
 	return pu.RemoveLikeIDs(ids...)
+}
+
+// ClearDailyTasks clears the "daily_tasks" edge to the DailyTask entity.
+func (pu *PostUpdate) ClearDailyTasks() *PostUpdate {
+	pu.mutation.ClearDailyTasks()
+	return pu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -435,6 +461,35 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pu.mutation.DailyTasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   post.DailyTasksTable,
+			Columns: []string{post.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.DailyTasksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   post.DailyTasksTable,
+			Columns: []string{post.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{post.Label}
@@ -598,6 +653,25 @@ func (puo *PostUpdateOne) AddLikes(l ...*Like) *PostUpdateOne {
 	return puo.AddLikeIDs(ids...)
 }
 
+// SetDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID.
+func (puo *PostUpdateOne) SetDailyTasksID(id uuid.UUID) *PostUpdateOne {
+	puo.mutation.SetDailyTasksID(id)
+	return puo
+}
+
+// SetNillableDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID if the given value is not nil.
+func (puo *PostUpdateOne) SetNillableDailyTasksID(id *uuid.UUID) *PostUpdateOne {
+	if id != nil {
+		puo = puo.SetDailyTasksID(*id)
+	}
+	return puo
+}
+
+// SetDailyTasks sets the "daily_tasks" edge to the DailyTask entity.
+func (puo *PostUpdateOne) SetDailyTasks(d *DailyTask) *PostUpdateOne {
+	return puo.SetDailyTasksID(d.ID)
+}
+
 // Mutation returns the PostMutation object of the builder.
 func (puo *PostUpdateOne) Mutation() *PostMutation {
 	return puo.mutation
@@ -649,6 +723,12 @@ func (puo *PostUpdateOne) RemoveLikes(l ...*Like) *PostUpdateOne {
 		ids[i] = l[i].ID
 	}
 	return puo.RemoveLikeIDs(ids...)
+}
+
+// ClearDailyTasks clears the "daily_tasks" edge to the DailyTask entity.
+func (puo *PostUpdateOne) ClearDailyTasks() *PostUpdateOne {
+	puo.mutation.ClearDailyTasks()
+	return puo
 }
 
 // Where appends a list predicates to the PostUpdate builder.
@@ -880,6 +960,35 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.DailyTasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   post.DailyTasksTable,
+			Columns: []string{post.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.DailyTasksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   post.DailyTasksTable,
+			Columns: []string{post.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
