@@ -6,27 +6,20 @@
 import torch
 import json
 from recommend_system.utils.database import get_connection
-
+from recommend_system.utils.config import new_user_threshold, existing_user_threshold
 # ----------------------------------
 # PostgreSQLから候補投稿を取得する関数
 # ----------------------------------
-def get_candidate_posts():
+def get_candidate_posts(query):
+    """
+    学習の際に存在しなかった新規ユーザー -> 閾値より高い投稿を時系列順に並べて返す
+    学習済みのユーザー -> モデルを使ってスコアを計算し、閾値より高い投稿を時系列順に並べて返す
+    """
     conn = get_connection()
     cur = conn.cursor()
-
-    # 特徴量が抽出済みの投稿を対象とする
-    query = """
-            SELECT 
-                id AS post_id,
-                created_at AS timestamp,
-                image_feature AS image_feature, -- JSON文字列
-                text_feature AS text_feature -- JSON文字列
-            FROM posts
-            WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL;
-            """
     cur.execute(query)
     rows = cur.fetchall()
-
+    
     # カラム名のリスト
     columns = [desc[0] for desc in cur.description]
     candidates = []
@@ -42,7 +35,11 @@ def get_candidate_posts():
 # ----------------------------------
 # 候補投稿からレコメンドタイムラインを生成する関数
 # ----------------------------------
-def get_recommended_timeline(user_id, candidates, model, device, score_threshold=0.5):
+def get_recommended_timeline(user_id, candidates, model, device, is_existing_user):
+    """
+    学習の際に存在しなかった新規ユーザー -> 閾値より高い投稿を時系列順に並べて表示
+    学習済みのユーザー -> モデルを使ってスコアを計算し、閾値より高い投稿を時系列順に並べて表示
+    """
     recommended = []
     user_tensor = torch.tensor([user_id], dtype=torch.long).to(device)
 
@@ -51,16 +48,29 @@ def get_recommended_timeline(user_id, candidates, model, device, score_threshold
         image_features = torch.tensor([candidate["image_feature"]], dtype=torch.float).unsqueeze(0).to(device)
         text_features = torch.tensor([candidate["text_feature"]], dtype=torch.float).unsqueeze(0).to(device)
 
-        with torch.no_grad():
-            score = model(user_tensor, item_tensor, image_features, text_features)
-        score = score.item()
+        # 学習済みユーザー
+        if is_existing_user:
+            with torch.no_grad():
+                score = model(user_tensor, item_tensor, image_features, text_features)
+            score = score.item()
+            score_threshold = existing_user_threshold
 
+        # 新規ユーザー
+        else:
+            score = candidate.get("score", 0)
+            score_threshold = new_user_threshold
+        
         if score > score_threshold:
             candidate["score"] = score
             recommended.append(candidate)
+
+    if is_existing_user:
+        # スコアが高い順にソート
+        sorted_recommend = sorted(recommended, key=lambda x: x["score"], reverse=True)
+    else:
+        # タイムスタンプが新しい順にソート
+        sorted_recommend = sorted(recommended, key=lambda x: x["timestamp"], reverse=True)
     
-    # タイムスタンプで降順ソート
-    sorted_recommend = sorted(recommended, key=lambda x: x["score"], reverse=True)
     return sorted_recommend
 
 

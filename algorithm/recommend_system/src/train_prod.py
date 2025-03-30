@@ -23,29 +23,32 @@ if __name__ == "__main__":
     query = """
             -- 投稿自体のインタラクション(投稿者による投稿)
             SELECT
-                user_id AS user_id, id AS post_id, 1 AS rating, created_at AS timestamp, 
-                image_feature AS image_feature, text_feature AS text_feature
-            FROM posts
-            WHERE text_feature IS NOT NULL AND image_feature IS NOT NULL
+                U.index AS user_id, P.index AS post_id, 1 AS rating, P.created_at AS timestamp, 
+                P.image_feature AS image_feature, P.text_feature AS text_feature
+            FROM posts P
+            JOIN users U ON P.user_posts = U.id
+            WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL
 
             UNION -- 縦結合＋重複削除
 
             -- 「いいね」のインタラクション
             SELECT
-                L.user_likes AS user_id, L.post_likes AS post_id, 1 AS rating, L.created_at AS timestamp,
+                U.index AS user_id, P.index AS post_id, 1 AS rating, L.created_at AS timestamp,
                 P.image_feature AS image_feature, P.text_feature AS text_feature
             FROM likes L
             JOIN posts P ON L.post_likes = P.id
+            JOIN users U ON L.user_likes = U.id
             WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL
 
             UNION
 
             -- コメントのインタラクション
             SELECT
-                C.user_comments AS user_id, C.post_comments AS post_id, 1 AS rating, C.created_at AS timestamp,
+                U.index AS user_id, P.index AS post_id, 1 AS rating, C.created_at AS timestamp,
                 P.image_feature AS image_feature, P.text_feature AS text_feature
             FROM comments C
             JOIN posts P ON C.post_comments = P.id
+            JOIN users U ON C.user_comments = U.id
             WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL;
             """
     prod_df = pd.read_sql(query, conn)
