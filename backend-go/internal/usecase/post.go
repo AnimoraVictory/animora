@@ -9,7 +9,7 @@ type PostUsecase struct {
 	postRepository repository.PostRepository
 }
 
-func NewPostUsecase(postRepository repository.PostRepository, storageRepository repository.StorageRepository) *PostUsecase {
+func NewPostUsecase(postRepository repository.PostRepository) *PostUsecase {
 	return &PostUsecase{
 		postRepository: postRepository,
 	}
