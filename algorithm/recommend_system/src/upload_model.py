@@ -11,8 +11,8 @@ from dotenv import load_dotenv, find_dotenv
 
 _ = load_dotenv(find_dotenv())
 
-TARGET_DIR = "models/checkpoints/"
-LATEST_MODEL_PATH = "models/latest.model"
+TARGET_DIR = "recommend_system/models/checkpoints/"
+LATEST_MODEL_PATH = "recommend_system/models/latest.model"
 S3_BUCKET = os.getenv("AWS_S3_BUCKET_NAME")
 S3_KEY = "models/latest.model"
 

@@ -34,14 +34,23 @@ class TimelineResponse(BaseModel):
     posts: list[Post]
 
 # ----------------------------------
+# モデルをロードする関数
+# ----------------------------------
+def load_model():
+    state_dict = torch.load(MODEL_PATH, map_location=torch.device(device))
+    config = state_dict["config"]
+    model = MultiModalNeuMF(config, config["image_feature_dim"], config["text_feature_dim"]).to(device)
+    model.load_state_dict(state_dict["model_state_dict"])
+    model.eval()
+    return model
+
+# ----------------------------------
 # モデルの初期ロード
 # ----------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model
-    model = MultiModalNeuMF().to(device)
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device(device)))
-    model.eval()
+    model = load_model()
     print("モデル初期ロード完了")
     yield # アプリのライフサイクルの本体がここ
 
@@ -58,9 +67,7 @@ def reload_model():
     try:
         download_latest_model()
         global model
-        model = MultiModalNeuMF().to(device)
-        model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device(device)))
-        model.eval()
+        model = load_model()
         return {"message": "モデルをリロードしました"}
     except Exception as e:
         return {"message": str(e)}
@@ -87,3 +94,7 @@ def recommend_timeline(request: TimelineRequest):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# ---------------------- 起動(開発用) ---------------------- #
+# poetry run uvicorn recommend_system.api.main:app --reload
+# -------------------------------------------------------- #
