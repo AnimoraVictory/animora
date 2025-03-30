@@ -3387,9 +3387,22 @@ func (m *UserMutation) OldIconImageKey(ctx context.Context) (v string, err error
 	return oldValue.IconImageKey, nil
 }
 
+// ClearIconImageKey clears the value of the "icon_image_key" field.
+func (m *UserMutation) ClearIconImageKey() {
+	m.icon_image_key = nil
+	m.clearedFields[user.FieldIconImageKey] = struct{}{}
+}
+
+// IconImageKeyCleared returns if the "icon_image_key" field was cleared in this mutation.
+func (m *UserMutation) IconImageKeyCleared() bool {
+	_, ok := m.clearedFields[user.FieldIconImageKey]
+	return ok
+}
+
 // ResetIconImageKey resets all changes to the "icon_image_key" field.
 func (m *UserMutation) ResetIconImageKey() {
 	m.icon_image_key = nil
+	delete(m.clearedFields, user.FieldIconImageKey)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -3912,7 +3925,11 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldIconImageKey) {
+		fields = append(fields, user.FieldIconImageKey)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3925,6 +3942,11 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldIconImageKey:
+		m.ClearIconImageKey()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 
