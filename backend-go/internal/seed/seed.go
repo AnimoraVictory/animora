@@ -5,17 +5,31 @@ import (
 	"fmt"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
 // SeedData populates the database with sample data
 func SeedData(client *ent.Client) error {
-
 	log.Info().Msg("Seeding database...")
 
-	ClearDatabase(client)
+	// コンテキストの作成
+	ctx := context.Background()
+
+	// まずデータベースをクリア
+	if err := ClearDatabase(client); err != nil {
+		log.Error().Err(err).Msg("Failed to clear database")
+		return err
+	}
+
+	// 通常のクライアントを使用
+	var (
+		kakuId   = uuid.MustParse("2a9165fe-8f3b-4e41-a846-e1fc73f32fae")
+		hatanoId = uuid.MustParse("86552ff6-f820-4aa2-b372-866dc38b4a4b")
+	)
 
 	// Create users
+	log.Debug().Msg("Creating users...")
 	users, err := client.User.CreateBulk(
 		client.User.Create().
 			SetEmail("john.doe@example.com").
@@ -43,43 +57,57 @@ func SeedData(client *ent.Client) error {
 			SetBio("I'm a flower shop owner").
 			SetIndex(4),
 		client.User.Create().
+			SetID(hatanoId).
 			SetEmail("tanomitsu2002@gmail.com").
 			SetName("Mitsuru Hatano").
 			SetBio("I'm a software engineer").
 			SetIndex(5),
 		client.User.Create().
+			SetID(kakuId).
 			SetEmail("aki.kaku0627@gmail.com").
 			SetName("Akihiro Kaku").
 			SetBio("I'm a software engineer").
 			SetIndex(6),
-	).Save(context.Background())
+	).Save(ctx)
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to create users")
 		return err
 	}
 
 	// Create pets
+	log.Debug().Msg("Creating pets...")
 	_, err = createPets(client, users)
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to create pets")
 		return err
 	}
 
 	// Create posts
+	log.Debug().Msg("Creating posts...")
 	posts, err := createPosts(client, users)
 	if err != nil {
+		log.Error().Err(err).Msg("Failed to create posts")
 		return err
 	}
 
 	// Create comments
+	log.Debug().Msg("Creating comments...")
 	if err := createComments(client, posts, users); err != nil {
+		log.Error().Err(err).Msg("Failed to create comments")
 		return err
 	}
 
 	// Create likes
+	log.Debug().Msg("Creating likes...")
 	if err := createLikes(client, posts, users); err != nil {
+		log.Error().Err(err).Msg("Failed to create likes")
 		return err
 	}
 
+	// Create follow relations
+	log.Debug().Msg("Creating follow relations...")
 	if err := createFollowRelations(client, users); err != nil {
+		log.Error().Err(err).Msg("Failed to create follow relations")
 		return err
 	}
 
@@ -92,7 +120,7 @@ func ClearDatabase(client *ent.Client) error {
 	log.Info().Msg("Clearing database...")
 	ctx := context.Background()
 
-	// 全てのテーブルのデータを削除
+	// 各テーブルのデータを個別に削除
 	if _, err := client.Like.Delete().Exec(ctx); err != nil {
 		return fmt.Errorf("failed to clear likes: %v", err)
 	}
@@ -107,6 +135,9 @@ func ClearDatabase(client *ent.Client) error {
 	}
 	if _, err := client.FollowRelation.Delete().Exec(ctx); err != nil {
 		return fmt.Errorf("failed to clear follow relations: %v", err)
+	}
+	if _, err := client.DailyTask.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear daily tasks: %v", err)
 	}
 	if _, err := client.User.Delete().Exec(ctx); err != nil {
 		return fmt.Errorf("failed to clear users: %v", err)
