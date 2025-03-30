@@ -9,7 +9,7 @@ from torch.autograd import Variable
 from tqdm import tqdm
 from tensorboardX import SummaryWriter 
 from recommend_system.utils.utils import save_checkpoint, use_optimizer
-from recommend_system.utils.metrics import MetronAtK
+from recommend_system.components.metrics import MetronAtK
 
 class Engine(object):
     """

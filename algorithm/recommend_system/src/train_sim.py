@@ -5,11 +5,12 @@
 # ライブラリのインポート
 import pandas as pd
 import random
-from recommend_system.models.mmneumf import MultiModalNeuMFEngine
-from recommend_system.utils.data import SampleGenerator
+from recommend_system.components.mmneumf import MultiModalNeuMFEngine
+from recommend_system.components.data import SampleGenerator
+from recommend_system.utils.config import sim_config
 
 # ----------------------------------
-# 1. 擬似シミュレーションデータの生成関数
+# 擬似シミュレーションデータの生成関数
 # ----------------------------------
 def generate_sim_data(num_users, num_items, num_records):
     """
@@ -34,61 +35,34 @@ def generate_sim_data(num_users, num_items, num_records):
     df = pd.DataFrame(data, columns=["userId", "itemId", "rating", "timestamp", "image_feature", "text_feature"])
     return df
 
-# ----------------------------------
-# 2. シミュレーション用の設定(config)
-# ----------------------------------
-sim_config = {
-    "alias": "sim",
-    "num_epoch": 50,
-    "batch_size": 512,
-    "optimizer": "adam",
-    "adam_lr": 1e-3,
-    "num_users": 100, # 擬似データ用のユーザー数
-    "num_items": 200, # 擬似データ用のアイテム数
-    "latent_dim_mf": 8,
-    "latent_dim_mlp": 8,
-    "num_negative": 4,
-    "layers": [16, 64, 32, 16, 8],
-    "l2_regularization": 0.0000001,
-    "weight_init_gaussian": True,
-    "use_cuda": True,
-    "use_bachify_eval": False,
-    "device_id": 0,
-    "pretrain": False,
-    "model_dir": "recommend_system/models/checkpoints/sim_HR{:.4f}_NDCG{:.4f}.model",
-    "image_emb_dim": 16,
-    "text_emb_dim": 16,
-    "image_feature_dim": 1024,
-    "text_feature_dim": 768
-}
+if __name__ == "__main__":
+    # ----------------------------------
+    # 1. 擬似シミュレーションデータの生成と前処理
+    # ----------------------------------
+    num_users = sim_config["num_users"]
+    num_items = sim_config["num_items"]
+    num_records = 1000 # 生成するレコード数
 
-# ----------------------------------
-# 3. 擬似シミュレーションデータの生成と前処理
-# ----------------------------------
-num_users = sim_config["num_users"]
-num_items = sim_config["num_items"]
-num_records = 1000 # 生成するレコード数
+    simulation_df = generate_sim_data(num_users, num_items, num_records)
+    print(f"Simulation data generated: {simulation_df.shape[0]} records.")
 
-simulation_df = generate_sim_data(num_users, num_items, num_records)
-print(f"Simulation data generated: {simulation_df.shape[0]} records.")
+    # ----------------------------------
+    # 2. サンプル生成器の作成と評価データの準備
+    # ----------------------------------
+    sample_generator = SampleGenerator(ratings=simulation_df)
+    evaluate_data = sample_generator.evaluate_data
 
-# ----------------------------------
-# 4. サンプル生成器の作成と評価データの準備
-# ----------------------------------
-sample_generator = SampleGenerator(ratings=simulation_df)
-evaluate_data = sample_generator.evaluate_data
+    # ----------------------------------
+    # 3. Multi-Modal NeuMFモデルの作成と学習
+    # ----------------------------------
+    engine = MultiModalNeuMFEngine(config=sim_config)
 
-# ----------------------------------
-# 5. Multi-Modal NeuMFモデルの作成と学習
-# ----------------------------------
-engine = MultiModalNeuMFEngine(config=sim_config)
-
-# エポックごとに学習と評価を実行
-for epoch in range(sim_config["num_epoch"]):
-    print(f"Epoch {epoch}/{sim_config['num_epoch']}")
-    print("-" * 80)
-    train_loader = sample_generator.instance_a_train_loader(sim_config["num_negative"], sim_config["batch_size"])
-    engine.train_an_epoch(train_loader, epoch_id=epoch)
-    hit_ratio, ndcg = engine.evaluate(evaluate_data, epoch_id=epoch)
-    engine.save_sim(hit_ratio, ndcg)
+    # エポックごとに学習と評価を実行
+    for epoch in range(sim_config["num_epoch"]):
+        print(f"Epoch {epoch}/{sim_config['num_epoch']}")
+        print("-" * 80)
+        train_loader = sample_generator.instance_a_train_loader(sim_config["num_negative"], sim_config["batch_size"])
+        engine.train_an_epoch(train_loader, epoch_id=epoch)
+        hit_ratio, ndcg = engine.evaluate(evaluate_data, epoch_id=epoch)
+        engine.save_sim(hit_ratio, ndcg)
 

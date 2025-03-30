@@ -6,7 +6,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from recommend_system.utils.engine import Engine
+from recommend_system.components.engine import Engine
 from recommend_system.utils.utils import use_cuda, resume_checkpoint
 
 class MultiModalNeuMF(nn.Module):

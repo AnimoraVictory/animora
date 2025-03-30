@@ -9,9 +9,7 @@ data/
 
 # 不要なファイル
 recommend_system/base/
-recommend_system/models/checkpoints/
-recommend_system/models/runs/
-recommend_system/models/latest.model
+recommend_system/models/
 
 # Pythonキャッシュ
 *.pyc
