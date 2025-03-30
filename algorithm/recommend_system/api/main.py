@@ -10,9 +10,11 @@ import uvicorn
 from recommend_system.components.mmneumf import MultiModalNeuMF
 from recommend_system.src.download_model import download_latest_model 
 from recommend_system.api.recommend_timeline import get_candidate_posts, get_recommended_timeline
+from recommend_system.utils.config import new_user_query, existing_user_query
 
 # モデル・デバイスのグローバル変数
 device = "cuda" if torch.cuda.is_available() else "cpu"
+config = None
 model = None
 MODEL_PATH = "recommend_system/models/latest.model"
 
@@ -21,7 +23,6 @@ MODEL_PATH = "recommend_system/models/latest.model"
 # ----------------------------------
 class TimelineRequest(BaseModel):
     user_id: int
-    score_threshold: float = 0.5 # 予測スコアの閾値
 
 class Post(BaseModel):
     id: int
@@ -34,7 +35,7 @@ class TimelineResponse(BaseModel):
     posts: list[Post]
 
 # ----------------------------------
-# モデルをロードする関数
+# モデルとそのconfigをロードする関数
 # ----------------------------------
 def load_model():
     state_dict = torch.load(MODEL_PATH, map_location=torch.device(device))
@@ -42,15 +43,15 @@ def load_model():
     model = MultiModalNeuMF(config, config["image_feature_dim"], config["text_feature_dim"]).to(device)
     model.load_state_dict(state_dict["model_state_dict"])
     model.eval()
-    return model
+    return config, model
 
 # ----------------------------------
 # モデルの初期ロード
 # ----------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global model
-    model = load_model()
+    global config, model
+    config, model = load_model()
     print("モデル初期ロード完了")
     yield # アプリのライフサイクルの本体がここ
 
@@ -66,8 +67,8 @@ app = FastAPI(lifespan=lifespan)
 def reload_model():
     try:
         download_latest_model()
-        global model
-        model = load_model()
+        global config, model
+        config, model = load_model()
         return {"message": "モデルをリロードしました"}
     except Exception as e:
         return {"message": str(e)}
@@ -78,9 +79,17 @@ def reload_model():
 @app.post("/timeline", response_model=TimelineResponse)
 def recommend_timeline(request: TimelineRequest):
     try:
+        is_existing_user = request.user_id < config["num_users"]
+        if is_existing_user:
+            print("学習済みユーザー")
+            query = existing_user_query
+        else:
+            print("新規ユーザー")
+            query = new_user_query
+
         # PostgreSQLから候補投稿画像を取得
-        candidates = get_candidate_posts()
-        recommended = get_recommended_timeline(request.user_id, candidates, model, device, request.score_threshold)
+        candidates = get_candidate_posts(query)
+        recommended = get_recommended_timeline(request.user_id, candidates, model, device, is_existing_user)
         posts = [Post(
             id=rc["post_id"],
             timestamp=rc["timestamp"],
