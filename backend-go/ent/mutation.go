@@ -3115,6 +3115,8 @@ type UserMutation struct {
 	op               Op
 	typ              string
 	id               *uuid.UUID
+	index            *int
+	addindex         *int
 	email            *string
 	name             *string
 	bio              *string
@@ -3246,6 +3248,76 @@ func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetIndex sets the "index" field.
+func (m *UserMutation) SetIndex(i int) {
+	m.index = &i
+	m.addindex = nil
+}
+
+// Index returns the value of the "index" field in the mutation.
+func (m *UserMutation) Index() (r int, exists bool) {
+	v := m.index
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIndex returns the old "index" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldIndex(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIndex is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIndex requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIndex: %w", err)
+	}
+	return oldValue.Index, nil
+}
+
+// AddIndex adds i to the "index" field.
+func (m *UserMutation) AddIndex(i int) {
+	if m.addindex != nil {
+		*m.addindex += i
+	} else {
+		m.addindex = &i
+	}
+}
+
+// AddedIndex returns the value that was added to the "index" field in this mutation.
+func (m *UserMutation) AddedIndex() (r int, exists bool) {
+	v := m.addindex
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearIndex clears the value of the "index" field.
+func (m *UserMutation) ClearIndex() {
+	m.index = nil
+	m.addindex = nil
+	m.clearedFields[user.FieldIndex] = struct{}{}
+}
+
+// IndexCleared returns if the "index" field was cleared in this mutation.
+func (m *UserMutation) IndexCleared() bool {
+	_, ok := m.clearedFields[user.FieldIndex]
+	return ok
+}
+
+// ResetIndex resets all changes to the "index" field.
+func (m *UserMutation) ResetIndex() {
+	m.index = nil
+	m.addindex = nil
+	delete(m.clearedFields, user.FieldIndex)
 }
 
 // SetEmail sets the "email" field.
@@ -3799,7 +3871,10 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
+	if m.index != nil {
+		fields = append(fields, user.FieldIndex)
+	}
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
 	}
@@ -3823,6 +3898,8 @@ func (m *UserMutation) Fields() []string {
 // schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldIndex:
+		return m.Index()
 	case user.FieldEmail:
 		return m.Email()
 	case user.FieldName:
@@ -3842,6 +3919,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case user.FieldIndex:
+		return m.OldIndex(ctx)
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
 	case user.FieldName:
@@ -3861,6 +3940,13 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIndex(v)
+		return nil
 	case user.FieldEmail:
 		v, ok := value.(string)
 		if !ok {
@@ -3903,13 +3989,21 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addindex != nil {
+		fields = append(fields, user.FieldIndex)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldIndex:
+		return m.AddedIndex()
+	}
 	return nil, false
 }
 
@@ -3918,6 +4012,13 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldIndex:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIndex(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -3926,6 +4027,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldIndex) {
+		fields = append(fields, user.FieldIndex)
+	}
 	if m.FieldCleared(user.FieldIconImageKey) {
 		fields = append(fields, user.FieldIconImageKey)
 	}
@@ -3943,6 +4047,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldIndex:
+		m.ClearIndex()
+		return nil
 	case user.FieldIconImageKey:
 		m.ClearIconImageKey()
 		return nil
@@ -3954,6 +4061,9 @@ func (m *UserMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
+	case user.FieldIndex:
+		m.ResetIndex()
+		return nil
 	case user.FieldEmail:
 		m.ResetEmail()
 		return nil

@@ -4,7 +4,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
+	"github.com/rs/zerolog/log"
 )
 
 type PetHandler struct {
@@ -23,7 +23,7 @@ func (h *PetHandler) GetByOwner() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ownerID := c.Query("ownerId")
 		if ownerID == "" {
-			log.Error("Failed to get pets: ownerId is empty")
+			log.Error().Msg("Failed to get pets: ownerId is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Owner ID is required",
 			})
@@ -31,7 +31,7 @@ func (h *PetHandler) GetByOwner() fiber.Handler {
 
 		pets, err := h.petUsecase.GetByOwner(ownerID)
 		if err != nil {
-			log.Error("Failed to get pets: %v", err)
+			log.Error().Err(err).Msg("Failed to get pets")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to get pets",
 			})
@@ -40,7 +40,7 @@ func (h *PetHandler) GetByOwner() fiber.Handler {
 		for i, pet := range pets {
 			url, err := h.storageUsecase.GetUrl(pet.ImageKey)
 			if err != nil {
-				log.Error("Failed to get pet image URL: %v", err)
+				log.Error().Err(err).Msg("Failed to get pet image URL")
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"error": "Failed to get pet image URL",
 				})
@@ -58,11 +58,15 @@ func (h *PetHandler) Create() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		form, err := c.MultipartForm()
 		if err != nil {
-			log.Error("Failed to create pet: invalid form data")
+			log.Error().Err(err).Msg("Failed to create pet: invalid form data")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid form data",
 			})
 		}
+
+		// debug
+		log.Info().Msgf("form: %v", form)
+		log.Info().Msgf("form.Value: %v", form.Value)
 
 		// Get form values
 		name := form.Value["name"][0]
@@ -74,7 +78,7 @@ func (h *PetHandler) Create() fiber.Handler {
 		// Get the image file
 		file, err := c.FormFile("image")
 		if err != nil {
-			log.Error("Failed to create pet: image file is required")
+			log.Error().Err(err).Msg("Failed to create pet: image file is required")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Image file is required",
 			})
@@ -82,7 +86,7 @@ func (h *PetHandler) Create() fiber.Handler {
 
 		// Validate form values
 		if name == "" || petType == "" || birthDay == "" || userID == "" {
-			log.Error("Failed to create pet: missing required fields")
+			log.Error().Msg("Failed to create pet: missing required fields")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Missing required fields",
 			})
@@ -91,7 +95,7 @@ func (h *PetHandler) Create() fiber.Handler {
 		// Upload the image
 		fileKey, err := h.storageUsecase.UploadImage(file, "pets")
 		if err != nil {
-			log.Error("Failed to create pet: failed to upload image")
+			log.Error().Err(err).Msg("Failed to create pet: failed to upload image")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to upload image",
 			})
@@ -99,7 +103,7 @@ func (h *PetHandler) Create() fiber.Handler {
 
 		pet, err := h.petUsecase.Create(name, petType, species, birthDay, fileKey, userID)
 		if err != nil {
-			log.Error("Failed to create pet: failed to create pet")
+			log.Error().Err(err).Msg("Failed to create pet: failed to create pet")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to create pet",
 			})
@@ -116,14 +120,14 @@ func (h *PetHandler) Update() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		petId := c.Query("petId")
 		if petId == "" {
-			log.Error("Failed to update pet: petId is empty")
+			log.Error().Msg("Failed to update pet: petId is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Pet ID is required",
 			})
 		}
 		form, err := c.MultipartForm()
 		if err != nil {
-			log.Error("Failed to update pet: invalid form data")
+			log.Error().Err(err).Msg("Failed to update pet: invalid form data")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid form data",
 			})
@@ -136,7 +140,7 @@ func (h *PetHandler) Update() fiber.Handler {
 		birthDay := form.Value["birthDay"][0]
 
 		if err := h.petUsecase.Update(petId, name, petType, species, birthDay); err != nil {
-			log.Error("Failed to update pet: failed to update pet")
+			log.Error().Err(err).Msg("Failed to update pet: failed to update pet")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to update pet",
 			})
@@ -152,14 +156,14 @@ func (h *PetHandler) Delete() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		petId := c.Query("petId")
 		if petId == "" {
-			log.Error("Failed to delete pet: petId is empty")
+			log.Error().Msg("Failed to delete pet: petId is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Pet ID is required",
 			})
 		}
 
 		if err := h.petUsecase.Delete(petId); err != nil {
-			log.Error("Failed to delete pet: failed to delete pet")
+			log.Error().Err(err).Msg("Failed to delete pet: failed to delete pet")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to delete pet",
 			})

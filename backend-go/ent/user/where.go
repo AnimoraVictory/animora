@@ -56,6 +56,11 @@ func IDLTE(id uuid.UUID) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
+// Index applies equality check predicate on the "index" field. It's identical to IndexEQ.
+func Index(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldIndex, v))
+}
+
 // Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
 func Email(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldEmail, v))
@@ -79,6 +84,56 @@ func IconImageKey(v string) predicate.User {
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// IndexEQ applies the EQ predicate on the "index" field.
+func IndexEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldIndex, v))
+}
+
+// IndexNEQ applies the NEQ predicate on the "index" field.
+func IndexNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldIndex, v))
+}
+
+// IndexIn applies the In predicate on the "index" field.
+func IndexIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldIndex, vs...))
+}
+
+// IndexNotIn applies the NotIn predicate on the "index" field.
+func IndexNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldIndex, vs...))
+}
+
+// IndexGT applies the GT predicate on the "index" field.
+func IndexGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldIndex, v))
+}
+
+// IndexGTE applies the GTE predicate on the "index" field.
+func IndexGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldIndex, v))
+}
+
+// IndexLT applies the LT predicate on the "index" field.
+func IndexLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldIndex, v))
+}
+
+// IndexLTE applies the LTE predicate on the "index" field.
+func IndexLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldIndex, v))
+}
+
+// IndexIsNil applies the IsNil predicate on the "index" field.
+func IndexIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldIndex))
+}
+
+// IndexNotNil applies the NotNil predicate on the "index" field.
+func IndexNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldIndex))
 }
 
 // EmailEQ applies the EQ predicate on the "email" field.

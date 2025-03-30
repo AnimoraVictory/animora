@@ -20,31 +20,38 @@ func SeedData(client *ent.Client) error {
 		client.User.Create().
 			SetEmail("john.doe@example.com").
 			SetName("John Doe").
-			SetBio("I'm a pet shop owner"),
+			SetBio("I'm a pet shop owner").
+			SetIndex(0),
 		client.User.Create().
 			SetEmail("jane.smith@example.com").
 			SetName("Jane Smith").
-			SetBio("I'm a cat lover"),
+			SetBio("I'm a cat lover").
+			SetIndex(1),
 		client.User.Create().
 			SetEmail("alex.johnson@example.com").
 			SetName("Alex Johnson").
-			SetBio("I'm a dog lover"),
+			SetBio("I'm a dog lover").
+			SetIndex(2),
 		client.User.Create().
 			SetEmail("emily.wilson@example.com").
 			SetName("Emily Wilson").
-			SetBio("I'm a food lover"),
+			SetBio("I'm a food lover").
+			SetIndex(3),
 		client.User.Create().
 			SetEmail("michael.brown@example.com").
 			SetName("Michael Brown").
-			SetBio("I'm a flower shop owner"),
+			SetBio("I'm a flower shop owner").
+			SetIndex(4),
 		client.User.Create().
 			SetEmail("tanomitsu2002@gmail.com").
 			SetName("Mitsuru Hatano").
-			SetBio("I'm a software engineer"),
+			SetBio("I'm a software engineer").
+			SetIndex(5),
 		client.User.Create().
 			SetEmail("aki.kaku0627@gmail.com").
 			SetName("Akihiro Kaku").
-			SetBio("I'm a software engineer"),
+			SetBio("I'm a software engineer").
+			SetIndex(6),
 	).Save(context.Background())
 	if err != nil {
 		return err
