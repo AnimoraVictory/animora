@@ -2729,31 +2729,31 @@ func (m *PetMutation) ResetEdge(name string) error {
 // PostMutation represents an operation that mutates the Post nodes in the graph.
 type PostMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	index              *int
-	addindex           *int
-	caption            *string
-	image_key          *string
-	created_at         *time.Time
-	deleted_at         *time.Time
-	text_feature       *pgvector.Vector
-	image_feature      *pgvector.Vector
-	clearedFields      map[string]struct{}
-	user               *uuid.UUID
-	cleareduser        bool
-	comments           map[uuid.UUID]struct{}
-	removedcomments    map[uuid.UUID]struct{}
-	clearedcomments    bool
-	likes              map[uuid.UUID]struct{}
-	removedlikes       map[uuid.UUID]struct{}
-	clearedlikes       bool
-	daily_tasks        *uuid.UUID
-	cleareddaily_tasks bool
-	done               bool
-	oldValue           func(context.Context) (*Post, error)
-	predicates         []predicate.Post
+	op                Op
+	typ               string
+	id                *uuid.UUID
+	index             *int
+	addindex          *int
+	caption           *string
+	image_key         *string
+	created_at        *time.Time
+	deleted_at        *time.Time
+	text_feature      *pgvector.Vector
+	image_feature     *pgvector.Vector
+	clearedFields     map[string]struct{}
+	user              *uuid.UUID
+	cleareduser       bool
+	comments          map[uuid.UUID]struct{}
+	removedcomments   map[uuid.UUID]struct{}
+	clearedcomments   bool
+	likes             map[uuid.UUID]struct{}
+	removedlikes      map[uuid.UUID]struct{}
+	clearedlikes      bool
+	daily_task        *uuid.UUID
+	cleareddaily_task bool
+	done              bool
+	oldValue          func(context.Context) (*Post, error)
+	predicates        []predicate.Post
 }
 
 var _ ent.Mutation = (*PostMutation)(nil)
@@ -3332,43 +3332,43 @@ func (m *PostMutation) ResetLikes() {
 	m.removedlikes = nil
 }
 
-// SetDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by id.
-func (m *PostMutation) SetDailyTasksID(id uuid.UUID) {
-	m.daily_tasks = &id
+// SetDailyTaskID sets the "daily_task" edge to the DailyTask entity by id.
+func (m *PostMutation) SetDailyTaskID(id uuid.UUID) {
+	m.daily_task = &id
 }
 
-// ClearDailyTasks clears the "daily_tasks" edge to the DailyTask entity.
-func (m *PostMutation) ClearDailyTasks() {
-	m.cleareddaily_tasks = true
+// ClearDailyTask clears the "daily_task" edge to the DailyTask entity.
+func (m *PostMutation) ClearDailyTask() {
+	m.cleareddaily_task = true
 }
 
-// DailyTasksCleared reports if the "daily_tasks" edge to the DailyTask entity was cleared.
-func (m *PostMutation) DailyTasksCleared() bool {
-	return m.cleareddaily_tasks
+// DailyTaskCleared reports if the "daily_task" edge to the DailyTask entity was cleared.
+func (m *PostMutation) DailyTaskCleared() bool {
+	return m.cleareddaily_task
 }
 
-// DailyTasksID returns the "daily_tasks" edge ID in the mutation.
-func (m *PostMutation) DailyTasksID() (id uuid.UUID, exists bool) {
-	if m.daily_tasks != nil {
-		return *m.daily_tasks, true
+// DailyTaskID returns the "daily_task" edge ID in the mutation.
+func (m *PostMutation) DailyTaskID() (id uuid.UUID, exists bool) {
+	if m.daily_task != nil {
+		return *m.daily_task, true
 	}
 	return
 }
 
-// DailyTasksIDs returns the "daily_tasks" edge IDs in the mutation.
+// DailyTaskIDs returns the "daily_task" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// DailyTasksID instead. It exists only for internal usage by the builders.
-func (m *PostMutation) DailyTasksIDs() (ids []uuid.UUID) {
-	if id := m.daily_tasks; id != nil {
+// DailyTaskID instead. It exists only for internal usage by the builders.
+func (m *PostMutation) DailyTaskIDs() (ids []uuid.UUID) {
+	if id := m.daily_task; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetDailyTasks resets all changes to the "daily_tasks" edge.
-func (m *PostMutation) ResetDailyTasks() {
-	m.daily_tasks = nil
-	m.cleareddaily_tasks = false
+// ResetDailyTask resets all changes to the "daily_task" edge.
+func (m *PostMutation) ResetDailyTask() {
+	m.daily_task = nil
+	m.cleareddaily_task = false
 }
 
 // Where appends a list predicates to the PostMutation builder.
@@ -3658,8 +3658,8 @@ func (m *PostMutation) AddedEdges() []string {
 	if m.likes != nil {
 		edges = append(edges, post.EdgeLikes)
 	}
-	if m.daily_tasks != nil {
-		edges = append(edges, post.EdgeDailyTasks)
+	if m.daily_task != nil {
+		edges = append(edges, post.EdgeDailyTask)
 	}
 	return edges
 }
@@ -3684,8 +3684,8 @@ func (m *PostMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case post.EdgeDailyTasks:
-		if id := m.daily_tasks; id != nil {
+	case post.EdgeDailyTask:
+		if id := m.daily_task; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -3736,8 +3736,8 @@ func (m *PostMutation) ClearedEdges() []string {
 	if m.clearedlikes {
 		edges = append(edges, post.EdgeLikes)
 	}
-	if m.cleareddaily_tasks {
-		edges = append(edges, post.EdgeDailyTasks)
+	if m.cleareddaily_task {
+		edges = append(edges, post.EdgeDailyTask)
 	}
 	return edges
 }
@@ -3752,8 +3752,8 @@ func (m *PostMutation) EdgeCleared(name string) bool {
 		return m.clearedcomments
 	case post.EdgeLikes:
 		return m.clearedlikes
-	case post.EdgeDailyTasks:
-		return m.cleareddaily_tasks
+	case post.EdgeDailyTask:
+		return m.cleareddaily_task
 	}
 	return false
 }
@@ -3765,8 +3765,8 @@ func (m *PostMutation) ClearEdge(name string) error {
 	case post.EdgeUser:
 		m.ClearUser()
 		return nil
-	case post.EdgeDailyTasks:
-		m.ClearDailyTasks()
+	case post.EdgeDailyTask:
+		m.ClearDailyTask()
 		return nil
 	}
 	return fmt.Errorf("unknown Post unique edge %s", name)
@@ -3785,8 +3785,8 @@ func (m *PostMutation) ResetEdge(name string) error {
 	case post.EdgeLikes:
 		m.ResetLikes()
 		return nil
-	case post.EdgeDailyTasks:
-		m.ResetDailyTasks()
+	case post.EdgeDailyTask:
+		m.ResetDailyTask()
 		return nil
 	}
 	return fmt.Errorf("unknown Post edge %s", name)

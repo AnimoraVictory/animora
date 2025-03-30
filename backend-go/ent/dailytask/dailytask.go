@@ -39,7 +39,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "post" package.
 	PostInverseTable = "posts"
 	// PostColumn is the table column denoting the post relation/edge.
-	PostColumn = "post_daily_tasks"
+	PostColumn = "post_daily_task"
 )
 
 // Columns holds all SQL columns for dailytask fields.
@@ -52,7 +52,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "daily_tasks"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"post_daily_tasks",
+	"post_daily_task",
 	"user_daily_tasks",
 }
 

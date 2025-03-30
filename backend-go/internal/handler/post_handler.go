@@ -70,8 +70,9 @@ func (h *PostHandler) GetPostsByUser() fiber.Handler {
 func (h *PostHandler) CreatePost() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var req struct {
-			Caption string `json:"caption"`
-			UserId  string `json:"userId"`
+			Caption     string  `json:"caption,omitempty"`
+			UserId      string  `json:"userId,omitempty"`
+			DailyTaskId *string `json:"dailyTaskId,omitempty"`
 		}
 		if err := c.BodyParser(&req); err != nil {
 			log.Error("Failed to create post: invalid request body")
@@ -105,7 +106,7 @@ func (h *PostHandler) CreatePost() fiber.Handler {
 			})
 		}
 
-		post, err := h.postUsecase.CreatePost(req.Caption, req.UserId, fileKey)
+		post, err := h.postUsecase.CreatePost(req.Caption, req.UserId, fileKey, req.DailyTaskId)
 		if err != nil {
 			log.Error("Failed to create post: failed to create post")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

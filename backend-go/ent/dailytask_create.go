@@ -226,7 +226,7 @@ func (dtc *DailyTaskCreate) createSpec() (*DailyTask, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.post_daily_tasks = &nodes[0]
+		_node.post_daily_task = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -27,7 +27,7 @@ type DailyTask struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DailyTaskQuery when eager-loading is set.
 	Edges            DailyTaskEdges `json:"edges"`
-	post_daily_tasks *uuid.UUID
+	post_daily_task  *uuid.UUID
 	user_daily_tasks *uuid.UUID
 	selectValues     sql.SelectValues
 }
@@ -76,7 +76,7 @@ func (*DailyTask) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case dailytask.FieldID:
 			values[i] = new(uuid.UUID)
-		case dailytask.ForeignKeys[0]: // post_daily_tasks
+		case dailytask.ForeignKeys[0]: // post_daily_task
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case dailytask.ForeignKeys[1]: // user_daily_tasks
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
@@ -115,10 +115,10 @@ func (dt *DailyTask) assignValues(columns []string, values []any) error {
 			}
 		case dailytask.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field post_daily_tasks", values[i])
+				return fmt.Errorf("unexpected type %T for field post_daily_task", values[i])
 			} else if value.Valid {
-				dt.post_daily_tasks = new(uuid.UUID)
-				*dt.post_daily_tasks = *value.S.(*uuid.UUID)
+				dt.post_daily_task = new(uuid.UUID)
+				*dt.post_daily_task = *value.S.(*uuid.UUID)
 			}
 		case dailytask.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {

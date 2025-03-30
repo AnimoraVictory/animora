@@ -47,7 +47,7 @@ func (r *PostRepository) GetPostsByUser(userID string) ([]*ent.Post, error) {
 	return posts, nil
 }
 
-func (r *PostRepository) CreatePost(caption, userID, fileKey string) (*ent.Post, error) {
+func (r *PostRepository) CreatePost(caption, userID, fileKey string, dailyTaskId *string) (*ent.Post, error) {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return nil, err
@@ -58,12 +58,21 @@ func (r *PostRepository) CreatePost(caption, userID, fileKey string) (*ent.Post,
 		return nil, err
 	}
 
-	post, err := r.db.Post.Create().
+	postCreate := r.db.Post.Create().
 		SetCaption(caption).
 		SetImageKey(fileKey).
 		SetUserID(userUUID).
-		SetIndex(postCount).
-		Save(context.Background())
+		SetIndex(postCount)
+
+	if dailyTaskId != nil {
+		dailyTaskUUID, err := uuid.Parse(*dailyTaskId)
+		if err != nil {
+			return nil, err
+		}
+		postCreate = postCreate.SetDailyTaskID(dailyTaskUUID)
+	}
+
+	post, err := postCreate.Save(context.Background())
 	if err != nil {
 		return nil, err
 	}

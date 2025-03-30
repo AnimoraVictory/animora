@@ -27,6 +27,6 @@ func (DailyTask) Fields() []ent.Field {
 func (DailyTask) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("daily_tasks").Unique().Required(),
-		edge.From("post", Post.Type).Ref("daily_tasks").Unique(),
+		edge.From("post", Post.Type).Ref("daily_task").Unique(),
 	}
 }

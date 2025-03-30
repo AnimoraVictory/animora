@@ -177,23 +177,23 @@ func (pu *PostUpdate) AddLikes(l ...*Like) *PostUpdate {
 	return pu.AddLikeIDs(ids...)
 }
 
-// SetDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID.
-func (pu *PostUpdate) SetDailyTasksID(id uuid.UUID) *PostUpdate {
-	pu.mutation.SetDailyTasksID(id)
+// SetDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID.
+func (pu *PostUpdate) SetDailyTaskID(id uuid.UUID) *PostUpdate {
+	pu.mutation.SetDailyTaskID(id)
 	return pu
 }
 
-// SetNillableDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID if the given value is not nil.
-func (pu *PostUpdate) SetNillableDailyTasksID(id *uuid.UUID) *PostUpdate {
+// SetNillableDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID if the given value is not nil.
+func (pu *PostUpdate) SetNillableDailyTaskID(id *uuid.UUID) *PostUpdate {
 	if id != nil {
-		pu = pu.SetDailyTasksID(*id)
+		pu = pu.SetDailyTaskID(*id)
 	}
 	return pu
 }
 
-// SetDailyTasks sets the "daily_tasks" edge to the DailyTask entity.
-func (pu *PostUpdate) SetDailyTasks(d *DailyTask) *PostUpdate {
-	return pu.SetDailyTasksID(d.ID)
+// SetDailyTask sets the "daily_task" edge to the DailyTask entity.
+func (pu *PostUpdate) SetDailyTask(d *DailyTask) *PostUpdate {
+	return pu.SetDailyTaskID(d.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.
@@ -249,9 +249,9 @@ func (pu *PostUpdate) RemoveLikes(l ...*Like) *PostUpdate {
 	return pu.RemoveLikeIDs(ids...)
 }
 
-// ClearDailyTasks clears the "daily_tasks" edge to the DailyTask entity.
-func (pu *PostUpdate) ClearDailyTasks() *PostUpdate {
-	pu.mutation.ClearDailyTasks()
+// ClearDailyTask clears the "daily_task" edge to the DailyTask entity.
+func (pu *PostUpdate) ClearDailyTask() *PostUpdate {
+	pu.mutation.ClearDailyTask()
 	return pu
 }
 
@@ -461,12 +461,12 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if pu.mutation.DailyTasksCleared() {
+	if pu.mutation.DailyTaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   post.DailyTasksTable,
-			Columns: []string{post.DailyTasksColumn},
+			Table:   post.DailyTaskTable,
+			Columns: []string{post.DailyTaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
@@ -474,12 +474,12 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.mutation.DailyTasksIDs(); len(nodes) > 0 {
+	if nodes := pu.mutation.DailyTaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   post.DailyTasksTable,
-			Columns: []string{post.DailyTasksColumn},
+			Table:   post.DailyTaskTable,
+			Columns: []string{post.DailyTaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
@@ -653,23 +653,23 @@ func (puo *PostUpdateOne) AddLikes(l ...*Like) *PostUpdateOne {
 	return puo.AddLikeIDs(ids...)
 }
 
-// SetDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID.
-func (puo *PostUpdateOne) SetDailyTasksID(id uuid.UUID) *PostUpdateOne {
-	puo.mutation.SetDailyTasksID(id)
+// SetDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID.
+func (puo *PostUpdateOne) SetDailyTaskID(id uuid.UUID) *PostUpdateOne {
+	puo.mutation.SetDailyTaskID(id)
 	return puo
 }
 
-// SetNillableDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID if the given value is not nil.
-func (puo *PostUpdateOne) SetNillableDailyTasksID(id *uuid.UUID) *PostUpdateOne {
+// SetNillableDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID if the given value is not nil.
+func (puo *PostUpdateOne) SetNillableDailyTaskID(id *uuid.UUID) *PostUpdateOne {
 	if id != nil {
-		puo = puo.SetDailyTasksID(*id)
+		puo = puo.SetDailyTaskID(*id)
 	}
 	return puo
 }
 
-// SetDailyTasks sets the "daily_tasks" edge to the DailyTask entity.
-func (puo *PostUpdateOne) SetDailyTasks(d *DailyTask) *PostUpdateOne {
-	return puo.SetDailyTasksID(d.ID)
+// SetDailyTask sets the "daily_task" edge to the DailyTask entity.
+func (puo *PostUpdateOne) SetDailyTask(d *DailyTask) *PostUpdateOne {
+	return puo.SetDailyTaskID(d.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.
@@ -725,9 +725,9 @@ func (puo *PostUpdateOne) RemoveLikes(l ...*Like) *PostUpdateOne {
 	return puo.RemoveLikeIDs(ids...)
 }
 
-// ClearDailyTasks clears the "daily_tasks" edge to the DailyTask entity.
-func (puo *PostUpdateOne) ClearDailyTasks() *PostUpdateOne {
-	puo.mutation.ClearDailyTasks()
+// ClearDailyTask clears the "daily_task" edge to the DailyTask entity.
+func (puo *PostUpdateOne) ClearDailyTask() *PostUpdateOne {
+	puo.mutation.ClearDailyTask()
 	return puo
 }
 
@@ -967,12 +967,12 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if puo.mutation.DailyTasksCleared() {
+	if puo.mutation.DailyTaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   post.DailyTasksTable,
-			Columns: []string{post.DailyTasksColumn},
+			Table:   post.DailyTaskTable,
+			Columns: []string{post.DailyTaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
@@ -980,12 +980,12 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.mutation.DailyTasksIDs(); len(nodes) > 0 {
+	if nodes := puo.mutation.DailyTaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   post.DailyTasksTable,
-			Columns: []string{post.DailyTasksColumn},
+			Table:   post.DailyTaskTable,
+			Columns: []string{post.DailyTaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),

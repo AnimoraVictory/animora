@@ -50,8 +50,8 @@ type PostEdges struct {
 	Comments []*Comment `json:"comments,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*Like `json:"likes,omitempty"`
-	// DailyTasks holds the value of the daily_tasks edge.
-	DailyTasks *DailyTask `json:"daily_tasks,omitempty"`
+	// DailyTask holds the value of the daily_task edge.
+	DailyTask *DailyTask `json:"daily_task,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -86,15 +86,15 @@ func (e PostEdges) LikesOrErr() ([]*Like, error) {
 	return nil, &NotLoadedError{edge: "likes"}
 }
 
-// DailyTasksOrErr returns the DailyTasks value or an error if the edge
+// DailyTaskOrErr returns the DailyTask value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PostEdges) DailyTasksOrErr() (*DailyTask, error) {
-	if e.DailyTasks != nil {
-		return e.DailyTasks, nil
+func (e PostEdges) DailyTaskOrErr() (*DailyTask, error) {
+	if e.DailyTask != nil {
+		return e.DailyTask, nil
 	} else if e.loadedTypes[3] {
 		return nil, &NotFoundError{label: dailytask.Label}
 	}
-	return nil, &NotLoadedError{edge: "daily_tasks"}
+	return nil, &NotLoadedError{edge: "daily_task"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -212,9 +212,9 @@ func (po *Post) QueryLikes() *LikeQuery {
 	return NewPostClient(po.config).QueryLikes(po)
 }
 
-// QueryDailyTasks queries the "daily_tasks" edge of the Post entity.
-func (po *Post) QueryDailyTasks() *DailyTaskQuery {
-	return NewPostClient(po.config).QueryDailyTasks(po)
+// QueryDailyTask queries the "daily_task" edge of the Post entity.
+func (po *Post) QueryDailyTask() *DailyTaskQuery {
+	return NewPostClient(po.config).QueryDailyTask(po)
 }
 
 // Update returns a builder for updating this Post.

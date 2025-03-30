@@ -489,10 +489,10 @@ func (dtq *DailyTaskQuery) loadPost(ctx context.Context, query *PostQuery, nodes
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*DailyTask)
 	for i := range nodes {
-		if nodes[i].post_daily_tasks == nil {
+		if nodes[i].post_daily_task == nil {
 			continue
 		}
-		fk := *nodes[i].post_daily_tasks
+		fk := *nodes[i].post_daily_task
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -509,7 +509,7 @@ func (dtq *DailyTaskQuery) loadPost(ctx context.Context, query *PostQuery, nodes
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "post_daily_tasks" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "post_daily_task" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

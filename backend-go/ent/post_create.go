@@ -166,23 +166,23 @@ func (pc *PostCreate) AddLikes(l ...*Like) *PostCreate {
 	return pc.AddLikeIDs(ids...)
 }
 
-// SetDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID.
-func (pc *PostCreate) SetDailyTasksID(id uuid.UUID) *PostCreate {
-	pc.mutation.SetDailyTasksID(id)
+// SetDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID.
+func (pc *PostCreate) SetDailyTaskID(id uuid.UUID) *PostCreate {
+	pc.mutation.SetDailyTaskID(id)
 	return pc
 }
 
-// SetNillableDailyTasksID sets the "daily_tasks" edge to the DailyTask entity by ID if the given value is not nil.
-func (pc *PostCreate) SetNillableDailyTasksID(id *uuid.UUID) *PostCreate {
+// SetNillableDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID if the given value is not nil.
+func (pc *PostCreate) SetNillableDailyTaskID(id *uuid.UUID) *PostCreate {
 	if id != nil {
-		pc = pc.SetDailyTasksID(*id)
+		pc = pc.SetDailyTaskID(*id)
 	}
 	return pc
 }
 
-// SetDailyTasks sets the "daily_tasks" edge to the DailyTask entity.
-func (pc *PostCreate) SetDailyTasks(d *DailyTask) *PostCreate {
-	return pc.SetDailyTasksID(d.ID)
+// SetDailyTask sets the "daily_task" edge to the DailyTask entity.
+func (pc *PostCreate) SetDailyTask(d *DailyTask) *PostCreate {
+	return pc.SetDailyTaskID(d.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.
@@ -372,12 +372,12 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.mutation.DailyTasksIDs(); len(nodes) > 0 {
+	if nodes := pc.mutation.DailyTaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
-			Table:   post.DailyTasksTable,
-			Columns: []string{post.DailyTasksColumn},
+			Table:   post.DailyTaskTable,
+			Columns: []string{post.DailyTaskColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),

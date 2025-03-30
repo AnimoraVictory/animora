@@ -41,7 +41,7 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"eating", "sleeping", "playing"}},
-		{Name: "post_daily_tasks", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "post_daily_task", Type: field.TypeUUID, Unique: true, Nullable: true},
 		{Name: "user_daily_tasks", Type: field.TypeUUID},
 	}
 	// DailyTasksTable holds the schema information for the "daily_tasks" table.
@@ -51,7 +51,7 @@ var (
 		PrimaryKey: []*schema.Column{DailyTasksColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "daily_tasks_posts_daily_tasks",
+				Symbol:     "daily_tasks_posts_daily_task",
 				Columns:    []*schema.Column{DailyTasksColumns[3]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
 				OnDelete:   schema.SetNull,

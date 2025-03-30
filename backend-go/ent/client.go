@@ -1219,15 +1219,15 @@ func (c *PostClient) QueryLikes(po *Post) *LikeQuery {
 	return query
 }
 
-// QueryDailyTasks queries the daily_tasks edge of a Post.
-func (c *PostClient) QueryDailyTasks(po *Post) *DailyTaskQuery {
+// QueryDailyTask queries the daily_task edge of a Post.
+func (c *PostClient) QueryDailyTask(po *Post) *DailyTaskQuery {
 	query := (&DailyTaskClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := po.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(post.Table, post.FieldID, id),
 			sqlgraph.To(dailytask.Table, dailytask.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, post.DailyTasksTable, post.DailyTasksColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, post.DailyTaskTable, post.DailyTaskColumn),
 		)
 		fromV = sqlgraph.Neighbors(po.driver.Dialect(), step)
 		return fromV, nil

@@ -531,21 +531,21 @@ func HasLikesWith(preds ...predicate.Like) predicate.Post {
 	})
 }
 
-// HasDailyTasks applies the HasEdge predicate on the "daily_tasks" edge.
-func HasDailyTasks() predicate.Post {
+// HasDailyTask applies the HasEdge predicate on the "daily_task" edge.
+func HasDailyTask() predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, DailyTasksTable, DailyTasksColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, DailyTaskTable, DailyTaskColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasDailyTasksWith applies the HasEdge predicate on the "daily_tasks" edge with a given conditions (other predicates).
-func HasDailyTasksWith(preds ...predicate.DailyTask) predicate.Post {
+// HasDailyTaskWith applies the HasEdge predicate on the "daily_task" edge with a given conditions (other predicates).
+func HasDailyTaskWith(preds ...predicate.DailyTask) predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {
-		step := newDailyTasksStep()
+		step := newDailyTaskStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
