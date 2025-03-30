@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 
+	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent"
 )
 
 type PostResponse struct {

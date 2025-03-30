@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/htanos/animalia/backend-go/ent/like"
-	"github.com/htanos/animalia/backend-go/ent/predicate"
+	"github.com/aki-13627/animalia/backend-go/ent/like"
+	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 )
 
 // LikeDelete is the builder for deleting a Like entity.

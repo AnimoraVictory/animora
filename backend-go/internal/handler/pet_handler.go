@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
+	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
-	"github.com/htanos/animalia/backend-go/internal/usecase"
 )
 
 type PetHandler struct {

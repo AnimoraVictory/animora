@@ -3,7 +3,7 @@ package usecase
 import (
 	"mime/multipart"
 
-	"github.com/htanos/animalia/backend-go/internal/domain/repository"
+	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
 )
 
 type StorageUsecase struct {

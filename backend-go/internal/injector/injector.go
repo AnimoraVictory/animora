@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/htanos/animalia/backend-go/ent"
-	"github.com/htanos/animalia/backend-go/internal/domain/repository"
-	"github.com/htanos/animalia/backend-go/internal/handler"
-	"github.com/htanos/animalia/backend-go/internal/infra"
-	"github.com/htanos/animalia/backend-go/internal/usecase"
+	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
+	"github.com/aki-13627/animalia/backend-go/internal/handler"
+	"github.com/aki-13627/animalia/backend-go/internal/infra"
+	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	_ "github.com/lib/pq" // PostgreSQLドライバー
 )
 

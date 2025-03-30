@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/htanos/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/rs/zerolog/log"
 )
 
@@ -13,7 +13,7 @@ func SeedData(client *ent.Client) error {
 
 	log.Info().Msg("Seeding database...")
 
-	clearDatabase(client)
+	ClearDatabase(client)
 
 	// Create users
 	users, err := client.User.CreateBulk(
@@ -80,8 +80,8 @@ func SeedData(client *ent.Client) error {
 	return nil
 }
 
-// clearDatabase clears all data from the database
-func clearDatabase(client *ent.Client) error {
+// ClearDatabase clears all data from the database
+func ClearDatabase(client *ent.Client) error {
 	log.Info().Msg("Clearing database...")
 	ctx := context.Background()
 
