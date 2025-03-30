@@ -25,7 +25,7 @@ class MultiModalNeuMF(nn.Module):
         self.latent_dim_mlp = config["latent_dim_mlp"] # MLPの埋め込みベクトルの次元数
 
         # ----------------------------------
-        # Embedding Layers
+        # Embedding Layers: IDに対応する重み行列のベクトルを取得 -> 埋め込みベクトル
         # ----------------------------------
         self.embedding_user_mlp = torch.nn.Embedding(num_embeddings=self.num_users, embedding_dim=self.latent_dim_mlp)
         self.embedding_item_mlp = torch.nn.Embedding(num_embeddings=self.num_items, embedding_dim=self.latent_dim_mlp)

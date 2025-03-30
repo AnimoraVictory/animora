@@ -7,14 +7,18 @@ import os
 import torch
 
 # モデルの保存
-def save_checkpoint(model, model_dir):
+def save_checkpoint(model, config, model_dir):
     """
     モデルの重みを保存する関数
     """
     dir = os.path.dirname(model_dir)
     if not os.path.exists(dir):
         os.makedirs(dir)
-    torch.save(model.state_dict(), model_dir)
+    checkpoint = {
+        "model_state_dict": model.state_dict(),
+        "config": config
+    }
+    torch.save(checkpoint, model_dir)
 
 # モデルの読み込み
 def resume_checkpoint(model, model_dir, device_id):

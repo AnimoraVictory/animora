@@ -14,15 +14,15 @@ def get_candidate_posts():
     conn = get_connection()
     cur = conn.cursor()
 
-    # feature_computed = true で特徴量が抽出済みの投稿を対象とする
+    # 特徴量が抽出済みの投稿を対象とする
     query = """
             SELECT 
-                ID AS post_id,
-                CreatedAt AS timestamp,
-                ImageFeature AS image_feature, -- JSON文字列
-                TextFeature AS text_feature -- JSON文字列
-            FROM Post
-            WHERE ImageFeature IS NOT NULL AND TextFeature IS NOT NULL;
+                id AS post_id,
+                created_at AS timestamp,
+                image_feature AS image_feature, -- JSON文字列
+                text_feature AS text_feature -- JSON文字列
+            FROM posts
+            WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL;
             """
     cur.execute(query)
     rows = cur.fetchall()

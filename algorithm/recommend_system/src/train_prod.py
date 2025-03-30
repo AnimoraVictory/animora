@@ -23,30 +23,30 @@ if __name__ == "__main__":
     query = """
             -- 投稿自体のインタラクション(投稿者による投稿)
             SELECT
-                UserID AS user_id, ID AS post_id, 1 AS rating, CreatedAt AS timestamp, 
-                ImageFeature AS image_feature, TextFeature AS text_feature
-            FROM Post
-            WHERE TextFeature IS NOT NULL AND ImageFeature IS NOT NULL
+                user_id AS user_id, id AS post_id, 1 AS rating, created_at AS timestamp, 
+                image_feature AS image_feature, text_feature AS text_feature
+            FROM posts
+            WHERE text_feature IS NOT NULL AND image_feature IS NOT NULL
 
             UNION -- 縦結合＋重複削除
 
             -- 「いいね」のインタラクション
             SELECT
-                L.UserID AS user_id, L.PostID AS post_id, 1 AS rating, L.CreatedAt AS timestamp,
-                P.ImageFeature AS image_feature, P.TextFeature AS text_feature
-            FROM "Like" L
-            JOIN Post P ON L.PostID = P.ID
-            WHERE P.TextFeature IS NOT NULL AND P.ImageFeature IS NOT NULL
+                L.user_likes AS user_id, L.post_likes AS post_id, 1 AS rating, L.created_at AS timestamp,
+                P.image_feature AS image_feature, P.text_feature AS text_feature
+            FROM likes L
+            JOIN posts P ON L.post_likes = P.id
+            WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL
 
             UNION
 
             -- コメントのインタラクション
             SELECT
-                C.UserID AS user_id, C.PostID AS post_id, 1 AS rating, C.CreatedAt AS timestamp,
-                P.ImageFeature AS image_feature, P.TextFeature AS text_feature
-            FROM Comment C
-            JOIN Post P ON C.PostID = P.ID
-            WHERE P.TextFeature IS NOT NULL AND P.ImageFeature IS NOT NULL;
+                C.user_comments AS user_id, C.post_comments AS post_id, 1 AS rating, C.created_at AS timestamp,
+                P.image_feature AS image_feature, P.text_feature AS text_feature
+            FROM comments C
+            JOIN posts P ON C.post_comments = P.id
+            WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL;
             """
     prod_df = pd.read_sql(query, conn)
     conn.close()
