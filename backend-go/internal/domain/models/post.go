@@ -5,24 +5,25 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 )
 
 type PostResponse struct {
-	ID        uuid.UUID `json:"id"`
-	Caption   string    `json:"caption"`
-	UserId    uuid.UUID `json:"userId"`
-	ImageURL  string    `json:"imageUrl"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID        uuid.UUID    `json:"id"`
+	Caption   string       `json:"caption"`
+	UserId    uuid.UUID    `json:"userId"`
+	User      UserResponse `json:"user"`
+	ImageURL  string       `json:"imageUrl"`
+	CreatedAt time.Time    `json:"createdAt"`
 }
 
-func NewPostResponse(post *ent.Post, imageURL string) *PostResponse {
-	log.Info().Msgf("post edges: %v", post.Edges)
+func NewPostResponse(post *ent.Post, postImageURL string, userImageURL string) *PostResponse {
+	user := post.Edges.User
 	return &PostResponse{
 		ID:        post.ID,
 		Caption:   post.Caption,
-		UserId:    post.Edges.User.ID,
-		ImageURL:  imageURL,
+		UserId:    user.ID,
+		User:      NewUserResponse(user, userImageURL),
+		ImageURL:  postImageURL,
 		CreatedAt: post.CreatedAt,
 	}
 }

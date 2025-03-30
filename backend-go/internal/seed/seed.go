@@ -28,6 +28,8 @@ func SeedData(client *ent.Client) error {
 		hatanoId = uuid.MustParse("86552ff6-f820-4aa2-b372-866dc38b4a4b")
 	)
 
+	const iconImageKey = "profile/a806f6f3-0b7c-44a1-95e3-46d39b0aefcc-57F1EED2-58FE-405C-B568-168538F8811A.jpg"
+
 	// Create users
 	log.Debug().Msg("Creating users...")
 	users, err := client.User.CreateBulk(
@@ -35,38 +37,45 @@ func SeedData(client *ent.Client) error {
 			SetEmail("john.doe@example.com").
 			SetName("John Doe").
 			SetBio("I'm a pet shop owner").
+			SetIconImageKey(iconImageKey).
 			SetIndex(0),
 		client.User.Create().
 			SetEmail("jane.smith@example.com").
 			SetName("Jane Smith").
 			SetBio("I'm a cat lover").
+			SetIconImageKey(iconImageKey).
 			SetIndex(1),
 		client.User.Create().
 			SetEmail("alex.johnson@example.com").
 			SetName("Alex Johnson").
 			SetBio("I'm a dog lover").
+			SetIconImageKey(iconImageKey).
 			SetIndex(2),
 		client.User.Create().
 			SetEmail("emily.wilson@example.com").
 			SetName("Emily Wilson").
 			SetBio("I'm a food lover").
+			SetIconImageKey(iconImageKey).
 			SetIndex(3),
 		client.User.Create().
 			SetEmail("michael.brown@example.com").
 			SetName("Michael Brown").
 			SetBio("I'm a flower shop owner").
+			SetIconImageKey(iconImageKey).
 			SetIndex(4),
 		client.User.Create().
 			SetID(hatanoId).
 			SetEmail("tanomitsu2002@gmail.com").
 			SetName("Mitsuru Hatano").
 			SetBio("I'm a software engineer").
+			SetIconImageKey(iconImageKey).
 			SetIndex(5),
 		client.User.Create().
 			SetID(kakuId).
 			SetEmail("aki.kaku0627@gmail.com").
 			SetName("Akihiro Kaku").
 			SetBio("I'm a software engineer").
+			SetIconImageKey(iconImageKey).
 			SetIndex(6),
 	).Save(ctx)
 	if err != nil {
