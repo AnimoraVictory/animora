@@ -16,7 +16,13 @@ export const PostPanel = ({ post }: Props) => {
   const colors = Colors[colorScheme ?? "light"];
 
   const date = new Date(post.createdAt);
-  const formattedDate = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const formattedDateTime = date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return (
     <View style={styles.wrapper}>
@@ -24,7 +30,7 @@ export const PostPanel = ({ post }: Props) => {
         <Image source={{ uri: post.user.iconImageUrl }} style={styles.avatar} />
         <View style={styles.userInfo}>
           <Text style={[styles.userName, { color: colors.text }]}>{post.user.name}</Text>
-          <Text style={[styles.postTime, { color: colors.icon }]}>{formattedDate}</Text>
+          <Text style={[styles.postTime, { color: colors.icon }]}>{formattedDateTime}</Text>
         </View>
       </View>
       <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
