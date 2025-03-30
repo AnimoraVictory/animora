@@ -66,14 +66,6 @@ func (cc *CommentCreate) SetPostID(id uuid.UUID) *CommentCreate {
 	return cc
 }
 
-// SetNillablePostID sets the "post" edge to the Post entity by ID if the given value is not nil.
-func (cc *CommentCreate) SetNillablePostID(id *uuid.UUID) *CommentCreate {
-	if id != nil {
-		cc = cc.SetPostID(*id)
-	}
-	return cc
-}
-
 // SetPost sets the "post" edge to the Post entity.
 func (cc *CommentCreate) SetPost(p *Post) *CommentCreate {
 	return cc.SetPostID(p.ID)
@@ -82,14 +74,6 @@ func (cc *CommentCreate) SetPost(p *Post) *CommentCreate {
 // SetUserID sets the "user" edge to the User entity by ID.
 func (cc *CommentCreate) SetUserID(id uuid.UUID) *CommentCreate {
 	cc.mutation.SetUserID(id)
-	return cc
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (cc *CommentCreate) SetNillableUserID(id *uuid.UUID) *CommentCreate {
-	if id != nil {
-		cc = cc.SetUserID(*id)
-	}
 	return cc
 }
 
@@ -155,6 +139,12 @@ func (cc *CommentCreate) check() error {
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Comment.created_at"`)}
+	}
+	if len(cc.mutation.PostIDs()) == 0 {
+		return &ValidationError{Name: "post", err: errors.New(`ent: missing required edge "Comment.post"`)}
+	}
+	if len(cc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Comment.user"`)}
 	}
 	return nil
 }

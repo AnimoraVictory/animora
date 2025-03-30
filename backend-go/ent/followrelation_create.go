@@ -59,14 +59,6 @@ func (frc *FollowRelationCreate) SetFromID(id uuid.UUID) *FollowRelationCreate {
 	return frc
 }
 
-// SetNillableFromID sets the "from" edge to the User entity by ID if the given value is not nil.
-func (frc *FollowRelationCreate) SetNillableFromID(id *uuid.UUID) *FollowRelationCreate {
-	if id != nil {
-		frc = frc.SetFromID(*id)
-	}
-	return frc
-}
-
 // SetFrom sets the "from" edge to the User entity.
 func (frc *FollowRelationCreate) SetFrom(u *User) *FollowRelationCreate {
 	return frc.SetFromID(u.ID)
@@ -75,14 +67,6 @@ func (frc *FollowRelationCreate) SetFrom(u *User) *FollowRelationCreate {
 // SetToID sets the "to" edge to the User entity by ID.
 func (frc *FollowRelationCreate) SetToID(id uuid.UUID) *FollowRelationCreate {
 	frc.mutation.SetToID(id)
-	return frc
-}
-
-// SetNillableToID sets the "to" edge to the User entity by ID if the given value is not nil.
-func (frc *FollowRelationCreate) SetNillableToID(id *uuid.UUID) *FollowRelationCreate {
-	if id != nil {
-		frc = frc.SetToID(*id)
-	}
 	return frc
 }
 
@@ -140,6 +124,12 @@ func (frc *FollowRelationCreate) defaults() {
 func (frc *FollowRelationCreate) check() error {
 	if _, ok := frc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "FollowRelation.created_at"`)}
+	}
+	if len(frc.mutation.FromIDs()) == 0 {
+		return &ValidationError{Name: "from", err: errors.New(`ent: missing required edge "FollowRelation.from"`)}
+	}
+	if len(frc.mutation.ToIDs()) == 0 {
+		return &ValidationError{Name: "to", err: errors.New(`ent: missing required edge "FollowRelation.to"`)}
 	}
 	return nil
 }

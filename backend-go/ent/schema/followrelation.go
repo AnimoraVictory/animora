@@ -25,7 +25,7 @@ func (FollowRelation) Fields() []ent.Field {
 // Edges of the FollowRelation.
 func (FollowRelation) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("from", User.Type).Ref("following").Unique(),
-		edge.From("to", User.Type).Ref("followers").Unique(),
+		edge.From("from", User.Type).Ref("following").Unique().Required(),
+		edge.From("to", User.Type).Ref("followers").Unique().Required(),
 	}
 }

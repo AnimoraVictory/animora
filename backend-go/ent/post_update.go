@@ -141,14 +141,6 @@ func (pu *PostUpdate) SetUserID(id uuid.UUID) *PostUpdate {
 	return pu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (pu *PostUpdate) SetNillableUserID(id *uuid.UUID) *PostUpdate {
-	if id != nil {
-		pu = pu.SetUserID(*id)
-	}
-	return pu
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (pu *PostUpdate) SetUser(u *User) *PostUpdate {
 	return pu.SetUserID(u.ID)
@@ -275,6 +267,9 @@ func (pu *PostUpdate) check() error {
 		if err := post.ImageKeyValidator(v); err != nil {
 			return &ValidationError{Name: "image_key", err: fmt.Errorf(`ent: validator failed for field "Post.image_key": %w`, err)}
 		}
+	}
+	if pu.mutation.UserCleared() && len(pu.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Post.user"`)
 	}
 	return nil
 }
@@ -565,14 +560,6 @@ func (puo *PostUpdateOne) SetUserID(id uuid.UUID) *PostUpdateOne {
 	return puo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (puo *PostUpdateOne) SetNillableUserID(id *uuid.UUID) *PostUpdateOne {
-	if id != nil {
-		puo = puo.SetUserID(*id)
-	}
-	return puo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (puo *PostUpdateOne) SetUser(u *User) *PostUpdateOne {
 	return puo.SetUserID(u.ID)
@@ -712,6 +699,9 @@ func (puo *PostUpdateOne) check() error {
 		if err := post.ImageKeyValidator(v); err != nil {
 			return &ValidationError{Name: "image_key", err: fmt.Errorf(`ent: validator failed for field "Post.image_key": %w`, err)}
 		}
+	}
+	if puo.mutation.UserCleared() && len(puo.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Post.user"`)
 	}
 	return nil
 }

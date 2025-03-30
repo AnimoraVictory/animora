@@ -50,14 +50,6 @@ func (fru *FollowRelationUpdate) SetFromID(id uuid.UUID) *FollowRelationUpdate {
 	return fru
 }
 
-// SetNillableFromID sets the "from" edge to the User entity by ID if the given value is not nil.
-func (fru *FollowRelationUpdate) SetNillableFromID(id *uuid.UUID) *FollowRelationUpdate {
-	if id != nil {
-		fru = fru.SetFromID(*id)
-	}
-	return fru
-}
-
 // SetFrom sets the "from" edge to the User entity.
 func (fru *FollowRelationUpdate) SetFrom(u *User) *FollowRelationUpdate {
 	return fru.SetFromID(u.ID)
@@ -66,14 +58,6 @@ func (fru *FollowRelationUpdate) SetFrom(u *User) *FollowRelationUpdate {
 // SetToID sets the "to" edge to the User entity by ID.
 func (fru *FollowRelationUpdate) SetToID(id uuid.UUID) *FollowRelationUpdate {
 	fru.mutation.SetToID(id)
-	return fru
-}
-
-// SetNillableToID sets the "to" edge to the User entity by ID if the given value is not nil.
-func (fru *FollowRelationUpdate) SetNillableToID(id *uuid.UUID) *FollowRelationUpdate {
-	if id != nil {
-		fru = fru.SetToID(*id)
-	}
 	return fru
 }
 
@@ -126,7 +110,21 @@ func (fru *FollowRelationUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (fru *FollowRelationUpdate) check() error {
+	if fru.mutation.FromCleared() && len(fru.mutation.FromIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "FollowRelation.from"`)
+	}
+	if fru.mutation.ToCleared() && len(fru.mutation.ToIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "FollowRelation.to"`)
+	}
+	return nil
+}
+
 func (fru *FollowRelationUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := fru.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(followrelation.Table, followrelation.Columns, sqlgraph.NewFieldSpec(followrelation.FieldID, field.TypeUUID))
 	if ps := fru.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -236,14 +234,6 @@ func (fruo *FollowRelationUpdateOne) SetFromID(id uuid.UUID) *FollowRelationUpda
 	return fruo
 }
 
-// SetNillableFromID sets the "from" edge to the User entity by ID if the given value is not nil.
-func (fruo *FollowRelationUpdateOne) SetNillableFromID(id *uuid.UUID) *FollowRelationUpdateOne {
-	if id != nil {
-		fruo = fruo.SetFromID(*id)
-	}
-	return fruo
-}
-
 // SetFrom sets the "from" edge to the User entity.
 func (fruo *FollowRelationUpdateOne) SetFrom(u *User) *FollowRelationUpdateOne {
 	return fruo.SetFromID(u.ID)
@@ -252,14 +242,6 @@ func (fruo *FollowRelationUpdateOne) SetFrom(u *User) *FollowRelationUpdateOne {
 // SetToID sets the "to" edge to the User entity by ID.
 func (fruo *FollowRelationUpdateOne) SetToID(id uuid.UUID) *FollowRelationUpdateOne {
 	fruo.mutation.SetToID(id)
-	return fruo
-}
-
-// SetNillableToID sets the "to" edge to the User entity by ID if the given value is not nil.
-func (fruo *FollowRelationUpdateOne) SetNillableToID(id *uuid.UUID) *FollowRelationUpdateOne {
-	if id != nil {
-		fruo = fruo.SetToID(*id)
-	}
 	return fruo
 }
 
@@ -325,7 +307,21 @@ func (fruo *FollowRelationUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (fruo *FollowRelationUpdateOne) check() error {
+	if fruo.mutation.FromCleared() && len(fruo.mutation.FromIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "FollowRelation.from"`)
+	}
+	if fruo.mutation.ToCleared() && len(fruo.mutation.ToIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "FollowRelation.to"`)
+	}
+	return nil
+}
+
 func (fruo *FollowRelationUpdateOne) sqlSave(ctx context.Context) (_node *FollowRelation, err error) {
+	if err := fruo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(followrelation.Table, followrelation.Columns, sqlgraph.NewFieldSpec(followrelation.FieldID, field.TypeUUID))
 	id, ok := fruo.mutation.ID()
 	if !ok {

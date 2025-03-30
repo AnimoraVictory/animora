@@ -23,7 +23,7 @@ type PetResponse struct {
 
 // NewPetResponse converts a Pet to a PetResponse
 func NewPetResponse(pet *ent.Pet, imageURL string) PetResponse {
-	owner, _ := pet.Edges.OwnerOrErr()
+	owner := pet.Edges.Owner
 	return PetResponse{
 		ID:        pet.ID,
 		Name:      pet.Name,
