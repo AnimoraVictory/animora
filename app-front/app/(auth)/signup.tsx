@@ -10,6 +10,7 @@ import {
   Keyboard,
   ActivityIndicator,
   TouchableOpacity,
+  ImageBackground,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -84,8 +85,13 @@ export default function SignUpScreen() {
   };
 
   return (
+    <ImageBackground
+      source={require("../../assets/images/noise2.png")}
+      resizeMode="repeat"
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={styles.container}>
         <View style={styles.formContainer}>
           <Text style={[styles.title, { color: theme.text }]}>サインアップ</Text>
           <Controller
@@ -146,14 +152,15 @@ export default function SignUpScreen() {
             </TouchableOpacity>
           )}
           <TouchableOpacity
-            style={[styles.button, { borderColor: theme.tint }]}
+            style={[styles.button, { backgroundColor: theme.tint }]}
             onPress={() => router.push("/")}
           >
-            <Text style={[styles.buttonText, { color: theme.tint }]}>戻る</Text>
+            <Text style={[styles.buttonText, { color: theme.background }]}>戻る</Text>
           </TouchableOpacity>
         </View>
       </View>
     </TouchableWithoutFeedback>
+    </ImageBackground>
   );
 }
 

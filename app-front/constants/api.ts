@@ -23,20 +23,20 @@ export interface LoginResponse {
 // APIクライアント関数
 export const api = {
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    const response = await axios.post<LoginResponse>(`${API_URL}/auth/signin`, { email, password }, {
+    const response = await axios.post<LoginResponse>(`${API_URL}/auth/signin/`, { email, password }, {
       headers: { 'Content-Type': 'application/json' }
     });
     return response.data;
   },
 
   signUp: async (email: string, password: string, name: string): Promise<void> => {
-    await axios.post(`${API_URL}/auth/signup`, { email, password, name }, {
+    await axios.post(`${API_URL}/auth/signup/`, { email, password, name }, {
       headers: { 'Content-Type': 'application/json' }
     });
   },
 
   signOut: async (accessToken: string): Promise<void> => {
-    await axios.post(`${API_URL}/auth/signout`, null, {
+    await axios.post(`${API_URL}/auth/signout/`, null, {
       headers: { 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
@@ -45,7 +45,7 @@ export const api = {
   },
 
   getUser: async (accessToken: string): Promise<User> => {
-    const response = await axios.get<User>(`${API_URL}/auth/me`, {
+    const response = await axios.get<User>(`${API_URL}/auth/me/`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       }
@@ -54,7 +54,7 @@ export const api = {
   },
 
   verifyEmail: async (email: string, code: string): Promise<void> => {
-    await axios.post(`${API_URL}/auth/verify-email`, { email, code }, {
+    await axios.post(`${API_URL}/auth/verify-email/`, { email, code }, {
       headers: { 'Content-Type': 'application/json' }
     });
   },

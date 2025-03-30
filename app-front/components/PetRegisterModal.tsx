@@ -100,7 +100,7 @@ export const PetRegiserModal: React.FC<PetRegiserModalProps> = ({
 
   const registerPetMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.post(`${API_URL}/pets/new`, data, {
+      return axios.post(`${API_URL}/pets/new/`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },

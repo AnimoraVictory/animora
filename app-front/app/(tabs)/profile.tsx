@@ -114,7 +114,7 @@ const ProfileScreen: React.FC = () => {
   } = useQuery<Pet[]>({
     queryKey: ["pets", user?.id],
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/pets/owner`, {
+      const response = await axios.get(`${API_URL}/pets/owner/`, {
         params: { ownerId: user?.id },
       });
       const result = getPetResponseSchema.safeParse(response.data);
@@ -135,7 +135,7 @@ const ProfileScreen: React.FC = () => {
   } = useQuery<Post[]>({
     queryKey: ["posts", user?.id],
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/posts/user`, {
+      const response = await axios.get(`${API_URL}/posts/user/`, {
         params: { userId: user?.id },
       });
       const result = getPostResponseSchema.safeParse(response.data);

@@ -47,7 +47,7 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
 
   const createPostMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.post(`${API_URL}/posts`, data, {
+      return axios.post(`${API_URL}/posts/`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },

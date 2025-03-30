@@ -88,7 +88,7 @@ export const PetPanel: React.FC<PetPanelProps> = ({
           onPress: async () => {
             try {
               // axiosを使用してDELETEリクエストを送信
-              const response = await axios.delete(`${API_URL}/pets/delete`, {
+              const response = await axios.delete(`${API_URL}/pets/delete/`, {
                 params: { petId: pet.id },
               });
               if (response.status === 200) {
