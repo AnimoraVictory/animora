@@ -176,7 +176,7 @@ const ProfileScreen: React.FC = () => {
   const renderPosts = (item: Post) => {
     return (
       <View style={styles.postContainer}>
-        <Text>{item.title}</Text>
+        <Text>{item.caption}</Text>
       </View>
     );
   };

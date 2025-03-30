@@ -14,8 +14,10 @@ import Constants from "expo-constants";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const postSchema = z.object({
   id: z.string().uuid(),
-  title: z.string().min(1),
-  content: z.string().min(1),
+  caption: z.string().min(0),
+  imageKey: z.string().min(1),
+  userId: z.string().uuid(),
+  createdAt: z.string().datetime(),
 });
 
 export const getPostResponseSchema = z.object({
@@ -67,8 +69,7 @@ export default function PostsScreen() {
               },
             ]}
           >
-            <ThemedText style={styles.postTitle}>{item.title}</ThemedText>
-            <ThemedText>{item.content}</ThemedText>
+            <ThemedText style={styles.postTitle}>{item.caption}</ThemedText>
           </ThemedView>
         )}
       />
