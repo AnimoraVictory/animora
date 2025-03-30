@@ -47,6 +47,14 @@ func (uc *UserCreate) SetBio(s string) *UserCreate {
 	return uc
 }
 
+// SetNillableBio sets the "bio" field if the given value is not nil.
+func (uc *UserCreate) SetNillableBio(s *string) *UserCreate {
+	if s != nil {
+		uc.SetBio(*s)
+	}
+	return uc
+}
+
 // SetIconImageKey sets the "icon_image_key" field.
 func (uc *UserCreate) SetIconImageKey(s string) *UserCreate {
 	uc.mutation.SetIconImageKey(s)
@@ -214,6 +222,10 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.Bio(); !ok {
+		v := user.DefaultBio
+		uc.mutation.SetBio(v)
+	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := user.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)

@@ -11,7 +11,7 @@ run-attach: build
 	docker compose up api
 
 run-seed: build
-	SEED=true docker compose up api -d
+	SEED=true docker compose up api
 
 build:
 	docker compose build api

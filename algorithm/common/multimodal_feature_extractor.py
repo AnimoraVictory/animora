@@ -171,11 +171,11 @@ def update_post_features():
     cur.execute(
         """
         SELECT 
-            ID AS post_id, 
-            ImageKey AS image_key, 
-            Caption AS text_content
-        FROM Post
-        WHERE TextFeature IS NULL OR ImageFeature IS NULL
+            id AS post_id, 
+            image_key AS image_key, 
+            caption AS text_content
+        FROM posts
+        WHERE text_feature IS NULL OR image_feature IS NULL
         """
     )
     posts = cur.fetchall()
@@ -207,9 +207,9 @@ def update_post_features():
 
             # データベースに特徴を保存(特徴ベクトルはJSON文字列として保存)
             update_query = """
-                UPDATE Post
-                SET TextFeature = %s, ImageFeature = %s
-                WHERE ID = %s
+                UPDATE posts
+                SET text_feature = %s, image_feature = %s
+                WHERE id = %s
             """
             cur.execute(update_query, 
                     (json.dumps(text_features_list), json.dumps(image_features_list), post_id)

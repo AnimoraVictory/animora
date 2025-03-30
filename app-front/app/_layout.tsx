@@ -15,11 +15,13 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/providers/AuthContext";
 import { Colors } from "@/constants/Colors";
+import Constants from "expo-constants";
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+export const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 // ユーザーの有無に応じてリダイレクトする
 function AuthSwitch() {
@@ -31,7 +33,7 @@ function AuthSwitch() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        if (pathname !== "/(tabs)/profile") {
+        if (pathname === "/(tabs)/profile") {
           router.replace("/(tabs)/profile");
         } else {
           router.replace("/(tabs)/posts");

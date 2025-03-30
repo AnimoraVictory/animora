@@ -108,7 +108,6 @@ export default function SignInScreen() {
         <View style={styles.formContainer}>
           <Text style={[styles.title, { color: theme.text }]}>サインイン</Text>
 
-          {/* Email */}
           <Controller
             control={control}
             name="email"
@@ -125,7 +124,6 @@ export default function SignInScreen() {
             )}
           />
 
-          {/* Password */}
           <Controller
             control={control}
             name="password"

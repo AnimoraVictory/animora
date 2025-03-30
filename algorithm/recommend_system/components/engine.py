@@ -3,12 +3,13 @@
 # ---------------------------------------------------------------------------------  #
 
 # ライブラリのインポート
+from datetime import datetime
 import torch
 from torch.autograd import Variable
 from tqdm import tqdm
 from tensorboardX import SummaryWriter 
 from recommend_system.utils.utils import save_checkpoint, use_optimizer
-from recommend_system.utils.metrics import MetronAtK
+from recommend_system.components.metrics import MetronAtK
 
 class Engine(object):
     """
@@ -19,7 +20,7 @@ class Engine(object):
     def __init__(self, config):
         self.config = config # モデルの設定情報
         self._metron = MetronAtK(top_k=10) # HR@K, NDCG@Kを計算するための評価モジュール
-        self._writer = SummaryWriter(log_dir="recommend_system/runs/{}".format(config["alias"])) # TensorBoardのログディレクトリ
+        self._writer = SummaryWriter(log_dir="recommend_system/models/runs/{}".format(config["alias"])) # TensorBoardのログディレクトリ
         self._writer.add_text("config", str(config), 0)
         self.opt = use_optimizer(self.model, config)
         # Explicit feedback
@@ -140,7 +141,13 @@ class Engine(object):
         print(f"[Evaluation Epoch {epoch_id}] HR@10 {hit_ratio:.4f}, NDCG@10 {ndcg:.4f}")
         return hit_ratio, ndcg
     
-    def save(self, alias, epoch_id, hit_ratio, ndcg):
+    def save_sim(self, hit_ratio, ndcg):
         assert hasattr(self, "model"), "Please specify the exact model !"
-        model_dir = self.config["model_dir"].format(alias, epoch_id, hit_ratio, ndcg)
-        save_checkpoint(self.model, model_dir)
+        model_dir = self.config["model_dir"].format(hit_ratio, ndcg)
+        save_checkpoint(self.model, self.config, model_dir)
+
+    def save_prod(self, hit_ratio, ndcg):
+        assert hasattr(self, "model"), "Please specify the exact model !"
+        now = datetime.now()
+        model_dir = self.config["model_dir"].format(now.strftime("%Y%m%d_%H%M%S"), hit_ratio, ndcg)
+        save_checkpoint(self.model, self.config, model_dir)

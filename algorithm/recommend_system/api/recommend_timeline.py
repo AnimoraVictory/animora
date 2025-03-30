@@ -1,33 +1,11 @@
 # ---------------------------------------------------------------------------------  # 
-#                      レコメンドタイムラインを生成するオンライン推論API                  　 #
+#                        レコメンドタイムラインを生成するソースコード                     　 #
 # ---------------------------------------------------------------------------------  #
 
 # ライブラリのインポート
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import torch
-import uvicorn
 import json
-from recommend_system.models.mmneumf import MultiModalNeuMF
 from recommend_system.utils.database import get_connection
-from recommend_system.utils.utils import resume_checkpoint
-
-# ----------------------------------
-# APIリクエストとレスポンスのデータモデル
-# ----------------------------------
-class TimelineRequest(BaseModel):
-    user_id: int
-    score_threshold: float = 0.5 # 予測スコアの閾値
-
-class Post(BaseModel):
-    id: int
-    timestamp: str
-    image_feature: list
-    text_feature: list
-    score: float
-
-class TimelineResponse(BaseModel):
-    posts: list[Post]
 
 # ----------------------------------
 # PostgreSQLから候補投稿を取得する関数
@@ -36,15 +14,15 @@ def get_candidate_posts():
     conn = get_connection()
     cur = conn.cursor()
 
-    # feature_computed = true で特徴量が抽出済みの投稿を対象とする
+    # 特徴量が抽出済みの投稿を対象とする
     query = """
             SELECT 
-                ID AS post_id,
-                CreatedAt AS timestamp,
-                ImageFeature AS image_feature, -- JSON文字列
-                TextFeature AS text_feature -- JSON文字列
-            FROM Post
-            WHERE ImageFeature IS NOT NULL AND TextFeature IS NOT NULL;
+                id AS post_id,
+                created_at AS timestamp,
+                image_feature AS image_feature, -- JSON文字列
+                text_feature AS text_feature -- JSON文字列
+            FROM posts
+            WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL;
             """
     cur.execute(query)
     rows = cur.fetchall()
@@ -85,32 +63,4 @@ def get_recommended_timeline(user_id, candidates, model, device, score_threshold
     sorted_recommend = sorted(recommended, key=lambda x: x["score"], reverse=True)
     return sorted_recommend
 
-# ----------------------------------
-# FastAPIアプリの構築
-# ----------------------------------
-app = FastAPI()
 
-# デバイス設定とモデルのロード
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model = MultiModalNeuMF().to(device)
-model.eval()
-
-@app.post("/recommend/timeline", response_model=TimelineResponse)
-def recommend_timeline(request: TimelineRequest):
-    try:
-        # PostgreSQLから候補投稿画像を取得
-        candidates = get_candidate_posts()
-        recommended = get_recommended_timeline(request.user_id, candidates, model, device, request.score_threshold)
-        posts = [Post(
-            id=rc["post_id"],
-            timestamp=rc["timestamp"],
-            image_feature=rc["image_feature"],
-            text_feature=rc["text_feature"],
-            score=rc["score"]
-        ) for rc in recommended]
-        return TimelineResponse(posts=posts)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)

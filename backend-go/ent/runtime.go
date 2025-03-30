@@ -103,6 +103,10 @@ func init() {
 	userDescName := userFields[2].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
+	// userDescBio is the schema descriptor for bio field.
+	userDescBio := userFields[3].Descriptor()
+	// user.DefaultBio holds the default value on creation for the bio field.
+	user.DefaultBio = userDescBio.Default.(string)
 	// userDescCreatedAt is the schema descriptor for created_at field.
 	userDescCreatedAt := userFields[5].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.

@@ -6,7 +6,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from recommend_system.utils.engine import Engine
+from recommend_system.components.engine import Engine
 from recommend_system.utils.utils import use_cuda, resume_checkpoint
 
 class MultiModalNeuMF(nn.Module):
@@ -25,7 +25,7 @@ class MultiModalNeuMF(nn.Module):
         self.latent_dim_mlp = config["latent_dim_mlp"] # MLPの埋め込みベクトルの次元数
 
         # ----------------------------------
-        # Embedding Layers
+        # Embedding Layers: IDに対応する重み行列のベクトルを取得 -> 埋め込みベクトル
         # ----------------------------------
         self.embedding_user_mlp = torch.nn.Embedding(num_embeddings=self.num_users, embedding_dim=self.latent_dim_mlp)
         self.embedding_item_mlp = torch.nn.Embedding(num_embeddings=self.num_items, embedding_dim=self.latent_dim_mlp)
@@ -140,6 +140,9 @@ class MultiModalNeuMFEngine(Engine):
         print(self.model)
 
         if config["pretrain"]:
-            self.model.load_pretrain_weights()
+            self.model.load_state_dict(torch.load(
+                config["pretrain_model_dir"],
+                map_location = torch.device("cuda" if config["use_cuda"] else "cpu")
+            ))
 
 
