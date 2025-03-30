@@ -37,7 +37,14 @@ func (h *PostHandler) GetAllPosts() fiber.Handler {
 					"error": err.Error(),
 				})
 			}
-			postResponses[i] = models.NewPostResponse(post, imageURL)
+			userImageURL, err := h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
+			if err != nil {
+				log.Error("Failed to get user image URL:", err)
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": err.Error(),
+				})
+			}
+			postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL)
 		}
 		return c.JSON(fiber.Map{
 			"posts": postResponses,

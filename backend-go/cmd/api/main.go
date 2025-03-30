@@ -51,8 +51,6 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	seed.SeedData(client)
-
 	isSeed := os.Getenv("SEED")
 	if isSeed == "true" {
 		seed.SeedData(client)
