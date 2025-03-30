@@ -31,7 +31,7 @@ function AuthSwitch() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        if (pathname !== "/(tabs)/profile") {
+        if (pathname === "/(tabs)/profile") {
           router.replace("/(tabs)/profile");
         } else {
           router.replace("/(tabs)/posts");

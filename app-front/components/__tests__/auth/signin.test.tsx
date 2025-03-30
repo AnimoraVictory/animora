@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import SignInScreen from "../../../app/(auth)/signin"; // パスを調整
 import { useRouter } from "expo-router";
 
@@ -31,7 +31,10 @@ describe("SignInScreen", () => {
   const replaceMock = jest.fn();
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({ push: pushMock, replace: replaceMock });
+    (useRouter as jest.Mock).mockReturnValue({
+      push: pushMock,
+      replace: replaceMock,
+    });
     jest.clearAllMocks();
   });
 
@@ -50,7 +53,9 @@ describe("SignInScreen", () => {
     const { getByText, findByText } = render(<SignInScreen />);
     fireEvent.press(getByText("ログイン"));
 
-    expect(await findByText("有効なメールアドレスを入力してください")).toBeTruthy();
+    expect(
+      await findByText("有効なメールアドレスを入力してください")
+    ).toBeTruthy();
     expect(await findByText("パスワードを入力してください")).toBeTruthy();
   });
 
@@ -58,9 +63,11 @@ describe("SignInScreen", () => {
     mockLogin.mockResolvedValueOnce(undefined); // 成功時は undefined で良い
 
     const { getByLabelText, getByText } = render(<SignInScreen />);
-    fireEvent.changeText(getByLabelText("Email"), "test@example.com");
-    fireEvent.changeText(getByLabelText("Password"), "password123");
-    fireEvent.press(getByText("ログイン"));
+    await act(async () => {
+      fireEvent.changeText(getByLabelText("Email"), "test@example.com");
+      fireEvent.changeText(getByLabelText("Password"), "password123");
+      fireEvent.press(getByText("ログイン"));
+    });
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith("test@example.com", "password123");
@@ -72,18 +79,22 @@ describe("SignInScreen", () => {
     mockLogin.mockRejectedValueOnce(new Error("認証失敗"));
 
     const { getByLabelText, getByText } = render(<SignInScreen />);
-    fireEvent.changeText(getByLabelText("Email"), "user@test.com");
-    fireEvent.changeText(getByLabelText("Password"), "wrongpass");
-    fireEvent.press(getByText("ログイン"));
+    await act(async () => {
+      fireEvent.changeText(getByLabelText("Email"), "user@test.com");
+      fireEvent.changeText(getByLabelText("Password"), "wrongpass");
+      fireEvent.press(getByText("ログイン"));
+    });
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith("ログインエラー", "認証失敗");
     });
   });
 
-  it("ユーザー登録ボタンを押すとsignup画面に遷移する", () => {
+  it("ユーザー登録ボタンを押すとsignup画面に遷移する", async () => {
     const { getByText } = render(<SignInScreen />);
-    fireEvent.press(getByText("ユーザー登録がまだの方はこちら"));
+    await act(async () => {
+      fireEvent.press(getByText("ユーザー登録がまだの方はこちら"));
+    });
     expect(pushMock).toHaveBeenCalledWith("/signup");
   });
 });
