@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/htanos/animalia/backend-go/ent/followrelation"
-	"github.com/htanos/animalia/backend-go/ent/predicate"
+	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
+	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 )
 
 // FollowRelationDelete is the builder for deleting a FollowRelation entity.

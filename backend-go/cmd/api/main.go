@@ -5,12 +5,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/internal/routes"
+	"github.com/aki-13627/animalia/backend-go/internal/seed"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/htanos/animalia/backend-go/ent"
-	"github.com/htanos/animalia/backend-go/internal/routes"
-	"github.com/htanos/animalia/backend-go/internal/seed"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 )

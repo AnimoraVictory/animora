@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/htanos/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent"
 )
 
 // SeedData populates the database with sample data

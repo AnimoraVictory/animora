@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/htanos/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent"
 	// required by schema hooks.
-	_ "github.com/htanos/animalia/backend-go/ent/runtime"
+	_ "github.com/aki-13627/animalia/backend-go/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/htanos/animalia/backend-go/ent/migrate"
+	"github.com/aki-13627/animalia/backend-go/ent/migrate"
 )
 
 type (

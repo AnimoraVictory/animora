@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/aki-13627/animalia/backend-go/ent/like"
+	"github.com/aki-13627/animalia/backend-go/ent/post"
+	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent/like"
-	"github.com/htanos/animalia/backend-go/ent/post"
-	"github.com/htanos/animalia/backend-go/ent/user"
 )
 
 // Like is the model entity for the Like schema.

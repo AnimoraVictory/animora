@@ -5,14 +5,14 @@ package ent
 import (
 	"time"
 
+	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
+	"github.com/aki-13627/animalia/backend-go/ent/like"
+	"github.com/aki-13627/animalia/backend-go/ent/pet"
+	"github.com/aki-13627/animalia/backend-go/ent/post"
+	"github.com/aki-13627/animalia/backend-go/ent/schema"
+	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent/comment"
-	"github.com/htanos/animalia/backend-go/ent/followrelation"
-	"github.com/htanos/animalia/backend-go/ent/like"
-	"github.com/htanos/animalia/backend-go/ent/pet"
-	"github.com/htanos/animalia/backend-go/ent/post"
-	"github.com/htanos/animalia/backend-go/ent/schema"
-	"github.com/htanos/animalia/backend-go/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code

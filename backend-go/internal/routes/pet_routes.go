@@ -1,8 +1,8 @@
 package routes
 
 import (
+	"github.com/aki-13627/animalia/backend-go/internal/injector"
 	"github.com/gofiber/fiber/v2"
-	"github.com/htanos/animalia/backend-go/internal/injector"
 )
 
 // SetupPetRoutes sets up the pet routes

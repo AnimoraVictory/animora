@@ -1,9 +1,9 @@
 package usecase
 
 import (
+	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
-	"github.com/htanos/animalia/backend-go/ent"
-	"github.com/htanos/animalia/backend-go/internal/domain/repository"
 )
 
 type AuthUsecase struct {

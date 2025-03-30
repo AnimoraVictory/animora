@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/htanos/animalia/backend-go/ent/runtime.go
+// The schema-stitching logic is generated in github.com/aki-13627/animalia/backend-go/ent/runtime.go
 
 const (
 	Version = "v0.14.4"                                         // Version of ent codegen.

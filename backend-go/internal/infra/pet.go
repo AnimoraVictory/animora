@@ -3,10 +3,10 @@ package infra
 import (
 	"context"
 
+	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/pet"
+	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent"
-	"github.com/htanos/animalia/backend-go/ent/pet"
-	"github.com/htanos/animalia/backend-go/ent/user"
 )
 
 type PetRepository struct {

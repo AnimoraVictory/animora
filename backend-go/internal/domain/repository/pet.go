@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/htanos/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent"
 )
 
 type PetRepository interface {
