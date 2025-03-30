@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 import torch
 import uvicorn
 import json
-from recommend_system.models.mmneumf import MultiModalNeuMF
+from recommend_system.components.mmneumf import MultiModalNeuMF
 from recommend_system.utils.database import get_connection
 from recommend_system.src.download_model import download_latest_model 
 
