@@ -331,6 +331,16 @@ func IconImageKeyHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldIconImageKey, v))
 }
 
+// IconImageKeyIsNil applies the IsNil predicate on the "icon_image_key" field.
+func IconImageKeyIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldIconImageKey))
+}
+
+// IconImageKeyNotNil applies the NotNil predicate on the "icon_image_key" field.
+func IconImageKeyNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldIconImageKey))
+}
+
 // IconImageKeyEqualFold applies the EqualFold predicate on the "icon_image_key" field.
 func IconImageKeyEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldIconImageKey, v))

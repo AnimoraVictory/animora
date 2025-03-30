@@ -2,52 +2,49 @@ package seed
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/htanos/animalia/backend-go/ent"
+	"github.com/rs/zerolog/log"
 )
 
 // SeedData populates the database with sample data
 func SeedData(client *ent.Client) error {
-	log.Println("Seeding database...")
+
+	log.Info().Msg("Seeding database...")
+
+	clearDatabase(client)
 
 	// Create users
 	users, err := client.User.CreateBulk(
 		client.User.Create().
 			SetEmail("john.doe@example.com").
 			SetName("John Doe").
-			SetBio("I'm a pet shop owner").
-			SetIconImageKey(""),
+			SetBio("I'm a pet shop owner"),
 		client.User.Create().
 			SetEmail("jane.smith@example.com").
 			SetName("Jane Smith").
-			SetBio("I'm a cat lover").
-			SetIconImageKey(""),
+			SetBio("I'm a cat lover"),
 		client.User.Create().
 			SetEmail("alex.johnson@example.com").
 			SetName("Alex Johnson").
-			SetBio("I'm a dog lover").
-			SetIconImageKey(""),
+			SetBio("I'm a dog lover"),
 		client.User.Create().
 			SetEmail("emily.wilson@example.com").
 			SetName("Emily Wilson").
-			SetBio("I'm a food lover").
-			SetIconImageKey(""),
+			SetBio("I'm a food lover"),
 		client.User.Create().
 			SetEmail("michael.brown@example.com").
 			SetName("Michael Brown").
-			SetBio("I'm a flower shop owner").
-			SetIconImageKey(""),
+			SetBio("I'm a flower shop owner"),
 		client.User.Create().
 			SetEmail("tanomitsu2002@gmail.com").
 			SetName("Mitsuru Hatano").
-			SetBio("I'm a software engineer").
-			SetIconImageKey(""),
+			SetBio("I'm a software engineer"),
 		client.User.Create().
 			SetEmail("aki.kaku0627@gmail.com").
 			SetName("Akihiro Kaku").
-			SetBio("I'm a software engineer").
-			SetIconImageKey(""),
+			SetBio("I'm a software engineer"),
 	).Save(context.Background())
 	if err != nil {
 		return err
@@ -79,13 +76,42 @@ func SeedData(client *ent.Client) error {
 		return err
 	}
 
-	log.Println("Database seeding completed successfully")
+	log.Info().Msg("Database seeding completed successfully")
+	return nil
+}
+
+// clearDatabase clears all data from the database
+func clearDatabase(client *ent.Client) error {
+	log.Info().Msg("Clearing database...")
+	ctx := context.Background()
+
+	// 全てのテーブルのデータを削除
+	if _, err := client.Like.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear likes: %v", err)
+	}
+	if _, err := client.Comment.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear comments: %v", err)
+	}
+	if _, err := client.Post.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear posts: %v", err)
+	}
+	if _, err := client.Pet.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear pets: %v", err)
+	}
+	if _, err := client.FollowRelation.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear follow relations: %v", err)
+	}
+	if _, err := client.User.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear users: %v", err)
+	}
+
+	log.Info().Msg("Database cleared successfully")
 	return nil
 }
 
 // createPets creates sample pets for users
 func createPets(client *ent.Client, users []*ent.User) ([]*ent.Pet, error) {
-	log.Println("Creating sample pets...")
+	log.Info().Msg("Creating sample pets...")
 
 	pets := []*ent.PetCreate{
 		client.Pet.Create().
@@ -137,33 +163,35 @@ func createPets(client *ent.Client, users []*ent.User) ([]*ent.Pet, error) {
 
 // createPosts creates sample posts by users
 func createPosts(client *ent.Client, users []*ent.User) ([]*ent.Post, error) {
-	log.Println("Creating sample posts...")
+	log.Info().Msg("Creating sample posts...")
+
+	sampleImageKey := "posts/98578a83-1d7d-4c25-aeea-c9b392e484e4-photo.jpg"
 
 	posts := []*ent.PostCreate{
 		client.Post.Create().
 			SetCaption("Max's first day at the park").
 			SetUser(users[0]).
-			SetImageKey("posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"),
+			SetImageKey(sampleImageKey),
 		client.Post.Create().
 			SetCaption("Luna's New Toy").
 			SetUser(users[1]).
-			SetImageKey("posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"),
+			SetImageKey(sampleImageKey),
 		client.Post.Create().
 			SetCaption("Buddy's Birthday Celebration").
 			SetUser(users[2]).
-			SetImageKey("posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"),
+			SetImageKey(sampleImageKey),
 		client.Post.Create().
 			SetCaption("Coco's New Hutch").
 			SetUser(users[3]).
-			SetImageKey("posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"),
+			SetImageKey(sampleImageKey),
 		client.Post.Create().
 			SetCaption("Rocky's First Swimming Lesson").
 			SetUser(users[4]).
-			SetImageKey("posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"),
+			SetImageKey(sampleImageKey),
 		client.Post.Create().
 			SetCaption("Milo's Favorite Napping Spot").
 			SetUser(users[0]).
-			SetImageKey("posts/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"),
+			SetImageKey(sampleImageKey),
 	}
 
 	return client.Post.CreateBulk(posts...).Save(context.Background())
@@ -171,7 +199,7 @@ func createPosts(client *ent.Client, users []*ent.User) ([]*ent.Post, error) {
 
 // createComments creates sample comments on posts
 func createComments(client *ent.Client, posts []*ent.Post, users []*ent.User) error {
-	log.Println("Creating sample comments...")
+	log.Info().Msg("Creating sample comments...")
 
 	comments := []*ent.CommentCreate{
 		client.Comment.Create().
@@ -210,7 +238,7 @@ func createComments(client *ent.Client, posts []*ent.Post, users []*ent.User) er
 
 // createLikes creates sample likes on posts
 func createLikes(client *ent.Client, posts []*ent.Post, users []*ent.User) error {
-	log.Println("Creating sample likes...")
+	log.Info().Msg("Creating sample likes...")
 
 	likes := []*ent.LikeCreate{
 		client.Like.Create().
@@ -251,7 +279,7 @@ func createLikes(client *ent.Client, posts []*ent.Post, users []*ent.User) error
 
 // createFollowRelations creates sample follow relations between users
 func createFollowRelations(client *ent.Client, users []*ent.User) error {
-	log.Println("Creating sample follow relations...")
+	log.Info().Msg("Creating sample follow relations...")
 
 	followRelations := []*ent.FollowRelationCreate{
 		client.FollowRelation.Create().

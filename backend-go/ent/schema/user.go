@@ -21,7 +21,7 @@ func (User) Fields() []ent.Field {
 		field.String("email").NotEmpty(),
 		field.String("name").NotEmpty(),
 		field.String("bio"),
-		field.String("icon_image_key"),
+		field.String("icon_image_key").Optional(),
 		field.Time("created_at").Default(time.Now),
 	}
 }
