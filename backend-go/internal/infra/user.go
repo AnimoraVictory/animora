@@ -32,15 +32,9 @@ func (r *UserRepository) Create(name, email string) (*ent.User, error) {
 		return nil, fmt.Errorf("このメールアドレスは既に登録されています")
 	}
 
-	index, err := r.db.User.Query().Count(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user count: %w", err)
-	}
-
 	user, err := r.db.User.Create().
 		SetName(name).
 		SetEmail(email).
-		SetIndex(index).
 		Save(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user in database: %w", err)
