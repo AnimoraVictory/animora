@@ -64,10 +64,6 @@ func (h *PetHandler) Create() fiber.Handler {
 			})
 		}
 
-		// debug
-		log.Info().Msgf("form: %v", form)
-		log.Info().Msgf("form.Value: %v", form.Value)
-
 		// Get form values
 		name := form.Value["name"][0]
 		petType := form.Value["type"][0]
@@ -101,7 +97,7 @@ func (h *PetHandler) Create() fiber.Handler {
 			})
 		}
 
-		pet, err := h.petUsecase.Create(name, petType, species, birthDay, fileKey, userID)
+		_, err = h.petUsecase.Create(name, petType, species, birthDay, fileKey, userID)
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to create pet: failed to create pet")
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -111,7 +107,6 @@ func (h *PetHandler) Create() fiber.Handler {
 
 		return c.JSON(fiber.Map{
 			"message": "Pet created successfully",
-			"pet":     pet,
 		})
 	}
 }
