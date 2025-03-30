@@ -1,6 +1,5 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import {
-  TextInput,
   View,
   Text,
   StyleSheet,
@@ -9,7 +8,6 @@ import {
   Keyboard,
   ImageBackground,
   TouchableOpacity,
-  Animated,
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -50,51 +48,6 @@ export default function SignInScreen() {
       router.replace("/(tabs)/posts");
     } catch (error: any) {
       Alert.alert("ログインエラー", error.message || "ログインに失敗しました");
-    }
-  };
-
-  const getLabelStyle = (animRef: Animated.Value) => ({
-    position: "absolute" as const,
-    left: 12,
-    top: animRef.interpolate({ inputRange: [0, 1], outputRange: [10, -10] }),
-    fontSize: animRef.interpolate({
-      inputRange: [0, 1],
-      outputRange: [16, 12],
-    }),
-    color: animRef.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["#999", "#2ecc71"],
-    }),
-    backgroundColor: theme.background,
-    paddingHorizontal: 4,
-    zIndex: 1,
-  });
-
-  const handleFocus = (
-    setFocused: React.Dispatch<React.SetStateAction<boolean>>,
-    animRef: Animated.Value
-  ) => {
-    setFocused(true);
-    Animated.timing(animRef, {
-      toValue: 1,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const handleBlur = (
-    setFocused: React.Dispatch<React.SetStateAction<boolean>>,
-    animRef: Animated.Value,
-    value: string
-  ) => {
-    if (!value) {
-      Animated.timing(animRef, {
-        toValue: 0,
-        duration: 100,
-        useNativeDriver: false,
-      }).start(() => setFocused(false));
-    } else {
-      setFocused(false);
     }
   };
 
@@ -151,10 +104,10 @@ export default function SignInScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, { borderColor: theme.tint }]}
+            style={[styles.button, { backgroundColor: theme.tint }]}
             onPress={() => router.push("/signup")}
           >
-            <Text style={[styles.buttonText, { color: theme.tint }]}>
+            <Text style={[styles.buttonText, { color: theme.background }]}>
               ユーザー登録がまだの方はこちら
             </Text>
           </TouchableOpacity>

@@ -81,7 +81,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   // API でプロフィール更新を行うための Mutation
   const updateProfileMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.put(`${API_URL}/users/update?id=${user.id}`, data, {
+      return axios.put(`${API_URL}/users/update/?id=${user.id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
