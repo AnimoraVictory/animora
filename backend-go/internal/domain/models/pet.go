@@ -3,9 +3,9 @@ package models
 import (
 	"time"
 
+	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/pet"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent"
-	"github.com/htanos/animalia/backend-go/ent/pet"
 )
 
 // PetResponse represents the API response structure for a pet

@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/post"
+	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent/comment"
-	"github.com/htanos/animalia/backend-go/ent/post"
-	"github.com/htanos/animalia/backend-go/ent/user"
 )
 
 // Comment is the model entity for the Comment schema.

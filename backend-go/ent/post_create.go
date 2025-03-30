@@ -12,11 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/like"
+	"github.com/aki-13627/animalia/backend-go/ent/post"
+	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent/comment"
-	"github.com/htanos/animalia/backend-go/ent/like"
-	"github.com/htanos/animalia/backend-go/ent/post"
-	"github.com/htanos/animalia/backend-go/ent/user"
 	pgvector "github.com/pgvector/pgvector-go"
 )
 

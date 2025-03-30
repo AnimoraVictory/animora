@@ -7,8 +7,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent/predicate"
 	pgvector "github.com/pgvector/pgvector-go"
 )
 

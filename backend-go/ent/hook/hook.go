@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/htanos/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent"
 )
 
 // The CommentFunc type is an adapter to allow the use of ordinary
