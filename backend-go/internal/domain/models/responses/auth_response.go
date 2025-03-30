@@ -1,6 +1,9 @@
 package responses
 
-import "github.com/htanos/animalia/backend-go/internal/domain/models"
+import (
+	"github.com/google/uuid"
+	"github.com/htanos/animalia/backend-go/ent"
+)
 
 type RefreshTokenResponse struct {
 	AccessToken string
@@ -8,15 +11,15 @@ type RefreshTokenResponse struct {
 }
 
 type UserResponse struct {
-	ID           string `json:"id" gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	Email        string `json:"email" gorm:"unique"`
-	Name         string `json:"name"`
-	Bio          string `json:"bio"`
-	IconImageUrl string `json:"iconImageUrl"`
+	ID           uuid.UUID `json:"id"`
+	Email        string    `json:"email" gorm:"unique"`
+	Name         string    `json:"name"`
+	Bio          string    `json:"bio"`
+	IconImageUrl string    `json:"iconImageUrl"`
 }
 
 // NewPetResponse converts a Pet to a PetResponse
-func NewUserResponse(user *models.User, imageURL string) UserResponse {
+func NewUserResponse(user *ent.User, imageURL string) UserResponse {
 	return UserResponse{
 		ID:           user.ID,
 		Name:         user.Name,

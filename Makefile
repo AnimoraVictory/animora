@@ -7,6 +7,9 @@ run-all: up-adminer run
 run: build
 	docker compose up api -d
 
+run-attach: build
+	docker compose up api
+
 run-seed:
 	SEED=true docker compose up api -d
 
@@ -24,6 +27,10 @@ up-adminer:
 
 down-all:
 	docker compoes down
+
+create-model:
+# make create-model NAME=Userなど
+	cd backend-go && go run -mod=mod entgo.io/ent/cmd/ent new $(NAME)
 
 migrate:
 	cd backend-go && atlas schema apply -u $(DATABASE_URL) --to file://schema.hcl

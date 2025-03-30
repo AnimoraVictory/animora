@@ -7,18 +7,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - ENV=${ENV}
-      - SEED=${SEED}
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - AWS_COGNITO_CLIENT_ID=${AWS_COGNITO_CLIENT_ID}
-      - AWS_COGNITO_POOL_ID=${AWS_COGNITO_POOL_ID}
-      - AWS_REGION=${AWS_REGION}
-      - AWS_COGNITO_CLIENT_SECRET=${AWS_COGNITO_CLIENT_SECRET}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+    volumes:
+      - ./.env:/app/.env
+    # environment:
+    #   - ENV=${ENV}
+    #   - SEED=${SEED}
+    #   - DATABASE_URL=${DATABASE_URL}
+    #   - JWT_SECRET=${JWT_SECRET}
+    #   - AWS_COGNITO_CLIENT_ID=${AWS_COGNITO_CLIENT_ID}
+    #   - AWS_COGNITO_POOL_ID=${AWS_COGNITO_POOL_ID}
+    #   - AWS_REGION=${AWS_REGION}
+    #   - AWS_COGNITO_CLIENT_SECRET=${AWS_COGNITO_CLIENT_SECRET}
+    #   - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    #   - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    #   - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s

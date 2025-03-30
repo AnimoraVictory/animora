@@ -149,7 +149,7 @@ func (h *UserHandler) GetFollowsUsers() fiber.Handler {
 			log.Error("Failed to get follows users: id is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ユーザーIDが必要です"})
 		}
-		users, err := h.userUsecase.FollowsUsers(id)
+		users, err := h.userUsecase.FollowingUsers(id)
 		if err != nil {
 			log.Error("Failed to get follows users: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロー中のユーザー一覧取得に失敗しました"})
@@ -165,7 +165,7 @@ func (h *UserHandler) GetFollowerUsers() fiber.Handler {
 			log.Error("Failed to get follower users: id is empty")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ユーザーIDが必要です"})
 		}
-		users, err := h.userUsecase.FollowerUsers(id)
+		users, err := h.userUsecase.Followers(id)
 		if err != nil {
 			log.Error("Failed to get follower users: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "フォロワーの取得に失敗しました"})

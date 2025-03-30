@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
+	"github.com/htanos/animalia/backend-go/ent"
 	"github.com/htanos/animalia/backend-go/internal/routes"
 	"github.com/htanos/animalia/backend-go/internal/seed"
 	"github.com/joho/godotenv"
@@ -20,8 +21,21 @@ func main() {
 		log.Println("Warning: .env file not found")
 	}
 
-	// Initialize database
-	models.InitDB()
+	// Get database URL from environment variable
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
+	}
+
+	client, err := ent.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatalf("failed opening connection to postgres: %v", err)
+	}
+	defer client.Close()
+	// Auto migration
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
 
 	// Set time format for zerolog
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
@@ -39,7 +53,7 @@ func main() {
 
 	isSeed := os.Getenv("SEED")
 	if isSeed == "true" {
-		seed.SeedData(models.DB)
+		seed.SeedData(client)
 	}
 
 	// Create Fiber app

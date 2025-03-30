@@ -1,18 +1,34 @@
 package injector
 
 import (
+	"context"
+	"log"
 	"os"
 
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
+	"github.com/htanos/animalia/backend-go/ent"
 	"github.com/htanos/animalia/backend-go/internal/domain/repository"
 	"github.com/htanos/animalia/backend-go/internal/handler"
 	"github.com/htanos/animalia/backend-go/internal/infra"
 	"github.com/htanos/animalia/backend-go/internal/usecase"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq" // PostgreSQLドライバー
 )
 
-func InjectDB() *gorm.DB {
-	return models.DB
+var client *ent.Client
+
+func InjectDB() *ent.Client {
+	if client == nil {
+		var err error
+		client, err = ent.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Fatalf("failed opening connection to postgres: %v", err)
+		}
+
+		// Run the auto migration tool
+		if err := client.Schema.Create(context.Background()); err != nil {
+			log.Fatalf("failed creating schema resources: %v", err)
+		}
+	}
+	return client
 }
 
 func InjectCognitoRepository() repository.AuthRepository {
@@ -23,6 +39,11 @@ func InjectCognitoRepository() repository.AuthRepository {
 func InjectUserRepository() repository.UserRepository {
 	userRepository := infra.NewUserRepository(InjectDB())
 	return userRepository
+}
+
+func InjectFollowRelationRepository() repository.FollowRelationRepository {
+	followRelationRepository := infra.NewFollowRelationRepository(InjectDB())
+	return followRelationRepository
 }
 
 func InjectPostRepository() repository.PostRepository {

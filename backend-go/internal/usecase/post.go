@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
+	"github.com/htanos/animalia/backend-go/ent"
 	"github.com/htanos/animalia/backend-go/internal/domain/repository"
 )
 
@@ -15,15 +15,15 @@ func NewPostUsecase(postRepository repository.PostRepository) *PostUsecase {
 	}
 }
 
-func (u *PostUsecase) GetAllPosts() ([]*models.Post, error) {
+func (u *PostUsecase) GetAllPosts() ([]*ent.Post, error) {
 	return u.postRepository.GetAllPosts()
 }
 
-func (u *PostUsecase) GetPostsByUser(userId string) ([]*models.Post, error) {
+func (u *PostUsecase) GetPostsByUser(userId string) ([]*ent.Post, error) {
 	return u.postRepository.GetPostsByUser(userId)
 }
 
-func (u *PostUsecase) CreatePost(caption, userId, fileKey string) (*models.Post, error) {
+func (u *PostUsecase) CreatePost(caption, userId, fileKey string) (*ent.Post, error) {
 	return u.postRepository.CreatePost(caption, userId, fileKey)
 }
 

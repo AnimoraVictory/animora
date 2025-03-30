@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
-	"github.com/htanos/animalia/backend-go/internal/domain/models"
+	"github.com/htanos/animalia/backend-go/ent"
 	"github.com/htanos/animalia/backend-go/internal/domain/repository"
 )
 
@@ -30,7 +30,7 @@ func (u *AuthUsecase) SignIn(email, password string) (*cognitoidentityprovider.I
 	return u.authRepository.SignIn(email, password)
 }
 
-func (u *AuthUsecase) FindByEmail(email string) (*models.User, error) {
+func (u *AuthUsecase) FindByEmail(email string) (*ent.User, error) {
 	return u.userRepository.FindByEmail(email)
 }
 
