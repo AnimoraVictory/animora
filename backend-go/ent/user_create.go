@@ -50,6 +50,14 @@ func (uc *UserCreate) SetIconImageKey(s string) *UserCreate {
 	return uc
 }
 
+// SetNillableIconImageKey sets the "icon_image_key" field if the given value is not nil.
+func (uc *UserCreate) SetNillableIconImageKey(s *string) *UserCreate {
+	if s != nil {
+		uc.SetIconImageKey(*s)
+	}
+	return uc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
 	uc.mutation.SetCreatedAt(t)
@@ -233,9 +241,6 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Bio(); !ok {
 		return &ValidationError{Name: "bio", err: errors.New(`ent: missing required field "User.bio"`)}
-	}
-	if _, ok := uc.mutation.IconImageKey(); !ok {
-		return &ValidationError{Name: "icon_image_key", err: errors.New(`ent: missing required field "User.icon_image_key"`)}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}

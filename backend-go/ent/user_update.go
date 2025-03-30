@@ -90,6 +90,12 @@ func (uu *UserUpdate) SetNillableIconImageKey(s *string) *UserUpdate {
 	return uu
 }
 
+// ClearIconImageKey clears the value of the "icon_image_key" field.
+func (uu *UserUpdate) ClearIconImageKey() *UserUpdate {
+	uu.mutation.ClearIconImageKey()
+	return uu
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
 	uu.mutation.SetCreatedAt(t)
@@ -390,6 +396,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.IconImageKey(); ok {
 		_spec.SetField(user.FieldIconImageKey, field.TypeString, value)
+	}
+	if uu.mutation.IconImageKeyCleared() {
+		_spec.ClearField(user.FieldIconImageKey, field.TypeString)
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -740,6 +749,12 @@ func (uuo *UserUpdateOne) SetNillableIconImageKey(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// ClearIconImageKey clears the value of the "icon_image_key" field.
+func (uuo *UserUpdateOne) ClearIconImageKey() *UserUpdateOne {
+	uuo.mutation.ClearIconImageKey()
+	return uuo
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetCreatedAt(t)
@@ -1070,6 +1085,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.IconImageKey(); ok {
 		_spec.SetField(user.FieldIconImageKey, field.TypeString, value)
+	}
+	if uuo.mutation.IconImageKeyCleared() {
+		_spec.ClearField(user.FieldIconImageKey, field.TypeString)
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
