@@ -7,15 +7,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from recommend_system.components.engine import Engine
-from recommend_system.utils.utils import use_cuda, resume_checkpoint
+from recommend_system.utils.utils import use_cuda
 
 class MultiModalNeuMF(nn.Module):
     def __init__(self, config, image_feature_dim, text_feature_dim):
         """
         Args:
             config (dict): モデルのハイパーパラメータ設定
-            image_feature_dim (int): 画像特徴の次元数(例: 2048)
-            text_feature_dim (int): テキスト特徴の次元数(例: 768)
+            image_feature_dim (int): 画像特徴の次元数(768)
+            text_feature_dim (int): テキスト特徴の次元数(768)
         """
         super(MultiModalNeuMF, self).__init__()
         self.config = config

@@ -20,7 +20,7 @@ def generate_sim_data(num_users, num_items, num_records):
         - itemId: アイテムID(0 ~ num_items-1)
         - rating: インタラクションの有無(ここでは常に1.0)
         - timestamp: ランダムなUnixタイムスタンプ
-        - image_feature: 1024次元のランダムな浮動小数点リスト
+        - image_feature: 768次元のランダムな浮動小数点リスト
         - text_feature: 768次元のランダムな浮動小数点リスト
     """
     data = []
@@ -29,7 +29,7 @@ def generate_sim_data(num_users, num_items, num_records):
         itemId = random.randint(0, num_items-1)
         rating = 1.0 # implicit feedbackなので、インタラクションがあったとみなす
         timestamp = random.randint(1600000000, 1700000000)
-        image_feature = [random.random() for _ in range(1024)]
+        image_feature = [random.random() for _ in range(768)]
         text_feature = [random.random() for _ in range(768)]
         data.append((userId, itemId, rating, timestamp, image_feature, text_feature))
     df = pd.DataFrame(data, columns=["userId", "itemId", "rating", "timestamp", "image_feature", "text_feature"])

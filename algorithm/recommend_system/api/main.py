@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------------  #
 # ライブラリのインポート
 from fastapi import FastAPI, HTTPException
+import traceback
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import torch
@@ -27,8 +28,6 @@ class TimelineRequest(BaseModel):
 class Post(BaseModel):
     id: int
     timestamp: str
-    image_feature: list
-    text_feature: list
     score: float
 
 class TimelineResponse(BaseModel):
@@ -89,16 +88,16 @@ def recommend_timeline(request: TimelineRequest):
 
         # PostgreSQLから候補投稿画像を取得
         candidates = get_candidate_posts(query)
+        print(f"取得した候補数: {len(candidates)}")
         recommended = get_recommended_timeline(request.user_id, candidates, model, device, is_existing_user)
         posts = [Post(
             id=rc["post_id"],
-            timestamp=rc["timestamp"],
-            image_feature=rc["image_feature"],
-            text_feature=rc["text_feature"],
+            timestamp=str(rc["timestamp"]),
             score=rc["score"]
         ) for rc in recommended]
         return TimelineResponse(posts=posts)
     except Exception as e:
+        traceback.print_exc()  # ← 追加！ターミナルにスタックトレースを表示
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
