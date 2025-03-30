@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react-native";
+import { render, fireEvent, act } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 import WelcomeScreen from "../../../app/(auth)";
 
@@ -36,15 +36,19 @@ describe("WelcomeScreen", () => {
     expect(getByText("新規ユーザー登録")).toBeTruthy();
   });
 
-  it("ログインボタンを押すとsigninに遷移する", () => {
+  it("ログインボタンを押すとsigninに遷移する", async() => {
     const { getByText } = render(<WelcomeScreen />);
-    fireEvent.press(getByText("ログイン"));
+    await act(async () => {
+      fireEvent.press(getByText("ログイン"));
+    })
     expect(pushMock).toHaveBeenCalledWith("/(auth)/signin");
   });
 
-  it("新規ユーザー登録ボタンを押すとsignupに遷移する", () => {
+  it("新規ユーザー登録ボタンを押すとsignupに遷移する", async () => {
     const { getByText } = render(<WelcomeScreen />);
-    fireEvent.press(getByText("新規ユーザー登録"));
+    await act(async() => {
+      fireEvent.press(getByText("新規ユーザー登録"));
+    })
     expect(pushMock).toHaveBeenCalledWith("/(auth)/signup");
   });
 });

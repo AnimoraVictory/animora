@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import VerifyEmailScreen from "../../../app/(auth)/verify-email"; // パスを調整
 import { Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -30,7 +30,9 @@ describe("VerifyEmailScreen", () => {
 
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({ push: pushMock });
-    (useLocalSearchParams as jest.Mock).mockReturnValue({ email: "test@example.com" });
+    (useLocalSearchParams as jest.Mock).mockReturnValue({
+      email: "test@example.com",
+    });
     jest.clearAllMocks();
   });
 
@@ -46,10 +48,14 @@ describe("VerifyEmailScreen", () => {
   });
 
   it("未入力で送信するとバリデーションエラーが出る", async () => {
-    const { getByText, findByText, getByLabelText } = render(<VerifyEmailScreen />);
-    fireEvent.changeText(getByLabelText("Email"), "");
-    fireEvent.changeText(getByLabelText("Code"), "");
-    fireEvent.press(getByText("認証する"));
+    const { getByText, findByText, getByLabelText } = render(
+      <VerifyEmailScreen />
+    );
+    await act(async () => {
+      fireEvent.changeText(getByLabelText("Email"), "");
+      fireEvent.changeText(getByLabelText("Code"), "");
+      fireEvent.press(getByText("認証する"));
+    });
 
     expect(await findByText("無効なメールアドレス")).toBeTruthy();
     expect(await findByText("確認コードを入力してください")).toBeTruthy();
@@ -59,9 +65,11 @@ describe("VerifyEmailScreen", () => {
     mockVerifyEmail.mockImplementation((_data, { onSuccess }) => onSuccess());
 
     const { getByLabelText, getByText } = render(<VerifyEmailScreen />);
-    fireEvent.changeText(getByLabelText("Email"), "test@example.com");
-    fireEvent.changeText(getByLabelText("Code"), "123456");
-    fireEvent.press(getByText("認証する"));
+    await act(async () => {
+      fireEvent.changeText(getByLabelText("Email"), "test@example.com");
+      fireEvent.changeText(getByLabelText("Code"), "123456");
+      fireEvent.press(getByText("認証する"));
+    });
 
     await waitFor(() => {
       expect(mockVerifyEmail).toHaveBeenCalledWith(
@@ -74,7 +82,10 @@ describe("VerifyEmailScreen", () => {
           onError: expect.any(Function),
         })
       );
-      expect(Alert.alert).toHaveBeenCalledWith("認証成功", "メール認証が完了しました");
+      expect(Alert.alert).toHaveBeenCalledWith(
+        "認証成功",
+        "メール認証が完了しました"
+      );
       expect(pushMock).toHaveBeenCalledWith("/(auth)/signin");
     });
   });
@@ -85,9 +96,11 @@ describe("VerifyEmailScreen", () => {
     );
 
     const { getByLabelText, getByText } = render(<VerifyEmailScreen />);
-    fireEvent.changeText(getByLabelText("Email"), "test@example.com");
-    fireEvent.changeText(getByLabelText("Code"), "invalid");
-    fireEvent.press(getByText("認証する"));
+    await act(() => {
+      fireEvent.changeText(getByLabelText("Email"), "test@example.com");
+      fireEvent.changeText(getByLabelText("Code"), "invalid");
+      fireEvent.press(getByText("認証する"));
+    });
 
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith("認証エラー", "無効なコード");

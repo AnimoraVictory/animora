@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, fireEvent, waitFor, act } from "@testing-library/react-native";
 import SignUpScreen from "../../../app/(auth)/signup"; // パスは環境に応じて調整
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
@@ -47,9 +47,13 @@ describe("SignUpScreen", () => {
 
   it("未入力でサインアップを押すとバリデーションエラーが出る", async () => {
     const { getAllByText, findByText } = render(<SignUpScreen />);
-    fireEvent.press(getAllByText("サインアップ")[1]); // ボタン
+    await act(async () => {
+      fireEvent.press(getAllByText("サインアップ")[1]);
+    });
 
-    expect(await findByText("有効なメールアドレスを入力してください")).toBeTruthy();
+    expect(
+      await findByText("有効なメールアドレスを入力してください")
+    ).toBeTruthy();
     expect(await findByText("パスワードは8文字以上必要です")).toBeTruthy();
   });
 
@@ -57,9 +61,11 @@ describe("SignUpScreen", () => {
     mockSignUp.mockImplementation((_data, { onSuccess }) => onSuccess());
 
     const { getByLabelText, getAllByText } = render(<SignUpScreen />);
-    fireEvent.changeText(getByLabelText("Name"), "山田太郎");
-    fireEvent.changeText(getByLabelText("Email"), "taro@example.com");
-    fireEvent.changeText(getByLabelText("Password"), "Abc12345");
+    await act(async () => {
+      fireEvent.changeText(getByLabelText("Name"), "山田太郎");
+      fireEvent.changeText(getByLabelText("Email"), "taro@example.com");
+      fireEvent.changeText(getByLabelText("Password"), "Abc12345");
+    });
 
     fireEvent.press(getAllByText("サインアップ")[1]);
 
@@ -84,9 +90,11 @@ describe("SignUpScreen", () => {
     );
 
     const { getByLabelText, getAllByText } = render(<SignUpScreen />);
-    fireEvent.changeText(getByLabelText("Name"), "田中花子");
-    fireEvent.changeText(getByLabelText("Email"), "hanako@example.com");
-    fireEvent.changeText(getByLabelText("Password"), "Abc12345");
+    act(() => {
+      fireEvent.changeText(getByLabelText("Name"), "田中花子");
+      fireEvent.changeText(getByLabelText("Email"), "hanako@example.com");
+      fireEvent.changeText(getByLabelText("Password"), "Abc12345");
+    });
 
     fireEvent.press(getAllByText("サインアップ")[1]);
 
