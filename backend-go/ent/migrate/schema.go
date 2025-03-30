@@ -119,6 +119,7 @@ var (
 	// PostsColumns holds the columns for the "posts" table.
 	PostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "index", Type: field.TypeInt, Unique: true, Nullable: true},
 		{Name: "caption", Type: field.TypeString},
 		{Name: "image_key", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
@@ -135,7 +136,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "posts_users_posts",
-				Columns:    []*schema.Column{PostsColumns[7]},
+				Columns:    []*schema.Column{PostsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

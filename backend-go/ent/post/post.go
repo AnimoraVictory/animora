@@ -15,6 +15,8 @@ const (
 	Label = "post"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldIndex holds the string denoting the index field in the database.
+	FieldIndex = "index"
 	// FieldCaption holds the string denoting the caption field in the database.
 	FieldCaption = "caption"
 	// FieldImageKey holds the string denoting the image_key field in the database.
@@ -61,6 +63,7 @@ const (
 // Columns holds all SQL columns for post fields.
 var Columns = []string{
 	FieldID,
+	FieldIndex,
 	FieldCaption,
 	FieldImageKey,
 	FieldCreatedAt,
@@ -91,6 +94,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// IndexValidator is a validator for the "index" field. It is called by the builders before save.
+	IndexValidator func(int) error
 	// CaptionValidator is a validator for the "caption" field. It is called by the builders before save.
 	CaptionValidator func(string) error
 	// ImageKeyValidator is a validator for the "image_key" field. It is called by the builders before save.
@@ -107,6 +112,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByIndex orders the results by the index field.
+func ByIndex(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIndex, opts...).ToFunc()
 }
 
 // ByCaption orders the results by the caption field.

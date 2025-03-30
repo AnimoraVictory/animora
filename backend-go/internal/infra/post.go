@@ -52,10 +52,16 @@ func (r *PostRepository) CreatePost(caption, userID, fileKey string) (*ent.Post,
 		return nil, err
 	}
 
+	postCount, err := r.db.Post.Query().Count(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
 	post, err := r.db.Post.Create().
 		SetCaption(caption).
 		SetImageKey(fileKey).
 		SetUserID(userUUID).
+		SetIndex(postCount).
 		Save(context.Background())
 	if err != nil {
 		return nil, err

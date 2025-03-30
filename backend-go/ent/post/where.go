@@ -57,6 +57,11 @@ func IDLTE(id uuid.UUID) predicate.Post {
 	return predicate.Post(sql.FieldLTE(FieldID, id))
 }
 
+// Index applies equality check predicate on the "index" field. It's identical to IndexEQ.
+func Index(v int) predicate.Post {
+	return predicate.Post(sql.FieldEQ(FieldIndex, v))
+}
+
 // Caption applies equality check predicate on the "caption" field. It's identical to CaptionEQ.
 func Caption(v string) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldCaption, v))
@@ -85,6 +90,56 @@ func TextFeature(v pgvector.Vector) predicate.Post {
 // ImageFeature applies equality check predicate on the "image_feature" field. It's identical to ImageFeatureEQ.
 func ImageFeature(v pgvector.Vector) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldImageFeature, v))
+}
+
+// IndexEQ applies the EQ predicate on the "index" field.
+func IndexEQ(v int) predicate.Post {
+	return predicate.Post(sql.FieldEQ(FieldIndex, v))
+}
+
+// IndexNEQ applies the NEQ predicate on the "index" field.
+func IndexNEQ(v int) predicate.Post {
+	return predicate.Post(sql.FieldNEQ(FieldIndex, v))
+}
+
+// IndexIn applies the In predicate on the "index" field.
+func IndexIn(vs ...int) predicate.Post {
+	return predicate.Post(sql.FieldIn(FieldIndex, vs...))
+}
+
+// IndexNotIn applies the NotIn predicate on the "index" field.
+func IndexNotIn(vs ...int) predicate.Post {
+	return predicate.Post(sql.FieldNotIn(FieldIndex, vs...))
+}
+
+// IndexGT applies the GT predicate on the "index" field.
+func IndexGT(v int) predicate.Post {
+	return predicate.Post(sql.FieldGT(FieldIndex, v))
+}
+
+// IndexGTE applies the GTE predicate on the "index" field.
+func IndexGTE(v int) predicate.Post {
+	return predicate.Post(sql.FieldGTE(FieldIndex, v))
+}
+
+// IndexLT applies the LT predicate on the "index" field.
+func IndexLT(v int) predicate.Post {
+	return predicate.Post(sql.FieldLT(FieldIndex, v))
+}
+
+// IndexLTE applies the LTE predicate on the "index" field.
+func IndexLTE(v int) predicate.Post {
+	return predicate.Post(sql.FieldLTE(FieldIndex, v))
+}
+
+// IndexIsNil applies the IsNil predicate on the "index" field.
+func IndexIsNil() predicate.Post {
+	return predicate.Post(sql.FieldIsNull(FieldIndex))
+}
+
+// IndexNotNil applies the NotNil predicate on the "index" field.
+func IndexNotNil() predicate.Post {
+	return predicate.Post(sql.FieldNotNull(FieldIndex))
 }
 
 // CaptionEQ applies the EQ predicate on the "caption" field.
