@@ -77,16 +77,20 @@ func init() {
 	pet.DefaultID = petDescID.Default.(func() uuid.UUID)
 	postFields := schema.Post{}.Fields()
 	_ = postFields
+	// postDescIndex is the schema descriptor for index field.
+	postDescIndex := postFields[1].Descriptor()
+	// post.IndexValidator is a validator for the "index" field. It is called by the builders before save.
+	post.IndexValidator = postDescIndex.Validators[0].(func(int) error)
 	// postDescCaption is the schema descriptor for caption field.
-	postDescCaption := postFields[1].Descriptor()
+	postDescCaption := postFields[2].Descriptor()
 	// post.CaptionValidator is a validator for the "caption" field. It is called by the builders before save.
 	post.CaptionValidator = postDescCaption.Validators[0].(func(string) error)
 	// postDescImageKey is the schema descriptor for image_key field.
-	postDescImageKey := postFields[2].Descriptor()
+	postDescImageKey := postFields[3].Descriptor()
 	// post.ImageKeyValidator is a validator for the "image_key" field. It is called by the builders before save.
 	post.ImageKeyValidator = postDescImageKey.Validators[0].(func(string) error)
 	// postDescCreatedAt is the schema descriptor for created_at field.
-	postDescCreatedAt := postFields[3].Descriptor()
+	postDescCreatedAt := postFields[4].Descriptor()
 	// post.DefaultCreatedAt holds the default value on creation for the created_at field.
 	post.DefaultCreatedAt = postDescCreatedAt.Default.(func() time.Time)
 	// postDescID is the schema descriptor for id field.

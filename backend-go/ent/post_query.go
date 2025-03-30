@@ -373,12 +373,12 @@ func (pq *PostQuery) WithLikes(opts ...func(*LikeQuery)) *PostQuery {
 // Example:
 //
 //	var v []struct {
-//		Caption string `json:"caption,omitempty"`
+//		Index int `json:"index,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Post.Query().
-//		GroupBy(post.FieldCaption).
+//		GroupBy(post.FieldIndex).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
@@ -396,11 +396,11 @@ func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Caption string `json:"caption,omitempty"`
+//		Index int `json:"index,omitempty"`
 //	}
 //
 //	client.Post.Query().
-//		Select(post.FieldCaption).
+//		Select(post.FieldIndex).
 //		Scan(ctx, &v)
 func (pq *PostQuery) Select(fields ...string) *PostSelect {
 	pq.ctx.Fields = append(pq.ctx.Fields, fields...)

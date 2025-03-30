@@ -178,27 +178,33 @@ func createPosts(client *ent.Client, users []*ent.User) ([]*ent.Post, error) {
 		client.Post.Create().
 			SetCaption("Max's first day at the park").
 			SetUser(users[0]).
-			SetImageKey(sampleImageKey),
+			SetImageKey(sampleImageKey).
+			SetIndex(0),
 		client.Post.Create().
 			SetCaption("Luna's New Toy").
 			SetUser(users[1]).
-			SetImageKey(sampleImageKey),
+			SetImageKey(sampleImageKey).
+			SetIndex(1),
 		client.Post.Create().
 			SetCaption("Buddy's Birthday Celebration").
 			SetUser(users[2]).
-			SetImageKey(sampleImageKey),
+			SetImageKey(sampleImageKey).
+			SetIndex(2),
 		client.Post.Create().
 			SetCaption("Coco's New Hutch").
 			SetUser(users[3]).
-			SetImageKey(sampleImageKey),
+			SetImageKey(sampleImageKey).
+			SetIndex(3),
 		client.Post.Create().
 			SetCaption("Rocky's First Swimming Lesson").
 			SetUser(users[4]).
-			SetImageKey(sampleImageKey),
+			SetImageKey(sampleImageKey).
+			SetIndex(4),
 		client.Post.Create().
 			SetCaption("Milo's Favorite Napping Spot").
 			SetUser(users[0]).
-			SetImageKey(sampleImageKey),
+			SetImageKey(sampleImageKey).
+			SetIndex(5),
 	}
 
 	return client.Post.CreateBulk(posts...).Save(context.Background())

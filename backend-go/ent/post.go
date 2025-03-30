@@ -20,6 +20,8 @@ type Post struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
+	// Index holds the value of the "index" field.
+	Index int `json:"index,omitempty"`
 	// Caption holds the value of the "caption" field.
 	Caption string `json:"caption,omitempty"`
 	// ImageKey holds the value of the "image_key" field.
@@ -88,6 +90,8 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case post.FieldTextFeature, post.FieldImageFeature:
 			values[i] = new(pgvector.Vector)
+		case post.FieldIndex:
+			values[i] = new(sql.NullInt64)
 		case post.FieldCaption, post.FieldImageKey:
 			values[i] = new(sql.NullString)
 		case post.FieldCreatedAt, post.FieldDeletedAt:
@@ -116,6 +120,12 @@ func (po *Post) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				po.ID = *value
+			}
+		case post.FieldIndex:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field index", values[i])
+			} else if value.Valid {
+				po.Index = int(value.Int64)
 			}
 		case post.FieldCaption:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -211,6 +221,9 @@ func (po *Post) String() string {
 	var builder strings.Builder
 	builder.WriteString("Post(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", po.ID))
+	builder.WriteString("index=")
+	builder.WriteString(fmt.Sprintf("%v", po.Index))
+	builder.WriteString(", ")
 	builder.WriteString("caption=")
 	builder.WriteString(po.Caption)
 	builder.WriteString(", ")

@@ -28,6 +28,20 @@ type PostCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetIndex sets the "index" field.
+func (pc *PostCreate) SetIndex(i int) *PostCreate {
+	pc.mutation.SetIndex(i)
+	return pc
+}
+
+// SetNillableIndex sets the "index" field if the given value is not nil.
+func (pc *PostCreate) SetNillableIndex(i *int) *PostCreate {
+	if i != nil {
+		pc.SetIndex(*i)
+	}
+	return pc
+}
+
 // SetCaption sets the "caption" field.
 func (pc *PostCreate) SetCaption(s string) *PostCreate {
 	pc.mutation.SetCaption(s)
@@ -198,6 +212,11 @@ func (pc *PostCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *PostCreate) check() error {
+	if v, ok := pc.mutation.Index(); ok {
+		if err := post.IndexValidator(v); err != nil {
+			return &ValidationError{Name: "index", err: fmt.Errorf(`ent: validator failed for field "Post.index": %w`, err)}
+		}
+	}
 	if _, ok := pc.mutation.Caption(); !ok {
 		return &ValidationError{Name: "caption", err: errors.New(`ent: missing required field "Post.caption"`)}
 	}
@@ -255,6 +274,10 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
+	}
+	if value, ok := pc.mutation.Index(); ok {
+		_spec.SetField(post.FieldIndex, field.TypeInt, value)
+		_node.Index = value
 	}
 	if value, ok := pc.mutation.Caption(); ok {
 		_spec.SetField(post.FieldCaption, field.TypeString, value)
@@ -336,7 +359,7 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Post.Create().
-//		SetCaption(v).
+//		SetIndex(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -345,7 +368,7 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PostUpsert) {
-//			SetCaption(v+v).
+//			SetIndex(v+v).
 //		}).
 //		Exec(ctx)
 func (pc *PostCreate) OnConflict(opts ...sql.ConflictOption) *PostUpsertOne {
@@ -487,6 +510,9 @@ func (u *PostUpsertOne) UpdateNewValues() *PostUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(post.FieldID)
+		}
+		if _, exists := u.create.mutation.Index(); exists {
+			s.SetIgnore(post.FieldIndex)
 		}
 	}))
 	return u
@@ -760,7 +786,7 @@ func (pcb *PostCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.PostUpsert) {
-//			SetCaption(v+v).
+//			SetIndex(v+v).
 //		}).
 //		Exec(ctx)
 func (pcb *PostCreateBulk) OnConflict(opts ...sql.ConflictOption) *PostUpsertBulk {
@@ -806,6 +832,9 @@ func (u *PostUpsertBulk) UpdateNewValues() *PostUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(post.FieldID)
+			}
+			if _, exists := b.mutation.Index(); exists {
+				s.SetIgnore(post.FieldIndex)
 			}
 		}
 	}))
