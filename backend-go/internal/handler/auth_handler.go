@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aki-13627/animalia/backend-go/internal/domain/models/responses"
+	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -63,7 +63,7 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 					"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
 				})
 			}
-			userResponse := responses.NewUserResponse(user, url)
+			userResponse := models.NewUserResponse(user, url)
 
 			return c.JSON(fiber.Map{
 				"message":      "ログイン成功",
@@ -75,7 +75,7 @@ func (h *AuthHandler) SignIn() fiber.Handler {
 		}
 
 		// IconImageKey が空の場合は URL を生成せずにレスポンスを返す
-		userResponse := responses.NewUserResponse(user, "")
+		userResponse := models.NewUserResponse(user, "")
 		return c.JSON(fiber.Map{
 			"message":      "ログイン成功",
 			"user":         userResponse,
@@ -115,7 +115,7 @@ func (h *AuthHandler) RefreshToken() fiber.Handler {
 		}
 
 		// レスポンスの作成
-		resp := responses.RefreshTokenResponse{
+		resp := models.RefreshTokenResponse{
 			AccessToken: *result.AuthenticationResult.AccessToken,
 			IdToken:     *result.AuthenticationResult.IdToken,
 		}
@@ -240,11 +240,11 @@ func (h *AuthHandler) GetMe() fiber.Handler {
 					"error": fmt.Sprintf("ユーザー情報の取得に失敗しました: %v", err),
 				})
 			}
-			userResponse := responses.NewUserResponse(user, url)
+			userResponse := models.NewUserResponse(user, url)
 			return c.JSON(userResponse)
 		}
 
-		userResponse := responses.NewUserResponse(user, "")
+		userResponse := models.NewUserResponse(user, "")
 		return c.JSON(userResponse)
 	}
 }

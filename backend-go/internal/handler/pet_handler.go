@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/aki-13627/animalia/backend-go/internal/domain/models/responses"
+	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -36,7 +36,7 @@ func (h *PetHandler) GetByOwner() fiber.Handler {
 				"error": "Failed to get pets",
 			})
 		}
-		petResponses := make([]responses.PetResponse, len(pets))
+		petResponses := make([]models.PetResponse, len(pets))
 		for i, pet := range pets {
 			url, err := h.storageUsecase.GetUrl(pet.ImageKey)
 			if err != nil {
@@ -45,7 +45,7 @@ func (h *PetHandler) GetByOwner() fiber.Handler {
 					"error": "Failed to get pet image URL",
 				})
 			}
-			petResponses[i] = responses.NewPetResponse(pet, url)
+			petResponses[i] = models.NewPetResponse(pet, url)
 		}
 
 		return c.JSON(fiber.Map{

@@ -1,4 +1,4 @@
-package responses
+package models
 
 import (
 	"time"

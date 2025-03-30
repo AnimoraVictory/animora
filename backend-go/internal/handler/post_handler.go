@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -27,8 +28,19 @@ func (h *PostHandler) GetAllPosts() fiber.Handler {
 				"error": err.Error(),
 			})
 		}
+		postResponses := make([]*models.PostResponse, len(posts))
+		for i, post := range posts {
+			imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
+			if err != nil {
+				log.Error("Failed to get image URL:", err)
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": err.Error(),
+				})
+			}
+			postResponses[i] = models.NewPostResponse(post, imageURL)
+		}
 		return c.JSON(fiber.Map{
-			"posts": posts,
+			"posts": postResponses,
 		})
 	}
 }

@@ -1,4 +1,4 @@
-package responses
+package models
 
 import (
 	"github.com/aki-13627/animalia/backend-go/ent"

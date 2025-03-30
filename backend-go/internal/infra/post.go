@@ -21,7 +21,8 @@ func NewPostRepository(db *ent.Client) *PostRepository {
 
 func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 	posts, err := r.db.Post.Query().
-		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt, post.FieldDeletedAt).
+		Where(post.DeletedAtIsNil()).
+		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
 	if err != nil {
 		return nil, err
@@ -35,7 +36,10 @@ func (r *PostRepository) GetPostsByUser(userID string) ([]*ent.Post, error) {
 		return nil, err
 	}
 
-	posts, err := r.db.Post.Query().Where(post.HasUserWith(user.ID(userUUID))).All(context.Background())
+	posts, err := r.db.Post.Query().
+		Where(post.HasUserWith(user.ID(userUUID))).
+		Where(post.DeletedAtIsNil()).
+		All(context.Background())
 	if err != nil {
 		return nil, err
 	}
