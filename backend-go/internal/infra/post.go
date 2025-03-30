@@ -21,6 +21,7 @@ func NewPostRepository(db *ent.Client) *PostRepository {
 
 func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 	posts, err := r.db.Post.Query().
+		WithUser().
 		Where(post.DeletedAtIsNil()).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
