@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
+	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent/followrelation"
-	"github.com/htanos/animalia/backend-go/ent/user"
 )
 
 // FollowRelation is the model entity for the FollowRelation schema.

@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/pet"
+	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent/pet"
-	"github.com/htanos/animalia/backend-go/ent/user"
 )
 
 // PetCreate is the builder for creating a Pet entity.

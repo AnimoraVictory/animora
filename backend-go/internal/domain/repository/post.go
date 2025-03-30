@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/htanos/animalia/backend-go/ent"
+import "github.com/aki-13627/animalia/backend-go/ent"
 
 type PostRepository interface {
 	GetAllPosts() ([]*ent.Post, error)

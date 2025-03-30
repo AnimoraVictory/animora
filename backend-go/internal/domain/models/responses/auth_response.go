@@ -1,8 +1,8 @@
 package responses
 
 import (
+	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/google/uuid"
-	"github.com/htanos/animalia/backend-go/ent"
 )
 
 type RefreshTokenResponse struct {

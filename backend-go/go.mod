@@ -1,4 +1,4 @@
-module github.com/htanos/animalia/backend-go
+module github.com/aki-13627/animalia/backend-go
 
 go 1.23.0
 
