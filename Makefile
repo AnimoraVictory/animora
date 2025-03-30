@@ -1,6 +1,6 @@
 include .env
 
-.PHONY: run run-seed run-all seed build psql down-all codegen
+.PHONY: run run-seed run-all seed build psql down codegen
 
 run-all: up-adminer run
 
@@ -25,8 +25,8 @@ down-db:
 up-adminer:
 	docker compose up adminer -d
 
-down-all:
-	docker compoes down
+down:
+	docker compose down api
 
 create-model:
 # make create-model NAME=Userなど
