@@ -5,6 +5,7 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type PostResponse struct {
@@ -16,6 +17,7 @@ type PostResponse struct {
 }
 
 func NewPostResponse(post *ent.Post, imageURL string) *PostResponse {
+	log.Info().Msgf("post edges: %v", post.Edges)
 	return &PostResponse{
 		ID:        post.ID,
 		Caption:   post.Caption,
