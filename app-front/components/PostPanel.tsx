@@ -16,10 +16,7 @@ export const PostPanel = ({ post }: Props) => {
   const colors = Colors[colorScheme ?? "light"];
 
   const date = new Date(post.createdAt);
-  const formattedDate = `${date.getHours().toString().padStart(2, "0")}:${date
-    .getMinutes()
-    .toString()
-    .padStart(2, "0")}`;
+  const formattedDate = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
   return (
     <View style={styles.wrapper}>
