@@ -32,8 +32,5 @@ create-model:
 # make create-model NAME=Userなど
 	cd backend-go && go run -mod=mod entgo.io/ent/cmd/ent new $(NAME)
 
-migrate:
-	cd backend-go && atlas schema apply -u $(DATABASE_URL) --to file://schema.hcl
-
 psql:
 	psql $(DATABASE_URL)

@@ -12,7 +12,7 @@ type RefreshTokenResponse struct {
 
 type UserResponse struct {
 	ID           uuid.UUID `json:"id"`
-	Email        string    `json:"email" gorm:"unique"`
+	Email        string    `json:"email"`
 	Name         string    `json:"name"`
 	Bio          string    `json:"bio"`
 	IconImageUrl string    `json:"iconImageUrl"`
