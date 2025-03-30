@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
@@ -49,9 +50,11 @@ type PostEdges struct {
 	Comments []*Comment `json:"comments,omitempty"`
 	// Likes holds the value of the likes edge.
 	Likes []*Like `json:"likes,omitempty"`
+	// DailyTask holds the value of the daily_task edge.
+	DailyTask *DailyTask `json:"daily_task,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -81,6 +84,17 @@ func (e PostEdges) LikesOrErr() ([]*Like, error) {
 		return e.Likes, nil
 	}
 	return nil, &NotLoadedError{edge: "likes"}
+}
+
+// DailyTaskOrErr returns the DailyTask value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PostEdges) DailyTaskOrErr() (*DailyTask, error) {
+	if e.DailyTask != nil {
+		return e.DailyTask, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: dailytask.Label}
+	}
+	return nil, &NotLoadedError{edge: "daily_task"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -196,6 +210,11 @@ func (po *Post) QueryComments() *CommentQuery {
 // QueryLikes queries the "likes" edge of the Post entity.
 func (po *Post) QueryLikes() *LikeQuery {
 	return NewPostClient(po.config).QueryLikes(po)
+}
+
+// QueryDailyTask queries the "daily_task" edge of the Post entity.
+func (po *Post) QueryDailyTask() *DailyTaskQuery {
+	return NewPostClient(po.config).QueryDailyTask(po)
 }
 
 // Update returns a builder for updating this Post.

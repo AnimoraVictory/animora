@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -200,6 +201,21 @@ func (uu *UserUpdate) AddFollowers(f ...*FollowRelation) *UserUpdate {
 	return uu.AddFollowerIDs(ids...)
 }
 
+// AddDailyTaskIDs adds the "daily_tasks" edge to the DailyTask entity by IDs.
+func (uu *UserUpdate) AddDailyTaskIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddDailyTaskIDs(ids...)
+	return uu
+}
+
+// AddDailyTasks adds the "daily_tasks" edges to the DailyTask entity.
+func (uu *UserUpdate) AddDailyTasks(d ...*DailyTask) *UserUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.AddDailyTaskIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -329,6 +345,27 @@ func (uu *UserUpdate) RemoveFollowers(f ...*FollowRelation) *UserUpdate {
 		ids[i] = f[i].ID
 	}
 	return uu.RemoveFollowerIDs(ids...)
+}
+
+// ClearDailyTasks clears all "daily_tasks" edges to the DailyTask entity.
+func (uu *UserUpdate) ClearDailyTasks() *UserUpdate {
+	uu.mutation.ClearDailyTasks()
+	return uu
+}
+
+// RemoveDailyTaskIDs removes the "daily_tasks" edge to DailyTask entities by IDs.
+func (uu *UserUpdate) RemoveDailyTaskIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveDailyTaskIDs(ids...)
+	return uu
+}
+
+// RemoveDailyTasks removes "daily_tasks" edges to DailyTask entities.
+func (uu *UserUpdate) RemoveDailyTasks(d ...*DailyTask) *UserUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.RemoveDailyTaskIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -676,6 +713,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.DailyTasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DailyTasksTable,
+			Columns: []string{user.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedDailyTasksIDs(); len(nodes) > 0 && !uu.mutation.DailyTasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DailyTasksTable,
+			Columns: []string{user.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.DailyTasksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DailyTasksTable,
+			Columns: []string{user.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -862,6 +944,21 @@ func (uuo *UserUpdateOne) AddFollowers(f ...*FollowRelation) *UserUpdateOne {
 	return uuo.AddFollowerIDs(ids...)
 }
 
+// AddDailyTaskIDs adds the "daily_tasks" edge to the DailyTask entity by IDs.
+func (uuo *UserUpdateOne) AddDailyTaskIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddDailyTaskIDs(ids...)
+	return uuo
+}
+
+// AddDailyTasks adds the "daily_tasks" edges to the DailyTask entity.
+func (uuo *UserUpdateOne) AddDailyTasks(d ...*DailyTask) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.AddDailyTaskIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -991,6 +1088,27 @@ func (uuo *UserUpdateOne) RemoveFollowers(f ...*FollowRelation) *UserUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return uuo.RemoveFollowerIDs(ids...)
+}
+
+// ClearDailyTasks clears all "daily_tasks" edges to the DailyTask entity.
+func (uuo *UserUpdateOne) ClearDailyTasks() *UserUpdateOne {
+	uuo.mutation.ClearDailyTasks()
+	return uuo
+}
+
+// RemoveDailyTaskIDs removes the "daily_tasks" edge to DailyTask entities by IDs.
+func (uuo *UserUpdateOne) RemoveDailyTaskIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveDailyTaskIDs(ids...)
+	return uuo
+}
+
+// RemoveDailyTasks removes "daily_tasks" edges to DailyTask entities.
+func (uuo *UserUpdateOne) RemoveDailyTasks(d ...*DailyTask) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.RemoveDailyTaskIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1361,6 +1479,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(followrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.DailyTasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DailyTasksTable,
+			Columns: []string{user.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedDailyTasksIDs(); len(nodes) > 0 && !uuo.mutation.DailyTasksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DailyTasksTable,
+			Columns: []string{user.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.DailyTasksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DailyTasksTable,
+			Columns: []string{user.DailyTasksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

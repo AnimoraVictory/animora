@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
@@ -23,14 +24,15 @@ import (
 // PostQuery is the builder for querying Post entities.
 type PostQuery struct {
 	config
-	ctx          *QueryContext
-	order        []post.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Post
-	withUser     *UserQuery
-	withComments *CommentQuery
-	withLikes    *LikeQuery
-	withFKs      bool
+	ctx           *QueryContext
+	order         []post.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.Post
+	withUser      *UserQuery
+	withComments  *CommentQuery
+	withLikes     *LikeQuery
+	withDailyTask *DailyTaskQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -126,6 +128,28 @@ func (pq *PostQuery) QueryLikes() *LikeQuery {
 			sqlgraph.From(post.Table, post.FieldID, selector),
 			sqlgraph.To(like.Table, like.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, post.LikesTable, post.LikesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDailyTask chains the current query on the "daily_task" edge.
+func (pq *PostQuery) QueryDailyTask() *DailyTaskQuery {
+	query := (&DailyTaskClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, selector),
+			sqlgraph.To(dailytask.Table, dailytask.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, post.DailyTaskTable, post.DailyTaskColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -320,14 +344,15 @@ func (pq *PostQuery) Clone() *PostQuery {
 		return nil
 	}
 	return &PostQuery{
-		config:       pq.config,
-		ctx:          pq.ctx.Clone(),
-		order:        append([]post.OrderOption{}, pq.order...),
-		inters:       append([]Interceptor{}, pq.inters...),
-		predicates:   append([]predicate.Post{}, pq.predicates...),
-		withUser:     pq.withUser.Clone(),
-		withComments: pq.withComments.Clone(),
-		withLikes:    pq.withLikes.Clone(),
+		config:        pq.config,
+		ctx:           pq.ctx.Clone(),
+		order:         append([]post.OrderOption{}, pq.order...),
+		inters:        append([]Interceptor{}, pq.inters...),
+		predicates:    append([]predicate.Post{}, pq.predicates...),
+		withUser:      pq.withUser.Clone(),
+		withComments:  pq.withComments.Clone(),
+		withLikes:     pq.withLikes.Clone(),
+		withDailyTask: pq.withDailyTask.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -364,6 +389,17 @@ func (pq *PostQuery) WithLikes(opts ...func(*LikeQuery)) *PostQuery {
 		opt(query)
 	}
 	pq.withLikes = query
+	return pq
+}
+
+// WithDailyTask tells the query-builder to eager-load the nodes that are connected to
+// the "daily_task" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *PostQuery) WithDailyTask(opts ...func(*DailyTaskQuery)) *PostQuery {
+	query := (&DailyTaskClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withDailyTask = query
 	return pq
 }
 
@@ -446,10 +482,11 @@ func (pq *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 		nodes       = []*Post{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			pq.withUser != nil,
 			pq.withComments != nil,
 			pq.withLikes != nil,
+			pq.withDailyTask != nil,
 		}
 	)
 	if pq.withUser != nil {
@@ -493,6 +530,12 @@ func (pq *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 		if err := pq.loadLikes(ctx, query, nodes,
 			func(n *Post) { n.Edges.Likes = []*Like{} },
 			func(n *Post, e *Like) { n.Edges.Likes = append(n.Edges.Likes, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pq.withDailyTask; query != nil {
+		if err := pq.loadDailyTask(ctx, query, nodes, nil,
+			func(n *Post, e *DailyTask) { n.Edges.DailyTask = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -588,6 +631,34 @@ func (pq *PostQuery) loadLikes(ctx context.Context, query *LikeQuery, nodes []*P
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "post_likes" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pq *PostQuery) loadDailyTask(ctx context.Context, query *DailyTaskQuery, nodes []*Post, init func(*Post), assign func(*Post, *DailyTask)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Post)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.DailyTask(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(post.DailyTaskColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.post_daily_task
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "post_daily_task" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "post_daily_task" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

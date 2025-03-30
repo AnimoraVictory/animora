@@ -42,5 +42,6 @@ func (Post) Edges() []ent.Edge {
 		edge.From("user", User.Type).Ref("posts").Unique().Required(),
 		edge.To("comments", Comment.Type),
 		edge.To("likes", Like.Type),
+		edge.To("daily_task", DailyTask.Type).Unique(),
 	}
 }

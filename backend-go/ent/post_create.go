@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
@@ -163,6 +164,25 @@ func (pc *PostCreate) AddLikes(l ...*Like) *PostCreate {
 		ids[i] = l[i].ID
 	}
 	return pc.AddLikeIDs(ids...)
+}
+
+// SetDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID.
+func (pc *PostCreate) SetDailyTaskID(id uuid.UUID) *PostCreate {
+	pc.mutation.SetDailyTaskID(id)
+	return pc
+}
+
+// SetNillableDailyTaskID sets the "daily_task" edge to the DailyTask entity by ID if the given value is not nil.
+func (pc *PostCreate) SetNillableDailyTaskID(id *uuid.UUID) *PostCreate {
+	if id != nil {
+		pc = pc.SetDailyTaskID(*id)
+	}
+	return pc
+}
+
+// SetDailyTask sets the "daily_task" edge to the DailyTask entity.
+func (pc *PostCreate) SetDailyTask(d *DailyTask) *PostCreate {
+	return pc.SetDailyTaskID(d.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.
@@ -345,6 +365,22 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(like.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.DailyTaskIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   post.DailyTaskTable,
+			Columns: []string{post.DailyTaskColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

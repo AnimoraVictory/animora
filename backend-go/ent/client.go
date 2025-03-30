@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -31,6 +32,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// DailyTask is the client for interacting with the DailyTask builders.
+	DailyTask *DailyTaskClient
 	// FollowRelation is the client for interacting with the FollowRelation builders.
 	FollowRelation *FollowRelationClient
 	// Like is the client for interacting with the Like builders.
@@ -53,6 +56,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Comment = NewCommentClient(c.config)
+	c.DailyTask = NewDailyTaskClient(c.config)
 	c.FollowRelation = NewFollowRelationClient(c.config)
 	c.Like = NewLikeClient(c.config)
 	c.Pet = NewPetClient(c.config)
@@ -151,6 +155,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:            ctx,
 		config:         cfg,
 		Comment:        NewCommentClient(cfg),
+		DailyTask:      NewDailyTaskClient(cfg),
 		FollowRelation: NewFollowRelationClient(cfg),
 		Like:           NewLikeClient(cfg),
 		Pet:            NewPetClient(cfg),
@@ -176,6 +181,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:            ctx,
 		config:         cfg,
 		Comment:        NewCommentClient(cfg),
+		DailyTask:      NewDailyTaskClient(cfg),
 		FollowRelation: NewFollowRelationClient(cfg),
 		Like:           NewLikeClient(cfg),
 		Pet:            NewPetClient(cfg),
@@ -210,7 +216,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Comment, c.FollowRelation, c.Like, c.Pet, c.Post, c.User,
+		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -220,7 +226,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Comment, c.FollowRelation, c.Like, c.Pet, c.Post, c.User,
+		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -231,6 +237,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
+	case *DailyTaskMutation:
+		return c.DailyTask.mutate(ctx, m)
 	case *FollowRelationMutation:
 		return c.FollowRelation.mutate(ctx, m)
 	case *LikeMutation:
@@ -408,6 +416,171 @@ func (c *CommentClient) mutate(ctx context.Context, m *CommentMutation) (Value, 
 		return (&CommentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Comment mutation op: %q", m.Op())
+	}
+}
+
+// DailyTaskClient is a client for the DailyTask schema.
+type DailyTaskClient struct {
+	config
+}
+
+// NewDailyTaskClient returns a client for the DailyTask from the given config.
+func NewDailyTaskClient(c config) *DailyTaskClient {
+	return &DailyTaskClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `dailytask.Hooks(f(g(h())))`.
+func (c *DailyTaskClient) Use(hooks ...Hook) {
+	c.hooks.DailyTask = append(c.hooks.DailyTask, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `dailytask.Intercept(f(g(h())))`.
+func (c *DailyTaskClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DailyTask = append(c.inters.DailyTask, interceptors...)
+}
+
+// Create returns a builder for creating a DailyTask entity.
+func (c *DailyTaskClient) Create() *DailyTaskCreate {
+	mutation := newDailyTaskMutation(c.config, OpCreate)
+	return &DailyTaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DailyTask entities.
+func (c *DailyTaskClient) CreateBulk(builders ...*DailyTaskCreate) *DailyTaskCreateBulk {
+	return &DailyTaskCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DailyTaskClient) MapCreateBulk(slice any, setFunc func(*DailyTaskCreate, int)) *DailyTaskCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DailyTaskCreateBulk{err: fmt.Errorf("calling to DailyTaskClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DailyTaskCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DailyTaskCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DailyTask.
+func (c *DailyTaskClient) Update() *DailyTaskUpdate {
+	mutation := newDailyTaskMutation(c.config, OpUpdate)
+	return &DailyTaskUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DailyTaskClient) UpdateOne(dt *DailyTask) *DailyTaskUpdateOne {
+	mutation := newDailyTaskMutation(c.config, OpUpdateOne, withDailyTask(dt))
+	return &DailyTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DailyTaskClient) UpdateOneID(id uuid.UUID) *DailyTaskUpdateOne {
+	mutation := newDailyTaskMutation(c.config, OpUpdateOne, withDailyTaskID(id))
+	return &DailyTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DailyTask.
+func (c *DailyTaskClient) Delete() *DailyTaskDelete {
+	mutation := newDailyTaskMutation(c.config, OpDelete)
+	return &DailyTaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DailyTaskClient) DeleteOne(dt *DailyTask) *DailyTaskDeleteOne {
+	return c.DeleteOneID(dt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DailyTaskClient) DeleteOneID(id uuid.UUID) *DailyTaskDeleteOne {
+	builder := c.Delete().Where(dailytask.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DailyTaskDeleteOne{builder}
+}
+
+// Query returns a query builder for DailyTask.
+func (c *DailyTaskClient) Query() *DailyTaskQuery {
+	return &DailyTaskQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDailyTask},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DailyTask entity by its id.
+func (c *DailyTaskClient) Get(ctx context.Context, id uuid.UUID) (*DailyTask, error) {
+	return c.Query().Where(dailytask.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DailyTaskClient) GetX(ctx context.Context, id uuid.UUID) *DailyTask {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a DailyTask.
+func (c *DailyTaskClient) QueryUser(dt *DailyTask) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailytask.Table, dailytask.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, dailytask.UserTable, dailytask.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(dt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPost queries the post edge of a DailyTask.
+func (c *DailyTaskClient) QueryPost(dt *DailyTask) *PostQuery {
+	query := (&PostClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(dailytask.Table, dailytask.FieldID, id),
+			sqlgraph.To(post.Table, post.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, dailytask.PostTable, dailytask.PostColumn),
+		)
+		fromV = sqlgraph.Neighbors(dt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DailyTaskClient) Hooks() []Hook {
+	return c.hooks.DailyTask
+}
+
+// Interceptors returns the client interceptors.
+func (c *DailyTaskClient) Interceptors() []Interceptor {
+	return c.inters.DailyTask
+}
+
+func (c *DailyTaskClient) mutate(ctx context.Context, m *DailyTaskMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DailyTaskCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DailyTaskUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DailyTaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DailyTaskDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DailyTask mutation op: %q", m.Op())
 	}
 }
 
@@ -1046,6 +1219,22 @@ func (c *PostClient) QueryLikes(po *Post) *LikeQuery {
 	return query
 }
 
+// QueryDailyTask queries the daily_task edge of a Post.
+func (c *PostClient) QueryDailyTask(po *Post) *DailyTaskQuery {
+	query := (&DailyTaskClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := po.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, id),
+			sqlgraph.To(dailytask.Table, dailytask.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, post.DailyTaskTable, post.DailyTaskColumn),
+		)
+		fromV = sqlgraph.Neighbors(po.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PostClient) Hooks() []Hook {
 	return c.hooks.Post
@@ -1275,6 +1464,22 @@ func (c *UserClient) QueryFollowers(u *User) *FollowRelationQuery {
 	return query
 }
 
+// QueryDailyTasks queries the daily_tasks edge of a User.
+func (c *UserClient) QueryDailyTasks(u *User) *DailyTaskQuery {
+	query := (&DailyTaskClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(dailytask.Table, dailytask.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DailyTasksTable, user.DailyTasksColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -1303,9 +1508,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Comment, FollowRelation, Like, Pet, Post, User []ent.Hook
+		Comment, DailyTask, FollowRelation, Like, Pet, Post, User []ent.Hook
 	}
 	inters struct {
-		Comment, FollowRelation, Like, Pet, Post, User []ent.Interceptor
+		Comment, DailyTask, FollowRelation, Like, Pet, Post, User []ent.Interceptor
 	}
 )

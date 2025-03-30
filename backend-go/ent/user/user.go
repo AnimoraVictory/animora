@@ -39,6 +39,8 @@ const (
 	EdgeFollowing = "following"
 	// EdgeFollowers holds the string denoting the followers edge name in mutations.
 	EdgeFollowers = "followers"
+	// EdgeDailyTasks holds the string denoting the daily_tasks edge name in mutations.
+	EdgeDailyTasks = "daily_tasks"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// PostsTable is the table that holds the posts relation/edge.
@@ -83,6 +85,13 @@ const (
 	FollowersInverseTable = "follow_relations"
 	// FollowersColumn is the table column denoting the followers relation/edge.
 	FollowersColumn = "user_followers"
+	// DailyTasksTable is the table that holds the daily_tasks relation/edge.
+	DailyTasksTable = "daily_tasks"
+	// DailyTasksInverseTable is the table name for the DailyTask entity.
+	// It exists in this package in order to avoid circular dependency with the "dailytask" package.
+	DailyTasksInverseTable = "daily_tasks"
+	// DailyTasksColumn is the table column denoting the daily_tasks relation/edge.
+	DailyTasksColumn = "user_daily_tasks"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -242,6 +251,20 @@ func ByFollowers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newFollowersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByDailyTasksCount orders the results by daily_tasks count.
+func ByDailyTasksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDailyTasksStep(), opts...)
+	}
+}
+
+// ByDailyTasks orders the results by daily_tasks terms.
+func ByDailyTasks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDailyTasksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPostsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -282,5 +305,12 @@ func newFollowersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FollowersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, FollowersTable, FollowersColumn),
+	)
+}
+func newDailyTasksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DailyTasksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DailyTasksTable, DailyTasksColumn),
 	)
 }

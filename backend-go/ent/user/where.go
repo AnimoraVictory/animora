@@ -584,6 +584,29 @@ func HasFollowersWith(preds ...predicate.FollowRelation) predicate.User {
 	})
 }
 
+// HasDailyTasks applies the HasEdge predicate on the "daily_tasks" edge.
+func HasDailyTasks() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DailyTasksTable, DailyTasksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDailyTasksWith applies the HasEdge predicate on the "daily_tasks" edge with a given conditions (other predicates).
+func HasDailyTasksWith(preds ...predicate.DailyTask) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newDailyTasksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

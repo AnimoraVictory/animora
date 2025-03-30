@@ -531,6 +531,29 @@ func HasLikesWith(preds ...predicate.Like) predicate.Post {
 	})
 }
 
+// HasDailyTask applies the HasEdge predicate on the "daily_task" edge.
+func HasDailyTask() predicate.Post {
+	return predicate.Post(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, DailyTaskTable, DailyTaskColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDailyTaskWith applies the HasEdge predicate on the "daily_task" edge with a given conditions (other predicates).
+func HasDailyTaskWith(preds ...predicate.DailyTask) predicate.Post {
+	return predicate.Post(func(s *sql.Selector) {
+		step := newDailyTaskStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Post) predicate.Post {
 	return predicate.Post(sql.AndPredicates(predicates...))
