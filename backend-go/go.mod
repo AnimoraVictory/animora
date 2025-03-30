@@ -15,6 +15,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/lestrrat-go/jwx v1.2.29
 	github.com/lib/pq v1.10.9
+	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pgvector/pgvector-go v0.3.0
 	github.com/rs/zerolog v1.34.0
 )
