@@ -18,6 +18,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
+		field.Int("index").Immutable().NonNegative().Unique().Optional(),
 		field.String("email").NotEmpty().Unique(),
 		field.String("name").NotEmpty(),
 		field.String("bio").Default(""),

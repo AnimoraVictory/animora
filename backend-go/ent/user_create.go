@@ -29,6 +29,20 @@ type UserCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetIndex sets the "index" field.
+func (uc *UserCreate) SetIndex(i int) *UserCreate {
+	uc.mutation.SetIndex(i)
+	return uc
+}
+
+// SetNillableIndex sets the "index" field if the given value is not nil.
+func (uc *UserCreate) SetNillableIndex(i *int) *UserCreate {
+	if i != nil {
+		uc.SetIndex(*i)
+	}
+	return uc
+}
+
 // SetEmail sets the "email" field.
 func (uc *UserCreate) SetEmail(s string) *UserCreate {
 	uc.mutation.SetEmail(s)
@@ -238,6 +252,11 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
+	if v, ok := uc.mutation.Index(); ok {
+		if err := user.IndexValidator(v); err != nil {
+			return &ValidationError{Name: "index", err: fmt.Errorf(`ent: validator failed for field "User.index": %w`, err)}
+		}
+	}
 	if _, ok := uc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
 	}
@@ -295,6 +314,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if id, ok := uc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
+	}
+	if value, ok := uc.mutation.Index(); ok {
+		_spec.SetField(user.FieldIndex, field.TypeInt, value)
+		_node.Index = value
 	}
 	if value, ok := uc.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
@@ -419,7 +442,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.User.Create().
-//		SetEmail(v).
+//		SetIndex(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -428,7 +451,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.UserUpsert) {
-//			SetEmail(v+v).
+//			SetIndex(v+v).
 //		}).
 //		Exec(ctx)
 func (uc *UserCreate) OnConflict(opts ...sql.ConflictOption) *UserUpsertOne {
@@ -546,6 +569,9 @@ func (u *UserUpsertOne) UpdateNewValues() *UserUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(user.FieldID)
+		}
+		if _, exists := u.create.mutation.Index(); exists {
+			s.SetIgnore(user.FieldIndex)
 		}
 	}))
 	return u
@@ -791,7 +817,7 @@ func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.UserUpsert) {
-//			SetEmail(v+v).
+//			SetIndex(v+v).
 //		}).
 //		Exec(ctx)
 func (ucb *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBulk {
@@ -837,6 +863,9 @@ func (u *UserUpsertBulk) UpdateNewValues() *UserUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(user.FieldID)
+			}
+			if _, exists := b.mutation.Index(); exists {
+				s.SetIgnore(user.FieldIndex)
 			}
 		}
 	}))
