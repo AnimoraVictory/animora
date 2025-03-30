@@ -67,7 +67,7 @@ func InjectAuthUsecase() usecase.AuthUsecase {
 }
 
 func InjectPostUsecase() usecase.PostUsecase {
-	postUsecase := usecase.NewPostUsecase(InjectPostRepository())
+	postUsecase := usecase.NewPostUsecase(InjectPostRepository(), InjectStorageRepository())
 	return *postUsecase
 }
 

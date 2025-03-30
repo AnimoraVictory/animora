@@ -14,7 +14,7 @@ run-seed:
 	SEED=true docker compose up api -d
 
 build:
-	docker compose build
+	docker compose build api
 
 up-db:
 	docker compose up db -d
