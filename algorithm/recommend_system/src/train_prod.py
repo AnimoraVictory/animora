@@ -34,18 +34,14 @@ if __name__ == "__main__":
     prod_df["image_feature"] = prod_df["image_feature"].map(parse_feature)
     prod_df["text_feature"] = prod_df["text_feature"].map(parse_feature)
 
-    # 埋め込みベクトルの次元数を取得
-    print(f"Image feature dimension: {prod_df['image_feature'].iloc[0].shape}")
-    print(f"Text feature dimension: {prod_df['text_feature'].iloc[0].shape}")
-
     print(f"Production data loaded: {prod_df.shape[0]} records")
 
     # ----------------------------------
     # 3. プロダクション用の設定(config)
     # ----------------------------------
     # データから実際のユーザー数・アイテム数を取得
-    prod_config["num_users"] = int(prod_df["userId"].nunique())
-    prod_config["num_items"] = int(prod_df["itemId"].nunique())
+    prod_config["num_users"] = int(prod_df["user_id"].nunique())
+    prod_config["num_items"] = int(prod_df["post_id"].nunique())
 
     # ----------------------------------
     # 4. サンプル生成器の作成と評価データの準備

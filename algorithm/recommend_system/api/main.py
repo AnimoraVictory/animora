@@ -50,6 +50,7 @@ def load_model():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global config, model
+    download_latest_model() # .modelは.gitignoreに追加されてしまっているため、毎回ダウンロードする
     config, model = load_model()
     print("モデル初期ロード完了")
     yield # アプリのライフサイクルの本体がここ
