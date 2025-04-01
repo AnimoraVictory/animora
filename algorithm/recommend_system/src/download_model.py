@@ -15,6 +15,7 @@ S3_KEY = "models/latest.model"
 
 # モデルのダウンロード
 def download_latest_model():
+    os.makedirs(os.path.dirname(LATEST_MODEL_PATH), exist_ok=True) # .gitignoreに追加されているため、毎回ダウンロードする
     s3 = boto3.client("s3")
     s3.download_file(S3_BUCKET, S3_KEY, LATEST_MODEL_PATH)
     print("モデルのダウンロードが完了しました")

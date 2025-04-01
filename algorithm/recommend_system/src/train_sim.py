@@ -32,7 +32,7 @@ def generate_sim_data(num_users, num_items, num_records):
         image_feature = [random.random() for _ in range(768)]
         text_feature = [random.random() for _ in range(768)]
         data.append((userId, itemId, rating, timestamp, image_feature, text_feature))
-    df = pd.DataFrame(data, columns=["userId", "itemId", "rating", "timestamp", "image_feature", "text_feature"])
+    df = pd.DataFrame(data, columns=["user_id", "post_id", "rating", "timestamp", "image_feature", "text_feature"])
     return df
 
 if __name__ == "__main__":

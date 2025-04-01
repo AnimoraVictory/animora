@@ -9,7 +9,7 @@ import subprocess
 import requests
 from recommend_system.components.mmneumf import MultiModalNeuMFEngine
 from recommend_system.components.data import SampleGenerator
-from recommend_system.utils.database import get_connection
+from recommend_system.utils.database import get_sqlalchemy_connection
 from recommend_system.utils.config import prod_config, rating_query
 
 if __name__ == "__main__":
@@ -17,11 +17,10 @@ if __name__ == "__main__":
     # 1. PostgreSQLから実データを取得
     # ----------------------------------
     # PostgreSQLデータベースへの接続
-    conn = get_connection()
+    engine = get_sqlalchemy_connection()
 
     # ratingsデータフレームを作成
-    prod_df = pd.read_sql(rating_query, conn)
-    conn.close()
+    prod_df = pd.read_sql(rating_query, engine)
 
     # ----------------------------------
     # 2. 特徴量のパース(JSON -> List)
