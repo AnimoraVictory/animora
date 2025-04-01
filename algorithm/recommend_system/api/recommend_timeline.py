@@ -47,8 +47,6 @@ def get_recommended_timeline(user_id, candidates, model, device, is_existing_use
         item_tensor = torch.tensor([candidate["post_id"]], dtype=torch.long).to(device)
         image_features = torch.tensor([candidate["image_feature"]], dtype=torch.float).to(device)
         text_features = torch.tensor([candidate["text_feature"]], dtype=torch.float).to(device)
-        print("image_feature type:", type(candidate["image_feature"]))
-        print("image_feature sample:", candidate["image_feature"][:5])
 
         # 学習済みユーザー
         if is_existing_user:

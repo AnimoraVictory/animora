@@ -128,6 +128,37 @@ class MultiModalNeuMF(nn.Module):
         logits = self.affine_output(final_vector)
         rating = self.logistic(logits)
         return rating
+    
+    def finetuning(self, state_dict, new_config):
+        """
+        事前学習済みのモデルの重みを読み込み、新しい設定でモデルを再構築する
+        """
+        def expand_embedding(old_emb, new_size):
+            old_weight = old_emb.weight.data
+            old_size, dim = old_weight.shape
+            if new_size <= old_size:
+                print(f"新しいサイズ({new_size})が古いサイズ({old_size})以下なので、重みをそのまま読み込みます")
+                return nn.Embedding.from_pretrained(old_weight[:new_size], freeze=False)
+            new_weight = torch.cat([
+                old_weight,
+                torch.randn(new_size - old_size, dim).to(old_weight.device) * 0.01
+            ], dim=0)
+            new_emb = nn.Embedding(new_size, dim)
+            new_emb.weight.data = new_weight
+            return new_emb
+        self.embedding_user_mlp = expand_embedding(self.embedding_user_mlp, new_config["num_users"])
+        self.embedding_item_mlp = expand_embedding(self.embedding_item_mlp, new_config["num_items"])
+        self.embedding_user_mf = expand_embedding(self.embedding_user_mf, new_config["num_users"])
+        self.embedding_item_mf = expand_embedding(self.embedding_item_mf, new_config["num_items"])
+
+        # state_dict から埋め込みを除外
+        for key in list(state_dict.keys()):
+            if "embedding" in key:
+                state_dict.pop(key)
+
+        self.load_state_dict(state_dict, strict=False)
+        print(f"重みを拡張して読み込みました: ユーザー数({new_config['num_users']}), アイテム数({new_config['num_items']})")
+        
 
 class MultiModalNeuMFEngine(Engine):
     def __init__(self, config):
@@ -140,9 +171,7 @@ class MultiModalNeuMFEngine(Engine):
         print(self.model)
 
         if config["pretrain"]:
-            self.model.load_state_dict(torch.load(
-                config["pretrain_model_dir"],
-                map_location = torch.device("cuda" if config["use_cuda"] else "cpu")
-            ))
+            state = torch.load(config["pretrain_model_dir"], map_location=torch.device("cuda" if config["use_cuda"] else "cpu"))
+            self.model.finetuning(state["model_state_dict"], config)
 
 

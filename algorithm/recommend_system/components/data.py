@@ -55,10 +55,10 @@ class SampleGenerator(object):
     def __init__(self, ratings):
         """
         Args:
-            ratings(pd.DataFrame): ["userId", "itemId", "rating", "timestamp", "image_feature", "text_feature"]
+            ratings(pd.DataFrame): ["user_id", "post_id", "rating", "timestamp", "image_feature", "text_feature"]
         """
         # 入力チェック
-        for col in ["userId", "itemId", "rating", "image_feature", "text_feature"]:
+        for col in ["user_id", "post_id", "rating", "image_feature", "text_feature"]:
             assert col in ratings.columns, f"{col}が存在しません"
 
         self.ratings = ratings.copy()
@@ -70,13 +70,13 @@ class SampleGenerator(object):
         self.preprocess_ratings = self._binarize(ratings)
 
         # 全ユーザーIDと全アイテムIDを取得
-        self.user_pool = set(self.ratings["userId"].unique())
-        self.item_pool = set(self.ratings["itemId"].unique())
+        self.user_pool = set(self.ratings["user_id"].unique())
+        self.item_pool = set(self.ratings["post_id"].unique())
 
         # 各アイテムの画像・テキスト特徴を取得する辞書(ここでは最初の出現レコードの特徴を採用)
         self.item_features = {}
         for item_id in self.item_pool:
-            row = self.ratings[self.ratings["itemId"] == item_id].iloc[0]
+            row = self.ratings[self.ratings["post_id"] == item_id].iloc[0]
             self.item_features[item_id] = {
                 "image_feature": row["image_feature"],
                 "text_feature": row["text_feature"]
@@ -86,7 +86,10 @@ class SampleGenerator(object):
         self.negatives = self._sample_negative(ratings)
 
         # 学習データとテストデータに分割(Leave-One-Out: 各ユーザーの最新をテストデータとする)
-        self.train_ratings, self.test_ratings = self._split_loo(self.preprocess_ratings)
+        filtered = self.preprocess_ratings.groupby("user_id").filter(lambda x: len(x) >= 2)
+            # 2回以上評価したユーザーのみを抽出(Leave-One-Outのため)
+        print(f"2回以上インタラクションのあったユーザー数: {len(filtered)}")
+        self.train_ratings, self.test_ratings = self._split_loo(filtered)
 
     def _normalize(self, ratings):
         """
@@ -111,26 +114,26 @@ class SampleGenerator(object):
         Leave-One-Outを使用して、学習データとテストデータに分割
             Leave-One-Out: 各ユーザーに対する最新の評価データをテストデータとして使用
         """
-        ratings["rank_latest"] = ratings.groupby(["userId"])["timestamp"].rank(method="first", ascending=False)
+        ratings["rank_latest"] = ratings.groupby(["user_id"])["timestamp"].rank(method="first", ascending=False)
         test = ratings[ratings["rank_latest"] == 1]
         train = ratings[ratings["rank_latest"] > 1]
-        train = train[["userId", "itemId", "rating", "image_feature", "text_feature"]] # 画像・テキスト特徴を追加
-        test = test[["userId", "itemId", "rating", "image_feature", "text_feature"]]
-        assert train["userId"].nunique() == test["userId"].nunique()
+        train = train[["user_id", "post_id", "rating", "image_feature", "text_feature"]] # 画像・テキスト特徴を追加
+        test = test[["user_id", "post_id", "rating", "image_feature", "text_feature"]]
+        assert train["user_id"].nunique() == test["user_id"].nunique()
         return train, test
     
     def _sample_negative(self, ratings):
         """
         ユーザーが評価していないアイテムを負例サンプルとして取得
         """
-        interact_status = ratings.groupby("userId")["itemId"].apply(set).reset_index().rename(columns={"itemId": "interacted_items"})
+        interact_status = ratings.groupby("user_id")["post_id"].apply(set).reset_index().rename(columns={"post_id": "interacted_items"})
 
         # 各ユーザーごとに、未インタラクションのアイテム集合を作成(negative_items)
         interact_status["negative_items"] = interact_status["interacted_items"].apply(lambda x: self.item_pool - x)
 
-        # ランダムに99個の負例サンプルを抽出
-        interact_status["negative_samples"] = interact_status["negative_items"].apply(lambda x: random.sample(list(x), 99))
-        return interact_status[["userId", "negative_items", "negative_samples"]]
+        # ランダムに99個(or postの数のうち少ない方)の負例サンプルを抽出
+        interact_status["negative_samples"] = interact_status["negative_items"].apply(lambda x: random.sample(list(x), min(len(x), 99)))
+        return interact_status[["user_id", "negative_items", "negative_samples"]]
     
     def instance_a_train_loader(self, num_negatives, batch_size):
         """
@@ -142,23 +145,23 @@ class SampleGenerator(object):
         """
         users, items, ratings_list = [], [], []
         image_features_list, text_features_list = [], []
-        train_ratings = pd.merge(self.train_ratings, self.negatives[["userId", "negative_items"]], on="userId")
-        train_ratings["negatives"] = train_ratings["negative_items"].apply(lambda x: random.sample(list(x), num_negatives))
+        train_ratings = pd.merge(self.train_ratings, self.negatives[["user_id", "negative_items"]], on="user_id")
+        train_ratings["negatives"] = train_ratings["negative_items"].apply(lambda x: random.sample(list(x), min(len(x), num_negatives)))
         
         # 正例と負例の両方をリストに追加
         for row in train_ratings.itertuples():
 
             # 正例
-            users.append(int(row.userId))
-            items.append(int(row.itemId))
+            users.append(int(row.user_id))
+            items.append(int(row.post_id))
             ratings_list.append(float(row.rating))
             image_features_list.append(row.image_feature)
             text_features_list.append(row.text_feature)
 
             # 負例
-            for i in range(num_negatives):
+            for i in range(len(row.negatives)):
                 neg_item = int(row.negatives[i])
-                users.append(int(row.userId))
+                users.append(int(row.user_id))
                 items.append(neg_item)
                 ratings_list.append(0.0)
 
@@ -187,7 +190,7 @@ class SampleGenerator(object):
         """
         テストデータを取得
         """
-        test_ratings = pd.merge(self.test_ratings, self.negatives[["userId", "negative_samples"]], on="userId")
+        test_ratings = pd.merge(self.test_ratings, self.negatives[["user_id", "negative_samples"]], on="user_id")
         test_users, test_items = [], []
         test_image_features, test_text_features = [], []
         negative_users, negative_items = [], []
@@ -195,14 +198,14 @@ class SampleGenerator(object):
         for row in test_ratings.itertuples():
             
             # 正例
-            test_users.append(int(row.userId))
-            test_items.append(int(row.itemId))
+            test_users.append(int(row.user_id))
+            test_items.append(int(row.post_id))
             test_image_features.append(row.image_feature)
             test_text_features.append(row.text_feature)
 
             # 負例
             for i in range(len(row.negative_samples)):
-                negative_users.append(int(row.userId))
+                negative_users.append(int(row.user_id))
                 neg_item = int(row.negative_samples[i])
                 negative_items.append(neg_item)
                 neg_features = self.item_features[neg_item]
