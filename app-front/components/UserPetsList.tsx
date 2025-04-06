@@ -1,5 +1,11 @@
 import React from "react";
-import { FlatList, RefreshControl, Text, View, StyleSheet, useColorScheme } from "react-native";
+import {
+  FlatList,
+  RefreshControl,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 import PetPanel from "@/components/PetPanel";
 import { Pet } from "@/constants/api";
 import { Colors } from "@/constants/Colors";
@@ -10,9 +16,17 @@ type Props = {
   onRefresh: () => void;
   colorScheme: ReturnType<typeof useColorScheme>;
   headerComponent: React.JSX.Element;
+  onScroll?: (event: any) => void;
 };
 
-export const UserPetList: React.FC<Props> = ({ pets, refreshing, onRefresh, colorScheme, headerComponent }) => {
+export const UserPetList: React.FC<Props> = ({
+  pets,
+  refreshing,
+  onRefresh,
+  colorScheme,
+  headerComponent,
+  onScroll,
+}) => {
   const colors = Colors[colorScheme ?? "light"];
   const backgroundColor = colorScheme === "dark" ? "black" : "white";
 
@@ -33,7 +47,13 @@ export const UserPetList: React.FC<Props> = ({ pets, refreshing, onRefresh, colo
           tintColor={colorScheme === "light" ? "black" : "white"}
         />
       }
-      ListHeaderComponent={headerComponent}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      ListHeaderComponent={
+        <View style={{ backgroundColor: colors.background }}>
+          {headerComponent}
+        </View>
+      }
       contentContainerStyle={{
         flexGrow: 1,
         backgroundColor,

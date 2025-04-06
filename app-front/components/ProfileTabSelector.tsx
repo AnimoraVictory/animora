@@ -13,10 +13,11 @@ type ProfileTabSelectorProps = {
 export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({ selectedTab, onSelectTab }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const backgroundColor = colorScheme == "light" ? "white" : "black"
   const styles = getStyles(colors);
 
   return (
-    <View style={styles.tabContainer}>
+    <View style={[styles.tabContainer, {backgroundColor }]}>
       <TouchableOpacity
         onPress={() => onSelectTab('posts')}
         style={[styles.tabButton, selectedTab === 'posts' && styles.tabButtonActive]}

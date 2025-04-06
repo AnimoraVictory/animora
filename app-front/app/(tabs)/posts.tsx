@@ -1,6 +1,4 @@
-import { useRef, useState } from "react";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Animated,
@@ -8,16 +6,21 @@ import {
   useColorScheme,
   Image,
   RefreshControl,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  FlatList,
 } from "react-native";
 import axios from "axios";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { PostPanel } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
+import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
-
 
 const userBaseSchema = z.object({
   id: z.string().uuid(),
@@ -41,7 +44,8 @@ export default function PostsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const colorScheme = useColorScheme();
   const scrollY = useRef(new Animated.Value(0)).current;
-
+  const scrollYRef = useRef(0);
+  const listRef = useRef<FlatList>(null);
   const HEADER_HEIGHT = 80;
 
   const icon =
@@ -68,11 +72,31 @@ export default function PostsScreen() {
     setRefreshing(false);
   };
 
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    scrollYRef.current = event.nativeEvent.contentOffset.y;
+  };
+
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, HEADER_HEIGHT],
     outputRange: [0, -HEADER_HEIGHT],
     extrapolate: "clamp",
   });
+
+  const { setHandler } = useHomeTabHandler();
+
+  
+useEffect(() => {
+  setHandler(() => {
+    if (scrollYRef.current > 10) {
+      listRef.current?.scrollToOffset({
+        offset: -(HEADER_HEIGHT + 12),
+        animated: true,
+      });
+    } else {
+      handleRefresh()
+    }
+  });
+}, [setHandler]);
 
   if (isLoading) {
     return (
@@ -123,6 +147,7 @@ export default function PostsScreen() {
       </Animated.View>
 
       <Animated.FlatList
+        ref={listRef}
         style={{
           backgroundColor: colorScheme === "light" ? "white" : "black",
         }}
@@ -141,7 +166,10 @@ export default function PostsScreen() {
         }
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
+          {
+            useNativeDriver: true,
+            listener: handleScroll,
+          }
         )}
         scrollEventThrottle={16}
       />

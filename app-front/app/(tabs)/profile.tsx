@@ -43,7 +43,16 @@ const ProfileScreen: React.FC = () => {
 
   const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
-  const backgroundColor = colorScheme == "light" ? "white" : "black"
+  const backgroundColor = colorScheme == "light" ? "white" : "black";
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const HEADER_THRESHOLD = 150;
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [HEADER_THRESHOLD - 20, HEADER_THRESHOLD],
+    outputRange: [0, 1],
+    extrapolate: "clamp",
+  });
 
   const handleLogout = async () => {
     try {
@@ -97,9 +106,9 @@ const ProfileScreen: React.FC = () => {
   }
 
   const headerContent = (
-    <>
+    <View style={{backgroundColor}}>
       <ProfileHeader user={user} onLogout={handleLogout} />
-      <View style={styles.editButtonsContainer}>
+      <View style={[styles.editButtonsContainer]}>
         <TouchableOpacity
           style={styles.editButton}
           onPress={openEditProfileModal}
@@ -117,7 +126,7 @@ const ProfileScreen: React.FC = () => {
         selectedTab={selectedTab}
         onSelectTab={setSelectedTab}
       />
-    </>
+    </View>
   );
 
   const contentList =
@@ -128,6 +137,10 @@ const ProfileScreen: React.FC = () => {
         refreshing={authLoading}
         colorScheme={colorScheme}
         headerComponent={headerContent}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
       />
     ) : (
       <UserPostList
@@ -136,14 +149,22 @@ const ProfileScreen: React.FC = () => {
         refreshing={authLoading}
         colorScheme={colorScheme}
         headerComponent={headerContent}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
       />
     );
 
   return (
-    <ThemedView style={[styles.container, {backgroundColor}]}>
-      <View style={styles.topHeader}>
-        <Text style={styles.userName}>{user.name}</Text>
-      </View>
+    <ThemedView style={[styles.container, { backgroundColor }]}>
+      <Animated.View
+        style={[styles.topHeader, { backgroundColor: colors.background }]}
+      >
+        <Animated.Text style={[styles.userName, { opacity: headerOpacity }]}>
+          {user.name}
+        </Animated.Text>
+      </Animated.View>
       {contentList}
       <ProfileEditModal
         visible={isEditModalVisible}
@@ -170,7 +191,7 @@ const getStyles = (colors: typeof Colors.light) =>
       flex: 1,
     },
     topHeader: {
-      paddingTop: 50,
+      paddingTop: 42,
       paddingBottom: 12,
       backgroundColor: colors.background,
       alignItems: "center",
