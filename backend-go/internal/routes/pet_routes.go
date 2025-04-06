@@ -8,15 +8,15 @@ import (
 // SetupPetRoutes sets up the pet routes
 func SetupPetRoutes(app *echo.Echo) {
 	petHandler := injector.InjectPetHandler()
-	petGroup := app.Group("/pets")
+	petGroup := app.Group("/pets/")
 
 	// Get pets by owner ID
-	petGroup.GET("/owner", petHandler.GetByOwner)
+	petGroup.GET("/owner/", petHandler.GetByOwner)
 
 	// Create a new pet
-	petGroup.POST("/new", petHandler.Create)
+	petGroup.POST("/new/", petHandler.Create)
 
-	petGroup.PUT("/update", petHandler.Update)
+	petGroup.PUT("/update/", petHandler.Update)
 
-	petGroup.DELETE("/delete", petHandler.Delete)
+	petGroup.DELETE("/delete/", petHandler.Delete)
 }
