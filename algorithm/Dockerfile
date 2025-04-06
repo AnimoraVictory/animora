@@ -30,4 +30,4 @@ COPY . /app
 EXPOSE 8000
 
 # --- FastAPI アプリ起動 ---
-CMD ["uvicorn", "recommend_system.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn $TARGET_APP --host 0.0.0.0 --port 8000"]

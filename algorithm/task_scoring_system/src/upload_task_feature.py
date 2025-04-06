@@ -20,7 +20,7 @@ def upload_task_features():
     cur.execute(
         """
         SELECT type, text_feature
-        FROM tasks
+        FROM task_types
         WHERE text_feature IS NULL;
         """
     )
@@ -40,7 +40,7 @@ def upload_task_features():
 
             # データベースに特徴量を保存(特徴ベクトルはJSON文字列として保存)
             update_query = """
-                UPDATE tasks
+                UPDATE task_types
                 SET text_feature = %s
                 WHERE type = %s;
             """
