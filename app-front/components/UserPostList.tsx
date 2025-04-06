@@ -1,5 +1,13 @@
 import React from "react";
-import { FlatList, RefreshControl, Text, StyleSheet, useColorScheme } from "react-native";
+import {
+  FlatList,
+  RefreshControl,
+  Text,
+  StyleSheet,
+  useColorScheme,
+  View,
+  Animated,
+} from "react-native";
 import ProfilePostPanel from "@/components/ProfilePostPanel";
 import { Post } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
@@ -10,11 +18,19 @@ type Props = {
   onRefresh: () => void;
   colorScheme: ReturnType<typeof useColorScheme>;
   headerComponent: React.JSX.Element;
+  onScroll?: (event: any) => void;
 };
 
-export const UserPostList: React.FC<Props> = ({ posts, refreshing, onRefresh, colorScheme, headerComponent }) => {
+export const UserPostList: React.FC<Props> = ({
+  posts,
+  refreshing,
+  onRefresh,
+  colorScheme,
+  headerComponent,
+  onScroll,
+}) => {
   const colors = Colors[colorScheme ?? "light"];
-  const backgroundColor = colorScheme == "light" ? "white" : "black"
+  const backgroundColor = colorScheme === "light" ? "white" : "black";
 
   return (
     <FlatList
@@ -34,8 +50,14 @@ export const UserPostList: React.FC<Props> = ({ posts, refreshing, onRefresh, co
           tintColor={colorScheme === "light" ? "black" : "white"}
         />
       }
-      ListHeaderComponent={headerComponent}
-      contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, backgroundColor }}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      ListHeaderComponent={
+        <View style={{ backgroundColor: colors.background }}>
+          {headerComponent}
+        </View>
+      }
+      contentContainerStyle={{ flexGrow: 1, backgroundColor, paddingBottom: 20 }}
       ListEmptyComponent={
         <Text style={{ color: colors.text, textAlign: "center", marginTop: 32 }}>
           投稿しましょう！

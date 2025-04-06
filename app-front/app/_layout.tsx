@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/providers/AuthContext";
 import { Colors } from "@/constants/Colors";
 import Constants from "expo-constants";
+import { HomeTabScrollProvider } from "@/providers/HomeTabScrollContext";
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
@@ -84,12 +85,14 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+      <HomeTabScrollProvider>
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
           <AuthSwitch />
           <StatusBar style="auto" />
         </ThemeProvider>
+        </HomeTabScrollProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

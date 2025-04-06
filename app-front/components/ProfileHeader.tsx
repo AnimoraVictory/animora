@@ -13,9 +13,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onLogout }) 
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const styles = getStyles(colors);
+  const backgroundColor = colorScheme == "light" ? "white" : "black"
 
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer,{backgroundColor}]}>
       <View style={styles.topRow}>
         <TouchableOpacity onPress={onLogout}>
           <Text style={styles.logoutText}>ログアウト</Text>
