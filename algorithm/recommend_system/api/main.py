@@ -24,6 +24,8 @@ MODEL_PATH = "recommend_system/models/latest.model"
 # ----------------------------------
 class TimelineRequest(BaseModel):
     user_id: int
+    offset: int = 0 # どれだけスキップするか
+    limit: int = 10 # 取得する投稿数
 
 class Post(BaseModel):
     id: int
@@ -86,16 +88,22 @@ def recommend_timeline(request: TimelineRequest):
         else:
             print("新規ユーザー")
             query = new_user_query
-
+        
         # PostgreSQLから候補投稿画像を取得
         candidates = get_candidate_posts(query)
         print(f"取得した候補数: {len(candidates)}")
         recommended = get_recommended_timeline(request.user_id, candidates, model, device, is_existing_user)
+
+        # offsetとlimitの制限
+        if request.offset > len(recommended):
+            posts = []
+        elif request.offset + request.limit > len(recommended):
+            request.limit = len(recommended) - request.offset
         posts = [Post(
             id=rc["post_id"],
             timestamp=str(rc["timestamp"]),
             score=rc["score"]
-        ) for rc in recommended]
+        ) for rc in recommended[request.offset:request.offset + request.limit]]
         return TimelineResponse(posts=posts)
     except Exception as e:
         traceback.print_exc()  # ← 追加！ターミナルにスタックトレースを表示
