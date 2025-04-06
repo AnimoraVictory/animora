@@ -83,20 +83,6 @@ func (pc *PostCreate) SetNillableDeletedAt(t *time.Time) *PostCreate {
 	return pc
 }
 
-// SetTextFeature sets the "text_feature" field.
-func (pc *PostCreate) SetTextFeature(pg pgvector.Vector) *PostCreate {
-	pc.mutation.SetTextFeature(pg)
-	return pc
-}
-
-// SetNillableTextFeature sets the "text_feature" field if the given value is not nil.
-func (pc *PostCreate) SetNillableTextFeature(pg *pgvector.Vector) *PostCreate {
-	if pg != nil {
-		pc.SetTextFeature(*pg)
-	}
-	return pc
-}
-
 // SetImageFeature sets the "image_feature" field.
 func (pc *PostCreate) SetImageFeature(pg pgvector.Vector) *PostCreate {
 	pc.mutation.SetImageFeature(pg)
@@ -315,10 +301,6 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = value
 	}
-	if value, ok := pc.mutation.TextFeature(); ok {
-		_spec.SetField(post.FieldTextFeature, field.TypeOther, value)
-		_node.TextFeature = value
-	}
 	if value, ok := pc.mutation.ImageFeature(); ok {
 		_spec.SetField(post.FieldImageFeature, field.TypeOther, value)
 		_node.ImageFeature = value
@@ -494,24 +476,6 @@ func (u *PostUpsert) ClearDeletedAt() *PostUpsert {
 	return u
 }
 
-// SetTextFeature sets the "text_feature" field.
-func (u *PostUpsert) SetTextFeature(v pgvector.Vector) *PostUpsert {
-	u.Set(post.FieldTextFeature, v)
-	return u
-}
-
-// UpdateTextFeature sets the "text_feature" field to the value that was provided on create.
-func (u *PostUpsert) UpdateTextFeature() *PostUpsert {
-	u.SetExcluded(post.FieldTextFeature)
-	return u
-}
-
-// ClearTextFeature clears the value of the "text_feature" field.
-func (u *PostUpsert) ClearTextFeature() *PostUpsert {
-	u.SetNull(post.FieldTextFeature)
-	return u
-}
-
 // SetImageFeature sets the "image_feature" field.
 func (u *PostUpsert) SetImageFeature(v pgvector.Vector) *PostUpsert {
 	u.Set(post.FieldImageFeature, v)
@@ -641,27 +605,6 @@ func (u *PostUpsertOne) UpdateDeletedAt() *PostUpsertOne {
 func (u *PostUpsertOne) ClearDeletedAt() *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
 		s.ClearDeletedAt()
-	})
-}
-
-// SetTextFeature sets the "text_feature" field.
-func (u *PostUpsertOne) SetTextFeature(v pgvector.Vector) *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.SetTextFeature(v)
-	})
-}
-
-// UpdateTextFeature sets the "text_feature" field to the value that was provided on create.
-func (u *PostUpsertOne) UpdateTextFeature() *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.UpdateTextFeature()
-	})
-}
-
-// ClearTextFeature clears the value of the "text_feature" field.
-func (u *PostUpsertOne) ClearTextFeature() *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.ClearTextFeature()
 	})
 }
 
@@ -964,27 +907,6 @@ func (u *PostUpsertBulk) UpdateDeletedAt() *PostUpsertBulk {
 func (u *PostUpsertBulk) ClearDeletedAt() *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
 		s.ClearDeletedAt()
-	})
-}
-
-// SetTextFeature sets the "text_feature" field.
-func (u *PostUpsertBulk) SetTextFeature(v pgvector.Vector) *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.SetTextFeature(v)
-	})
-}
-
-// UpdateTextFeature sets the "text_feature" field to the value that was provided on create.
-func (u *PostUpsertBulk) UpdateTextFeature() *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.UpdateTextFeature()
-	})
-}
-
-// ClearTextFeature clears the value of the "text_feature" field.
-func (u *PostUpsertBulk) ClearTextFeature() *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.ClearTextFeature()
 	})
 }
 

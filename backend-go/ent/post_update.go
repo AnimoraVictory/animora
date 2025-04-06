@@ -96,26 +96,6 @@ func (pu *PostUpdate) ClearDeletedAt() *PostUpdate {
 	return pu
 }
 
-// SetTextFeature sets the "text_feature" field.
-func (pu *PostUpdate) SetTextFeature(pg pgvector.Vector) *PostUpdate {
-	pu.mutation.SetTextFeature(pg)
-	return pu
-}
-
-// SetNillableTextFeature sets the "text_feature" field if the given value is not nil.
-func (pu *PostUpdate) SetNillableTextFeature(pg *pgvector.Vector) *PostUpdate {
-	if pg != nil {
-		pu.SetTextFeature(*pg)
-	}
-	return pu
-}
-
-// ClearTextFeature clears the value of the "text_feature" field.
-func (pu *PostUpdate) ClearTextFeature() *PostUpdate {
-	pu.mutation.ClearTextFeature()
-	return pu
-}
-
 // SetImageFeature sets the "image_feature" field.
 func (pu *PostUpdate) SetImageFeature(pg pgvector.Vector) *PostUpdate {
 	pu.mutation.SetImageFeature(pg)
@@ -329,12 +309,6 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pu.mutation.DeletedAtCleared() {
 		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := pu.mutation.TextFeature(); ok {
-		_spec.SetField(post.FieldTextFeature, field.TypeOther, value)
-	}
-	if pu.mutation.TextFeatureCleared() {
-		_spec.ClearField(post.FieldTextFeature, field.TypeOther)
 	}
 	if value, ok := pu.mutation.ImageFeature(); ok {
 		_spec.SetField(post.FieldImageFeature, field.TypeOther, value)
@@ -569,26 +543,6 @@ func (puo *PostUpdateOne) SetNillableDeletedAt(t *time.Time) *PostUpdateOne {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (puo *PostUpdateOne) ClearDeletedAt() *PostUpdateOne {
 	puo.mutation.ClearDeletedAt()
-	return puo
-}
-
-// SetTextFeature sets the "text_feature" field.
-func (puo *PostUpdateOne) SetTextFeature(pg pgvector.Vector) *PostUpdateOne {
-	puo.mutation.SetTextFeature(pg)
-	return puo
-}
-
-// SetNillableTextFeature sets the "text_feature" field if the given value is not nil.
-func (puo *PostUpdateOne) SetNillableTextFeature(pg *pgvector.Vector) *PostUpdateOne {
-	if pg != nil {
-		puo.SetTextFeature(*pg)
-	}
-	return puo
-}
-
-// ClearTextFeature clears the value of the "text_feature" field.
-func (puo *PostUpdateOne) ClearTextFeature() *PostUpdateOne {
-	puo.mutation.ClearTextFeature()
 	return puo
 }
 
@@ -835,12 +789,6 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 	}
 	if puo.mutation.DeletedAtCleared() {
 		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := puo.mutation.TextFeature(); ok {
-		_spec.SetField(post.FieldTextFeature, field.TypeOther, value)
-	}
-	if puo.mutation.TextFeatureCleared() {
-		_spec.ClearField(post.FieldTextFeature, field.TypeOther)
 	}
 	if value, ok := puo.mutation.ImageFeature(); ok {
 		_spec.SetField(post.FieldImageFeature, field.TypeOther, value)

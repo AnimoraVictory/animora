@@ -25,10 +25,7 @@ func (Post) Fields() []ent.Field {
 		field.String("image_key").NotEmpty(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("deleted_at").Optional(),
-		field.Other("text_feature", pgvector.Vector{}).
-			SchemaType(map[string]string{
-				dialect.Postgres: "vector(768)",
-			}).Optional(),
+		
 		field.Other("image_feature", pgvector.Vector{}).
 			SchemaType(map[string]string{
 				dialect.Postgres: "vector(768)",

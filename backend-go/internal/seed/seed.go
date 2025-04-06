@@ -120,6 +120,12 @@ func SeedData(client *ent.Client) error {
 		return err
 	}
 
+	log.Debug("Creating task types table rows...")
+	if err := createTaskTypes(client); err != nil {
+		log.Errorf("Failed to create task types: %v", err)
+		return err
+	}
+
 	log.Info("Database seeding completed successfully")
 	return nil
 }
@@ -353,5 +359,21 @@ func createFollowRelations(client *ent.Client, users []*ent.User) error {
 	}
 
 	_, err := client.FollowRelation.CreateBulk(followRelations...).Save(context.Background())
+	return err
+}
+
+func createTaskTypes(client *ent.Client) error {
+	log.Info("Creating sample task types...")
+
+	taskTypes := []*ent.TaskTypeCreate{
+		client.TaskType.Create().
+			SetType("eating"),
+		client.TaskType.Create().
+			SetType("sleeping"),
+		client.TaskType.Create().
+			SetType("playing"),
+	}
+
+	_, err := client.TaskType.CreateBulk(taskTypes...).Save(context.Background())
 	return err
 }

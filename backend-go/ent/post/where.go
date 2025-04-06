@@ -82,11 +82,6 @@ func DeletedAt(v time.Time) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// TextFeature applies equality check predicate on the "text_feature" field. It's identical to TextFeatureEQ.
-func TextFeature(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldTextFeature, v))
-}
-
 // ImageFeature applies equality check predicate on the "image_feature" field. It's identical to ImageFeatureEQ.
 func ImageFeature(v pgvector.Vector) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldImageFeature, v))
@@ -360,56 +355,6 @@ func DeletedAtIsNil() predicate.Post {
 // DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
 func DeletedAtNotNil() predicate.Post {
 	return predicate.Post(sql.FieldNotNull(FieldDeletedAt))
-}
-
-// TextFeatureEQ applies the EQ predicate on the "text_feature" field.
-func TextFeatureEQ(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldTextFeature, v))
-}
-
-// TextFeatureNEQ applies the NEQ predicate on the "text_feature" field.
-func TextFeatureNEQ(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldNEQ(FieldTextFeature, v))
-}
-
-// TextFeatureIn applies the In predicate on the "text_feature" field.
-func TextFeatureIn(vs ...pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldIn(FieldTextFeature, vs...))
-}
-
-// TextFeatureNotIn applies the NotIn predicate on the "text_feature" field.
-func TextFeatureNotIn(vs ...pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldNotIn(FieldTextFeature, vs...))
-}
-
-// TextFeatureGT applies the GT predicate on the "text_feature" field.
-func TextFeatureGT(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldGT(FieldTextFeature, v))
-}
-
-// TextFeatureGTE applies the GTE predicate on the "text_feature" field.
-func TextFeatureGTE(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldGTE(FieldTextFeature, v))
-}
-
-// TextFeatureLT applies the LT predicate on the "text_feature" field.
-func TextFeatureLT(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldLT(FieldTextFeature, v))
-}
-
-// TextFeatureLTE applies the LTE predicate on the "text_feature" field.
-func TextFeatureLTE(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldLTE(FieldTextFeature, v))
-}
-
-// TextFeatureIsNil applies the IsNil predicate on the "text_feature" field.
-func TextFeatureIsNil() predicate.Post {
-	return predicate.Post(sql.FieldIsNull(FieldTextFeature))
-}
-
-// TextFeatureNotNil applies the NotNil predicate on the "text_feature" field.
-func TextFeatureNotNil() predicate.Post {
-	return predicate.Post(sql.FieldNotNull(FieldTextFeature))
 }
 
 // ImageFeatureEQ applies the EQ predicate on the "image_feature" field.

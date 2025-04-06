@@ -18,6 +18,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
+	"github.com/aki-13627/animalia/backend-go/ent/tasktype"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
 	pgvector "github.com/pgvector/pgvector-go"
@@ -38,6 +39,7 @@ const (
 	TypeLike           = "Like"
 	TypePet            = "Pet"
 	TypePost           = "Post"
+	TypeTaskType       = "TaskType"
 	TypeUser           = "User"
 )
 
@@ -2738,7 +2740,6 @@ type PostMutation struct {
 	image_key         *string
 	created_at        *time.Time
 	deleted_at        *time.Time
-	text_feature      *pgvector.Vector
 	image_feature     *pgvector.Vector
 	clearedFields     map[string]struct{}
 	user              *uuid.UUID
@@ -3087,55 +3088,6 @@ func (m *PostMutation) ResetDeletedAt() {
 	delete(m.clearedFields, post.FieldDeletedAt)
 }
 
-// SetTextFeature sets the "text_feature" field.
-func (m *PostMutation) SetTextFeature(pg pgvector.Vector) {
-	m.text_feature = &pg
-}
-
-// TextFeature returns the value of the "text_feature" field in the mutation.
-func (m *PostMutation) TextFeature() (r pgvector.Vector, exists bool) {
-	v := m.text_feature
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTextFeature returns the old "text_feature" field's value of the Post entity.
-// If the Post object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PostMutation) OldTextFeature(ctx context.Context) (v pgvector.Vector, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTextFeature is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTextFeature requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTextFeature: %w", err)
-	}
-	return oldValue.TextFeature, nil
-}
-
-// ClearTextFeature clears the value of the "text_feature" field.
-func (m *PostMutation) ClearTextFeature() {
-	m.text_feature = nil
-	m.clearedFields[post.FieldTextFeature] = struct{}{}
-}
-
-// TextFeatureCleared returns if the "text_feature" field was cleared in this mutation.
-func (m *PostMutation) TextFeatureCleared() bool {
-	_, ok := m.clearedFields[post.FieldTextFeature]
-	return ok
-}
-
-// ResetTextFeature resets all changes to the "text_feature" field.
-func (m *PostMutation) ResetTextFeature() {
-	m.text_feature = nil
-	delete(m.clearedFields, post.FieldTextFeature)
-}
-
 // SetImageFeature sets the "image_feature" field.
 func (m *PostMutation) SetImageFeature(pg pgvector.Vector) {
 	m.image_feature = &pg
@@ -3405,7 +3357,7 @@ func (m *PostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PostMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 6)
 	if m.index != nil {
 		fields = append(fields, post.FieldIndex)
 	}
@@ -3420,9 +3372,6 @@ func (m *PostMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, post.FieldDeletedAt)
-	}
-	if m.text_feature != nil {
-		fields = append(fields, post.FieldTextFeature)
 	}
 	if m.image_feature != nil {
 		fields = append(fields, post.FieldImageFeature)
@@ -3445,8 +3394,6 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case post.FieldDeletedAt:
 		return m.DeletedAt()
-	case post.FieldTextFeature:
-		return m.TextFeature()
 	case post.FieldImageFeature:
 		return m.ImageFeature()
 	}
@@ -3468,8 +3415,6 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case post.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case post.FieldTextFeature:
-		return m.OldTextFeature(ctx)
 	case post.FieldImageFeature:
 		return m.OldImageFeature(ctx)
 	}
@@ -3515,13 +3460,6 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
-		return nil
-	case post.FieldTextFeature:
-		v, ok := value.(pgvector.Vector)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTextFeature(v)
 		return nil
 	case post.FieldImageFeature:
 		v, ok := value.(pgvector.Vector)
@@ -3581,9 +3519,6 @@ func (m *PostMutation) ClearedFields() []string {
 	if m.FieldCleared(post.FieldDeletedAt) {
 		fields = append(fields, post.FieldDeletedAt)
 	}
-	if m.FieldCleared(post.FieldTextFeature) {
-		fields = append(fields, post.FieldTextFeature)
-	}
 	if m.FieldCleared(post.FieldImageFeature) {
 		fields = append(fields, post.FieldImageFeature)
 	}
@@ -3606,9 +3541,6 @@ func (m *PostMutation) ClearField(name string) error {
 		return nil
 	case post.FieldDeletedAt:
 		m.ClearDeletedAt()
-		return nil
-	case post.FieldTextFeature:
-		m.ClearTextFeature()
 		return nil
 	case post.FieldImageFeature:
 		m.ClearImageFeature()
@@ -3635,9 +3567,6 @@ func (m *PostMutation) ResetField(name string) error {
 		return nil
 	case post.FieldDeletedAt:
 		m.ResetDeletedAt()
-		return nil
-	case post.FieldTextFeature:
-		m.ResetTextFeature()
 		return nil
 	case post.FieldImageFeature:
 		m.ResetImageFeature()
@@ -3790,6 +3719,408 @@ func (m *PostMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Post edge %s", name)
+}
+
+// TaskTypeMutation represents an operation that mutates the TaskType nodes in the graph.
+type TaskTypeMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	_type         *tasktype.Type
+	text_feature  *pgvector.Vector
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*TaskType, error)
+	predicates    []predicate.TaskType
+}
+
+var _ ent.Mutation = (*TaskTypeMutation)(nil)
+
+// tasktypeOption allows management of the mutation configuration using functional options.
+type tasktypeOption func(*TaskTypeMutation)
+
+// newTaskTypeMutation creates new mutation for the TaskType entity.
+func newTaskTypeMutation(c config, op Op, opts ...tasktypeOption) *TaskTypeMutation {
+	m := &TaskTypeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTaskType,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTaskTypeID sets the ID field of the mutation.
+func withTaskTypeID(id int) tasktypeOption {
+	return func(m *TaskTypeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TaskType
+		)
+		m.oldValue = func(ctx context.Context) (*TaskType, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TaskType.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTaskType sets the old TaskType of the mutation.
+func withTaskType(node *TaskType) tasktypeOption {
+	return func(m *TaskTypeMutation) {
+		m.oldValue = func(context.Context) (*TaskType, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TaskTypeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TaskTypeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TaskTypeMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TaskTypeMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TaskType.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetType sets the "type" field.
+func (m *TaskTypeMutation) SetType(t tasktype.Type) {
+	m._type = &t
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *TaskTypeMutation) GetType() (r tasktype.Type, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the TaskType entity.
+// If the TaskType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskTypeMutation) OldType(ctx context.Context) (v tasktype.Type, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *TaskTypeMutation) ResetType() {
+	m._type = nil
+}
+
+// SetTextFeature sets the "text_feature" field.
+func (m *TaskTypeMutation) SetTextFeature(pg pgvector.Vector) {
+	m.text_feature = &pg
+}
+
+// TextFeature returns the value of the "text_feature" field in the mutation.
+func (m *TaskTypeMutation) TextFeature() (r pgvector.Vector, exists bool) {
+	v := m.text_feature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTextFeature returns the old "text_feature" field's value of the TaskType entity.
+// If the TaskType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskTypeMutation) OldTextFeature(ctx context.Context) (v pgvector.Vector, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTextFeature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTextFeature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTextFeature: %w", err)
+	}
+	return oldValue.TextFeature, nil
+}
+
+// ClearTextFeature clears the value of the "text_feature" field.
+func (m *TaskTypeMutation) ClearTextFeature() {
+	m.text_feature = nil
+	m.clearedFields[tasktype.FieldTextFeature] = struct{}{}
+}
+
+// TextFeatureCleared returns if the "text_feature" field was cleared in this mutation.
+func (m *TaskTypeMutation) TextFeatureCleared() bool {
+	_, ok := m.clearedFields[tasktype.FieldTextFeature]
+	return ok
+}
+
+// ResetTextFeature resets all changes to the "text_feature" field.
+func (m *TaskTypeMutation) ResetTextFeature() {
+	m.text_feature = nil
+	delete(m.clearedFields, tasktype.FieldTextFeature)
+}
+
+// Where appends a list predicates to the TaskTypeMutation builder.
+func (m *TaskTypeMutation) Where(ps ...predicate.TaskType) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TaskTypeMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TaskTypeMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TaskType, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TaskTypeMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TaskTypeMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TaskType).
+func (m *TaskTypeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TaskTypeMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m._type != nil {
+		fields = append(fields, tasktype.FieldType)
+	}
+	if m.text_feature != nil {
+		fields = append(fields, tasktype.FieldTextFeature)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TaskTypeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tasktype.FieldType:
+		return m.GetType()
+	case tasktype.FieldTextFeature:
+		return m.TextFeature()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TaskTypeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tasktype.FieldType:
+		return m.OldType(ctx)
+	case tasktype.FieldTextFeature:
+		return m.OldTextFeature(ctx)
+	}
+	return nil, fmt.Errorf("unknown TaskType field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TaskTypeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tasktype.FieldType:
+		v, ok := value.(tasktype.Type)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case tasktype.FieldTextFeature:
+		v, ok := value.(pgvector.Vector)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTextFeature(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TaskType field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TaskTypeMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TaskTypeMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TaskTypeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown TaskType numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TaskTypeMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tasktype.FieldTextFeature) {
+		fields = append(fields, tasktype.FieldTextFeature)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TaskTypeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TaskTypeMutation) ClearField(name string) error {
+	switch name {
+	case tasktype.FieldTextFeature:
+		m.ClearTextFeature()
+		return nil
+	}
+	return fmt.Errorf("unknown TaskType nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TaskTypeMutation) ResetField(name string) error {
+	switch name {
+	case tasktype.FieldType:
+		m.ResetType()
+		return nil
+	case tasktype.FieldTextFeature:
+		m.ResetTextFeature()
+		return nil
+	}
+	return fmt.Errorf("unknown TaskType field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TaskTypeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TaskTypeMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TaskTypeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TaskTypeMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TaskTypeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TaskTypeMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TaskTypeMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown TaskType unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TaskTypeMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown TaskType edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
