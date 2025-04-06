@@ -5,7 +5,7 @@
 # ライブラリのインポート
 import torch
 import json
-from recommend_system.utils.database import get_connection
+from common.utils.database import get_connection
 from recommend_system.utils.config import new_user_threshold, existing_user_threshold
 # ----------------------------------
 # PostgreSQLから候補投稿を取得する関数

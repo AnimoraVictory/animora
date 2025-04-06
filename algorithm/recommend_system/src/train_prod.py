@@ -9,7 +9,7 @@ import subprocess
 import requests
 from recommend_system.components.mmneumf import MultiModalNeuMFEngine
 from recommend_system.components.data import SampleGenerator
-from recommend_system.utils.database import get_sqlalchemy_connection
+from common.utils.database import get_sqlalchemy_connection
 from recommend_system.utils.config import prod_config, rating_query
 
 if __name__ == "__main__":
