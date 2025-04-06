@@ -8,7 +8,7 @@ import (
 // SetupPostRoutes sets up the post routes
 func SetupPostRoutes(app *echo.Echo) {
 	postHandler := injector.InjectPostHandler()
-	postGroup := app.Group("/posts")
+	postGroup := app.Group("/posts/")
 
 	// Get all posts
 	postGroup.GET("/", postHandler.GetAllPosts)
