@@ -61,7 +61,7 @@ export const PostPanel = ({ post }: Props) => {
     },
     staleTime: 1000 * 60,
   });
-  
+
   const { data: count } = useQuery({
     queryKey: ["count", post.id],
     queryFn: async (): Promise<number> => {
@@ -77,8 +77,6 @@ export const PostPanel = ({ post }: Props) => {
     staleTime: 1000 * 60,
   });
 
-  console.log("count", count);
-console.log("comments", comments);
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
