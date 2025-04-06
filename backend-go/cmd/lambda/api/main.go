@@ -98,6 +98,8 @@ func init() {
 	routes.SetupPetRoutes(app)
 	routes.SetupPostRoutes(app)
 	routes.SetupUserRoutes(app)
+	routes.SetupLikeRoutes(app)
+	routes.SetupCommentRoutes(app)
 	log.Println("API routes setup completed")
 
 	// Initialize the Lambda adapter

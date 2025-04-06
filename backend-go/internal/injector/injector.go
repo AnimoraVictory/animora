@@ -66,6 +66,11 @@ func InjectLikeRepository() repository.LikeRepository {
 	return likeRepository
 }
 
+func InjectCommentRepository() repository.CommentRepository {
+	commentRepository := infra.NewCommentRepository(InjectDB())
+	return commentRepository
+}
+
 func InjectAuthUsecase() usecase.AuthUsecase {
 	authUsecase := usecase.NewAuthUsecase(InjectCognitoRepository(), InjectUserRepository())
 	return *authUsecase
@@ -96,6 +101,10 @@ func InjectLikeUsecase() usecase.LikeUsecase {
 	return *likeUsecase
 }
 
+func InjectCommentUsecase() usecase.CommentUsecase {
+	commentUsecase := usecase.NewCommentUsecase(InjectCommentRepository(), InjectStorageRepository())
+	return *commentUsecase
+}
 func InjectAuthHandler() handler.AuthHandler {
 	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase(), InjectStorageUsecase())
 	return *authHandler
@@ -119,4 +128,9 @@ func InjectUserHandler() handler.UserHandler {
 func InjectLikeHandler() handler.LikeHandler {
 	likeHandler := handler.NewLikeHandler(InjectLikeUsecase())
 	return *likeHandler
+}
+
+func InjectCommentHandler() handler.CommentHandler {
+	commentHandler := handler.NewCommentHandler(InjectCommentUsecase())
+	return *commentHandler
 }
