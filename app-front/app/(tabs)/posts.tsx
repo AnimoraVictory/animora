@@ -66,12 +66,6 @@ export default function PostsScreen() {
     },
   });
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
-
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollYRef.current = event.nativeEvent.contentOffset.y;
   };
@@ -84,19 +78,14 @@ export default function PostsScreen() {
 
   const { setHandler } = useHomeTabHandler();
 
-  
-useEffect(() => {
-  setHandler(() => {
-    if (scrollYRef.current > 10) {
+  useEffect(() => {
+    setHandler(() => {
       listRef.current?.scrollToOffset({
         offset: -(HEADER_HEIGHT + 12),
         animated: true,
       });
-    } else {
-      handleRefresh()
-    }
-  });
-}, [setHandler]);
+    });
+  }, [setHandler]);
 
   if (isLoading) {
     return (
@@ -119,8 +108,8 @@ useEffect(() => {
           }
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
+              refreshing={false}
+              onRefresh={() => {}}
               progressViewOffset={HEADER_HEIGHT}
               tintColor={colorScheme === "light" ? "black" : "white"}
             />
@@ -159,8 +148,8 @@ useEffect(() => {
         renderItem={({ item }) => <PostPanel post={item} />}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
+            refreshing={false}
+            onRefresh={() => {}}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
         }
