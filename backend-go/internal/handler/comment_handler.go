@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
@@ -18,8 +20,8 @@ func NewCommentHandler(commentUsecase usecase.CommentUsecase) *CommentHandler {
 	}
 }
 func (h *CommentHandler) Create(c echo.Context) error {
-	userId := c.Param("userId")
-	postId := c.Param("postId")
+	userId := c.QueryParam("userId")
+	postId := c.QueryParam("postId")
 	content := c.FormValue("content")
 	err := h.commentUsecase.Create(userId, postId, content)
 	if err != nil {
@@ -34,7 +36,7 @@ func (h *CommentHandler) Create(c echo.Context) error {
 }
 
 func (h *CommentHandler) Delete(c echo.Context) error {
-	commentId := c.Param("commentId")
+	commentId := c.QueryParam("commentId")
 	err := h.commentUsecase.Delete(commentId)
 	if err != nil {
 		log.Errorf("Failed to delete comment: %v", err)
@@ -48,9 +50,15 @@ func (h *CommentHandler) Delete(c echo.Context) error {
 }
 
 func (h *CommentHandler) Count(c echo.Context) error {
-	postId := c.Param("postId")
+	postId := c.QueryParam("postId")
 	count, err := h.commentUsecase.Count(postId)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// コメントが存在しないのは正常なので count = 0 で返す
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"count": 0,
+			})
+		}
 		log.Errorf("Failed to count comments: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to count comments",
@@ -62,9 +70,14 @@ func (h *CommentHandler) Count(c echo.Context) error {
 }
 
 func (h *CommentHandler) GetByPostId(c echo.Context) error {
-	postId := c.Param("postId")
+	postId := c.QueryParam("postId")
 	comments, err := h.commentUsecase.GetByPostId(postId)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"comments": []interface{}{},
+			})
+		}
 		log.Errorf("Failed to get comments: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "Failed to get comments",

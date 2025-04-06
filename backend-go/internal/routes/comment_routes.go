@@ -17,4 +17,7 @@ func SetupCommentRoutes(app *echo.Echo) {
 
 	// Get comments for a post
 	commentGroup.GET("/post", commentHandler.GetByPostId)
+
+	// Count comments for a post
+	commentGroup.GET("/count", commentHandler.Count)
 }
