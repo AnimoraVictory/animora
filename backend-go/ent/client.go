@@ -22,6 +22,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
+	"github.com/aki-13627/animalia/backend-go/ent/tasktype"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 )
 
@@ -42,6 +43,8 @@ type Client struct {
 	Pet *PetClient
 	// Post is the client for interacting with the Post builders.
 	Post *PostClient
+	// TaskType is the client for interacting with the TaskType builders.
+	TaskType *TaskTypeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -61,6 +64,7 @@ func (c *Client) init() {
 	c.Like = NewLikeClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.Post = NewPostClient(c.config)
+	c.TaskType = NewTaskTypeClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -160,6 +164,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Like:           NewLikeClient(cfg),
 		Pet:            NewPetClient(cfg),
 		Post:           NewPostClient(cfg),
+		TaskType:       NewTaskTypeClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
 }
@@ -186,6 +191,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Like:           NewLikeClient(cfg),
 		Pet:            NewPetClient(cfg),
 		Post:           NewPostClient(cfg),
+		TaskType:       NewTaskTypeClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
 }
@@ -216,7 +222,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.User,
+		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.TaskType,
+		c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -226,7 +233,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.User,
+		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.TaskType,
+		c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -247,6 +255,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Pet.mutate(ctx, m)
 	case *PostMutation:
 		return c.Post.mutate(ctx, m)
+	case *TaskTypeMutation:
+		return c.TaskType.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -1260,6 +1270,139 @@ func (c *PostClient) mutate(ctx context.Context, m *PostMutation) (Value, error)
 	}
 }
 
+// TaskTypeClient is a client for the TaskType schema.
+type TaskTypeClient struct {
+	config
+}
+
+// NewTaskTypeClient returns a client for the TaskType from the given config.
+func NewTaskTypeClient(c config) *TaskTypeClient {
+	return &TaskTypeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tasktype.Hooks(f(g(h())))`.
+func (c *TaskTypeClient) Use(hooks ...Hook) {
+	c.hooks.TaskType = append(c.hooks.TaskType, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tasktype.Intercept(f(g(h())))`.
+func (c *TaskTypeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TaskType = append(c.inters.TaskType, interceptors...)
+}
+
+// Create returns a builder for creating a TaskType entity.
+func (c *TaskTypeClient) Create() *TaskTypeCreate {
+	mutation := newTaskTypeMutation(c.config, OpCreate)
+	return &TaskTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TaskType entities.
+func (c *TaskTypeClient) CreateBulk(builders ...*TaskTypeCreate) *TaskTypeCreateBulk {
+	return &TaskTypeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TaskTypeClient) MapCreateBulk(slice any, setFunc func(*TaskTypeCreate, int)) *TaskTypeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TaskTypeCreateBulk{err: fmt.Errorf("calling to TaskTypeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TaskTypeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TaskTypeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TaskType.
+func (c *TaskTypeClient) Update() *TaskTypeUpdate {
+	mutation := newTaskTypeMutation(c.config, OpUpdate)
+	return &TaskTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TaskTypeClient) UpdateOne(tt *TaskType) *TaskTypeUpdateOne {
+	mutation := newTaskTypeMutation(c.config, OpUpdateOne, withTaskType(tt))
+	return &TaskTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TaskTypeClient) UpdateOneID(id int) *TaskTypeUpdateOne {
+	mutation := newTaskTypeMutation(c.config, OpUpdateOne, withTaskTypeID(id))
+	return &TaskTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TaskType.
+func (c *TaskTypeClient) Delete() *TaskTypeDelete {
+	mutation := newTaskTypeMutation(c.config, OpDelete)
+	return &TaskTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TaskTypeClient) DeleteOne(tt *TaskType) *TaskTypeDeleteOne {
+	return c.DeleteOneID(tt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TaskTypeClient) DeleteOneID(id int) *TaskTypeDeleteOne {
+	builder := c.Delete().Where(tasktype.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TaskTypeDeleteOne{builder}
+}
+
+// Query returns a query builder for TaskType.
+func (c *TaskTypeClient) Query() *TaskTypeQuery {
+	return &TaskTypeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTaskType},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TaskType entity by its id.
+func (c *TaskTypeClient) Get(ctx context.Context, id int) (*TaskType, error) {
+	return c.Query().Where(tasktype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TaskTypeClient) GetX(ctx context.Context, id int) *TaskType {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TaskTypeClient) Hooks() []Hook {
+	return c.hooks.TaskType
+}
+
+// Interceptors returns the client interceptors.
+func (c *TaskTypeClient) Interceptors() []Interceptor {
+	return c.inters.TaskType
+}
+
+func (c *TaskTypeClient) mutate(ctx context.Context, m *TaskTypeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TaskTypeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TaskTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TaskTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TaskTypeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TaskType mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -1508,9 +1651,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Comment, DailyTask, FollowRelation, Like, Pet, Post, User []ent.Hook
+		Comment, DailyTask, FollowRelation, Like, Pet, Post, TaskType, User []ent.Hook
 	}
 	inters struct {
-		Comment, DailyTask, FollowRelation, Like, Pet, Post, User []ent.Interceptor
+		Comment, DailyTask, FollowRelation, Like, Pet, Post, TaskType,
+		User []ent.Interceptor
 	}
 )

@@ -31,8 +31,6 @@ type Post struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt time.Time `json:"deleted_at,omitempty"`
-	// TextFeature holds the value of the "text_feature" field.
-	TextFeature pgvector.Vector `json:"text_feature,omitempty"`
 	// ImageFeature holds the value of the "image_feature" field.
 	ImageFeature pgvector.Vector `json:"image_feature,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -102,7 +100,7 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case post.FieldTextFeature, post.FieldImageFeature:
+		case post.FieldImageFeature:
 			values[i] = new(pgvector.Vector)
 		case post.FieldIndex:
 			values[i] = new(sql.NullInt64)
@@ -164,12 +162,6 @@ func (po *Post) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				po.DeletedAt = value.Time
-			}
-		case post.FieldTextFeature:
-			if value, ok := values[i].(*pgvector.Vector); !ok {
-				return fmt.Errorf("unexpected type %T for field text_feature", values[i])
-			} else if value != nil {
-				po.TextFeature = *value
 			}
 		case post.FieldImageFeature:
 			if value, ok := values[i].(*pgvector.Vector); !ok {
@@ -254,9 +246,6 @@ func (po *Post) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("deleted_at=")
 	builder.WriteString(po.DeletedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("text_feature=")
-	builder.WriteString(fmt.Sprintf("%v", po.TextFeature))
 	builder.WriteString(", ")
 	builder.WriteString("image_feature=")
 	builder.WriteString(fmt.Sprintf("%v", po.ImageFeature))

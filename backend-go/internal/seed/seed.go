@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
 )
@@ -117,6 +118,12 @@ func SeedData(client *ent.Client) error {
 	log.Debug("Creating follow relations...")
 	if err := createFollowRelations(client, users); err != nil {
 		log.Errorf("Failed to create follow relations: %v", err)
+		return err
+	}
+
+	log.Debug("Creating task types table rows...")
+	if err := createTaskTypes(client); err != nil {
+		log.Errorf("Failed to create task types: %v", err)
 		return err
 	}
 
@@ -353,5 +360,21 @@ func createFollowRelations(client *ent.Client, users []*ent.User) error {
 	}
 
 	_, err := client.FollowRelation.CreateBulk(followRelations...).Save(context.Background())
+	return err
+}
+
+func createTaskTypes(client *ent.Client) error {
+	log.Info("Creating sample task types...")
+
+	taskTypes := []*ent.TaskTypeCreate{
+		client.TaskType.Create().
+			SetType(enum.TypeEating),
+		client.TaskType.Create().
+			SetType(enum.TypeSleeping),
+		client.TaskType.Create().
+			SetType(enum.TypePlaying),
+	}
+
+	_, err := client.TaskType.CreateBulk(taskTypes...).Save(context.Background())
 	return err
 }

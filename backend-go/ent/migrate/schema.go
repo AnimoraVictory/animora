@@ -40,7 +40,7 @@ var (
 	DailyTasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"eating", "sleeping", "playing"}},
+		{Name: "type", Type: field.TypeString},
 		{Name: "post_daily_task", Type: field.TypeUUID, Unique: true, Nullable: true},
 		{Name: "user_daily_tasks", Type: field.TypeUUID},
 	}
@@ -152,7 +152,6 @@ var (
 		{Name: "image_key", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "text_feature", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "vector(768)"}},
 		{Name: "image_feature", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "vector(768)"}},
 		{Name: "user_posts", Type: field.TypeUUID},
 	}
@@ -164,11 +163,23 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "posts_users_posts",
-				Columns:    []*schema.Column{PostsColumns[8]},
+				Columns:    []*schema.Column{PostsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
+	}
+	// TaskTypesColumns holds the columns for the "task_types" table.
+	TaskTypesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "type", Type: field.TypeString},
+		{Name: "text_feature", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "vector(768)"}},
+	}
+	// TaskTypesTable holds the schema information for the "task_types" table.
+	TaskTypesTable = &schema.Table{
+		Name:       "task_types",
+		Columns:    TaskTypesColumns,
+		PrimaryKey: []*schema.Column{TaskTypesColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -194,6 +205,7 @@ var (
 		LikesTable,
 		PetsTable,
 		PostsTable,
+		TaskTypesTable,
 		UsersTable,
 	}
 )

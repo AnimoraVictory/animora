@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
@@ -41,8 +42,8 @@ func (dtc *DailyTaskCreate) SetNillableCreatedAt(t *time.Time) *DailyTaskCreate 
 }
 
 // SetType sets the "type" field.
-func (dtc *DailyTaskCreate) SetType(d dailytask.Type) *DailyTaskCreate {
-	dtc.mutation.SetType(d)
+func (dtc *DailyTaskCreate) SetType(et enum.TaskType) *DailyTaskCreate {
+	dtc.mutation.SetType(et)
 	return dtc
 }
 
@@ -143,11 +144,6 @@ func (dtc *DailyTaskCreate) check() error {
 	if _, ok := dtc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "DailyTask.type"`)}
 	}
-	if v, ok := dtc.mutation.GetType(); ok {
-		if err := dailytask.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "DailyTask.type": %w`, err)}
-		}
-	}
 	if len(dtc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "DailyTask.user"`)}
 	}
@@ -192,7 +188,7 @@ func (dtc *DailyTaskCreate) createSpec() (*DailyTask, *sqlgraph.CreateSpec) {
 		_node.CreatedAt = value
 	}
 	if value, ok := dtc.mutation.GetType(); ok {
-		_spec.SetField(dailytask.FieldType, field.TypeEnum, value)
+		_spec.SetField(dailytask.FieldType, field.TypeString, value)
 		_node.Type = value
 	}
 	if nodes := dtc.mutation.UserIDs(); len(nodes) > 0 {
@@ -294,7 +290,7 @@ func (u *DailyTaskUpsert) UpdateCreatedAt() *DailyTaskUpsert {
 }
 
 // SetType sets the "type" field.
-func (u *DailyTaskUpsert) SetType(v dailytask.Type) *DailyTaskUpsert {
+func (u *DailyTaskUpsert) SetType(v enum.TaskType) *DailyTaskUpsert {
 	u.Set(dailytask.FieldType, v)
 	return u
 }
@@ -368,7 +364,7 @@ func (u *DailyTaskUpsertOne) UpdateCreatedAt() *DailyTaskUpsertOne {
 }
 
 // SetType sets the "type" field.
-func (u *DailyTaskUpsertOne) SetType(v dailytask.Type) *DailyTaskUpsertOne {
+func (u *DailyTaskUpsertOne) SetType(v enum.TaskType) *DailyTaskUpsertOne {
 	return u.Update(func(s *DailyTaskUpsert) {
 		s.SetType(v)
 	})
@@ -611,7 +607,7 @@ func (u *DailyTaskUpsertBulk) UpdateCreatedAt() *DailyTaskUpsertBulk {
 }
 
 // SetType sets the "type" field.
-func (u *DailyTaskUpsertBulk) SetType(v dailytask.Type) *DailyTaskUpsertBulk {
+func (u *DailyTaskUpsertBulk) SetType(v enum.TaskType) *DailyTaskUpsertBulk {
 	return u.Update(func(s *DailyTaskUpsert) {
 		s.SetType(v)
 	})

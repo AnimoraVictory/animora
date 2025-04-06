@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/google/uuid"
 )
 
@@ -19,7 +20,7 @@ func (DailyTask) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
 		field.Time("created_at").Default(time.Now),
-		field.Enum("type").Values("eating", "sleeping", "playing"),
+		field.String("type").GoType(enum.TypeEating),
 	}
 }
 

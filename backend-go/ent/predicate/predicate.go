@@ -24,5 +24,8 @@ type Pet func(*sql.Selector)
 // Post is the predicate function for post builders.
 type Post func(*sql.Selector)
 
+// TaskType is the predicate function for tasktype builders.
+type TaskType func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
