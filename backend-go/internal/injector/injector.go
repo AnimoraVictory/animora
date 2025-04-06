@@ -82,7 +82,7 @@ func InjectStorageUsecase() usecase.StorageUsecase {
 }
 
 func InjectUserUsecase() usecase.UserUsecase {
-	userUsecase := usecase.NewUserUsecase(InjectUserRepository())
+	userUsecase := usecase.NewUserUsecase(InjectUserRepository(), InjectStorageRepository(), InjectPostRepository(), InjectPetRepository(), InjectFollowRelationRepository())
 	return *userUsecase
 }
 

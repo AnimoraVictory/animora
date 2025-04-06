@@ -48,37 +48,19 @@ func (h *AuthHandler) SignIn(c echo.Context) error {
 	}
 
 	// ユーザー情報の取得
-	user, err := h.authUsecase.FindByEmail(req.Email)
-	if err != nil {
-		log.Errorf("Failed to get user: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
-		})
-	}
-	if user.IconImageKey != "" {
-		url, err := h.storageUsecase.GetUrl(user.IconImageKey)
-		if err != nil {
-			log.Errorf("Failed to get url: %v", err)
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("ユーザーの取得に失敗しました: %v", err),
-			})
-		}
-		userResponse := models.NewUserResponse(user, url)
-
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message":      "ログイン成功",
-			"user":         userResponse,
-			"accessToken":  *result.AuthenticationResult.AccessToken,
-			"idToken":      *result.AuthenticationResult.IdToken,
-			"refreshToken": *result.AuthenticationResult.RefreshToken,
-		})
-	}
+	user, err := h.userUsecase.GetByEmail(req.Email)
 
 	// IconImageKey が空の場合は URL を生成せずにレスポンスを返す
-	userResponse := models.NewUserResponse(user, "")
+	if err != nil {
+		log.Errorf("Failed to get user by email: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ユーザー情報の取得に失敗しました",
+		})
+	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":      "ログイン成功",
-		"user":         userResponse,
+		"user":         user,
 		"accessToken":  *result.AuthenticationResult.AccessToken,
 		"idToken":      *result.AuthenticationResult.IdToken,
 		"refreshToken": *result.AuthenticationResult.RefreshToken,
@@ -216,27 +198,13 @@ func (h *AuthHandler) GetMe(c echo.Context) error {
 		})
 	}
 
-	user, err := h.authUsecase.FindByEmail(email)
+	userResponse, err := h.userUsecase.GetByEmail(email)
 	if err != nil {
 		log.Errorf("Failed to get user: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": fmt.Sprintf("ユーザー情報の取得に失敗しました: %v", err),
 		})
 	}
-	// ユーザーのアイコン画像がある場合は URL を取得
-	if user.IconImageKey != "" {
-		url, err := h.storageUsecase.GetUrl(user.IconImageKey)
-		if err != nil {
-			log.Errorf("Failed to get url: %v", err)
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": fmt.Sprintf("ユーザー情報の取得に失敗しました: %v", err),
-			})
-		}
-		userResponse := models.NewUserResponse(user, url)
-		return c.JSON(http.StatusOK, userResponse)
-	}
-
-	userResponse := models.NewUserResponse(user, "")
 	return c.JSON(http.StatusOK, userResponse)
 }
 
