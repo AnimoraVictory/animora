@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"fmt"
+
+	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
 	"github.com/labstack/gommon/log"
@@ -42,29 +45,34 @@ func (u *CommentUsecase) Count(postId string) (int, error) {
 	return count, nil
 }
 
-func (u *CommentUsecase) GetByPostId(postId string) ([]models.CommentResponse, error) {
+func (u *CommentUsecase) convertToResponse(comment *ent.Comment) (models.CommentResponse, error) {
+	user := comment.Edges.User
+	if user == nil {
+		return models.CommentResponse{}, fmt.Errorf("user not found for comment ID %v", comment.ID)
+	}
 
+	imageURL, err := u.storageRepository.GetUrl(user.IconImageKey)
+	if err != nil {
+		return models.CommentResponse{}, fmt.Errorf("failed to get url for user %v: %w", user.ID, err)
+	}
+
+	return models.NewCommentResponse(comment, user, imageURL), nil
+}
+
+func (u *CommentUsecase) GetByPostId(postId string) ([]models.CommentResponse, error) {
 	comments, err := u.commentRepository.GetByPostId(postId)
 	if err != nil {
-		log.Errorf("Failed to get comments: %v", err)
+		log.Errorf("Failed to get Comments: %v", err)
 		return nil, err
 	}
 
-	commentResponses := make([]models.CommentResponse, 0, len(comments))
+	var commentResponses []models.CommentResponse
 	for _, comment := range comments {
-		user := comment.Edges.User
-		if user == nil {
-			log.Errorf("Missing user edge for comment ID %v", comment.ID)
-			continue
-		}
-
-		imageURL, err := u.storageRepository.GetUrl(user.IconImageKey)
+		resp, err := u.convertToResponse(comment)
 		if err != nil {
-			log.Errorf("Failed to get icon URL: %v", err)
+			log.Errorf("Conversion error for comment ID %v: %v", comment.ID, err)
 			return nil, err
 		}
-
-		resp := models.NewCommentResponse(comment, user, imageURL)
 		commentResponses = append(commentResponses, resp)
 	}
 
