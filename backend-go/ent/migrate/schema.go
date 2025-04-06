@@ -117,6 +117,13 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "like_user_likes_post_likes",
+				Unique:  true,
+				Columns: []*schema.Column{LikesColumns[3], LikesColumns[2]},
+			},
+		},
 	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
