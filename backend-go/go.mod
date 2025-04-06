@@ -4,11 +4,13 @@ go 1.24.1
 
 require (
 	entgo.io/ent v0.14.4
+	github.com/aws/aws-lambda-go v1.46.0
 	github.com/aws/aws-sdk-go-v2 v1.25.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.0
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.35.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.50.0
+	github.com/awslabs/aws-lambda-go-api-proxy v0.16.1
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
