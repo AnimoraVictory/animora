@@ -38,8 +38,10 @@ func (r *PostRepository) GetPostsByUser(userID string) ([]*ent.Post, error) {
 	}
 
 	posts, err := r.db.Post.Query().
+		WithUser().
 		Where(post.HasUserWith(user.ID(userUUID))).
 		Where(post.DeletedAtIsNil()).
+		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
 	if err != nil {
 		return nil, err

@@ -68,8 +68,26 @@ func (h *PostHandler) GetPostsByUser() fiber.Handler {
 				"error": err.Error(),
 			})
 		}
+		postResponses := make([]*models.PostResponse, len(posts))
+		for i, post := range posts {
+			imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
+			if err != nil {
+				log.Error("Failed to get image URL:", err)
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": err.Error(),
+				})
+			}
+			userImageURL, err := h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
+			if err != nil {
+				log.Error("Failed to get user image URL:", err)
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": err.Error(),
+				})
+			}
+			postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL)
+		}
 		return c.JSON(fiber.Map{
-			"posts": posts,
+			"posts": postResponses,
 		})
 	}
 }
