@@ -8,19 +8,19 @@ import (
 )
 
 type PostResponse struct {
-	ID        uuid.UUID    `json:"id"`
-	Caption   string       `json:"caption"`
-	User      UserResponse `json:"user"`
-	ImageURL  string       `json:"imageUrl"`
-	CreatedAt time.Time    `json:"createdAt"`
+	ID        uuid.UUID        `json:"id"`
+	Caption   string           `json:"caption"`
+	User      UserBaseResponse `json:"user"`
+	ImageURL  string           `json:"imageUrl"`
+	CreatedAt time.Time        `json:"createdAt"`
 }
 
-func NewPostResponse(post *ent.Post, postImageURL string, userImageURL string) *PostResponse {
+func NewPostResponse(post *ent.Post, postImageURL string, userImageURL string) PostResponse {
 	user := post.Edges.User
-	return &PostResponse{
+	return PostResponse{
 		ID:        post.ID,
 		Caption:   post.Caption,
-		User:      NewUserResponse(user, userImageURL),
+		User:      NewUserBaseResponse(user, userImageURL),
 		ImageURL:  postImageURL,
 		CreatedAt: post.CreatedAt,
 	}

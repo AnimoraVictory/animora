@@ -33,19 +33,15 @@ func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 	return posts, nil
 }
 
-func (r *PostRepository) GetPostsByUser(userID string) ([]*ent.Post, error) {
-	userUUID, err := uuid.Parse(userID)
-	if err != nil {
-		return nil, err
-	}
-
+func (r *PostRepository) GetPostsByUser(userID uuid.UUID) ([]*ent.Post, error) {
 	posts, err := r.db.Post.Query().
 		WithUser().
-		Where(post.HasUserWith(user.ID(userUUID))).
+		Where(post.HasUserWith(user.ID(userID))).
 		Where(post.DeletedAtIsNil()).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
 	if err != nil {
+		log.Errorf("Failed to get posts by user: %v", err)
 		return nil, err
 	}
 	return posts, nil

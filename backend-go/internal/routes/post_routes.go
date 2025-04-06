@@ -16,5 +16,4 @@ func SetupPostRoutes(app *echo.Echo) {
 	// Create a new post
 	postGroup.POST("/", postHandler.CreatePost)
 
-	postGroup.GET("/user", postHandler.GetPostsByUser)
 }

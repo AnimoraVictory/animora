@@ -33,45 +33,7 @@ func (h *PostHandler) GetAllPosts(c echo.Context) error {
 		})
 	}
 	log.Debug("GetAllPosts: posts", posts)
-	postResponses := make([]*models.PostResponse, len(posts))
-	for i, post := range posts {
-		imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
-		if err != nil {
-			log.Errorf("Failed to get image URL: %v", err)
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-		userImageURL, err := h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
-		if err != nil {
-			log.Errorf("Failed to get user image URL: %v", err)
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL)
-	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"posts": postResponses,
-	})
-}
-
-func (h *PostHandler) GetPostsByUser(c echo.Context) error {
-	userID := c.QueryParam("userId")
-	if userID == "" {
-		log.Error("Failed to get posts by user: userID is empty")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "User ID is required",
-		})
-	}
-	posts, err := h.postUsecase.GetPostsByUser(userID)
-	if err != nil {
-		log.Errorf("Failed to get posts by user: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-	postResponses := make([]*models.PostResponse, len(posts))
+	postResponses := make([]models.PostResponse, len(posts))
 	for i, post := range posts {
 		imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
 		if err != nil {

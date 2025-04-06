@@ -19,10 +19,6 @@ func (u *PostUsecase) GetAllPosts() ([]*ent.Post, error) {
 	return u.postRepository.GetAllPosts()
 }
 
-func (u *PostUsecase) GetPostsByUser(userId string) ([]*ent.Post, error) {
-	return u.postRepository.GetPostsByUser(userId)
-}
-
 func (u *PostUsecase) CreatePost(caption, userId, fileKey string, dailyTaskId *string) (*ent.Post, error) {
 	return u.postRepository.CreatePost(caption, userId, fileKey, dailyTaskId)
 }
