@@ -127,6 +127,12 @@ func SeedData(client *ent.Client) error {
 		return err
 	}
 
+	log.Debug("Creating daily tasks...")
+	if err := createDailyTasks(client, users, posts); err != nil {
+		log.Errorf("Failed to create daily tasks: %v", err)
+		return err
+	}
+
 	log.Info("Database seeding completed successfully")
 	return nil
 }
@@ -154,6 +160,9 @@ func ClearDatabase(client *ent.Client) error {
 	}
 	if _, err := client.DailyTask.Delete().Exec(ctx); err != nil {
 		return fmt.Errorf("failed to clear daily tasks: %v", err)
+	}
+	if _, err := client.TaskType.Delete().Exec(ctx); err != nil {
+		return fmt.Errorf("failed to clear task types: %v", err)
 	}
 	if _, err := client.User.Delete().Exec(ctx); err != nil {
 		return fmt.Errorf("failed to clear users: %v", err)
@@ -376,5 +385,27 @@ func createTaskTypes(client *ent.Client) error {
 	}
 
 	_, err := client.TaskType.CreateBulk(taskTypes...).Save(context.Background())
+	return err
+}
+
+func createDailyTasks(client *ent.Client, users []*ent.User, posts []*ent.Post) error {
+	log.Info("Creating sample daily tasks...")
+
+	dailyTasks := []*ent.DailyTaskCreate{
+		client.DailyTask.Create().
+			SetType(enum.TypeEating).
+			SetPost(posts[0]).
+			SetUser(users[0]),
+		client.DailyTask.Create().
+			SetType(enum.TypeSleeping).
+			SetPost(posts[1]).
+			SetUser(users[1]),
+		client.DailyTask.Create().
+			SetType(enum.TypePlaying).
+			SetPost(posts[2]).
+			SetUser(users[2]),
+	}
+
+	_, err := client.DailyTask.CreateBulk(dailyTasks...).Save(context.Background())
 	return err
 }
