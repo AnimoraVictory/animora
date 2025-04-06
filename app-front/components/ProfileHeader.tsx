@@ -5,7 +5,7 @@ import { Colors } from '@/constants/Colors';
 import { User } from '@/constants/api';
 
 type ProfileHeaderProps = {
-  user: User
+  user: User;
   onLogout: () => void;
 };
 
@@ -16,17 +16,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onLogout }) 
 
   return (
     <View style={styles.headerContainer}>
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={onLogout}
-      >
-        <Text style={{ color: colors.tint }}>ログアウト</Text>
-      </TouchableOpacity>
+      <View style={styles.topRow}>
+        <TouchableOpacity onPress={onLogout}>
+          <Text style={styles.logoutText}>ログアウト</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.profileSection}>
-        <Image
-          source={{ uri: user.iconImageUrl }}
-          style={styles.profileImage}
-        />
+        <Image source={{ uri: user.iconImageUrl }} style={styles.profileImage} />
         <Text style={styles.profileName}>{user.name}</Text>
         <Text style={styles.profileBio}>{user.bio}</Text>
       </View>
@@ -37,24 +34,26 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onLogout }) 
 const getStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     headerContainer: {
-      backgroundColor: colors.background,
+      paddingTop: 16,
+      paddingBottom: 8,
     },
-    logoutButton: {
-      position: 'absolute', 
-      top: 50, 
-      right: 20,
-      zIndex: 100 ,
+    topRow: {
+      flexDirection: 'row-reverse',
+      paddingRight: 20,
+      paddingTop: 8,
+    },
+    logoutText: {
+      color: colors.tint,
+      fontWeight: '600',
     },
     profileSection: {
       alignItems: 'center',
-      borderColor: colors.icon,
-      paddingTop: 60,
-      paddingBottom: 0,
+      marginTop: 8,
     },
     profileImage: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
+      width: 64,
+      height: 64,
+      borderRadius: 32,
     },
     profileName: {
       marginTop: 10,

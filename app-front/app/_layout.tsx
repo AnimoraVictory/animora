@@ -8,7 +8,7 @@ import { Slot, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -33,11 +33,10 @@ function AuthSwitch() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        if (pathname === "/(tabs)/profile") {
-          router.replace("/(tabs)/profile");
-        } else {
-          router.replace("/(tabs)/posts");
+        if (pathname.startsWith("/profile")) {
+          return;
         }
+        router.replace("/(tabs)/posts");
       } else {
         router.replace("/(auth)");
       }

@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { useNavigation } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import {
@@ -19,10 +18,10 @@ import { Colors } from "@/constants/Colors";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-const userSchema = z.object({
+
+const userBaseSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
-  bio: z.string(),
   iconImageUrl: z.string().url(),
 });
 
@@ -30,7 +29,7 @@ export const postSchema = z.object({
   id: z.string().uuid(),
   caption: z.string().min(0),
   imageUrl: z.string().min(1),
-  user: userSchema,
+  user: userBaseSchema,
   createdAt: z.string().datetime(),
 });
 
@@ -124,28 +123,28 @@ export default function PostsScreen() {
       </Animated.View>
 
       <Animated.FlatList
-  style={{
-    backgroundColor: colorScheme === "light" ? "white" : "black",
-  }}
-  contentInset={{ top: HEADER_HEIGHT + 12 }}
-  contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 12) }}
-  contentContainerStyle={{ paddingBottom: 75 }}
-  data={data}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => <PostPanel post={item} />}
-  refreshControl={
-    <RefreshControl
-      refreshing={refreshing}
-      onRefresh={handleRefresh}
-      tintColor={colorScheme === "light" ? "black" : "white"}
-    />
-  }
-  onScroll={Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { useNativeDriver: true }
-  )}
-  scrollEventThrottle={16}
-/>
+        style={{
+          backgroundColor: colorScheme === "light" ? "white" : "black",
+        }}
+        contentInset={{ top: HEADER_HEIGHT + 12 }}
+        contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 12) }}
+        contentContainerStyle={{ paddingBottom: 75 }}
+        data={data}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <PostPanel post={item} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colorScheme === "light" ? "black" : "white"}
+          />
+        }
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      />
     </ThemedView>
   );
 }

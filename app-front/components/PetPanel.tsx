@@ -33,7 +33,6 @@ type Pet = z.infer<typeof petSchema>;
 
 type PetPanelProps = {
   pet: Pet;
-  refetchPets: () => void;
   colorScheme: ColorSchemeName;
 };
 
@@ -44,7 +43,6 @@ const birthDayParser = (birthDay: string) => {
 
 export const PetPanel: React.FC<PetPanelProps> = ({ 
   pet,
-  refetchPets,
   colorScheme,
  }) => {
   const windowHeight = Dimensions.get("window").height;
@@ -88,7 +86,7 @@ export const PetPanel: React.FC<PetPanelProps> = ({
           onPress: async () => {
             try {
               // axiosを使用してDELETEリクエストを送信
-              const response = await axios.delete(`${API_URL}/pets/delete/`, {
+              const response = await axios.delete(`${API_URL}/pets/delete`, {
                 params: { petId: pet.id },
               });
               if (response.status === 200) {
@@ -164,7 +162,6 @@ export const PetPanel: React.FC<PetPanelProps> = ({
         onClose={closeEditPetModal}
         slideAnim={slideAnimEditPet}
         colorScheme={colorScheme}
-        refetchPets={refetchPets}
         pet={pet}
       />
     </View>

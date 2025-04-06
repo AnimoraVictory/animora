@@ -26,7 +26,8 @@ import axios from "axios";
 import { useAuth } from "@/providers/AuthContext";
 import Constants from "expo-constants";
 import { PetForm, petInputSchema } from "./PetRegisterModal";
-import { Pet } from "@/app/(tabs)/profile";
+import { Pet } from "@/constants/api";
+
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -43,7 +44,6 @@ type PetEditModalProps = {
   onClose: () => void;
   slideAnim: Animated.Value;
   colorScheme: ColorSchemeName;
-  refetchPets: () => void;
   pet: Pet;
 };
 
@@ -52,7 +52,6 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
   onClose,
   slideAnim,
   colorScheme,
-  refetchPets,
   pet,
 }) => {
   const { user } = useAuth();
@@ -85,7 +84,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
   // 編集用の更新API（PUT や PATCH を使用してください）
   const updatePetMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.put(`${API_URL}/pets/update/?petId=${pet.id}`, data, {
+      return axios.put(`${API_URL}/pets/update?petId=${pet.id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
@@ -131,7 +130,6 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
     try {
       await updatePetMutation.mutateAsync(fd);
       Alert.alert("成功", "ペット情報が更新されました");
-      await refetchPets();
       onClose();
     } catch (error) {
       console.error(error);
