@@ -262,7 +262,7 @@ func (ttq *TaskTypeQuery) Clone() *TaskTypeQuery {
 // Example:
 //
 //	var v []struct {
-//		Type tasktype.Type `json:"type,omitempty"`
+//		Type enum.TaskType `json:"type,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -285,7 +285,7 @@ func (ttq *TaskTypeQuery) GroupBy(field string, fields ...string) *TaskTypeGroup
 // Example:
 //
 //	var v []struct {
-//		Type tasktype.Type `json:"type,omitempty"`
+//		Type enum.TaskType `json:"type,omitempty"`
 //	}
 //
 //	client.TaskType.Query().

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
 )
@@ -367,11 +368,11 @@ func createTaskTypes(client *ent.Client) error {
 
 	taskTypes := []*ent.TaskTypeCreate{
 		client.TaskType.Create().
-			SetType("eating"),
+			SetType(enum.TypeEating),
 		client.TaskType.Create().
-			SetType("sleeping"),
+			SetType(enum.TypeSleeping),
 		client.TaskType.Create().
-			SetType("playing"),
+			SetType(enum.TypePlaying),
 	}
 
 	_, err := client.TaskType.CreateBulk(taskTypes...).Save(context.Background())

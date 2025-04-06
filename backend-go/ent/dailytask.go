@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
@@ -23,7 +24,7 @@ type DailyTask struct {
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Type holds the value of the "type" field.
-	Type dailytask.Type `json:"type,omitempty"`
+	Type enum.TaskType `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DailyTaskQuery when eager-loading is set.
 	Edges            DailyTaskEdges `json:"edges"`
@@ -111,7 +112,7 @@ func (dt *DailyTask) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				dt.Type = dailytask.Type(value.String)
+				dt.Type = enum.TaskType(value.String)
 			}
 		case dailytask.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/aki-13627/animalia/backend-go/ent/tasktype"
 	pgvector "github.com/pgvector/pgvector-go"
@@ -29,15 +30,15 @@ func (ttu *TaskTypeUpdate) Where(ps ...predicate.TaskType) *TaskTypeUpdate {
 }
 
 // SetType sets the "type" field.
-func (ttu *TaskTypeUpdate) SetType(t tasktype.Type) *TaskTypeUpdate {
-	ttu.mutation.SetType(t)
+func (ttu *TaskTypeUpdate) SetType(et enum.TaskType) *TaskTypeUpdate {
+	ttu.mutation.SetType(et)
 	return ttu
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ttu *TaskTypeUpdate) SetNillableType(t *tasktype.Type) *TaskTypeUpdate {
-	if t != nil {
-		ttu.SetType(*t)
+func (ttu *TaskTypeUpdate) SetNillableType(et *enum.TaskType) *TaskTypeUpdate {
+	if et != nil {
+		ttu.SetType(*et)
 	}
 	return ttu
 }
@@ -94,20 +95,7 @@ func (ttu *TaskTypeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (ttu *TaskTypeUpdate) check() error {
-	if v, ok := ttu.mutation.GetType(); ok {
-		if err := tasktype.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "TaskType.type": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (ttu *TaskTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := ttu.check(); err != nil {
-		return n, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(tasktype.Table, tasktype.Columns, sqlgraph.NewFieldSpec(tasktype.FieldID, field.TypeInt))
 	if ps := ttu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -117,7 +105,7 @@ func (ttu *TaskTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ttu.mutation.GetType(); ok {
-		_spec.SetField(tasktype.FieldType, field.TypeEnum, value)
+		_spec.SetField(tasktype.FieldType, field.TypeString, value)
 	}
 	if value, ok := ttu.mutation.TextFeature(); ok {
 		_spec.SetField(tasktype.FieldTextFeature, field.TypeOther, value)
@@ -146,15 +134,15 @@ type TaskTypeUpdateOne struct {
 }
 
 // SetType sets the "type" field.
-func (ttuo *TaskTypeUpdateOne) SetType(t tasktype.Type) *TaskTypeUpdateOne {
-	ttuo.mutation.SetType(t)
+func (ttuo *TaskTypeUpdateOne) SetType(et enum.TaskType) *TaskTypeUpdateOne {
+	ttuo.mutation.SetType(et)
 	return ttuo
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ttuo *TaskTypeUpdateOne) SetNillableType(t *tasktype.Type) *TaskTypeUpdateOne {
-	if t != nil {
-		ttuo.SetType(*t)
+func (ttuo *TaskTypeUpdateOne) SetNillableType(et *enum.TaskType) *TaskTypeUpdateOne {
+	if et != nil {
+		ttuo.SetType(*et)
 	}
 	return ttuo
 }
@@ -224,20 +212,7 @@ func (ttuo *TaskTypeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (ttuo *TaskTypeUpdateOne) check() error {
-	if v, ok := ttuo.mutation.GetType(); ok {
-		if err := tasktype.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "TaskType.type": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (ttuo *TaskTypeUpdateOne) sqlSave(ctx context.Context) (_node *TaskType, err error) {
-	if err := ttuo.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(tasktype.Table, tasktype.Columns, sqlgraph.NewFieldSpec(tasktype.FieldID, field.TypeInt))
 	id, ok := ttuo.mutation.ID()
 	if !ok {
@@ -264,7 +239,7 @@ func (ttuo *TaskTypeUpdateOne) sqlSave(ctx context.Context) (_node *TaskType, er
 		}
 	}
 	if value, ok := ttuo.mutation.GetType(); ok {
-		_spec.SetField(tasktype.FieldType, field.TypeEnum, value)
+		_spec.SetField(tasktype.FieldType, field.TypeString, value)
 	}
 	if value, ok := ttuo.mutation.TextFeature(); ok {
 		_spec.SetField(tasktype.FieldTextFeature, field.TypeOther, value)

@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/pgvector/pgvector-go"
 )
 
@@ -15,7 +16,7 @@ type TaskType struct {
 // Fields of the TaskType.
 func (TaskType) Fields() []ent.Field {
 	return []ent.Field{
-		field.Enum("type").Values("eating", "sleeping", "playing"),
+		field.String("type").GoType(enum.TypeEating),
 		field.Other("text_feature", pgvector.Vector{}).
 			SchemaType(map[string]string{
 				dialect.Postgres: "vector(768)",

@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -562,7 +563,7 @@ type DailyTaskMutation struct {
 	typ           string
 	id            *uuid.UUID
 	created_at    *time.Time
-	_type         *dailytask.Type
+	_type         *enum.TaskType
 	clearedFields map[string]struct{}
 	user          *uuid.UUID
 	cleareduser   bool
@@ -714,12 +715,12 @@ func (m *DailyTaskMutation) ResetCreatedAt() {
 }
 
 // SetType sets the "type" field.
-func (m *DailyTaskMutation) SetType(d dailytask.Type) {
-	m._type = &d
+func (m *DailyTaskMutation) SetType(et enum.TaskType) {
+	m._type = &et
 }
 
 // GetType returns the value of the "type" field in the mutation.
-func (m *DailyTaskMutation) GetType() (r dailytask.Type, exists bool) {
+func (m *DailyTaskMutation) GetType() (r enum.TaskType, exists bool) {
 	v := m._type
 	if v == nil {
 		return
@@ -730,7 +731,7 @@ func (m *DailyTaskMutation) GetType() (r dailytask.Type, exists bool) {
 // OldType returns the old "type" field's value of the DailyTask entity.
 // If the DailyTask object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DailyTaskMutation) OldType(ctx context.Context) (v dailytask.Type, err error) {
+func (m *DailyTaskMutation) OldType(ctx context.Context) (v enum.TaskType, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
@@ -910,7 +911,7 @@ func (m *DailyTaskMutation) SetField(name string, value ent.Value) error {
 		m.SetCreatedAt(v)
 		return nil
 	case dailytask.FieldType:
-		v, ok := value.(dailytask.Type)
+		v, ok := value.(enum.TaskType)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3727,7 +3728,7 @@ type TaskTypeMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	_type         *tasktype.Type
+	_type         *enum.TaskType
 	text_feature  *pgvector.Vector
 	clearedFields map[string]struct{}
 	done          bool
@@ -3834,12 +3835,12 @@ func (m *TaskTypeMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetType sets the "type" field.
-func (m *TaskTypeMutation) SetType(t tasktype.Type) {
-	m._type = &t
+func (m *TaskTypeMutation) SetType(et enum.TaskType) {
+	m._type = &et
 }
 
 // GetType returns the value of the "type" field in the mutation.
-func (m *TaskTypeMutation) GetType() (r tasktype.Type, exists bool) {
+func (m *TaskTypeMutation) GetType() (r enum.TaskType, exists bool) {
 	v := m._type
 	if v == nil {
 		return
@@ -3850,7 +3851,7 @@ func (m *TaskTypeMutation) GetType() (r tasktype.Type, exists bool) {
 // OldType returns the old "type" field's value of the TaskType entity.
 // If the TaskType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskTypeMutation) OldType(ctx context.Context) (v tasktype.Type, err error) {
+func (m *TaskTypeMutation) OldType(ctx context.Context) (v enum.TaskType, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
@@ -3994,7 +3995,7 @@ func (m *TaskTypeMutation) OldField(ctx context.Context, name string) (ent.Value
 func (m *TaskTypeMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case tasktype.FieldType:
-		v, ok := value.(tasktype.Type)
+		v, ok := value.(enum.TaskType)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

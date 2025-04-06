@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
@@ -46,15 +47,15 @@ func (dtu *DailyTaskUpdate) SetNillableCreatedAt(t *time.Time) *DailyTaskUpdate 
 }
 
 // SetType sets the "type" field.
-func (dtu *DailyTaskUpdate) SetType(d dailytask.Type) *DailyTaskUpdate {
-	dtu.mutation.SetType(d)
+func (dtu *DailyTaskUpdate) SetType(et enum.TaskType) *DailyTaskUpdate {
+	dtu.mutation.SetType(et)
 	return dtu
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (dtu *DailyTaskUpdate) SetNillableType(d *dailytask.Type) *DailyTaskUpdate {
-	if d != nil {
-		dtu.SetType(*d)
+func (dtu *DailyTaskUpdate) SetNillableType(et *enum.TaskType) *DailyTaskUpdate {
+	if et != nil {
+		dtu.SetType(*et)
 	}
 	return dtu
 }
@@ -135,11 +136,6 @@ func (dtu *DailyTaskUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (dtu *DailyTaskUpdate) check() error {
-	if v, ok := dtu.mutation.GetType(); ok {
-		if err := dailytask.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "DailyTask.type": %w`, err)}
-		}
-	}
 	if dtu.mutation.UserCleared() && len(dtu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "DailyTask.user"`)
 	}
@@ -162,7 +158,7 @@ func (dtu *DailyTaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(dailytask.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := dtu.mutation.GetType(); ok {
-		_spec.SetField(dailytask.FieldType, field.TypeEnum, value)
+		_spec.SetField(dailytask.FieldType, field.TypeString, value)
 	}
 	if dtu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -257,15 +253,15 @@ func (dtuo *DailyTaskUpdateOne) SetNillableCreatedAt(t *time.Time) *DailyTaskUpd
 }
 
 // SetType sets the "type" field.
-func (dtuo *DailyTaskUpdateOne) SetType(d dailytask.Type) *DailyTaskUpdateOne {
-	dtuo.mutation.SetType(d)
+func (dtuo *DailyTaskUpdateOne) SetType(et enum.TaskType) *DailyTaskUpdateOne {
+	dtuo.mutation.SetType(et)
 	return dtuo
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (dtuo *DailyTaskUpdateOne) SetNillableType(d *dailytask.Type) *DailyTaskUpdateOne {
-	if d != nil {
-		dtuo.SetType(*d)
+func (dtuo *DailyTaskUpdateOne) SetNillableType(et *enum.TaskType) *DailyTaskUpdateOne {
+	if et != nil {
+		dtuo.SetType(*et)
 	}
 	return dtuo
 }
@@ -359,11 +355,6 @@ func (dtuo *DailyTaskUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (dtuo *DailyTaskUpdateOne) check() error {
-	if v, ok := dtuo.mutation.GetType(); ok {
-		if err := dailytask.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "DailyTask.type": %w`, err)}
-		}
-	}
 	if dtuo.mutation.UserCleared() && len(dtuo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "DailyTask.user"`)
 	}
@@ -403,7 +394,7 @@ func (dtuo *DailyTaskUpdateOne) sqlSave(ctx context.Context) (_node *DailyTask, 
 		_spec.SetField(dailytask.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := dtuo.mutation.GetType(); ok {
-		_spec.SetField(dailytask.FieldType, field.TypeEnum, value)
+		_spec.SetField(dailytask.FieldType, field.TypeString, value)
 	}
 	if dtuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

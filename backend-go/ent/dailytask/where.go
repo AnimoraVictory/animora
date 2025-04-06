@@ -7,6 +7,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -61,6 +62,12 @@ func CreatedAt(v time.Time) predicate.DailyTask {
 	return predicate.DailyTask(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldEQ(FieldType, vc))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.DailyTask {
 	return predicate.DailyTask(sql.FieldEQ(FieldCreatedAt, v))
@@ -102,23 +109,87 @@ func CreatedAtLTE(v time.Time) predicate.DailyTask {
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v Type) predicate.DailyTask {
-	return predicate.DailyTask(sql.FieldEQ(FieldType, v))
+func TypeEQ(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldEQ(FieldType, vc))
 }
 
 // TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v Type) predicate.DailyTask {
-	return predicate.DailyTask(sql.FieldNEQ(FieldType, v))
+func TypeNEQ(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldNEQ(FieldType, vc))
 }
 
 // TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...Type) predicate.DailyTask {
-	return predicate.DailyTask(sql.FieldIn(FieldType, vs...))
+func TypeIn(vs ...enum.TaskType) predicate.DailyTask {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.DailyTask(sql.FieldIn(FieldType, v...))
 }
 
 // TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...Type) predicate.DailyTask {
-	return predicate.DailyTask(sql.FieldNotIn(FieldType, vs...))
+func TypeNotIn(vs ...enum.TaskType) predicate.DailyTask {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.DailyTask(sql.FieldNotIn(FieldType, v...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldGT(FieldType, vc))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldGTE(FieldType, vc))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldLT(FieldType, vc))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldLTE(FieldType, vc))
+}
+
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldContains(FieldType, vc))
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldHasPrefix(FieldType, vc))
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldHasSuffix(FieldType, vc))
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldEqualFold(FieldType, vc))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v enum.TaskType) predicate.DailyTask {
+	vc := string(v)
+	return predicate.DailyTask(sql.FieldContainsFold(FieldType, vc))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

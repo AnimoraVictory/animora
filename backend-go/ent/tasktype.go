@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/tasktype"
 	pgvector "github.com/pgvector/pgvector-go"
 )
@@ -18,7 +19,7 @@ type TaskType struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Type holds the value of the "type" field.
-	Type tasktype.Type `json:"type,omitempty"`
+	Type enum.TaskType `json:"type,omitempty"`
 	// TextFeature holds the value of the "text_feature" field.
 	TextFeature  pgvector.Vector `json:"text_feature,omitempty"`
 	selectValues sql.SelectValues
@@ -60,7 +61,7 @@ func (tt *TaskType) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				tt.Type = tasktype.Type(value.String)
+				tt.Type = enum.TaskType(value.String)
 			}
 		case tasktype.FieldTextFeature:
 			if value, ok := values[i].(*pgvector.Vector); !ok {

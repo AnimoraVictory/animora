@@ -4,6 +4,7 @@ package tasktype
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	pgvector "github.com/pgvector/pgvector-go"
 )
@@ -53,29 +54,99 @@ func IDLTE(id int) predicate.TaskType {
 	return predicate.TaskType(sql.FieldLTE(FieldID, id))
 }
 
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldEQ(FieldType, vc))
+}
+
 // TextFeature applies equality check predicate on the "text_feature" field. It's identical to TextFeatureEQ.
 func TextFeature(v pgvector.Vector) predicate.TaskType {
 	return predicate.TaskType(sql.FieldEQ(FieldTextFeature, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v Type) predicate.TaskType {
-	return predicate.TaskType(sql.FieldEQ(FieldType, v))
+func TypeEQ(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldEQ(FieldType, vc))
 }
 
 // TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v Type) predicate.TaskType {
-	return predicate.TaskType(sql.FieldNEQ(FieldType, v))
+func TypeNEQ(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldNEQ(FieldType, vc))
 }
 
 // TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...Type) predicate.TaskType {
-	return predicate.TaskType(sql.FieldIn(FieldType, vs...))
+func TypeIn(vs ...enum.TaskType) predicate.TaskType {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.TaskType(sql.FieldIn(FieldType, v...))
 }
 
 // TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...Type) predicate.TaskType {
-	return predicate.TaskType(sql.FieldNotIn(FieldType, vs...))
+func TypeNotIn(vs ...enum.TaskType) predicate.TaskType {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.TaskType(sql.FieldNotIn(FieldType, v...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldGT(FieldType, vc))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldGTE(FieldType, vc))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldLT(FieldType, vc))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldLTE(FieldType, vc))
+}
+
+// TypeContains applies the Contains predicate on the "type" field.
+func TypeContains(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldContains(FieldType, vc))
+}
+
+// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
+func TypeHasPrefix(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldHasPrefix(FieldType, vc))
+}
+
+// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
+func TypeHasSuffix(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldHasSuffix(FieldType, vc))
+}
+
+// TypeEqualFold applies the EqualFold predicate on the "type" field.
+func TypeEqualFold(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldEqualFold(FieldType, vc))
+}
+
+// TypeContainsFold applies the ContainsFold predicate on the "type" field.
+func TypeContainsFold(v enum.TaskType) predicate.TaskType {
+	vc := string(v)
+	return predicate.TaskType(sql.FieldContainsFold(FieldType, vc))
 }
 
 // TextFeatureEQ applies the EQ predicate on the "text_feature" field.

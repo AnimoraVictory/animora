@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/tasktype"
 	pgvector "github.com/pgvector/pgvector-go"
 )
@@ -23,8 +24,8 @@ type TaskTypeCreate struct {
 }
 
 // SetType sets the "type" field.
-func (ttc *TaskTypeCreate) SetType(t tasktype.Type) *TaskTypeCreate {
-	ttc.mutation.SetType(t)
+func (ttc *TaskTypeCreate) SetType(et enum.TaskType) *TaskTypeCreate {
+	ttc.mutation.SetType(et)
 	return ttc
 }
 
@@ -79,11 +80,6 @@ func (ttc *TaskTypeCreate) check() error {
 	if _, ok := ttc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "TaskType.type"`)}
 	}
-	if v, ok := ttc.mutation.GetType(); ok {
-		if err := tasktype.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "TaskType.type": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -112,7 +108,7 @@ func (ttc *TaskTypeCreate) createSpec() (*TaskType, *sqlgraph.CreateSpec) {
 	)
 	_spec.OnConflict = ttc.conflict
 	if value, ok := ttc.mutation.GetType(); ok {
-		_spec.SetField(tasktype.FieldType, field.TypeEnum, value)
+		_spec.SetField(tasktype.FieldType, field.TypeString, value)
 		_node.Type = value
 	}
 	if value, ok := ttc.mutation.TextFeature(); ok {
@@ -172,7 +168,7 @@ type (
 )
 
 // SetType sets the "type" field.
-func (u *TaskTypeUpsert) SetType(v tasktype.Type) *TaskTypeUpsert {
+func (u *TaskTypeUpsert) SetType(v enum.TaskType) *TaskTypeUpsert {
 	u.Set(tasktype.FieldType, v)
 	return u
 }
@@ -242,7 +238,7 @@ func (u *TaskTypeUpsertOne) Update(set func(*TaskTypeUpsert)) *TaskTypeUpsertOne
 }
 
 // SetType sets the "type" field.
-func (u *TaskTypeUpsertOne) SetType(v tasktype.Type) *TaskTypeUpsertOne {
+func (u *TaskTypeUpsertOne) SetType(v enum.TaskType) *TaskTypeUpsertOne {
 	return u.Update(func(s *TaskTypeUpsert) {
 		s.SetType(v)
 	})
@@ -480,7 +476,7 @@ func (u *TaskTypeUpsertBulk) Update(set func(*TaskTypeUpsert)) *TaskTypeUpsertBu
 }
 
 // SetType sets the "type" field.
-func (u *TaskTypeUpsertBulk) SetType(v tasktype.Type) *TaskTypeUpsertBulk {
+func (u *TaskTypeUpsertBulk) SetType(v enum.TaskType) *TaskTypeUpsertBulk {
 	return u.Update(func(s *TaskTypeUpsert) {
 		s.SetType(v)
 	})

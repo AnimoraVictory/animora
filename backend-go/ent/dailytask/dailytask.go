@@ -3,7 +3,6 @@
 package dailytask
 
 import (
-	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -77,30 +76,6 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
-
-// Type defines the type for the "type" enum field.
-type Type string
-
-// Type values.
-const (
-	TypeEating   Type = "eating"
-	TypeSleeping Type = "sleeping"
-	TypePlaying  Type = "playing"
-)
-
-func (_type Type) String() string {
-	return string(_type)
-}
-
-// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
-func TypeValidator(_type Type) error {
-	switch _type {
-	case TypeEating, TypeSleeping, TypePlaying:
-		return nil
-	default:
-		return fmt.Errorf("dailytask: invalid enum value for type field: %q", _type)
-	}
-}
 
 // OrderOption defines the ordering options for the DailyTask queries.
 type OrderOption func(*sql.Selector)
