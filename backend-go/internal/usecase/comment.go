@@ -43,25 +43,29 @@ func (u *CommentUsecase) Count(postId string) (int, error) {
 }
 
 func (u *CommentUsecase) GetByPostId(postId string) ([]models.CommentResponse, error) {
+
 	comments, err := u.commentRepository.GetByPostId(postId)
 	if err != nil {
-		log.Errorf("Faild to get Comments: %v", err)
-		return []models.CommentResponse{}, err
+		log.Errorf("Failed to get comments: %v", err)
+		return nil, err
 	}
 
-	commentResponses := make([]models.CommentResponse, len(comments))
-	for i, comment := range comments {
+	commentResponses := make([]models.CommentResponse, 0, len(comments))
+	for _, comment := range comments {
 		user := comment.Edges.User
 		if user == nil {
-			log.Errorf("User not found for comment: %v", comment)
-			return []models.CommentResponse{}, err
+			log.Errorf("Missing user edge for comment ID %v", comment.ID)
+			continue
 		}
+
 		imageURL, err := u.storageRepository.GetUrl(user.IconImageKey)
 		if err != nil {
-			log.Errorf("Failed to get url: %v", err)
-			return []models.CommentResponse{}, err
+			log.Errorf("Failed to get icon URL: %v", err)
+			return nil, err
 		}
-		commentResponses[i] = models.NewCommentResponse(comment, user, imageURL)
+
+		resp := models.NewCommentResponse(comment, user, imageURL)
+		commentResponses = append(commentResponses, resp)
 	}
 
 	return commentResponses, nil
