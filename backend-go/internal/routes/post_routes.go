@@ -2,19 +2,19 @@ package routes
 
 import (
 	"github.com/aki-13627/animalia/backend-go/internal/injector"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
 // SetupPostRoutes sets up the post routes
-func SetupPostRoutes(app *fiber.App) {
+func SetupPostRoutes(app *echo.Echo) {
 	postHandler := injector.InjectPostHandler()
 	postGroup := app.Group("/posts")
 
 	// Get all posts
-	postGroup.Get("/", postHandler.GetAllPosts())
+	postGroup.GET("/", postHandler.GetAllPosts)
 
 	// Create a new post
-	postGroup.Post("/", postHandler.CreatePost())
+	postGroup.POST("/", postHandler.CreatePost)
 
-	postGroup.Get("/user", postHandler.GetPostsByUser())
+	postGroup.GET("/user", postHandler.GetPostsByUser)
 }

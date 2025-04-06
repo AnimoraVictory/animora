@@ -6,19 +6,19 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
+	"github.com/labstack/gommon/log"
 )
 
 // SeedData populates the database with sample data
 func SeedData(client *ent.Client) error {
-	log.Info().Msg("Seeding database...")
+	log.Info("Seeding database...")
 
 	// コンテキストの作成
 	ctx := context.Background()
 
 	// まずデータベースをクリア
 	if err := ClearDatabase(client); err != nil {
-		log.Error().Err(err).Msg("Failed to clear database")
+		log.Errorf("Failed to clear database: %v", err)
 		return err
 	}
 
@@ -31,7 +31,7 @@ func SeedData(client *ent.Client) error {
 	const iconImageKey = "profile/a806f6f3-0b7c-44a1-95e3-46d39b0aefcc-57F1EED2-58FE-405C-B568-168538F8811A.jpg"
 
 	// Create users
-	log.Debug().Msg("Creating users...")
+	log.Debug("Creating users...")
 	users, err := client.User.CreateBulk(
 		client.User.Create().
 			SetEmail("john.doe@example.com").
@@ -79,54 +79,54 @@ func SeedData(client *ent.Client) error {
 			SetIndex(6),
 	).Save(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to create users")
+		log.Errorf("Failed to create users: %v", err)
 		return err
 	}
 
 	// Create pets
-	log.Debug().Msg("Creating pets...")
+	log.Debug("Creating pets...")
 	_, err = createPets(client, users)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to create pets")
+		log.Errorf("Failed to create pets: %v", err)
 		return err
 	}
 
 	// Create posts
-	log.Debug().Msg("Creating posts...")
+	log.Debug("Creating posts...")
 	posts, err := createPosts(client, users)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to create posts")
+		log.Errorf("Failed to create posts: %v", err)
 		return err
 	}
 
 	// Create comments
-	log.Debug().Msg("Creating comments...")
+	log.Debug("Creating comments...")
 	if err := createComments(client, posts, users); err != nil {
-		log.Error().Err(err).Msg("Failed to create comments")
+		log.Errorf("Failed to create comments: %v", err)
 		return err
 	}
 
 	// Create likes
-	log.Debug().Msg("Creating likes...")
+	log.Debug("Creating likes...")
 	if err := createLikes(client, posts, users); err != nil {
-		log.Error().Err(err).Msg("Failed to create likes")
+		log.Errorf("Failed to create likes: %v", err)
 		return err
 	}
 
 	// Create follow relations
-	log.Debug().Msg("Creating follow relations...")
+	log.Debug("Creating follow relations...")
 	if err := createFollowRelations(client, users); err != nil {
-		log.Error().Err(err).Msg("Failed to create follow relations")
+		log.Errorf("Failed to create follow relations: %v", err)
 		return err
 	}
 
-	log.Info().Msg("Database seeding completed successfully")
+	log.Info("Database seeding completed successfully")
 	return nil
 }
 
 // ClearDatabase clears all data from the database
 func ClearDatabase(client *ent.Client) error {
-	log.Info().Msg("Clearing database...")
+	log.Info("Clearing database...")
 	ctx := context.Background()
 
 	// 各テーブルのデータを個別に削除
@@ -152,13 +152,13 @@ func ClearDatabase(client *ent.Client) error {
 		return fmt.Errorf("failed to clear users: %v", err)
 	}
 
-	log.Info().Msg("Database cleared successfully")
+	log.Info("Database cleared successfully")
 	return nil
 }
 
 // createPets creates sample pets for users
 func createPets(client *ent.Client, users []*ent.User) ([]*ent.Pet, error) {
-	log.Info().Msg("Creating sample pets...")
+	log.Info("Creating sample pets...")
 
 	pets := []*ent.PetCreate{
 		client.Pet.Create().
@@ -210,7 +210,7 @@ func createPets(client *ent.Client, users []*ent.User) ([]*ent.Pet, error) {
 
 // createPosts creates sample posts by users
 func createPosts(client *ent.Client, users []*ent.User) ([]*ent.Post, error) {
-	log.Info().Msg("Creating sample posts...")
+	log.Info("Creating sample posts...")
 
 	sampleImageKey := "posts/98578a83-1d7d-4c25-aeea-c9b392e484e4-photo.jpg"
 
@@ -252,7 +252,7 @@ func createPosts(client *ent.Client, users []*ent.User) ([]*ent.Post, error) {
 
 // createComments creates sample comments on posts
 func createComments(client *ent.Client, posts []*ent.Post, users []*ent.User) error {
-	log.Info().Msg("Creating sample comments...")
+	log.Info("Creating sample comments...")
 
 	comments := []*ent.CommentCreate{
 		client.Comment.Create().
@@ -291,7 +291,7 @@ func createComments(client *ent.Client, posts []*ent.Post, users []*ent.User) er
 
 // createLikes creates sample likes on posts
 func createLikes(client *ent.Client, posts []*ent.Post, users []*ent.User) error {
-	log.Info().Msg("Creating sample likes...")
+	log.Info("Creating sample likes...")
 
 	likes := []*ent.LikeCreate{
 		client.Like.Create().
@@ -332,7 +332,7 @@ func createLikes(client *ent.Client, posts []*ent.Post, users []*ent.User) error
 
 // createFollowRelations creates sample follow relations between users
 func createFollowRelations(client *ent.Client, users []*ent.User) error {
-	log.Info().Msg("Creating sample follow relations...")
+	log.Info("Creating sample follow relations...")
 
 	followRelations := []*ent.FollowRelationCreate{
 		client.FollowRelation.Create().
