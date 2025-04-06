@@ -22,7 +22,7 @@ import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-const userBaseSchema = z.object({
+export const userBaseSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   iconImageUrl: z.string().url(),
@@ -41,7 +41,6 @@ export const getPostResponseSchema = z.object({
 });
 
 export default function PostsScreen() {
-  const [refreshing, setRefreshing] = useState(false);
   const colorScheme = useColorScheme();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollYRef = useRef(0);

@@ -66,7 +66,7 @@ func (u *CommentUsecase) GetByPostId(postId string) ([]models.CommentResponse, e
 		return nil, err
 	}
 
-	var commentResponses []models.CommentResponse
+	commentResponses := make([]models.CommentResponse, 0)
 	for _, comment := range comments {
 		resp, err := u.convertToResponse(comment)
 		if err != nil {

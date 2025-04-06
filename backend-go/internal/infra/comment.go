@@ -78,8 +78,9 @@ func (r *CommentRepository) GetByPostId(postId string) ([]*ent.Comment, error) {
 	}
 
 	comments, err := r.db.Comment.Query().
-		Where(comment.HasPostWith(post.ID(parsedPostId))).
 		WithUser().
+		Where(comment.HasPostWith(post.ID(parsedPostId))).
+		Order(ent.Desc(comment.FieldCreatedAt)).
 		All(context.Background())
 	if err != nil {
 		return nil, err
