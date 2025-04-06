@@ -2,12 +2,11 @@ import React, { useRef, useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
-  useColorScheme,
   TouchableOpacity,
   Animated,
   Dimensions,
+  useColorScheme,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/providers/AuthContext";
@@ -17,43 +16,43 @@ import {
   ProfileTabSelector,
   ProfileTabType,
 } from "@/components/ProfileTabSelector";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import z from "zod";
-import { postSchema } from "./posts";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
 import { PetRegiserModal } from "@/components/PetRegisterModal";
-import PetPanel, { petSchema } from "@/components/PetPanel";
-import Constants from "expo-constants";
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-const getPetResponseSchema = z.object({
-  pets: z.array(petSchema),
-});
-
-const getPostResponseSchema = z.object({
-  posts: z.array(postSchema),
-});
-
-export type Pet = z.infer<typeof petSchema>;
-type Post = z.infer<typeof postSchema>;
+import { UserPetList } from "@/components/UserPetsList";
+import { UserPostList } from "@/components/UserPostList";
 
 const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
-const HEADER_HEIGHT = Math.min(windowHeight * 0.33, 280);
 
 const ProfileScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const styles = getStyles(colors);
+
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
-  const { user, loading: authLoading, logout, refetch: refetchUser } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    logout,
+    refetch: refetchUser,
+  } = useAuth();
+
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] = useState(false);
+  const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] =
+    useState(false);
+
   const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
+  const backgroundColor = colorScheme == "light" ? "white" : "black"
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error(error);
+    }
+    router.replace("/(auth)");
+  };
 
   const openEditProfileModal = () => {
     setIsEditModalVisible(true);
@@ -89,55 +88,6 @@ const ProfileScreen: React.FC = () => {
     }).start(() => setIsRegisterPetModalVisible(false));
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error(error);
-      throw Error(`error: ${error}`);
-    }
-    router.replace("/(auth)");
-  };
-
-  const {
-    data: petData,
-    isLoading: petLoading,
-    error: petError,
-    refetch: refetchPets,
-  } = useQuery<Pet[]>({
-    queryKey: ["pets", user?.id],
-    queryFn: async () => {
-      const response = await axios.get(`${API_URL}/pets/owner/`, {
-        params: { ownerId: user?.id },
-      });
-      const result = getPetResponseSchema.safeParse(response.data);
-      if (result.error) {
-        throw new Error(`error: ${result.error}`);
-      }
-      return result.data.pets;
-    },
-    enabled: !!user?.id,
-  });
-
-  const {
-    data: postData,
-    isLoading: postLoading,
-    error: postError,
-  } = useQuery<Post[]>({
-    queryKey: ["posts", user?.id],
-    queryFn: async () => {
-      const response = await axios.get(`${API_URL}/posts/user/?userId=${user?.id}`, {
-        params: { userId: user?.id },
-      });
-      const result = getPostResponseSchema.safeParse(response.data);
-      if (result.error) {
-        throw new Error(`error: ${result.error}`);
-      }
-      return result.data.posts;
-    },
-    enabled: !!user?.id,
-  });
-
   if (authLoading || !user) {
     return (
       <View style={styles.loadingContainer}>
@@ -146,55 +96,55 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
-  const listData = selectedTab === "mypet" ? petData : postData;
-  const isDataLoading = selectedTab === "mypet" ? petLoading : postLoading;
-  const isDataError = selectedTab === "mypet" ? petError : postError;
-
-  const renderPets = (item: Pet) => (
-    <View style={styles.petContainer}>
-      <PetPanel pet={item} refetchPets={refetchPets} colorScheme={colorScheme} />
-    </View>
+  const headerContent = (
+    <>
+      <ProfileHeader user={user} onLogout={handleLogout} />
+      <View style={styles.editButtonsContainer}>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={openEditProfileModal}
+        >
+          <Text style={styles.buttonText}>プロフィールを編集</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={openRegisterPetModal}
+        >
+          <Text style={styles.buttonText}>ペットを登録する</Text>
+        </TouchableOpacity>
+      </View>
+      <ProfileTabSelector
+        selectedTab={selectedTab}
+        onSelectTab={setSelectedTab}
+      />
+    </>
   );
 
-  const renderPosts = (item: Post) => (
-    <View style={styles.postContainer}>
-      <Text>{item.caption}</Text>
-    </View>
-  );
+  const contentList =
+    selectedTab === "mypet" ? (
+      <UserPetList
+        pets={user.pets}
+        onRefresh={refetchUser}
+        refreshing={authLoading}
+        colorScheme={colorScheme}
+        headerComponent={headerContent}
+      />
+    ) : (
+      <UserPostList
+        posts={user.posts}
+        onRefresh={refetchUser}
+        refreshing={authLoading}
+        colorScheme={colorScheme}
+        headerComponent={headerContent}
+      />
+    );
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.fixedHeader}>
-        <ProfileHeader user={user} onLogout={handleLogout} />
-        <View style={styles.editButtonsContainer}>
-          <TouchableOpacity style={styles.editButton} onPress={openEditProfileModal}>
-            <Text style={styles.buttonText}>プロフィールを編集</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.editButton} onPress={openRegisterPetModal}>
-            <Text style={styles.buttonText}>ペットを登録する</Text>
-          </TouchableOpacity>
-        </View>
-        <ProfileTabSelector selectedTab={selectedTab} onSelectTab={setSelectedTab} />
+    <ThemedView style={[styles.container, {backgroundColor}]}>
+      <View style={styles.topHeader}>
+        <Text style={styles.userName}>{user.name}</Text>
       </View>
-      <FlatList
-        data={listData as (Pet | Post)[]}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) =>
-          selectedTab === "mypet" ? renderPets(item as Pet) : renderPosts(item as Post)
-        }
-        contentContainerStyle={{ paddingTop: HEADER_HEIGHT, paddingBottom: 20 }}
-        ListEmptyComponent={
-          isDataLoading ? (
-            <Text style={{ color: colors.text }}>読み込み中...</Text>
-          ) : isDataError ? (
-            <Text style={{ color: colors.text }}>エラーが発生しました</Text>
-          ) : (
-            <Text style={styles.emptyText}>
-              {selectedTab === "mypet" ? "マイペットを登録しましょう！" : "投稿しましょう！"}
-            </Text>
-          )
-        }
-      />
+      {contentList}
       <ProfileEditModal
         visible={isEditModalVisible}
         onClose={closeEditProfileModal}
@@ -208,7 +158,7 @@ const ProfileScreen: React.FC = () => {
         onClose={closeRegisterPetModal}
         slideAnim={slideAnimPet}
         colorScheme={colorScheme}
-        refetchPets={refetchPets}
+        refetchPets={refetchUser}
       />
     </ThemedView>
   );
@@ -218,35 +168,24 @@ const getStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      paddingBottom: 70,
-      backgroundColor: colors.background,
     },
-    fixedHeader: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      height: HEADER_HEIGHT,
-      zIndex: 10,
+    topHeader: {
+      paddingTop: 50,
+      paddingBottom: 12,
       backgroundColor: colors.background,
+      alignItems: "center",
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.icon,
+    },
+    userName: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: colors.text,
     },
     loadingContainer: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: colors.background,
-    },
-    petContainer: {
-      padding: 10,
-      borderColor: colors.icon,
-    },
-    postContainer: {
-      padding: 10,
-      borderColor: colors.icon,
-    },
-    emptyText: {
-      fontSize: 16,
-      color: colors.text,
     },
     editButtonsContainer: {
       flexDirection: "row",
@@ -262,7 +201,6 @@ const getStyles = (colors: typeof Colors.light) =>
       paddingHorizontal: 16,
       width: 160,
       alignItems: "center",
-      backgroundColor: colors.background,
     },
     buttonText: {
       color: colors.text,
