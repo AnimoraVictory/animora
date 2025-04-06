@@ -151,7 +151,7 @@ class MultiModalNeuMF(nn.Module):
         self.embedding_user_mf = expand_embedding(self.embedding_user_mf, new_config["num_users"])
         self.embedding_item_mf = expand_embedding(self.embedding_item_mf, new_config["num_items"])
 
-        # state_dict から埋め込みを除外
+        # state_dict から埋め込みを除外(でないと重複して読み込まれる)
         for key in list(state_dict.keys()):
             if "embedding" in key:
                 state_dict.pop(key)

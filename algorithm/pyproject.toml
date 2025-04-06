@@ -5,8 +5,10 @@ description = "Algorithm components for animalia"
 authors = ["shuntakochi <shuntakochi@gmail.com>"]
 readme = "README.md"
 packages = [
+    { include = "common"},
     { include = "recommend_system"},
-    { include = "search_engine"}
+    { include = "search_engine"},
+    { include = "task_scoring_system"},
 ]
 
 [tool.poetry.dependencies]
