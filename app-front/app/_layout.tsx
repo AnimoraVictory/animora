@@ -16,6 +16,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/providers/AuthContext";
 import { Colors } from "@/constants/Colors";
 import Constants from "expo-constants";
+import { registerForPushNotificationsAsync } from "@/utils/notifications";
+import * as Notifications from "expo-notifications";
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
@@ -29,6 +31,8 @@ function AuthSwitch() {
   const router = useRouter();
   const pathname = usePathname();
   const colorScheme = useColorScheme();
+
+  
 
   useEffect(() => {
     if (!loading) {
@@ -63,6 +67,32 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
+  const notificationListener = useRef<{ remove: () => void } | null>(null);
+  const responseListener = useRef<{ remove: () => void } | null>(null);
+
+  useEffect(() => {
+    // Push通知トークン登録
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) {
+        console.log("Push Token:", token);
+        // バックエンドに送信するなど
+      }
+    });
+
+    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
+      console.log("通知受信:", notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log("通知タップ:", response);
+    });
+
+    return () => {
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
+    };
+  }, []);
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -80,7 +110,6 @@ export default function RootLayout() {
     );
   }
 
-  // QueryClientProvider を最上位に配置し、その中に AuthProvider を配置する
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -94,6 +123,7 @@ export default function RootLayout() {
     </QueryClientProvider>
   );
 }
+
 
 const styles = StyleSheet.create({
   loadingContainer: {

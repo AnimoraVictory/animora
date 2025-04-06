@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "app-front",
-    "slug": "app-front",
+    "slug": "animalia",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,13 +9,18 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aki13627.animalia",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.aki13627.animalia"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +42,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "1121c635-34a2-49d3-8211-028ee0e18cd9"
+      }
+    },
+    "owner": "aki13627"
   }
 }

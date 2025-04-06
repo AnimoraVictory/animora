@@ -21,6 +21,7 @@ import { ProfileEditModal } from "@/components/ProfileEditModal";
 import { PetRegiserModal } from "@/components/PetRegisterModal";
 import { UserPetList } from "@/components/UserPetsList";
 import { UserPostList } from "@/components/UserPostList";
+import { registerForPushNotificationsAsync } from "@/utils/notifications";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -107,11 +108,19 @@ const ProfileScreen: React.FC = () => {
           <Text style={styles.buttonText}>プロフィールを編集</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.editButton}
-          onPress={openRegisterPetModal}
-        >
-          <Text style={styles.buttonText}>ペットを登録する</Text>
-        </TouchableOpacity>
+        style={styles.editButton}
+  onPress={async () => {
+    try {
+      console.log("トークン取得開始");
+      const token = await registerForPushNotificationsAsync();
+      console.log("再取得されたPush Token:", token);
+    } catch (e) {
+      console.error("トークン取得中にエラー:", e);
+    }
+  }}
+>
+  <Text>Pushトークンを再取得</Text>
+</TouchableOpacity>
       </View>
       <ProfileTabSelector
         selectedTab={selectedTab}
