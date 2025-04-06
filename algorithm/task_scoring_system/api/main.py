@@ -44,7 +44,7 @@ async def calculate_score(request: TaskRequest):
         cur.execute(
             """
             SELECT text_feature
-            FROM tasks
+            FROM task_types
             WHERE type = %s
             """
             , (request.task_type, )
@@ -71,8 +71,8 @@ async def calculate_score(request: TaskRequest):
         conn.close()
 
         # スコアの算出
-        image_feature_tensor = torch.tensor(image_feature, dtype=torch.float).to(device)
-        text_feature_tensor = torch.tensor(text_feature, dtype=torch.float).to(device)
+        image_feature_tensor = torch.tensor(image_feature, dtype=torch.float).unsqueeze(0).to(device)
+        text_feature_tensor = torch.tensor(text_feature, dtype=torch.float).unsqueeze(0).to(device)
         score = F.cosine_similarity(image_feature_tensor, text_feature_tensor).item()
         score = max(0, min(100, score * 100))  # スコアを0から100の範囲に制限
         return ScoreResponse(score=score)
