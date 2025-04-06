@@ -25,11 +25,9 @@ import { postSchema } from "./posts";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
 import { PetRegiserModal } from "@/components/PetRegisterModal";
 import PetPanel, { petSchema } from "@/components/PetPanel";
-
 import Constants from "expo-constants";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
-
 
 const getPetResponseSchema = z.object({
   pets: z.array(petSchema),
@@ -42,21 +40,21 @@ const getPostResponseSchema = z.object({
 export type Pet = z.infer<typeof petSchema>;
 type Post = z.infer<typeof postSchema>;
 
+const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
+const HEADER_HEIGHT = Math.min(windowHeight * 0.33, 280);
 
-const HEADER_HEIGHT = windowHeight * 0.31;
 const ProfileScreen: React.FC = () => {
-  const windowWidth = Dimensions.get("window").width;
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const styles = getStyles(colors);
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
   const { user, loading: authLoading, logout, refetch: refetchUser } = useAuth();
-  const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
-  const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] =
-    useState<boolean>(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] = useState(false);
   const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
+
   const openEditProfileModal = () => {
     setIsEditModalVisible(true);
     Animated.timing(slideAnimProfile, {
@@ -71,9 +69,7 @@ const ProfileScreen: React.FC = () => {
       toValue: windowWidth,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => {
-      setIsEditModalVisible(false);
-    });
+    }).start(() => setIsEditModalVisible(false));
   };
 
   const openRegisterPetModal = () => {
@@ -90,9 +86,7 @@ const ProfileScreen: React.FC = () => {
       toValue: windowWidth,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => {
-      setIsRegisterPetModalVisible(false);
-    });
+    }).start(() => setIsRegisterPetModalVisible(false));
   };
 
   const handleLogout = async () => {
@@ -100,12 +94,11 @@ const ProfileScreen: React.FC = () => {
       await logout();
     } catch (error) {
       console.error(error);
-      throw Error(`error: ${error}`)
+      throw Error(`error: ${error}`);
     }
     router.replace("/(auth)");
   };
 
-  // ペット情報取得
   const {
     data: petData,
     isLoading: petLoading,
@@ -118,16 +111,14 @@ const ProfileScreen: React.FC = () => {
         params: { ownerId: user?.id },
       });
       const result = getPetResponseSchema.safeParse(response.data);
-      if(result.error) {
-        console.error(result.error)
-        throw new Error(`error: ${result.error}`)
+      if (result.error) {
+        throw new Error(`error: ${result.error}`);
       }
       return result.data.pets;
     },
     enabled: !!user?.id,
   });
 
-  // 投稿一覧取得
   const {
     data: postData,
     isLoading: postLoading,
@@ -135,13 +126,12 @@ const ProfileScreen: React.FC = () => {
   } = useQuery<Post[]>({
     queryKey: ["posts", user?.id],
     queryFn: async () => {
-      const response = await axios.get(`${API_URL}/posts/user/`, {
+      const response = await axios.get(`${API_URL}/posts/user/?userId=${user?.id}`, {
         params: { userId: user?.id },
       });
       const result = getPostResponseSchema.safeParse(response.data);
-      if(result.error) {
-        console.error(result.error)
-        throw new Error(`error: ${result.error}`)
+      if (result.error) {
+        throw new Error(`error: ${result.error}`);
       }
       return result.data.posts;
     },
@@ -156,67 +146,43 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
-  // タブに応じたデータ、読み込み・エラー状態
   const listData = selectedTab === "mypet" ? petData : postData;
   const isDataLoading = selectedTab === "mypet" ? petLoading : postLoading;
   const isDataError = selectedTab === "mypet" ? petError : postError;
 
-  const renderPets = (item: Pet) => {
-    return (
-      <View style={styles.petContainer}>
-        <PetPanel
-         pet={item}
-         refetchPets={refetchPets}
-         colorScheme={colorScheme}
-          />
-      </View>
-    );
-  };
+  const renderPets = (item: Pet) => (
+    <View style={styles.petContainer}>
+      <PetPanel pet={item} refetchPets={refetchPets} colorScheme={colorScheme} />
+    </View>
+  );
 
-  const renderPosts = (item: Post) => {
-    return (
-      <View style={styles.postContainer}>
-        <Text>{item.caption}</Text>
-      </View>
-    );
-  };
+  const renderPosts = (item: Post) => (
+    <View style={styles.postContainer}>
+      <Text>{item.caption}</Text>
+    </View>
+  );
 
   return (
     <ThemedView style={styles.container}>
       <View style={styles.fixedHeader}>
         <ProfileHeader user={user} onLogout={handleLogout} />
         <View style={styles.editButtonsContainer}>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={openEditProfileModal}
-          >
+          <TouchableOpacity style={styles.editButton} onPress={openEditProfileModal}>
             <Text style={styles.buttonText}>プロフィールを編集</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={openRegisterPetModal}
-          >
+          <TouchableOpacity style={styles.editButton} onPress={openRegisterPetModal}>
             <Text style={styles.buttonText}>ペットを登録する</Text>
           </TouchableOpacity>
         </View>
-
-        <ProfileTabSelector
-          selectedTab={selectedTab}
-          onSelectTab={setSelectedTab}
-        />
+        <ProfileTabSelector selectedTab={selectedTab} onSelectTab={setSelectedTab} />
       </View>
       <FlatList
         data={listData as (Pet | Post)[]}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) =>
-          selectedTab === "mypet"
-            ? renderPets(item as Pet)
-            : renderPosts(item as Post)
+          selectedTab === "mypet" ? renderPets(item as Pet) : renderPosts(item as Post)
         }
-        contentContainerStyle={[
-          styles.contentContainer,
-          { paddingTop: HEADER_HEIGHT },
-        ]}
+        contentContainerStyle={{ paddingTop: HEADER_HEIGHT, paddingBottom: 20 }}
         ListEmptyComponent={
           isDataLoading ? (
             <Text style={{ color: colors.text }}>読み込み中...</Text>
@@ -224,16 +190,14 @@ const ProfileScreen: React.FC = () => {
             <Text style={{ color: colors.text }}>エラーが発生しました</Text>
           ) : (
             <Text style={styles.emptyText}>
-              {selectedTab === "mypet"
-                ? "マイペットを登録しましょう！"
-                : "投稿しましょう！"}
+              {selectedTab === "mypet" ? "マイペットを登録しましょう！" : "投稿しましょう！"}
             </Text>
           )
         }
       />
       <ProfileEditModal
         visible={isEditModalVisible}
-        onClose={() => closeEditProfileModal()}
+        onClose={closeEditProfileModal}
         slideAnim={slideAnimProfile}
         colorScheme={colorScheme}
         refetchUser={refetchUser}
@@ -241,7 +205,7 @@ const ProfileScreen: React.FC = () => {
       />
       <PetRegiserModal
         visible={isRegisterPetModalVisible}
-        onClose={() => closeRegisterPetModal()}
+        onClose={closeRegisterPetModal}
         slideAnim={slideAnimPet}
         colorScheme={colorScheme}
         refetchPets={refetchPets}
@@ -263,7 +227,7 @@ const getStyles = (colors: typeof Colors.light) =>
       left: 0,
       right: 0,
       height: HEADER_HEIGHT,
-      zIndex: 1,
+      zIndex: 10,
       backgroundColor: colors.background,
     },
     loadingContainer: {
@@ -271,9 +235,6 @@ const getStyles = (colors: typeof Colors.light) =>
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: colors.background,
-    },
-    contentContainer: {
-      paddingBottom: 20,
     },
     petContainer: {
       padding: 10,
@@ -284,7 +245,6 @@ const getStyles = (colors: typeof Colors.light) =>
       borderColor: colors.icon,
     },
     emptyText: {
-      padding: 20,
       fontSize: 16,
       color: colors.text,
     },
