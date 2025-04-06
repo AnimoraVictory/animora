@@ -2,6 +2,8 @@ import * as cdk from "aws-cdk-lib";
 import * as dotenv from "dotenv";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as events from "aws-cdk-lib/aws-events";
+import * as targets from "aws-cdk-lib/aws-events-targets";
 import { Construct } from "constructs";
 import path = require("path");
 import { getRequiredEnvVars } from "../utils/env";
@@ -35,10 +37,10 @@ export class BackendStack extends cdk.Stack {
       "AWS_S3_BUCKET_NAME",
     ]);
 
-    const fn = new lambda.Function(this, "AnimaliaBackend", {
+    const apiFn = new lambda.Function(this, "AnimaliaBackend", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
-      handler: "bootstrap", // GO binary name
-      code: lambda.Code.fromAsset(path.join(__dirname, "../../bin")),
+      handler: "bootstrap",
+      code: lambda.Code.fromAsset(path.join(__dirname, "../../bin/api")),
       environment: {
         DATABASE_URL,
         JWT_SECRET,
@@ -52,8 +54,22 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    const endpoint = new apigw.LambdaRestApi(this, "AnimaliaAPI", {
-      handler: fn,
+    new apigw.LambdaRestApi(this, "AnimaliaAPI", {
+      handler: apiFn,
+    });
+
+    const dailyTaskFn = new lambda.Function(this, "DailyTaskCreator", {
+      runtime: lambda.Runtime.PROVIDED_AL2023,
+      handler: "bootstrap",
+      code: lambda.Code.fromAsset(path.join(__dirname, "../../bin/dailytask")),
+      environment: {
+        DATABASE_URL,
+      },
+    });
+
+    new events.Rule(this, "DailyTaskRule", {
+      schedule: events.Schedule.cron({ minute: "0", hour: "15", day: "*" }),
+      targets: [new targets.LambdaFunction(dailyTaskFn)],
     });
     // The code that defines your stack goes here
 
