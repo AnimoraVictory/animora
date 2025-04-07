@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,11 @@ import {
   Dimensions,
   TouchableOpacity,
   Animated,
-  TextInput,
 } from "react-native";
 import { postSchema } from "@/app/(tabs)/posts";
 import { z } from "zod";
 import { Colors } from "@/constants/Colors";
-import { FontAwesome } from "@expo/vector-icons";
+import { Ionicons, } from "@expo/vector-icons";
 import CommentsModal from "@/components/CommentsModal";
 import { useAuth } from "@/providers/AuthContext";
 
@@ -74,8 +73,8 @@ export const PostPanel = ({ post }: Props) => {
         <View style={[styles.imageContainer, { height: imageHeight }]}>
           <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
           <TouchableOpacity style={styles.commentBox} onPress={() => OpenModal()}>
-            <FontAwesome name="comments" size={35} color={colors.middleBackground} />
-            <Text style={{ color: colors.middleBackground }}>{post.commentsCount}</Text>
+          <Ionicons name="chatbox-ellipses-outline" size={35} color="white" />
+            <Text style={{ color: "white" }}>{post.commentsCount}</Text>
           </TouchableOpacity>
         </View>
         <Text style={[styles.caption, { color: colors.tint }]}>{post.caption}</Text>
