@@ -41,40 +41,40 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
   const windowHeight = Dimensions.get("window").height;
   const modalHeight = windowHeight * 0.6;
 
-  // const panResponder = useRef(
-  //   PanResponder.create({
-  //     onStartShouldSetPanResponder: () => true,
-  //     onPanResponderMove: (_, gestureState) => {
-  //       if (gestureState.dy > 0) {
-  //         slideAnim.setValue(gestureState.dy);
-  //       }
-  //     },
-  //     onPanResponderRelease: (_, gestureState) => {
-  //       const displacementThreshold = 50;
-  //       const velocityThreshold = 1.5;
-  //       if (gestureState.dy > displacementThreshold || gestureState.vy > velocityThreshold) {
-  //         Animated.timing(slideAnim, {
-  //           toValue: modalHeight,
-  //           duration: 200,
-  //           useNativeDriver: true,
-  //         }).start(() => onClose());
-  //       } else {
-  //         Animated.spring(slideAnim, {
-  //           toValue: 0,
-  //           useNativeDriver: true,
-  //           bounciness: 0,
-  //         }).start();
-  //       }
-  //     },
-  //     onPanResponderTerminate: () => {
-  //       Animated.spring(slideAnim, {
-  //         toValue: 0,
-  //         useNativeDriver: true,
-  //         bounciness: 0,
-  //       }).start();
-  //     },
-  //   })
-  // ).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const displacementThreshold = 50;
+        const velocityThreshold = 1.5;
+        if (gestureState.dy > displacementThreshold || gestureState.vy > velocityThreshold) {
+          Animated.timing(slideAnim, {
+            toValue: modalHeight,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => onClose());
+        } else {
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            bounciness: 0,
+          }).start();
+        }
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          bounciness: 0,
+        }).start();
+      },
+    })
+  ).current;
 
   return (
     <Modal visible={visible} animationType="none" transparent onRequestClose={onClose}>
@@ -87,7 +87,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
       >
         <Animated.View
           style={[styles.modal, { transform: [{ translateY: slideAnim }] }]}
-          // {...panResponder.panHandlers}
+          {...panResponder.panHandlers}
         >
           <Text style={styles.headerContainer}>コメント</Text>
 
