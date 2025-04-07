@@ -86,12 +86,13 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
       >
         <Animated.View
           style={[styles.modal, { transform: [{ translateY: slideAnim }] }]}
-          {...panResponder.panHandlers}
         >
-          <Text style={styles.headerContainer}>コメント</Text>
-
-          <View style={styles.commentsContainer}>
-            {comments.length > 0 ? (
+          <View style={{ flex: 1 }}>
+          <View {...panResponder.panHandlers}>
+  <View style={styles.gripBar} />
+  <Text style={styles.headerContainer}>コメント</Text>
+</View>
+            <View style={styles.commentsContainer}>
               <FlatList
                 data={comments}
                 keyExtractor={(item) => item.id}
@@ -105,19 +106,17 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
                   </View>
                 )}
                 keyboardShouldPersistTaps="always"
+                contentContainerStyle={{ paddingBottom: 20 }}
               />
-            ) : (
-              <View style={styles.noCommentsContainer}>
-                <Text style={styles.noCommentsText}>最初のコメントを追加しよう！</Text>
-              </View>
-            )}
-          </View>
+            </View>
 
-          <View style={styles.inputContainer}>
-            <CommentInput currentUser={currentUser} onClose={onClose} postId={postId} />
+            <View style={styles.inputContainer}>
+              <CommentInput currentUser={currentUser} onClose={onClose} postId={postId} />
+            </View>
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
+
     </Modal>
   );
 };
@@ -130,6 +129,14 @@ const styles = StyleSheet.create({
   staticOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  gripBar: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#ccc',
+    marginBottom: 8,
   },
   modal: {
     backgroundColor: '#fff',

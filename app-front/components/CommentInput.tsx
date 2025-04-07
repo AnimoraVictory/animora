@@ -6,50 +6,57 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  ScrollView,
   useColorScheme,
+  Alert,
 } from 'react-native';
 import { User } from '@/constants/api';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { z } from 'zod';
-import { Alert } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { useForm, Controller } from "react-hook-form";
 
 type CommentInputProps = {
   currentUser: User | null | undefined;
   postId: string;
   onClose: () => void;
 };
+
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, onClose }) => {
-  const { control, handleSubmit, reset } = useForm<{ content: string }>({
-    defaultValues: { content: "" },
+  const [content, setContent] = useState('');
+  const colorScheme = useColorScheme();
+  const colors = colorScheme === 'light' ? Colors.light : Colors.dark;
+
+  const createCommentMutation = useMutation({
+    mutationFn: async (data: { content: string }) => {
+      const formData = new FormData();
+      formData.append('content', data.content);
+      formData.append('userId', currentUser?.id ?? '');
+      formData.append('postId', postId);
+
+      return axios.post(`${API_URL}/comments/new`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    },
+    onSuccess: () => {
+      Alert.alert('コメント完了', 'コメントを追加しました！');
+      setContent('');
+      onClose();
+      router.replace('/(tabs)/posts');
+    },
+    onError: () => {
+      Alert.alert('エラー', 'コメントに失敗しました');
+    },
   });
 
-  const onSubmit = (data: { content: string }) => {
-    const formData = new FormData();
-    formData.append("content", data.content);
-    formData.append("userId", currentUser?.id ?? "");
-    formData.append("postId", postId);
-
-    axios
-      .post(`${API_URL}/comments/new`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then(() => {
-        Alert.alert("投稿完了", "投稿が完了しました！");
-        reset(); // 入力欄をリセット
-        onClose();
-        router.replace("/(tabs)/posts");
-      })
-      .catch(() => {
-        Alert.alert("エラー", "投稿に失敗しました。");
-      });
+  const handleSubmit = () => {
+    if (!content || content.trim().length < 1) {
+      Alert.alert('エラー', 'コメントは1文字以上必要です。');
+      return;
+    }
+    createCommentMutation.mutate({ content: content.trim() });
   };
 
   return (
@@ -57,21 +64,17 @@ const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, onClos
       {currentUser && (
         <Image source={{ uri: currentUser.iconImageUrl }} style={styles.avatar} />
       )}
-      <Controller
-        control={control}
-        name="content"
-        rules={{ required: true, minLength: 1 }}
-        render={({ field: { onChange, value } }) => (
-          <TextInput
-            style={styles.input}
-            placeholder="コメントを入力..."
-            value={value}
-            onChangeText={onChange}
-            multiline
-          />
-        )}
+      <TextInput
+        style={styles.input}
+        placeholder="コメントを入力..."
+        value={content}
+        onChangeText={setContent}
+        multiline
       />
-      <TouchableOpacity onPress={handleSubmit(onSubmit)} style={[styles.button, { backgroundColor: Colors.light.tint }]}>
+      <TouchableOpacity
+        onPress={handleSubmit}
+        style={[styles.button, { backgroundColor: colors.background }]}
+      >
         <Text style={styles.buttonText}>送信</Text>
       </TouchableOpacity>
     </View>
@@ -80,13 +83,6 @@ const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, onClos
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  scrollContainer: {
-    flex: 1,
-  },
-  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
   },

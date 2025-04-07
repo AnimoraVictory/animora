@@ -61,7 +61,7 @@ export default function PostsScreen() {
       ? require("../../assets/images/icon-green.png")
       : require("../../assets/images/icon-dark.png");
 
-  const { data, isLoading, error, } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/posts/`);
@@ -116,8 +116,8 @@ export default function PostsScreen() {
           }
           refreshControl={
             <RefreshControl
-              refreshing={false}
-              onRefresh={() => {}}
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
               progressViewOffset={HEADER_HEIGHT}
               tintColor={colorScheme === "light" ? "black" : "white"}
             />
@@ -157,8 +157,8 @@ export default function PostsScreen() {
         renderItem={({ item }) => <PostPanel post={item} />}
         refreshControl={
           <RefreshControl
-            refreshing={false}
-            onRefresh={() => {}}
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
         }
