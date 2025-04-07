@@ -12,7 +12,6 @@ import {
   PanResponder,
   Dimensions,
   TouchableWithoutFeedback,
-  Keyboard,
 } from 'react-native';
 import { commentSchema } from '@/app/(tabs)/posts';
 import { z } from 'zod';
