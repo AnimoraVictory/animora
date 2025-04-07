@@ -29,6 +29,7 @@ type Props = {
   post: Post;
 };
 
+
 export const PostPanel = ({ post }: Props) => {
   const screenWidth = Dimensions.get("window").width;
   const imageHeight = (screenWidth * 14) / 9;
@@ -44,39 +45,6 @@ export const PostPanel = ({ post }: Props) => {
     minute: "2-digit",
   });
 
-  const { data: comments } = useQuery({
-    queryKey: ["comments", post.id],
-    queryFn: async () => {
-      const res = await axios.get(`${API_URL}/comments/post`, {
-        params: { postId: post.id },
-      });
-      const result = z.object({
-        comments: z.array(commentSchema)
-      }).safeParse(res.data);
-      if (result.error) {
-        console.error(result.error);
-        throw new Error(`error: ${result.error}`);
-      }
-      return result.data.comments;
-    },
-    staleTime: 1000 * 60,
-  });
-
-  const { data: count } = useQuery({
-    queryKey: ["count", post.id],
-    queryFn: async (): Promise<number> => {
-      const res = await axios.get(`${API_URL}/comments/count`, {
-        params: { postId: post.id },
-      });
-      const result = z.object({ count: z.number() }).safeParse(res.data);
-      if (!result.success) {
-        throw new Error("コメントの取得に失敗しました");
-      }
-      return result.data.count;
-    },
-    staleTime: 1000 * 60,
-  });
-
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
@@ -86,9 +54,12 @@ export const PostPanel = ({ post }: Props) => {
           <Text style={[styles.postTime, { color: colors.icon }]}>{formattedDateTime}</Text>
         </View>
       </View>
-      <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
-      <View style={styles.commentBox}>
-          <FontAwesome name="comment-o" size={25} color={colors.icon} />
+      <View style={[styles.imageContainer, { height: imageHeight }]}>
+        <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
+        <View style={styles.commentBox}>
+          <FontAwesome name="comments" size={30} color={colors.background} />
+          <Text style={{color:colors.background}}>{post.commentsCount}</Text>
+        </View>
       </View>
       <Text style={[styles.caption, { color: colors.tint }]}>{post.caption}</Text>
     </View>
@@ -122,6 +93,9 @@ const styles = StyleSheet.create({
   postTime: {
     fontSize: 12,
   },
+  imageContainer: {
+    position: "relative",
+  },
   image: {
     borderRadius: 20,
     width: "100%",
@@ -133,14 +107,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   commentBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 6,
-    marginTop: 12,
-    marginLeft: 8,
-  },
-  commentText: {
-    fontSize: 14,
-    flexShrink: 1,
+    position: "absolute",
+    bottom: 10,
+    right: 10,
+    alignItems: "center",
   },
 });
+
+export default PostPanel;

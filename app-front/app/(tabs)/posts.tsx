@@ -28,11 +28,20 @@ export const userBaseSchema = z.object({
   iconImageUrl: z.string().url(),
 });
 
+export const commentSchema = z.object({
+  id: z.string(),
+  user: userBaseSchema,
+  content: z.string(),
+  createdAt: z.string(),
+})
+
 export const postSchema = z.object({
   id: z.string().uuid(),
   caption: z.string().min(0),
   imageUrl: z.string().min(1),
   user: userBaseSchema,
+  comments: z.array(commentSchema),
+  commentsCount: z.number(),
   createdAt: z.string().datetime(),
 });
 
@@ -52,7 +61,7 @@ export default function PostsScreen() {
       ? require("../../assets/images/icon-green.png")
       : require("../../assets/images/icon-dark.png");
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/posts/`);
