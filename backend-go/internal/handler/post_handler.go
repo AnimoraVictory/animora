@@ -49,8 +49,24 @@ func (h *PostHandler) GetAllPosts(c echo.Context) error {
 				"error": err.Error(),
 			})
 		}
-		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL)
+
+		commentResponses := make([]models.CommentResponse, len(post.Edges.Comments))
+		for j, comment := range post.Edges.Comments {
+			var commentUserImageURL string
+			if comment.Edges.User.IconImageKey != "" {
+				commentUserImageURL, err = h.storageUsecase.GetUrl(comment.Edges.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get comment user image URL: %v", err)
+					return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+						"error": err.Error(),
+					})
+				}
+			}
+			commentResponses[j] = models.NewCommentResponse(comment, comment.Edges.User, commentUserImageURL)
+		}
+		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL, commentResponses)
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"posts": postResponses,
 	})

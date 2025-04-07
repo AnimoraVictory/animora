@@ -14,10 +14,4 @@ func SetupCommentRoutes(app *echo.Echo) {
 
 	// Delete a comment
 	commentGroup.DELETE("/delete", commentHandler.Delete)
-
-	// Get comments for a post
-	commentGroup.GET("/post", commentHandler.GetByPostId)
-
-	// Count comments for a post
-	commentGroup.GET("/count", commentHandler.Count)
 }
