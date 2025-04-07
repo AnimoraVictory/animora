@@ -144,6 +144,7 @@ export default function PostsScreen() {
       </Animated.View>
 
       <Animated.FlatList
+        keyboardShouldPersistTaps="handled"
         ref={listRef}
         style={{
           backgroundColor: colorScheme === "light" ? "white" : "black",
