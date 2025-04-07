@@ -1,41 +1,36 @@
-import { View, Text, StyleSheet, Image, useColorScheme, Dimensions } from "react-native";
+import React, { useRef, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  useColorScheme,
+  Dimensions,
+  TouchableOpacity,
+  Animated,
+  TextInput,
+} from "react-native";
 import { postSchema } from "@/app/(tabs)/posts";
 import { z } from "zod";
 import { Colors } from "@/constants/Colors";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import Constants from "expo-constants";
 import { FontAwesome } from "@expo/vector-icons";
+import CommentsModal from "@/components/CommentsModal";
+import { useAuth } from "@/providers/AuthContext";
 
 export type Post = z.infer<typeof postSchema>;
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-const userBaseSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-  iconImageUrl: z.string().url(),
-});
-
-const commentSchema = z.object({
-  id: z.string(),
-  user: userBaseSchema,
-  content: z.string(),
-  createdAt: z.string(),
-});
-type Comment = z.infer<typeof commentSchema>;
 
 type Props = {
   post: Post;
 };
 
-
 export const PostPanel = ({ post }: Props) => {
+
+  const [isModalVisible, setIsModalVisible] = React.useState(false);
+  const slideAnim = useRef(new Animated.Value(300)).current;
   const screenWidth = Dimensions.get("window").width;
   const imageHeight = (screenWidth * 14) / 9;
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
-
   const date = new Date(post.createdAt);
   const formattedDateTime = date.toLocaleString(undefined, {
     year: "numeric",
@@ -44,25 +39,56 @@ export const PostPanel = ({ post }: Props) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+  const { user: currentUser } = useAuth();
+  const windowHeight = Dimensions.get("window").height;
+
+
+
+  const OpenModal = () => {
+    setIsModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: windowHeight * 0.8,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setIsModalVisible(false));
+  };
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.header}>
-        <Image source={{ uri: post.user.iconImageUrl }} style={styles.avatar} />
-        <View style={styles.userInfo}>
-          <Text style={[styles.userName, { color: colors.text }]}>{post.user.name}</Text>
-          <Text style={[styles.postTime, { color: colors.icon }]}>{formattedDateTime}</Text>
+    <>
+      <View style={styles.wrapper}>
+        <View style={styles.header}>
+          <Image source={{ uri: post.user.iconImageUrl }} style={styles.avatar} />
+          <View style={styles.userInfo}>
+            <Text style={[styles.userName, { color: colors.text }]}>{post.user.name}</Text>
+            <Text style={[styles.postTime, { color: colors.icon }]}>{formattedDateTime}</Text>
+          </View>
         </View>
-      </View>
-      <View style={[styles.imageContainer, { height: imageHeight }]}>
-        <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
-        <View style={styles.commentBox}>
-          <FontAwesome name="comments" size={30} color={colors.background} />
-          <Text style={{color:colors.background}}>{post.commentsCount}</Text>
+        <View style={[styles.imageContainer, { height: imageHeight }]}>
+          <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
+          <TouchableOpacity style={styles.commentBox} onPress={() => OpenModal()}>
+            <FontAwesome name="comments" size={35} color={colors.middleBackground} />
+            <Text style={{ color: colors.middleBackground }}>{post.commentsCount}</Text>
+          </TouchableOpacity>
         </View>
+        <Text style={[styles.caption, { color: colors.tint }]}>{post.caption}</Text>
       </View>
-      <Text style={[styles.caption, { color: colors.tint }]}>{post.caption}</Text>
-    </View>
+      <CommentsModal
+        slideAnim={slideAnim}
+        postId={post.id}
+        currentUser={currentUser}
+        visible={isModalVisible}
+        comments={post.comments}
+        onClose={closeModal}
+      />
+    </>
   );
 };
 

@@ -1,78 +1,119 @@
+import React, { useState } from 'react';
+import {
+  View,
+  TextInput,
+  Image,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ScrollView,
+  useColorScheme,
+} from 'react-native';
 import { User } from '@/constants/api';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import React, { useState, FormEvent } from 'react';
-import { Alert } from 'react-native';
 import { z } from 'zod';
+import { Alert } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { useForm, Controller } from "react-hook-form";
 
 type CommentInputProps = {
-  currentUser: User;
+  currentUser: User | null | undefined;
   postId: string;
   onClose: () => void;
 };
-
-const CommentInputScema = z.object({
-  content: z.string().min(1),
-});
-
-type CommentInputForm = z.infer<typeof CommentInputScema>;
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, onClose }) => {
-  const [comment, setComment] = useState('');
-  const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-  const createPostMutation = useMutation({
-    mutationFn: (data: CommentInputForm) => {
-      const formData = new FormData();
-      formData.append('content', data.content);
-      formData.append('userId', currentUser.id);
-      formData.append('postId', postId);
-
-      return axios.post(`${API_URL}/comments/new`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-    },
-    onSuccess: () => {
-      Alert.alert("投稿完了", "投稿が完了しました！");
-      onClose();
-      router.replace("/(tabs)/posts");
-    },
-    onError: (error) => {
-      console.error(`error: ${error}`);
-      Alert.alert("エラー", "投稿に失敗しました。");
-    },
+  const { control, handleSubmit, reset } = useForm<{ content: string }>({
+    defaultValues: { content: "" },
   });
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    const form: CommentInputForm = { content: comment };
-    const parseResult = CommentInputScema.safeParse(form);
-    if (!parseResult.success) {
-      Alert.alert("エラー", "コメントは1文字以上必要です。");
-      return;
-    }
-    createPostMutation.mutate(parseResult.data);
-    setComment('');
+  const onSubmit = (data: { content: string }) => {
+    const formData = new FormData();
+    formData.append("content", data.content);
+    formData.append("userId", currentUser?.id ?? "");
+    formData.append("postId", postId);
+
+    axios
+      .post(`${API_URL}/comments/new`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then(() => {
+        Alert.alert("投稿完了", "投稿が完了しました！");
+        reset(); // 入力欄をリセット
+        onClose();
+        router.replace("/(tabs)/posts");
+      })
+      .catch(() => {
+        Alert.alert("エラー", "投稿に失敗しました。");
+      });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <img
-        src={currentUser.iconImageUrl}
-        alt="ユーザー画像"
-        style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '8px' }}
+    <View style={styles.container}>
+      {currentUser && (
+        <Image source={{ uri: currentUser.iconImageUrl }} style={styles.avatar} />
+      )}
+      <Controller
+        control={control}
+        name="content"
+        rules={{ required: true, minLength: 1 }}
+        render={({ field: { onChange, value } }) => (
+          <TextInput
+            style={styles.input}
+            placeholder="コメントを入力..."
+            value={value}
+            onChangeText={onChange}
+            multiline
+          />
+        )}
       />
-      <input
-        type="text"
-        placeholder="コメントを入力..."
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-      />
-      <button type="submit">送信</button>
-    </form>
+      <TouchableOpacity onPress={handleSubmit(onSubmit)} style={[styles.button, { backgroundColor: Colors.light.tint }]}>
+        <Text style={styles.buttonText}>送信</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    textAlignVertical: 'top',
+  },
+  button: {
+    marginLeft: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  buttonText: {
+    color: '#fff',
+  },
+});
 
 export default CommentInput;
