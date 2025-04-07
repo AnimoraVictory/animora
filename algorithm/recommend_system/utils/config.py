@@ -63,11 +63,19 @@ prod_config = {
 # ----------------------------------
 existing_user_query = """
                       SELECT 
-                          index AS post_id,
-                          created_at AS timestamp,
-                          image_feature AS image_feature, -- JSON文字列
-                          text_feature AS text_feature -- JSON文字列
-                      FROM posts
+                          P.index AS post_id,
+                          P.created_at AS created_at,
+                          P.image_feature AS image_feature, -- JSON文字列
+                          P.text_feature AS text_feature -- JSON文字列
+                          P.caption AS caption,
+                          P.image_key AS image_key,
+                          U.id AS user_id,
+                          U.email AS email,
+                          U.name AS name,
+                          U.bio AS bio,
+                          U.icon_image_key AS icon_image_key
+                      FROM posts P
+                      LEFT JOIN users U ON posts.user_posts = users.id
                       WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL;
                       """
 existing_user_threshold = 0.45
@@ -78,10 +86,12 @@ existing_user_threshold = 0.45
 new_user_query = """
                  SELECT
                      P.index AS post_id,
-                     P.created_at AS timestamp,
+                     P.created_at AS created_at,
                      P.image_feature AS image_feature,
                      P.text_feature AS text_feature,
                      COUNT(DISTINCT L.id) + COUNT(DISTINCT C.id) AS score
+                     P.caption AS caption,
+                     P.image_key AS image_key
                  FROM posts P
                  LEFT JOIN likes L ON L.post_likes = P.id
                  LEFT JOIN comments C ON C.post_comments = P.id
@@ -96,7 +106,7 @@ new_user_threshold = 2
 rating_query =  """
                 -- 投稿自体のインタラクション(投稿者による投稿)
                 SELECT
-                    U.index AS user_id, P.index AS post_id, 1 AS rating, P.created_at AS timestamp, 
+                    U.index AS user_id, P.index AS post_id, 1 AS rating, P.created_at AS created_at, 
                     P.image_feature AS image_feature, P.text_feature AS text_feature
                 FROM posts P
                 JOIN users U ON P.user_posts = U.id
@@ -106,7 +116,7 @@ rating_query =  """
 
                 -- 「いいね」のインタラクション
                 SELECT
-                    U.index AS user_id, P.index AS post_id, 1 AS rating, L.created_at AS timestamp,
+                    U.index AS user_id, P.index AS post_id, 1 AS rating, L.created_at AS created_at,
                     P.image_feature AS image_feature, P.text_feature AS text_feature
                 FROM likes L
                 JOIN posts P ON L.post_likes = P.id
@@ -117,7 +127,7 @@ rating_query =  """
 
                 -- コメントのインタラクション
                 SELECT
-                    U.index AS user_id, P.index AS post_id, 1 AS rating, C.created_at AS timestamp,
+                    U.index AS user_id, P.index AS post_id, 1 AS rating, C.created_at AS created_at,
                     P.image_feature AS image_feature, P.text_feature AS text_feature
                 FROM comments C
                 JOIN posts P ON C.post_comments = P.id
