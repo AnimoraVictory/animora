@@ -54,7 +54,7 @@ export const PostPanel = ({ post }: Props) => {
     
       const createLikeMutation = useMutation({
         mutationFn: () => {
-          return axios.post(`${API_URL}/likes/new?userId=${userId}&postId=${postId}`);;
+          return axios.post(`${API_URL}/likes/new?userId=${userId}&postId=${postId}`);
         },
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["posts"] });

@@ -7,7 +7,6 @@ import {
   Animated,
   Button,
   Dimensions,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,

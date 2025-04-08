@@ -3,10 +3,8 @@ import {
   FlatList,
   RefreshControl,
   Text,
-  StyleSheet,
   useColorScheme,
   View,
-  Animated,
 } from "react-native";
 import ProfilePostPanel from "@/components/ProfilePostPanel";
 import { Post } from "@/components/PostPanel";

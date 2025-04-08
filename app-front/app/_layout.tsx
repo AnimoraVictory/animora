@@ -8,7 +8,7 @@ import { Slot, usePathname, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -42,6 +42,7 @@ function AuthSwitch() {
         router.replace("/(auth)");
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user, router]);
 
   if (loading) {
