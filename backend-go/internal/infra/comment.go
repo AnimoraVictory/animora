@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
-	"github.com/aki-13627/animalia/backend-go/ent/comment"
-	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/google/uuid"
 )
 
@@ -53,37 +51,4 @@ func (r *CommentRepository) Delete(commentId string) error {
 	}
 
 	return nil
-}
-
-func (r *CommentRepository) Count(postId string) (int, error) {
-	parsedPostId, err := uuid.Parse(postId)
-	if err != nil {
-		return 0, err
-	}
-
-	count, err := r.db.Comment.Query().
-		Where(comment.HasPostWith(post.ID(parsedPostId))).
-		Count(context.Background())
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
-}
-
-func (r *CommentRepository) GetByPostId(postId string) ([]*ent.Comment, error) {
-	parsedPostId, err := uuid.Parse(postId)
-	if err != nil {
-		return nil, err
-	}
-
-	comments, err := r.db.Comment.Query().
-		Where(comment.HasPostWith(post.ID(parsedPostId))).
-		WithUser().
-		All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
 }
