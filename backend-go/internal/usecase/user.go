@@ -44,7 +44,6 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	}
 
 	iconURL := ""
-	// ユーザーのアイコン画像がある場合は URL を取得
 	if user.IconImageKey != "" {
 		url, err := u.storageRepository.GetUrl(user.IconImageKey)
 		if err != nil {
@@ -66,7 +65,32 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 			log.Errorf("Failed to get url: %v", err)
 			return models.UserResponse{}, err
 		}
-		postResponses[i] = models.NewPostResponse(post, imageURL, iconURL)
+
+		commentResponses := make([]models.CommentResponse, len(post.Edges.Comments))
+		for j, comment := range post.Edges.Comments {
+			commentUserImageURL := ""
+			if comment.Edges.User.IconImageKey != "" {
+				commentUserImageURL, err = u.storageRepository.GetUrl(comment.Edges.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get comment user url: %v", err)
+					return models.UserResponse{}, err
+				}
+			}
+			commentResponses[j] = models.NewCommentResponse(comment, comment.Edges.User, commentUserImageURL)
+		}
+		likeResponses := make([]models.LikeResponse, len(post.Edges.Likes))
+		for j, like := range post.Edges.Likes {
+			likeUserImageURL := ""
+			if like.Edges.User.IconImageKey != "" {
+				likeUserImageURL, err = u.storageRepository.GetUrl(like.Edges.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get like user url: %v", err)
+					return models.UserResponse{}, err
+				}
+			}
+			likeResponses[j] = models.NewLikeResponse(like, likeUserImageURL)
+		}
+		postResponses[i] = models.NewPostResponse(post, imageURL, iconURL, commentResponses, likeResponses)
 	}
 
 	pets, err := u.petRepository.GetByOwner(user.ID.String())
@@ -84,7 +108,6 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	}
 
 	userResponse := models.NewUserResponse(user, iconURL, postResponses, petResponses)
-
 	return userResponse, nil
 }
 
