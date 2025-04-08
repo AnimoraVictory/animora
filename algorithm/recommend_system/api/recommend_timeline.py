@@ -70,7 +70,6 @@ def get_recommended_timeline(user_id, candidates, model, device, is_existing_use
     else:
         # タイムスタンプが新しい順にソート
         sorted_recommend = sorted(recommended, key=lambda x: x["created_at"], reverse=True)
-
     
     return sorted_recommend
 
