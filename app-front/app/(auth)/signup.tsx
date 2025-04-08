@@ -2,8 +2,6 @@ import React from "react";
 import {
   View,
   Text,
-  TextInput,
-  Button,
   StyleSheet,
   Alert,
   TouchableWithoutFeedback,
