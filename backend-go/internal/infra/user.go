@@ -58,7 +58,15 @@ func (r *UserRepository) ExistsEmail(email string) (bool, error) {
 }
 
 func (r *UserRepository) FindByEmail(email string) (*ent.User, error) {
-	user, err := r.db.User.Query().Where(user.Email(email)).First(context.Background())
+	user, err := r.db.User.Query().Where(user.Email(email)).
+		WithFollowing(func(q *ent.FollowRelationQuery) {
+			q.WithTo()
+		}).
+		WithFollowers(
+			func(q *ent.FollowRelationQuery) {
+				q.WithFrom()
+			}).
+		First(context.Background())
 	if err != nil {
 		return nil, err
 	}

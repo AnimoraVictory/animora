@@ -57,7 +57,7 @@ export const UserPetList: React.FC<Props> = ({
       contentContainerStyle={{
         flexGrow: 1,
         backgroundColor,
-        paddingBottom: 20,
+        paddingBottom: 200,
       }}
       ListEmptyComponent={
         <Text style={{ color: colors.text, textAlign: "center", marginTop: 32 }}>
