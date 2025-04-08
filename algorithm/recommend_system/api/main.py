@@ -29,8 +29,11 @@ class TimelineRequest(BaseModel):
 
 class Post(BaseModel):
     id: int
-    timestamp: str
+    caption: str
+    image_key: str
+    created_at: str
     score: float
+    users: dict[str, str]
 
 class TimelineResponse(BaseModel):
     posts: list[Post]
@@ -101,8 +104,17 @@ def recommend_timeline(request: TimelineRequest):
             request.limit = len(recommended) - request.offset
         posts = [Post(
             id=rc["post_id"],
-            timestamp=str(rc["timestamp"]),
-            score=rc["score"]
+            caption=rc["caption"],
+            image_key=rc["image_key"],
+            created_at=str(rc["created_at"]),
+            score=rc["score"],
+            users={
+                "id": rc["user_id"], 
+                "name": rc["name"],
+                "email": rc["email"],
+                "bio": rc["bio"],
+                "icon_image_key": rc["icon_image_key"]
+            } if is_existing_user else {}
         ) for rc in recommended[request.offset:request.offset + request.limit]]
         return TimelineResponse(posts=posts)
     except Exception as e:
