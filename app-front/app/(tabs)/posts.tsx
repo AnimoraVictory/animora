@@ -19,14 +19,18 @@ import { ThemedView } from "@/components/ThemedView";
 import { PostPanel } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
 import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
+import { petSchema } from "@/components/PetPanel";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export const userBaseSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
+  email: z.string(),
   name: z.string(),
-  iconImageUrl: z.string().url(),
+  bio: z.string(), 
+  iconImageUrl: z.string()
 });
+
 
 export const commentSchema = z.object({
   id: z.string(),
@@ -51,6 +55,15 @@ export const postSchema = z.object({
   likes: z.array(likeSchema),
   likesCount: z.number(),
   createdAt: z.string().datetime(),
+});
+
+export const userSchema = userBaseSchema.extend({
+  followers: z.array(userBaseSchema),
+  follows: z.array(userBaseSchema),
+  followersCount: z.number(),
+  followsCount: z.number(),
+  posts: z.array(postSchema),
+  pets: z.array(petSchema),
 });
 
 export const getPostResponseSchema = z.object({

@@ -21,6 +21,7 @@ import { ProfileEditModal } from "@/components/ProfileEditModal";
 import { PetRegiserModal } from "@/components/PetRegisterModal";
 import { UserPetList } from "@/components/UserPetsList";
 import { UserPostList } from "@/components/UserPostList";
+import UsersModal from "@/components/UsersModal";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -30,6 +31,8 @@ const ProfileScreen: React.FC = () => {
   const styles = getStyles(colors);
 
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
+  const [selectedFollowTab, setSelectedFollowTab] =
+    useState<"follows" | "followers">("follows");
   const {
     user,
     loading: authLoading,
@@ -37,12 +40,15 @@ const ProfileScreen: React.FC = () => {
     refetch: refetchUser,
   } = useAuth();
 
+  const [isFollowModalVisible, setIsFollowModalVisible] = useState(false);
+
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] =
     useState(false);
 
   const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
+  const slideAnimFollow = useRef(new Animated.Value(windowWidth)).current;
   const backgroundColor = colorScheme === "light" ? "white" : "black";
 
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -97,6 +103,23 @@ const ProfileScreen: React.FC = () => {
     }).start(() => setIsRegisterPetModalVisible(false));
   };
 
+  const openFollowModal = () => {
+    setIsFollowModalVisible(true);
+    Animated.timing(slideAnimFollow, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeFollowModal = () => {
+    Animated.timing(slideAnimFollow, {
+      toValue: windowWidth,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setIsFollowModalVisible(false));
+  };
+
   if (authLoading || !user) {
     return (
       <View style={styles.loadingContainer}>
@@ -107,7 +130,7 @@ const ProfileScreen: React.FC = () => {
 
   const headerContent = (
     <View style={{backgroundColor}}>
-      <ProfileHeader user={user} onLogout={handleLogout} />
+      <ProfileHeader user={user} onLogout={handleLogout} onOpenFollowModal={openFollowModal} setSelectedTab={setSelectedFollowTab}/>
       <View style={[styles.editButtonsContainer]}>
         <TouchableOpacity
           style={styles.editButton}
@@ -181,6 +204,15 @@ const ProfileScreen: React.FC = () => {
         colorScheme={colorScheme}
         refetchPets={refetchUser}
       />
+      <UsersModal
+        slideAnim={slideAnimFollow}
+        currentUser={user}
+        visible={isFollowModalVisible}
+        onClose={() => closeFollowModal()}
+        users={selectedFollowTab === "followers" ? user.followers : user.follows}
+        selectedTab={selectedFollowTab}
+        setSelectedTab={setSelectedFollowTab}
+      />
     </ThemedView>
   );
 };
@@ -190,6 +222,7 @@ const getStyles = (colors: typeof Colors.light) =>
     container: {
       flex: 1,
     },
+    
     topHeader: {
       paddingTop: 42,
       paddingBottom: 12,
