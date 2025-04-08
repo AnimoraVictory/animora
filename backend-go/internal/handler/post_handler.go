@@ -64,7 +64,21 @@ func (h *PostHandler) GetAllPosts(c echo.Context) error {
 			}
 			commentResponses[j] = models.NewCommentResponse(comment, comment.Edges.User, commentUserImageURL)
 		}
-		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL, commentResponses)
+		likeResponses := make([]models.LikeResponse, len(post.Edges.Likes))
+		for j, like := range post.Edges.Likes {
+			var likeUserImageURL string
+			if like.Edges.User.IconImageKey != "" {
+				likeUserImageURL, err = h.storageUsecase.GetUrl(like.Edges.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get like user image URL: %v", err)
+					return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+						"error": err.Error(),
+					})
+				}
+			}
+			likeResponses[j] = models.NewLikeResponse(like, likeUserImageURL)
+		}
+		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL, commentResponses, likeResponses)
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{

@@ -15,9 +15,17 @@ type PostResponse struct {
 	CreatedAt     time.Time         `json:"createdAt"`
 	Comments      []CommentResponse `json:"comments"`
 	CommentsCount int               `json:"commentsCount"`
+	Likes         []LikeResponse    `json:"likes"`
+	LikesCount    int               `json:"likesCount"`
 }
 
-func NewPostResponse(post *ent.Post, postImageURL string, userImageURL string, comments []CommentResponse) PostResponse {
+func NewPostResponse(
+	post *ent.Post,
+	postImageURL string,
+	userImageURL string,
+	comments []CommentResponse,
+	likes []LikeResponse,
+) PostResponse {
 	user := post.Edges.User
 	return PostResponse{
 		ID:            post.ID,
@@ -27,5 +35,7 @@ func NewPostResponse(post *ent.Post, postImageURL string, userImageURL string, c
 		CreatedAt:     post.CreatedAt,
 		Comments:      comments,
 		CommentsCount: len(comments),
+		Likes:         likes,
+		LikesCount:    len(likes),
 	}
 }

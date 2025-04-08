@@ -10,10 +10,9 @@ import {
   Alert,
 } from 'react-native';
 import { User } from '@/constants/api';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import Constants from 'expo-constants';
-import { router } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 
 type CommentInputProps = {
@@ -29,22 +28,23 @@ const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, onClos
   const colorScheme = useColorScheme();
   const colors = colorScheme === 'light' ? Colors.light : Colors.dark;
 
+  const queryClient = useQueryClient();
+
   const createCommentMutation = useMutation({
     mutationFn: async (data: { content: string }) => {
       const formData = new FormData();
       formData.append('content', data.content);
       formData.append('userId', currentUser?.id ?? '');
       formData.append('postId', postId);
-
+  
       return axios.post(`${API_URL}/comments/new`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
       Alert.alert('コメント完了', 'コメントを追加しました！');
       setContent('');
-      onClose();
-      router.replace('/(tabs)/posts');
     },
     onError: () => {
       Alert.alert('エラー', 'コメントに失敗しました');

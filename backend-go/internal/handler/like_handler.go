@@ -19,8 +19,8 @@ func NewLikeHandler(likeUsecase usecase.LikeUsecase) *LikeHandler {
 }
 
 func (h *LikeHandler) Create(c echo.Context) error {
-	userId := c.Param("userId")
-	postId := c.Param("postId")
+	userId := c.QueryParam("userId")
+	postId := c.QueryParam("postId")
 	err := h.likeUsecase.Create(userId, postId)
 	if err != nil {
 		log.Errorf("Failed to create like: %v", err)
@@ -32,8 +32,8 @@ func (h *LikeHandler) Create(c echo.Context) error {
 }
 
 func (h *LikeHandler) Delete(c echo.Context) error {
-	userId := c.Param("userId")
-	postId := c.Param("postId")
+	userId := c.QueryParam("userId")
+	postId := c.QueryParam("postId")
 	err := h.likeUsecase.Delete(userId, postId)
 	if err != nil {
 		log.Errorf("Failed to delete like: %v", err)

@@ -79,7 +79,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
     <Modal visible={visible} animationType="none" transparent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.staticOverlay} />
-        </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -88,10 +88,10 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
           style={[styles.modal, { transform: [{ translateY: slideAnim }] }]}
         >
           <View style={{ flex: 1 }}>
-          <View {...panResponder.panHandlers}>
-  <View style={styles.gripBar} />
-  <Text style={styles.headerContainer}>コメント</Text>
-</View>
+            <View {...panResponder.panHandlers}>
+              <View style={styles.gripBar} />
+              <Text style={styles.headerContainer}>コメント</Text>
+            </View>
             <View style={styles.commentsContainer}>
               <FlatList
                 data={comments}

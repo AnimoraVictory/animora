@@ -26,6 +26,9 @@ func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 		WithComments(func(q *ent.CommentQuery) {
 			q.WithUser()
 		}).
+		WithLikes(func(q *ent.LikeQuery) {
+			q.WithUser()
+		}).
 		Where(post.DeletedAtIsNil()).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
@@ -40,6 +43,9 @@ func (r *PostRepository) GetPostsByUser(userID uuid.UUID) ([]*ent.Post, error) {
 	posts, err := r.db.Post.Query().
 		WithUser().
 		WithComments(func(q *ent.CommentQuery) {
+			q.WithUser()
+		}).
+		WithLikes(func(q *ent.LikeQuery) {
 			q.WithUser()
 		}).
 		Where(post.HasUserWith(user.ID(userID))).
