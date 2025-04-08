@@ -1,6 +1,7 @@
 import { CreatePostModal } from "@/components/CreatePostModal";
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { CameraView, CameraType, useCameraPermissions, FlashMode } from "expo-camera";
 import { useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -11,6 +12,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Linking,
 } from "react-native";
 
 const { height } = Dimensions.get("window");
@@ -19,11 +21,11 @@ export default function CameraScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [facing, setFacing] = useState<CameraType>("back");
+  const [flashMode, setFlashMode] = useState<FlashMode>("off");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const cameraRef = useRef<any>(null);
 
   const slideAnim = useRef(new Animated.Value(height)).current;
-
   useFocusEffect(
     useCallback(() => {
       slideAnim.setValue(height);
@@ -44,47 +46,71 @@ export default function CameraScreen() {
     });
   };
 
-  if (!permission) return <View />;
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.message}>カメラの許可が必要です</Text>
-        <Button title="許可する" onPress={requestPermission} />
-      </View>
-    );
-  }
-
-  const handleFlip = () => {
-    setFacing((prev) => (prev === "back" ? "front" : "back"));
-  };
-
-  const takePhoto = async () => {
-    if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
-      setPhotoUri(photo.uri);
-    }
-  };
+  if (!permission) return null;
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
-      {photoUri ? (
-        <CreatePostModal
-        photoUri={photoUri}
-        onClose={() => setPhotoUri("")}
-        />
+    <Animated.View
+      style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
+    >
+      {!permission.granted ? (
+        <View style={styles.permissionOverlay}>
+          <Text style={styles.permissionText}>カメラの許可が必要です</Text>
+          {permission.canAskAgain ? (
+            <Button title="許可をリクエスト" onPress={requestPermission} />
+          ) : (
+            <Button title="設定を開く" onPress={() => Linking.openSettings()} />
+          )}
+        </View>
+      ) : photoUri ? (
+        <CreatePostModal photoUri={photoUri} onClose={() => setPhotoUri(null)} />
       ) : (
-        <CameraView ref={cameraRef} style={styles.camera} facing={facing}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => handleClose()}
-          >
-            <Text style={styles.closeText}>x</Text>
+        <CameraView
+          ref={cameraRef}
+          style={styles.camera}
+          facing={facing}
+          flash={flashMode}
+        >
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+            <Text style={styles.closeText}>×</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.flipButton} onPress={handleFlip}>
-            <Text style={styles.flipText}>↺</Text>
-          </TouchableOpacity>
+
           <View style={styles.bottomControls}>
-            <TouchableOpacity style={styles.shutterButton} onPress={takePhoto} />
+            {/* フラッシュ切替ボタン */}
+            <TouchableOpacity
+              style={styles.flashButton}
+              onPress={() =>
+                setFlashMode((prev) =>
+                  prev === "off"
+                    ? "on"
+                    : "off"
+                )
+              }
+            >
+              <Ionicons
+                name={flashMode === "off" ? "flash-off" : "flash"}
+                size={30}
+                color={flashMode === "off" ? "#888" : "#facc15"}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.shutterButton}
+              onPress={async () => {
+                if (cameraRef.current) {
+                  const photo = await cameraRef.current.takePictureAsync();
+                  setPhotoUri(photo.uri);
+                }
+              }}
+            />
+
+            <TouchableOpacity
+              style={styles.flipButton}
+              onPress={() =>
+                setFacing((prev) => (prev === "back" ? "front" : "back"))
+              }
+            >
+              <Text style={styles.flipText}>↺</Text>
+            </TouchableOpacity>
           </View>
         </CameraView>
       )}
@@ -93,26 +119,42 @@ export default function CameraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1 },
+  permissionOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    padding: 16,
   },
-  camera: {
-    flex: 1,
-  },
-  message: {
+  permissionText: {
+    color: "#fff",
+    fontSize: 18,
     textAlign: "center",
-    marginTop: 20,
+    marginBottom: 20,
   },
-  preview: {
-    flex: 1,
-    resizeMode: "cover",
-  },
+  camera: { flex: 1 },
   bottomControls: {
     position: "absolute",
     bottom: 40,
     width: "100%",
-    alignItems: "center",
+    flexDirection: "row",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  flashButton: {
+    marginRight: 50,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  flashText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
   },
   shutterButton: {
     width: 80,
@@ -123,32 +165,34 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
   },
   flipButton: {
-    position: "absolute",
+    marginLeft: 50,
     width: 50,
-    top: 40,
-    right: 20,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 20,
-    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
   flipText: {
-    textAlign: "center",
-    fontSize: 24,
     color: "#fff",
+    fontSize: 24,
+    textAlign: "center",
   },
   closeButton: {
     position: "absolute",
-    width: 50,
     top: 40,
     left: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 20,
-    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1,
   },
   closeText: {
-    textAlign: "center",
-    fontSize: 24,
     color: "#fff",
+    fontSize: 24,
+    textAlign: "center",
   },
 });
