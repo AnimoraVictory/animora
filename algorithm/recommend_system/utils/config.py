@@ -66,7 +66,7 @@ existing_user_query = """
                           P.index AS post_id,
                           P.created_at AS created_at,
                           P.image_feature AS image_feature, -- JSON文字列
-                          P.text_feature AS text_feature -- JSON文字列
+                          P.text_feature AS text_feature, -- JSON文字列
                           P.caption AS caption,
                           P.image_key AS image_key,
                           U.id AS user_id,
@@ -75,7 +75,7 @@ existing_user_query = """
                           U.bio AS bio,
                           U.icon_image_key AS icon_image_key
                       FROM posts P
-                      LEFT JOIN users U ON posts.user_posts = users.id
+                      LEFT JOIN users U ON P.user_posts = U.id
                       WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL;
                       """
 existing_user_threshold = 0.45
@@ -89,7 +89,7 @@ new_user_query = """
                      P.created_at AS created_at,
                      P.image_feature AS image_feature,
                      P.text_feature AS text_feature,
-                     COUNT(DISTINCT L.id) + COUNT(DISTINCT C.id) AS score
+                     COUNT(DISTINCT L.id) + COUNT(DISTINCT C.id) AS score,
                      P.caption AS caption,
                      P.image_key AS image_key
                  FROM posts P
