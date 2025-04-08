@@ -1,7 +1,8 @@
+
+import { Colors } from '../constants/Colors';
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/Colors';
 
 export type ProfileTabType = 'posts' | 'mypet';
 
@@ -13,7 +14,7 @@ type ProfileTabSelectorProps = {
 export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({ selectedTab, onSelectTab }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const backgroundColor = colorScheme == "light" ? "white" : "black"
+  const backgroundColor = colorScheme === "light" ? "white" : "black"
   const styles = getStyles(colors);
 
   return (

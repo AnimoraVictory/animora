@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   StyleSheet,
   Animated,
@@ -22,17 +22,34 @@ import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-const userBaseSchema = z.object({
+export const userBaseSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   iconImageUrl: z.string().url(),
 });
+
+export const commentSchema = z.object({
+  id: z.string(),
+  user: userBaseSchema,
+  content: z.string(),
+  createdAt: z.string().datetime(),
+})
+
+export const likeSchema = z.object({
+  id: z.string(),
+  user: userBaseSchema,
+  createdAt: z.string().datetime(),
+})
 
 export const postSchema = z.object({
   id: z.string().uuid(),
   caption: z.string().min(0),
   imageUrl: z.string().min(1),
   user: userBaseSchema,
+  comments: z.array(commentSchema),
+  commentsCount: z.number(),
+  likes: z.array(likeSchema),
+  likesCount: z.number(),
   createdAt: z.string().datetime(),
 });
 
@@ -41,19 +58,18 @@ export const getPostResponseSchema = z.object({
 });
 
 export default function PostsScreen() {
-  const [refreshing, setRefreshing] = useState(false);
   const colorScheme = useColorScheme();
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollYRef = useRef(0);
   const listRef = useRef<FlatList>(null);
-  const HEADER_HEIGHT = 80;
+  const HEADER_HEIGHT = 90;
 
   const icon =
     colorScheme === "light"
       ? require("../../assets/images/icon-green.png")
       : require("../../assets/images/icon-dark.png");
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
       const response = await axios.get(`${API_URL}/posts/`);
@@ -108,8 +124,8 @@ export default function PostsScreen() {
           }
           refreshControl={
             <RefreshControl
-              refreshing={false}
-              onRefresh={() => {}}
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
               progressViewOffset={HEADER_HEIGHT}
               tintColor={colorScheme === "light" ? "black" : "white"}
             />
@@ -136,20 +152,21 @@ export default function PostsScreen() {
       </Animated.View>
 
       <Animated.FlatList
+        keyboardShouldPersistTaps="handled"
         ref={listRef}
         style={{
           backgroundColor: colorScheme === "light" ? "white" : "black",
         }}
-        contentInset={{ top: HEADER_HEIGHT + 12 }}
-        contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 12) }}
+        contentInset={{ top: HEADER_HEIGHT + 20 }}
+        contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 20) }}
         contentContainerStyle={{ paddingBottom: 75 }}
         data={data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PostPanel post={item} />}
         refreshControl={
           <RefreshControl
-            refreshing={false}
-            onRefresh={() => {}}
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
         }
@@ -175,7 +192,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: 90,
     zIndex: 10,
     justifyContent: "flex-start",
     alignItems: "center",
@@ -183,12 +200,12 @@ const styles = StyleSheet.create({
   logo: {
     width: 32,
     height: 32,
-    marginTop: 40,
+    marginTop: 50,
     resizeMode: "contain",
   },
   errorText: {
     textAlign: "center",
-    marginTop: 100,
+    marginTop: 150,
     fontSize: 16,
     color: "gray",
   },
