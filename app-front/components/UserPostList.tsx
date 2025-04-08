@@ -55,7 +55,7 @@ export const UserPostList: React.FC<Props> = ({
           {headerComponent}
         </View>
       }
-      contentContainerStyle={{ flexGrow: 1, backgroundColor, paddingBottom: 20 }}
+      contentContainerStyle={{ flexGrow: 1, backgroundColor, paddingBottom: 200 }}
       ListEmptyComponent={
         <Text style={{ color: colors.text, textAlign: "center", marginTop: 32 }}>
           投稿しましょう！
