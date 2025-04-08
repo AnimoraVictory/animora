@@ -1,22 +1,33 @@
 import axios from "axios";
 import Constants from "expo-constants";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Post } from "@/components/PostPanel";
 import { petSchema } from "@/components/PetPanel";
 import { z } from "zod";
+import { postSchema } from "@/app/(tabs)/posts";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export type Pet = z.infer<typeof petSchema>;
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  bio: string;
-  iconImageUrl: string;
-  posts: Post[];
-  pets: Pet[];
-}
+const userBaseSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  name: z.string(),
+  bio: z.string(), 
+  iconImageUrl: z.string()
+});
+
+const userSchema = userBaseSchema.extend({
+  followers: z.array(userBaseSchema),
+  follows: z.array(userBaseSchema),
+  followersCount: z.number(),
+  followsCount: z.number(),
+  posts: z.array(postSchema),
+  pets: z.array(petSchema),
+});
+
+export type UserBase = z.infer<typeof userBaseSchema>;
+
+export type User = z.infer<typeof userSchema>;
 
 export interface LoginResponse {
   message: string;

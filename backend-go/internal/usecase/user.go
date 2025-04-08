@@ -107,7 +107,27 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 		petResponses[i] = models.NewPetResponse(pet, imageURL)
 	}
 
-	userResponse := models.NewUserResponse(user, iconURL, postResponses, petResponses)
+	followers := make([]models.UserBaseResponse, len(user.Edges.Followers))
+	for i, followersRelation := range user.Edges.Followers {
+		follower := followersRelation.Edges.From
+		imageUrl, err := u.storageRepository.GetUrl(follower.IconImageKey)
+		if err != nil {
+			continue
+		}
+		followers[i] = models.NewUserBaseResponse(follower, imageUrl)
+	}
+
+	follows := make([]models.UserBaseResponse, len(user.Edges.Following))
+	for i, followsRelation := range user.Edges.Following {
+		follow := followsRelation.Edges.To
+		imageUrl, err := u.storageRepository.GetUrl(follow.IconImageKey)
+		if err != nil {
+			continue
+		}
+		follows[i] = models.NewUserBaseResponse(follow, imageUrl)
+	}
+
+	userResponse := models.NewUserResponse(user, iconURL, postResponses, petResponses, followers, follows)
 	return userResponse, nil
 }
 
