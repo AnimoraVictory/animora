@@ -55,7 +55,7 @@ class SampleGenerator(object):
     def __init__(self, ratings):
         """
         Args:
-            ratings(pd.DataFrame): ["user_id", "post_id", "rating", "timestamp", "image_feature", "text_feature"]
+            ratings(pd.DataFrame): ["user_id", "post_id", "rating", "created_at", "image_feature", "text_feature"]
         """
         # 入力チェック
         for col in ["user_id", "post_id", "rating", "image_feature", "text_feature"]:
@@ -114,7 +114,7 @@ class SampleGenerator(object):
         Leave-One-Outを使用して、学習データとテストデータに分割
             Leave-One-Out: 各ユーザーに対する最新の評価データをテストデータとして使用
         """
-        ratings["rank_latest"] = ratings.groupby(["user_id"])["timestamp"].rank(method="first", ascending=False)
+        ratings["rank_latest"] = ratings.groupby(["user_id"])["created_at"].rank(method="first", ascending=False)
         test = ratings[ratings["rank_latest"] == 1]
         train = ratings[ratings["rank_latest"] > 1]
         train = train[["user_id", "post_id", "rating", "image_feature", "text_feature"]] # 画像・テキスト特徴を追加
