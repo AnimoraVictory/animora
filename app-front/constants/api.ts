@@ -3,27 +3,10 @@ import Constants from "expo-constants";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { petSchema } from "@/components/PetPanel";
 import { z } from "zod";
-import { postSchema } from "@/app/(tabs)/posts";
+import { userBaseSchema, userSchema } from "@/app/(tabs)/posts";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export type Pet = z.infer<typeof petSchema>;
-
-const userBaseSchema = z.object({
-  id: z.string(),
-  email: z.string(),
-  name: z.string(),
-  bio: z.string(), 
-  iconImageUrl: z.string()
-});
-
-const userSchema = userBaseSchema.extend({
-  followers: z.array(userBaseSchema),
-  follows: z.array(userBaseSchema),
-  followersCount: z.number(),
-  followsCount: z.number(),
-  posts: z.array(postSchema),
-  pets: z.array(petSchema),
-});
 
 export type UserBase = z.infer<typeof userBaseSchema>;
 
