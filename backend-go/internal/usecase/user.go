@@ -78,8 +78,19 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 			}
 			commentResponses[j] = models.NewCommentResponse(comment, comment.Edges.User, commentUserImageURL)
 		}
-
-		postResponses[i] = models.NewPostResponse(post, imageURL, iconURL, commentResponses)
+		likeResponses := make([]models.LikeResponse, len(post.Edges.Likes))
+		for j, like := range post.Edges.Likes {
+			likeUserImageURL := ""
+			if like.Edges.User.IconImageKey != "" {
+				likeUserImageURL, err = u.storageRepository.GetUrl(like.Edges.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get like user url: %v", err)
+					return models.UserResponse{}, err
+				}
+			}
+			likeResponses[j] = models.NewLikeResponse(like, likeUserImageURL)
+		}
+		postResponses[i] = models.NewPostResponse(post, imageURL, iconURL, commentResponses, likeResponses)
 	}
 
 	pets, err := u.petRepository.GetByOwner(user.ID.String())

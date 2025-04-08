@@ -32,7 +32,13 @@ export const commentSchema = z.object({
   id: z.string(),
   user: userBaseSchema,
   content: z.string(),
-  createdAt: z.string(),
+  createdAt: z.string().datetime(),
+})
+
+export const likeSchema = z.object({
+  id: z.string(),
+  user: userBaseSchema,
+  createdAt: z.string().datetime(),
 })
 
 export const postSchema = z.object({
@@ -42,6 +48,8 @@ export const postSchema = z.object({
   user: userBaseSchema,
   comments: z.array(commentSchema),
   commentsCount: z.number(),
+  likes: z.array(likeSchema),
+  likesCount: z.number(),
   createdAt: z.string().datetime(),
 });
 
@@ -54,7 +62,7 @@ export default function PostsScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollYRef = useRef(0);
   const listRef = useRef<FlatList>(null);
-  const HEADER_HEIGHT = 80;
+  const HEADER_HEIGHT = 90;
 
   const icon =
     colorScheme === "light"
@@ -149,8 +157,8 @@ export default function PostsScreen() {
         style={{
           backgroundColor: colorScheme === "light" ? "white" : "black",
         }}
-        contentInset={{ top: HEADER_HEIGHT + 12 }}
-        contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 12) }}
+        contentInset={{ top: HEADER_HEIGHT + 20 }}
+        contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 20) }}
         contentContainerStyle={{ paddingBottom: 75 }}
         data={data}
         keyExtractor={(item) => item.id}
@@ -184,7 +192,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: 90,
     zIndex: 10,
     justifyContent: "flex-start",
     alignItems: "center",
@@ -192,12 +200,12 @@ const styles = StyleSheet.create({
   logo: {
     width: 32,
     height: 32,
-    marginTop: 40,
+    marginTop: 50,
     resizeMode: "contain",
   },
   errorText: {
     textAlign: "center",
-    marginTop: 100,
+    marginTop: 150,
     fontSize: 16,
     color: "gray",
   },
