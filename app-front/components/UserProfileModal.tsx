@@ -164,13 +164,19 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
         }
     };
 
-    const isMe = currentUser.id === user?.id;
+
+    const isMe: boolean = useMemo(() => {
+        return !!user?.id && user.id === currentUser.id;
+      }, [user?.id]);
+    
+    console.log(isMe, prevModalIdx + 1)
 
     if (!user || isLoading) return null;
 
     const headerContent = (
         <View style={{ backgroundColor }}>
             <UserProfileHeader
+                key={prevModalIdx +1}
                 isMe={isMe}
                 user={user}
                 onPressFollow={handlePressFollowButton}
@@ -209,8 +215,8 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
                 </View>
             </Animated.View>
             <UsersModal
+                key={prevModalIdx + 1}
                 prevModalIdx={prevModalIdx + 1}
-                key={user.id}
                 visible={isFollowModalVisible}
                 user={user}
                 currentUser={currentUser}
