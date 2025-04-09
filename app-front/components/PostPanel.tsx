@@ -166,6 +166,14 @@ export const PostPanel = ({ post }: Props) => {
         onClose={closeModal}
       />
       <UserProfileModal
+        key={post.user.id}
+        currentUser={{
+          id: currentUser?.id ?? "",
+          iconImageUrl: currentUser?.iconImageUrl ?? "",
+          bio: currentUser?.bio ?? "",
+          name: currentUser?.name ?? "",
+          email: currentUser?.email ?? "",
+        }}
         email={post.user.email}
         visible={isUserModalVisible}
         onClose={closeUserProfile}
