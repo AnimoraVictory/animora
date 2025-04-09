@@ -216,6 +216,7 @@ const ProfileScreen: React.FC = () => {
       <UsersModal
         prevModalIdx={0}
         slideAnim={slideAnimFollow}
+        user={user}
         currentUser={user}
         visible={isFollowModalVisible}
         onClose={() => closeFollowModal()}

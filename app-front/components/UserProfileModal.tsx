@@ -90,10 +90,10 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
         enabled: visible,
     });
 
-    const [isFollowing, setIsFollowing] = useState<boolean>(
-        user?.followers.some((follower) =>
-            follower.id === currentUser?.id) ?? false
-    );
+    const isFollowing = useMemo(() => {
+        if (!user) return false;
+        return user.followers.some((follower) => follower.id === currentUser.id);
+      }, [user?.followers, currentUser?.id]);
 
     const onOpenFollowModal = () => {
         setIsFollowModalVisible(true);
@@ -129,7 +129,6 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
                     followersCount: prev.followersCount + 1,
                 };
             });
-            setIsFollowing(true);
             refetch();
         },
         onError: (error) => {
@@ -150,7 +149,6 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
                     followersCount: prev.followersCount - 1,
                 };
             });
-            setIsFollowing(false);
             refetch();
         },
         onError: (error) => {
@@ -214,6 +212,7 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
                 prevModalIdx={prevModalIdx + 1}
                 key={user.id}
                 visible={isFollowModalVisible}
+                user={user}
                 currentUser={currentUser}
                 onClose={onCloseFollowModal}
                 users={selectedFollowTab === "followers" ? user.followers : user.follows}

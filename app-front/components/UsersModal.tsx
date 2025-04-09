@@ -20,7 +20,7 @@ import { useModalStack } from '@/providers/ModalStackContext';
 const { width, height } = Dimensions.get('window');
 
 type Props = {
-    currentUser: UserBase;
+    user: UserBase;
     visible: boolean;
     onClose: () => void;
     users: UserBase[];
@@ -28,10 +28,11 @@ type Props = {
     setSelectedTab: (tab: 'follows' | 'followers') => void;
     slideAnim: Animated.Value;
     prevModalIdx: number
+    currentUser: UserBase
 };
 
 const UsersModal: React.FC<Props> = ({
-    currentUser,
+    user,
     visible,
     onClose,
     users,
@@ -108,7 +109,7 @@ const UsersModal: React.FC<Props> = ({
                     <TouchableOpacity style={styles.backButton} onPress={onClose}>
                         <Text style={styles.backText}>＜</Text>
                     </TouchableOpacity>
-                    <Text style={[styles.headerUserName, { color: colors.tint }]}>{currentUser.name}</Text>
+                    <Text style={[styles.headerUserName, { color: colors.tint }]}>{user.name}</Text>
                 </Animated.View>
                 <Animated.View style={[styles.modalContainer, { backgroundColor: colors.background, paddingTop: 80 }]}>
                     <View style={styles.tabHeader}>
@@ -142,7 +143,7 @@ const UsersModal: React.FC<Props> = ({
                 <UserProfileModal
                     prevModalIdx={prevModalIdx + 1}
                     key={selectedUserEmail}
-                    currentUser={currentUser}
+                    currentUser={user}
                     email={selectedUserEmail}
                     visible={isProfileModalVisible}
                     onClose={closeUserProfile}
