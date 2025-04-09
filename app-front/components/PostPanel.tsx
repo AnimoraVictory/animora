@@ -170,6 +170,8 @@ export const PostPanel = ({ post }: Props) => {
         visible={isModalVisible}
         comments={post.comments}
         onClose={closeModal}
+        queryKey={["posts"]}
+        onNewComment={() => {}}
       />
       <UserProfileModal
       prevModalIdx={0}

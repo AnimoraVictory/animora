@@ -18,7 +18,7 @@ import { z } from 'zod';
 import CommentInput from '@/components/CommentInput';
 import { User } from '@/constants/api';
 
-type Comment = z.infer<typeof commentSchema>;
+export type Comment = z.infer<typeof commentSchema>;
 
 type CommentsModalProps = {
   postId: string;
@@ -27,6 +27,8 @@ type CommentsModalProps = {
   onClose: () => void;
   currentUser: User | null | undefined;
   slideAnim: Animated.Value;
+  queryKey: unknown[]
+  onNewComment: (comment: Comment) => void;
 };
 
 const CommentsModal: React.FC<CommentsModalProps> = ({
@@ -36,6 +38,8 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
   onClose,
   currentUser,
   slideAnim,
+  queryKey,
+  onNewComment
 }) => {
   const windowHeight = Dimensions.get("window").height;
   const modalHeight = windowHeight * 0.6;
@@ -111,7 +115,11 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
             </View>
 
             <View style={styles.inputContainer}>
-              <CommentInput currentUser={currentUser} onClose={onClose} postId={postId} />
+              <CommentInput 
+              currentUser={currentUser} 
+              postId={postId} 
+              queryKey={queryKey}
+              onNewComment={onNewComment}/>
             </View>
           </View>
         </Animated.View>

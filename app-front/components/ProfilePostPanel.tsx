@@ -3,7 +3,7 @@ import { TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native";
 
 export type ProfilePostPanelProps = {
   imageUrl: string;
-  onPress?: () => void;
+  onPress: () => void;
 };
 
 const windowWidth = Dimensions.get("window").width;

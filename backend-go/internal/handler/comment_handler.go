@@ -22,7 +22,7 @@ func (h *CommentHandler) Create(c echo.Context) error {
 	userId := c.FormValue("userId")
 	postId := c.FormValue("postId")
 	content := c.FormValue("content")
-	err := h.commentUsecase.Create(userId, postId, content)
+	comment, err := h.commentUsecase.Create(userId, postId, content)
 	if err != nil {
 		log.Errorf("Failed to create comment: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -31,6 +31,7 @@ func (h *CommentHandler) Create(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Comment created successfully",
+		"comment": comment,
 	})
 }
 
