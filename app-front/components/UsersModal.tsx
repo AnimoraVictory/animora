@@ -70,33 +70,33 @@ const UsersModal: React.FC<Props> = ({
     };
 
     const panResponder = useMemo(() =>
-            PanResponder.create({
-                onStartShouldSetPanResponder: () => false,
-                onMoveShouldSetPanResponder: (_, gestureState) => {
-                    const isHorizontalSwipe = Math.abs(gestureState.dx) > 1 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-                    return isHorizontalSwipe && gestureState.dx > 1 && isTop(modalKey);
-                },
-                onPanResponderMove: (_, gestureState) => {
-                    if (gestureState.dx > 0) {
-                        slideAnim.setValue(gestureState.dx);
-                    }
-                },
-                onPanResponderRelease: (_, gestureState) => {
-                    if (gestureState.dx > 100) {
-                        Animated.timing(slideAnim, {
-                            toValue: width,
-                            duration: 200,
-                            useNativeDriver: true,
-                        }).start(() => onClose());
-                    } else {
-                        Animated.spring(slideAnim, {
-                            toValue: 0,
-                            useNativeDriver: true,
-                        }).start();
-                    }
-                },
-            })
-            , [modalKey, isTop, slideAnim, onClose]);
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => false,
+            onMoveShouldSetPanResponder: (_, gestureState) => {
+                const isHorizontalSwipe = Math.abs(gestureState.dx) > 1 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+                return isHorizontalSwipe && gestureState.dx > 1 && isTop(modalKey);
+            },
+            onPanResponderMove: (_, gestureState) => {
+                if (gestureState.dx > 0) {
+                    slideAnim.setValue(gestureState.dx);
+                }
+            },
+            onPanResponderRelease: (_, gestureState) => {
+                if (gestureState.dx > 100) {
+                    Animated.timing(slideAnim, {
+                        toValue: width,
+                        duration: 200,
+                        useNativeDriver: true,
+                    }).start(() => onClose());
+                } else {
+                    Animated.spring(slideAnim, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }).start();
+                }
+            },
+        })
+        , [modalKey, isTop, slideAnim, onClose]);
 
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
@@ -140,7 +140,7 @@ const UsersModal: React.FC<Props> = ({
             </Animated.View>
             {selectedUserEmail && (
                 <UserProfileModal
-                    prevModalIdx={prevModalIdx +1}
+                    prevModalIdx={prevModalIdx + 1}
                     key={selectedUserEmail}
                     currentUser={currentUser}
                     email={selectedUserEmail}
