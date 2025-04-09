@@ -18,6 +18,7 @@ import { useAuth } from "@/providers/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import axios from "axios";
+import UserProfileModal from "./UserProfileModal";
 
 export type Post = z.infer<typeof postSchema>;
 
@@ -30,7 +31,10 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const PostPanel = ({ post }: Props) => {
 
   const [isModalVisible, setIsModalVisible] = React.useState(false);
+  const [isUserModalVisible, setIsUserModalVisible] = React.useState(false);
+
   const slideAnim = useRef(new Animated.Value(300)).current;
+  const slideAnimUser = useRef(new Animated.Value(Dimensions.get("window").width)).current;
   const screenWidth = Dimensions.get("window").width;
   const imageHeight = (screenWidth * 14) / 9;
   const colorScheme = useColorScheme();
@@ -43,6 +47,7 @@ export const PostPanel = ({ post }: Props) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+
   const { user: currentUser } = useAuth();
   const windowHeight = Dimensions.get("window").height;
 
@@ -50,42 +55,42 @@ export const PostPanel = ({ post }: Props) => {
     post.likes?.some((like) => like.user.id === currentUser?.id) ?? false;
 
   const useToggleLike = (postId: string, userId: string) => {
-      const queryClient = useQueryClient();
-    
-      const createLikeMutation = useMutation({
-        mutationFn: () => {
-          return axios.post(`${API_URL}/likes/new?userId=${userId}&postId=${postId}`);
-        },
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["posts"] });
-        },
-        onError: (error) => {
-          console.error("likeに失敗しました", error);
-        },
-      });
-    
-      const deleteLikeMutation = useMutation({
-        mutationFn: () => {
-          return axios.delete(`${API_URL}/likes/delete?userId=${userId}&postId=${postId}`);
-        },
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["posts"] });
-        },
-        onError: (error) => {
-          console.error("Like削除エラー", error);
-        },
-      });
-    
-      const toggleLike = (liked: boolean) => {
-        if (liked) {
-          deleteLikeMutation.mutate();
-        } else {
-          createLikeMutation.mutate();
-        }
-      };
-    
-      return { toggleLike };
+    const queryClient = useQueryClient();
+
+    const createLikeMutation = useMutation({
+      mutationFn: () => {
+        return axios.post(`${API_URL}/likes/new?userId=${userId}&postId=${postId}`);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+      },
+      onError: (error) => {
+        console.error("likeに失敗しました", error);
+      },
+    });
+
+    const deleteLikeMutation = useMutation({
+      mutationFn: () => {
+        return axios.delete(`${API_URL}/likes/delete?userId=${userId}&postId=${postId}`);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+      },
+      onError: (error) => {
+        console.error("Like削除エラー", error);
+      },
+    });
+
+    const toggleLike = (liked: boolean) => {
+      if (liked) {
+        deleteLikeMutation.mutate();
+      } else {
+        createLikeMutation.mutate();
+      }
     };
+
+    return { toggleLike };
+  };
 
   const { toggleLike } = useToggleLike(post.id, currentUser?.id ?? "");
 
@@ -107,19 +112,36 @@ export const PostPanel = ({ post }: Props) => {
     }).start(() => setIsModalVisible(false));
   };
 
+  const openUserProfile = () => {
+    setIsUserModalVisible(true);
+    Animated.timing(slideAnimUser, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeUserProfile = () => {
+    Animated.timing(slideAnimUser, {
+      toValue: Dimensions.get("window").width,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setIsUserModalVisible(false));
+  };
+
   return (
     <>
       <View style={styles.wrapper}>
-        <View style={styles.header}>
+        <TouchableOpacity style={styles.header} onPress={openUserProfile}>
           <Image source={{ uri: post.user.iconImageUrl }} style={styles.avatar} />
           <View style={styles.userInfo}>
             <Text style={[styles.userName, { color: colors.text }]}>{post.user.name}</Text>
             <Text style={[styles.postTime, { color: colors.icon }]}>{formattedDateTime}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
         <View style={[styles.imageContainer, { height: imageHeight }]}>
           <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
-            
+
           <TouchableOpacity
             style={styles.likeBox}
             onPress={() => toggleLike(likedByCurrentUser)}
@@ -128,8 +150,8 @@ export const PostPanel = ({ post }: Props) => {
             <Text style={{ color: "white" }}>{post.likesCount}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.commentBox} onPress={() => OpenModal()}>
-            
-          <Ionicons name="chatbox-ellipses-outline" size={35} color="white" />
+
+            <Ionicons name="chatbox-ellipses-outline" size={35} color="white" />
             <Text style={{ color: "white" }}>{post.commentsCount}</Text>
           </TouchableOpacity>
         </View>
@@ -142,6 +164,12 @@ export const PostPanel = ({ post }: Props) => {
         visible={isModalVisible}
         comments={post.comments}
         onClose={closeModal}
+      />
+      <UserProfileModal
+        email={post.user.email}
+        visible={isUserModalVisible}
+        onClose={closeUserProfile}
+        slideAnim={slideAnimUser}
       />
     </>
   );
