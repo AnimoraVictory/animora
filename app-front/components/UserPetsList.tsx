@@ -36,7 +36,7 @@ export const UserPetList: React.FC<Props> = ({
       keyExtractor={(item) => item.id}
       numColumns={1}
       renderItem={({ item }) => (
-        <View style={{ padding: 10, borderColor: colors.icon }}>
+        <View style={{paddingTop: 2, borderColor: colors.icon }}>
           <PetPanel pet={item} colorScheme={colorScheme} />
         </View>
       )}
