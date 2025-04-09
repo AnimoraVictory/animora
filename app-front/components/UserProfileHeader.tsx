@@ -47,8 +47,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                             <Text style={styles.followCount}>{user.followersCount}</Text>
                             <Text style={styles.followLabel}>フォロワー</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.followButton, { borderColor: colors.tint }]} onPress={onPressFollow}>
-                        <Text style={[styles.followButtonText, { color: colors.tint }]}>
+                        <TouchableOpacity style={[styles.followButton, { borderColor: colors.tint,backgroundColor: isFollowing ? colors.background : colors.middleBackground }]} onPress={onPressFollow}>
+                        <Text style={[styles.followButtonText, { color: colors.tint}]}>
                             {isFollowing ? 'フォロー中' : 'フォロー'}
                         </Text>
                     </TouchableOpacity>

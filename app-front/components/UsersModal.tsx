@@ -157,6 +157,7 @@ const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, sel
                                 <Text style={[styles.userName, { color: colors.text }]}>{item.name}</Text>
                                 <UserProfileModal
                                     key={item.id}
+                                    currentUser={currentUser}
                                     email={item.email}
                                     visible={isUserModalVisible}
                                     onClose={closeUserProfile}

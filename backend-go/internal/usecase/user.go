@@ -131,8 +131,12 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	return userResponse, nil
 }
 
-func (u *UserUsecase) Follow(followerId string, followedId string) error {
-	return u.userRepository.Follow(followerId, followedId)
+func (u *UserUsecase) Follow(toId string, fromId string) error {
+	return u.userRepository.Follow(toId, fromId)
+}
+
+func (u *UserUsecase) Unfollow(toId string, fromId string) error {
+	return u.userRepository.Unfollow(toId, fromId)
 }
 
 func (u *UserUsecase) FollowsCount(id string) (int, error) {
