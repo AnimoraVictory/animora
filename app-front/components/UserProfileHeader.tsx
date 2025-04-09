@@ -54,7 +54,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                                 onPress={onPressFollow}
                             >
                                 <Text style={[styles.followButtonText, { color: colors.tint }]}>
-                                    {isFollowing ? 'フォロー中' : 'フォローする'}
+                                    {isFollowing ? 'フォロー解除' : 'フォローする'}
                                 </Text>
                             </TouchableOpacity>
                         )}
