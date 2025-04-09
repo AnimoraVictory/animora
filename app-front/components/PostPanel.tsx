@@ -19,6 +19,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import axios from "axios";
 import UserProfileModal from "./UserProfileModal";
+import { useModalStack } from "@/providers/ModalStackContext";
 
 export type Post = z.infer<typeof postSchema>;
 
@@ -29,6 +30,7 @@ type Props = {
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export const PostPanel = ({ post }: Props) => {
+  const {push, pop} = useModalStack()
 
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [isUserModalVisible, setIsUserModalVisible] = React.useState(false);
@@ -114,6 +116,7 @@ export const PostPanel = ({ post }: Props) => {
 
   const openUserProfile = () => {
     setIsUserModalVisible(true);
+    push("1")
     Animated.timing(slideAnimUser, {
       toValue: 0,
       duration: 300,
@@ -126,7 +129,10 @@ export const PostPanel = ({ post }: Props) => {
       toValue: Dimensions.get("window").width,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsUserModalVisible(false));
+    }).start(() => {
+      setIsUserModalVisible(false)
+      pop()
+    });
   };
 
   return (
@@ -166,6 +172,15 @@ export const PostPanel = ({ post }: Props) => {
         onClose={closeModal}
       />
       <UserProfileModal
+      prevModalIdx={0}
+        key={post.user.id}
+        currentUser={{
+          id: currentUser?.id ?? "",
+          iconImageUrl: currentUser?.iconImageUrl ?? "",
+          bio: currentUser?.bio ?? "",
+          name: currentUser?.name ?? "",
+          email: currentUser?.email ?? "",
+        }}
         email={post.user.email}
         visible={isUserModalVisible}
         onClose={closeUserProfile}

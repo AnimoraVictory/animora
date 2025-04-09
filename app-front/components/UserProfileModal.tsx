@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import {
     Modal,
     View,
@@ -11,39 +11,50 @@ import {
 } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import Constants from 'expo-constants';
-import { User } from '@/constants/api';
+import { User, UserBase } from '@/constants/api';
 import { UserPostList } from './UserPostList';
 import { UserPetList } from './UserPetsList';
 import { ProfileTabSelector } from './ProfileTabSelector';
 import UserProfileHeader from './UserProfileHeader';
 import UsersModal from './UsersModal';
+import { useModalStack } from '@/providers/ModalStackContext';
 
 const { width } = Dimensions.get('window');
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-type Props = {
+type UserProfileProps = {
     email: string;
     visible: boolean;
     onClose: () => void;
     slideAnim: Animated.Value;
+    currentUser: UserBase;
+    prevModalIdx: number
 };
 
-const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim }) => {
-    const [selectedTab, setSelectedTab] = React.useState<"posts" | "mypet">("posts");
-    const [selectedFollowTab, setSelectedFollowTab] = React.useState<"follows" | "followers">("follows");
-    const [isFollowModalVisible, setIsFollowModalVisible] = React.useState(false);
+const UserProfileModal: React.FC<UserProfileProps> = ({
+    email,
+    visible,
+    onClose,
+    slideAnim,
+    currentUser,
+    prevModalIdx,
+}) => {
+    const [selectedTab, setSelectedTab] = useState<"posts" | "mypet">("posts");
+    const [selectedFollowTab, setSelectedFollowTab] = useState<"follows" | "followers">("follows");
+    const [isFollowModalVisible, setIsFollowModalVisible] = useState(false);
     const slideAnimFollow = useRef(new Animated.Value(width)).current;
-    const panResponder = React.useRef(
+    const queryClient = useQueryClient();
+    const { push, pop, isTop } = useModalStack();
+    const modalKey: string = `${prevModalIdx + 1}`;
+    const panResponder = useMemo(() =>
         PanResponder.create({
-            onStartShouldSetPanResponder: () => {
-                return false
-            },
+            onStartShouldSetPanResponder: () => false,
             onMoveShouldSetPanResponder: (_, gestureState) => {
                 const isHorizontalSwipe = Math.abs(gestureState.dx) > 1 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-                return isHorizontalSwipe && gestureState.dx > 1;
+                return isHorizontalSwipe && gestureState.dx > 1 && isTop(modalKey);
             },
             onPanResponderMove: (_, gestureState) => {
                 if (gestureState.dx > 0) {
@@ -65,7 +76,7 @@ const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim 
                 }
             },
         })
-    ).current;
+        , [modalKey, isTop, slideAnim, onClose]);
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
     const backgroundColor = colorScheme === 'light' ? 'white' : 'black';
@@ -73,17 +84,21 @@ const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim 
     const { data: user, isLoading, refetch, isRefetching } = useQuery<User>({
         queryKey: ['userProfile', email],
         queryFn: async () => {
-            const res = await axios.get(`${API_URL}/users/?email=${email}`,);
+            const res = await axios.get(`${API_URL}/users/?email=${email}`);
             return res.data.user;
         },
         enabled: visible,
     });
 
-    if (!user || isLoading) return null;
+    const [isFollowing, setIsFollowing] = useState<boolean>(
+        user?.followers.some((follower) =>
+            follower.id === currentUser?.id) ?? false
+    );
 
     const onOpenFollowModal = () => {
         setIsFollowModalVisible(true);
-        Animated.timing(slideAnimFollow, {    
+        push(`${prevModalIdx + 2}`)
+        Animated.timing(slideAnimFollow, {
             toValue: 0,
             duration: 300,
             useNativeDriver: true,
@@ -95,25 +110,82 @@ const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim 
             toValue: width,
             duration: 300,
             useNativeDriver: true,
-        }).start(() => setIsFollowModalVisible(false));
-    }
+        }).start(() => {
+            setIsFollowModalVisible(false)
+            pop()
+        });
+    };
 
+    const followMutation = useMutation({
+        mutationFn: () => {
+            return axios.post(`${API_URL}/users/follow?toId=${user?.id}&fromId=${currentUser?.id ?? ""}`);
+        },
+        onSuccess: () => {
+            queryClient.setQueryData(['userProfile', email], (prev: User | undefined) => {
+                if (!prev || !currentUser) return prev;
+                return {
+                    ...prev,
+                    followers: [...prev.followers, currentUser],
+                    followersCount: prev.followersCount + 1,
+                };
+            });
+            setIsFollowing(true);
+            refetch();
+        },
+        onError: (error) => {
+            console.error("フォローエラー", error);
+        },
+    });
+
+    const unfollowMutation = useMutation({
+        mutationFn: () => {
+            return axios.delete(`${API_URL}/users/unfollow?toId=${user?.id}&fromId=${currentUser?.id ?? ""}`);
+        },
+        onSuccess: () => {
+            queryClient.setQueryData(['userProfile', email], (prev: User | undefined) => {
+                if (!prev || !currentUser) return prev;
+                return {
+                    ...prev,
+                    followers: prev.followers.filter((f) => f.id !== currentUser.id),
+                    followersCount: prev.followersCount - 1,
+                };
+            });
+            setIsFollowing(false);
+            refetch();
+        },
+        onError: (error) => {
+            console.error("アンフォローエラー", error);
+        },
+    });
+
+    const handlePressFollowButton = () => {
+        if (isFollowing) {
+            unfollowMutation.mutate();
+        } else {
+            followMutation.mutate();
+        }
+    };
+
+    const isMe = currentUser.id === user?.id;
+
+    if (!user || isLoading) return null;
 
     const headerContent = (
-        <View style={{backgroundColor}}>
+        <View style={{ backgroundColor }}>
             <UserProfileHeader
-            user={user}
-            onPressFollow={()=> {}}
-            onOpenFollowModal={onOpenFollowModal}
-            setSelectedTab={setSelectedFollowTab}
-            isFollowing={false}
+                isMe={isMe}
+                user={user}
+                onPressFollow={handlePressFollowButton}
+                onOpenFollowModal={onOpenFollowModal}
+                setSelectedTab={setSelectedFollowTab}
+                isFollowing={isFollowing}
             />
-          <ProfileTabSelector
-            selectedTab={selectedTab}
-            onSelectTab={setSelectedTab}
-          />
+            <ProfileTabSelector
+                selectedTab={selectedTab}
+                onSelectTab={setSelectedTab}
+            />
         </View>
-      );
+    );
 
     return (
         <Modal visible={visible} transparent animationType="none">
@@ -125,9 +197,7 @@ const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim 
                     <TouchableOpacity style={styles.backButton} onPress={onClose}>
                         <Text style={styles.backText}>＜</Text>
                     </TouchableOpacity>
-                    <Text style={[styles.userName, { color: colors.tint }]}>
-                        {user.name}
-                    </Text>
+                    <Text style={[styles.userName, { color: colors.tint }]}> {user.name} </Text>
                 </View>
 
                 <View style={[styles.container, { backgroundColor: colors.middleBackground }]}>
@@ -141,14 +211,15 @@ const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim 
                 </View>
             </Animated.View>
             <UsersModal
-            key={user.id}
-            visible={isFollowModalVisible}
-            currentUser={user}
-            onClose={onCloseFollowModal}
-            users={selectedFollowTab === "followers" ? user.followers : user.follows}
-            selectedTab={selectedFollowTab}
-            setSelectedTab={setSelectedFollowTab}
-            slideAnim={slideAnimFollow}
+                prevModalIdx={prevModalIdx + 1}
+                key={user.id}
+                visible={isFollowModalVisible}
+                currentUser={currentUser}
+                onClose={onCloseFollowModal}
+                users={selectedFollowTab === "followers" ? user.followers : user.follows}
+                selectedTab={selectedFollowTab}
+                setSelectedTab={setSelectedFollowTab}
+                slideAnim={slideAnimFollow}
             />
         </Modal>
     );

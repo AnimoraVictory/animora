@@ -90,21 +90,39 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 }
 
 func (h *UserHandler) Follow(c echo.Context) error {
-	followerId, followedId := c.QueryParam("followerId"), c.QueryParam("followedId")
+	toId, fromId := c.QueryParam("toId"), c.QueryParam("fromId")
 
-	if followerId == "" || followedId == "" {
+	if toId == "" || fromId == "" {
 		log.Error("Failed to follow: followerId or followedId is empty")
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "情報が不足しています"})
 	}
-	if err := h.userUsecase.Follow(followerId, followedId); err != nil {
+	if err := h.userUsecase.Follow(toId, fromId); err != nil {
 		log.Errorf("Failed to follow: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "フォローに失敗しました",
 		})
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "フォローしました",
+	})
+}
+
+func (h *UserHandler) Unfollow(c echo.Context) error {
+	toId, fromId := c.QueryParam("toId"), c.QueryParam("fromId")
+
+	if toId == "" || fromId == "" {
+		log.Error("Failed to unfollow: followerId or followedId is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "情報が不足しています"})
+	}
+	if err := h.userUsecase.Unfollow(toId, fromId); err != nil {
+		log.Errorf("Failed to unfollow: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "フォロー解除に失敗しました",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "フォロー解除しました",
 	})
 }
 
