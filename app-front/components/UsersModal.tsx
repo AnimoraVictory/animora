@@ -40,6 +40,7 @@ const UsersModal: React.FC<Props> = ({
     setSelectedTab,
     slideAnim,
     prevModalIdx,
+    currentUser
 }) => {
     const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
     const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(null);
@@ -142,8 +143,8 @@ const UsersModal: React.FC<Props> = ({
             {selectedUserEmail && (
                 <UserProfileModal
                     prevModalIdx={prevModalIdx + 1}
-                    key={selectedUserEmail}
-                    currentUser={user}
+                    key={prevModalIdx +1}
+                    currentUser={currentUser}
                     email={selectedUserEmail}
                     visible={isProfileModalVisible}
                     onClose={closeUserProfile}
