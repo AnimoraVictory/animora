@@ -14,6 +14,7 @@ type UserBaseResponse struct {
 	ID           uuid.UUID `json:"id"`
 	Email        string    `json:"email"`
 	Name         string    `json:"name"`
+	Bio          string    `json:"bio"`
 	IconImageUrl string    `json:"iconImageUrl"`
 }
 
@@ -52,6 +53,7 @@ func NewUserBaseResponse(user *ent.User, imageURL string) UserBaseResponse {
 		ID:           user.ID,
 		Email:        user.Email,
 		Name:         user.Name,
+		Bio:          user.Bio,
 		IconImageUrl: imageURL,
 	}
 }
