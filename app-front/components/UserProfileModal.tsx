@@ -154,12 +154,15 @@ const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim,
         }
     }
 
+    const isMe = currentUser.id === user?.id ? true : false
+
     if (!user || isLoading) return null;
 
 
     const headerContent = (
         <View style={{ backgroundColor }}>
             <UserProfileHeader
+                isMe={isMe}
                 user={user}
                 onPressFollow={handlePressFollowButton}
                 onOpenFollowModal={onOpenFollowModal}
@@ -201,7 +204,7 @@ const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim,
             <UsersModal
                 key={user.id}
                 visible={isFollowModalVisible}
-                currentUser={user}
+                currentUser={currentUser}
                 onClose={onCloseFollowModal}
                 users={selectedFollowTab === "followers" ? user.followers : user.follows}
                 selectedTab={selectedFollowTab}
