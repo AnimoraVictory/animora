@@ -14,16 +14,18 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { Colors } from '@/constants/Colors';
+import {Comment} from "./CommentsModal"
 
 type CommentInputProps = {
   currentUser: User | null | undefined;
   postId: string;
-  onClose: () => void;
+  queryKey: unknown[]
+  onNewComment: (comment: Comment) => void;
 };
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, onClose }) => {
+const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, queryKey, onNewComment }) => {
   const [content, setContent] = useState('');
   const colorScheme = useColorScheme();
   const colors = colorScheme === 'light' ? Colors.light : Colors.dark;
@@ -36,14 +38,17 @@ const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, onClos
       formData.append('content', data.content);
       formData.append('userId', currentUser?.id ?? '');
       formData.append('postId', postId);
-  
-      return axios.post(`${API_URL}/comments/new`, formData, {
+    
+      const res = await axios.post(`${API_URL}/comments/new`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
+    
+      return res.data.comment; // ← ここで新しいコメントを返す
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    onSuccess: (createdComment) => {
+      queryClient.invalidateQueries({ queryKey: queryKey });
       Alert.alert('コメント完了', 'コメントを追加しました！');
+      onNewComment(createdComment);
       setContent('');
     },
     onError: () => {
