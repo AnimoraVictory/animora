@@ -27,6 +27,7 @@ export const userBaseSchema = z.object({
   id: z.string(),
   email: z.string(),
   name: z.string(),
+  bio: z.string(),
   iconImageUrl: z.string()
 });
 

@@ -9,6 +9,8 @@ func SetupUserRoutes(app *echo.Echo) {
 	userHandler := injector.InjectUserHandler()
 	userGroup := app.Group("/users")
 
+	userGroup.GET("/", userHandler.GetUser)
+
 	userGroup.PUT("/update", userHandler.UpdateUser)
 
 	userGroup.POST("/follow", userHandler.Follow)
