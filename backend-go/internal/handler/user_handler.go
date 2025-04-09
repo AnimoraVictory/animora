@@ -163,3 +163,19 @@ func (h *UserHandler) GetFollowerUsers(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{"follower_users": users})
 }
+
+func (h *UserHandler) GetUser(c echo.Context) error {
+	email := c.QueryParam("email")
+	if email == "" {
+		log.Error("Failed to get user: id is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "ユーザーIDが必要です"})
+	}
+	user, err := h.userUsecase.GetByEmail(email)
+	if err != nil {
+		log.Errorf("Failed to get user: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "ユーザー情報の取得に失敗しました"})
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"user": user,
+	})
+}

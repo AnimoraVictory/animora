@@ -1,0 +1,217 @@
+import React, { useRef } from 'react';
+import {
+    Modal,
+    View,
+    Text,
+    TouchableOpacity,
+    Animated,
+    Dimensions,
+    StyleSheet,
+    PanResponder,
+} from 'react-native';
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import Constants from 'expo-constants';
+import { User } from '@/constants/api';
+import { UserPostList } from './UserPostList';
+import { UserPetList } from './UserPetsList';
+import { ProfileTabSelector } from './ProfileTabSelector';
+import UserProfileHeader from './UserProfileHeader';
+import UsersModal from './UsersModal';
+
+const { width } = Dimensions.get('window');
+const API_URL = Constants.expoConfig?.extra?.API_URL;
+
+type Props = {
+    email: string;
+    visible: boolean;
+    onClose: () => void;
+    slideAnim: Animated.Value;
+};
+
+const UserProfileModal: React.FC<Props> = ({ email, visible, onClose, slideAnim }) => {
+    const [selectedTab, setSelectedTab] = React.useState<"posts" | "mypet">("posts");
+    const [selectedFollowTab, setSelectedFollowTab] = React.useState<"follows" | "followers">("follows");
+    const [isFollowModalVisible, setIsFollowModalVisible] = React.useState(false);
+    const slideAnimFollow = useRef(new Animated.Value(width)).current;
+    const panResponder = React.useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => {
+                return false
+            },
+            onMoveShouldSetPanResponder: (_, gestureState) => {
+                const isHorizontalSwipe = Math.abs(gestureState.dx) > 1 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+                return isHorizontalSwipe && gestureState.dx > 1;
+            },
+            onPanResponderMove: (_, gestureState) => {
+                if (gestureState.dx > 0) {
+                    slideAnim.setValue(gestureState.dx);
+                }
+            },
+            onPanResponderRelease: (_, gestureState) => {
+                if (gestureState.dx > 100) {
+                    Animated.timing(slideAnim, {
+                        toValue: width,
+                        duration: 200,
+                        useNativeDriver: true,
+                    }).start(() => onClose());
+                } else {
+                    Animated.spring(slideAnim, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }).start();
+                }
+            },
+        })
+    ).current;
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? 'light'];
+    const backgroundColor = colorScheme === 'light' ? 'white' : 'black';
+
+    const { data: user, isLoading, refetch, isRefetching } = useQuery<User>({
+        queryKey: ['userProfile', email],
+        queryFn: async () => {
+            const res = await axios.get(`${API_URL}/users/?email=${email}`,);
+            return res.data.user;
+        },
+        enabled: visible,
+    });
+
+    if (!user || isLoading) return null;
+
+    const onOpenFollowModal = () => {
+        setIsFollowModalVisible(true);
+        Animated.timing(slideAnimFollow, {    
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const onCloseFollowModal = () => {
+        Animated.timing(slideAnimFollow, {
+            toValue: width,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => setIsFollowModalVisible(false));
+    }
+
+
+    const headerContent = (
+        <View style={{backgroundColor}}>
+            <UserProfileHeader
+            user={user}
+            onPressFollow={()=> {}}
+            onOpenFollowModal={onOpenFollowModal}
+            setSelectedTab={setSelectedFollowTab}
+            isFollowing={false}
+            />
+          <ProfileTabSelector
+            selectedTab={selectedTab}
+            onSelectTab={setSelectedTab}
+          />
+        </View>
+      );
+
+    return (
+        <Modal visible={visible} transparent animationType="none">
+            <Animated.View
+                style={[styles.overlay, { transform: [{ translateX: slideAnim }] }]}
+                {...panResponder.panHandlers}
+            >
+                <View style={[styles.topHeader, { backgroundColor: colors.background }]}>
+                    <TouchableOpacity style={styles.backButton} onPress={onClose}>
+                        <Text style={styles.backText}>＜</Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.userName, { color: colors.tint }]}>
+                        {user.name}
+                    </Text>
+                </View>
+
+                <View style={[styles.container, { backgroundColor: colors.middleBackground }]}>
+                    <View style={{ marginTop: 80, flex: 1 }}>
+                        {selectedTab === "posts" ? (
+                            <UserPostList posts={user.posts} colorScheme={colorScheme} onRefresh={refetch} refreshing={isRefetching} headerComponent={headerContent} />
+                        ) : (
+                            <UserPetList pets={user.pets} colorScheme={colorScheme} onRefresh={refetch} refreshing={isRefetching} headerComponent={headerContent} />
+                        )}
+                    </View>
+                </View>
+            </Animated.View>
+            <UsersModal
+            key={user.id}
+            visible={isFollowModalVisible}
+            currentUser={user}
+            onClose={onCloseFollowModal}
+            users={selectedFollowTab === "followers" ? user.followers : user.follows}
+            selectedTab={selectedFollowTab}
+            setSelectedTab={setSelectedFollowTab}
+            slideAnim={slideAnimFollow}
+            />
+        </Modal>
+    );
+};
+
+export default UserProfileModal;
+
+const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    topHeader: {
+        position: 'absolute',
+        top: 0,
+        height: 80,
+        width: width,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: 40,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: '#ccc',
+        zIndex: 2,
+    },
+    backButton: {
+        position: 'absolute',
+        left: 16,
+        top: 44,
+    },
+    backText: {
+        fontSize: 20,
+    },
+    userName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    container: {
+        flex: 1,
+        alignItems: 'center',
+    },
+    profileSection: {
+        alignItems: 'center',
+    },
+    avatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        marginBottom: 10,
+    },
+    bioText: {
+        fontSize: 14,
+        textAlign: 'center',
+        marginVertical: 8,
+    },
+    followButton: {
+        borderWidth: 1,
+        borderRadius: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 6,
+        marginTop: 10,
+    },
+    followButtonText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+});

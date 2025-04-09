@@ -14,6 +14,7 @@ import {
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { UserBase } from '@/constants/api';
+import UserProfileModal from './UserProfileModal';
 
 type Props = {
     currentUser: UserBase;
@@ -28,37 +29,55 @@ type Props = {
 const { width, height } = Dimensions.get('window');
 
 const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, selectedTab, setSelectedTab, slideAnim }) => {
+    const [isUserModalVisible, setIsUserModalVisible] = React.useState(false);
+    const slideAnimUser = React.useRef(new Animated.Value(Dimensions.get("window").width)).current;
+    const openUserProfile = () => {
+        setIsUserModalVisible(true);
+        Animated.timing(slideAnimUser, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const closeUserProfile = () => {
+        Animated.timing(slideAnimUser, {
+            toValue: Dimensions.get("window").width,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => setIsUserModalVisible(false));
+    };
 
     const panResponder = React.useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => {
-              return false
+                return false
             },
             onMoveShouldSetPanResponder: (_, gestureState) => {
                 const isHorizontalSwipe = Math.abs(gestureState.dx) > 1 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
                 return isHorizontalSwipe && gestureState.dx > 1;
-              },
+            },
             onPanResponderMove: (_, gestureState) => {
-              if (gestureState.dx > 0) {
-                slideAnim.setValue(gestureState.dx);
-              }
+                if (gestureState.dx > 0) {
+                    slideAnim.setValue(gestureState.dx);
+                }
             },
             onPanResponderRelease: (_, gestureState) => {
-              if (gestureState.dx > 100) {
-                Animated.timing(slideAnim, {
-                  toValue: width,
-                  duration: 200,
-                  useNativeDriver: true,
-                }).start(() => onClose());
-              } else {
-                Animated.spring(slideAnim, {
-                  toValue: 0,
-                  useNativeDriver: true,
-                }).start();
-              }
+                if (gestureState.dx > 100) {
+                    Animated.timing(slideAnim, {
+                        toValue: width,
+                        duration: 200,
+                        useNativeDriver: true,
+                    }).start(() => onClose());
+                } else {
+                    Animated.spring(slideAnim, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                    }).start();
+                }
             },
-          })
-      ).current;
+        })
+    ).current;
 
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
@@ -82,7 +101,7 @@ const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, sel
 
     return (
         <Modal visible={visible} transparent animationType="none">
-            <Animated.View style={[styles.overlay,  {transform: [{ translateX: slideAnim }]}]} {...panResponder.panHandlers}>
+            <Animated.View style={[styles.overlay, { transform: [{ translateX: slideAnim }] }]} {...panResponder.panHandlers}>
                 <Animated.View style={[styles.topHeader, { backgroundColor: colors.background }]}>
                     <TouchableOpacity
                         style={styles.backButton}
@@ -91,7 +110,7 @@ const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, sel
                         <Text style={styles.backText}>＜</Text>
                     </TouchableOpacity>
 
-                    <Text style={[styles.headerUserName, {color: colors.tint}]}>{currentUser.name}</Text>
+                    <Text style={[styles.headerUserName, { color: colors.tint }]}>{currentUser.name}</Text>
                 </Animated.View>
                 <Animated.View
                     style={[
@@ -107,7 +126,7 @@ const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, sel
                                 selectedTab === 'follows' && { borderBottomColor: colors.tint },
                             ]}
                         >
-                            <Text style={[styles.tabText, selectedTab === 'follows' && styles.activeTabText,  { color: colors.tint }]}>
+                            <Text style={[styles.tabText, selectedTab === 'follows' && styles.activeTabText, { color: colors.tint }]}>
                                 フォロー中
                             </Text>
                         </TouchableOpacity>
@@ -133,13 +152,19 @@ const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, sel
                         }
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
-                            <View style={styles.userItem}>
+                            <TouchableOpacity style={styles.userItem} onPress={openUserProfile}>
                                 <Image source={{ uri: item.iconImageUrl }} style={styles.avatar} />
                                 <Text style={[styles.userName, { color: colors.text }]}>{item.name}</Text>
-                            </View>
+                                <UserProfileModal
+                                    key={item.id}
+                                    email={item.email}
+                                    visible={isUserModalVisible}
+                                    onClose={closeUserProfile}
+                                    slideAnim={slideAnimUser}
+                                ></UserProfileModal>
+                            </TouchableOpacity>
                         )}
                     />
-
                 </Animated.View>
             </Animated.View>
         </Modal>
