@@ -17,6 +17,7 @@ import { AuthProvider, useAuth } from "@/providers/AuthContext";
 import { Colors } from "@/constants/Colors";
 import Constants from "expo-constants";
 import { HomeTabScrollProvider } from "@/providers/HomeTabScrollContext";
+import { ModalStackProvider } from "@/providers/ModalStackContext";
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
@@ -42,7 +43,7 @@ function AuthSwitch() {
         router.replace("/(auth)");
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user, router]);
 
   if (loading) {
@@ -86,13 +87,15 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-      <HomeTabScrollProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <AuthSwitch />
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <HomeTabScrollProvider>
+          <ModalStackProvider>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <AuthSwitch />
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </ModalStackProvider>
         </HomeTabScrollProvider>
       </AuthProvider>
     </QueryClientProvider>
