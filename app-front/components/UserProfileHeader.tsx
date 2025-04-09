@@ -5,6 +5,7 @@ import { Colors } from '@/constants/Colors';
 import { User } from '@/constants/api';
 
 type UserProfileHeaderProps = {
+    isMe: boolean
     user: User;
     onPressFollow: () => void;
     onOpenFollowModal: () => void;
@@ -13,6 +14,7 @@ type UserProfileHeaderProps = {
 };
 
 const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
+    isMe,
     user,
     onPressFollow,
     onOpenFollowModal,
@@ -27,7 +29,6 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
         setSelectedTab(tab);
         onOpenFollowModal();
     };
-
 
     return (
         <View style={[styles.headerContainer, { backgroundColor }]}>
@@ -47,11 +48,16 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                             <Text style={styles.followCount}>{user.followersCount}</Text>
                             <Text style={styles.followLabel}>フォロワー</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.followButton, { borderColor: colors.tint }]} onPress={onPressFollow}>
-                        <Text style={[styles.followButtonText, { color: colors.tint }]}>
-                            {isFollowing ? 'フォロー中' : 'フォロー'}
-                        </Text>
-                    </TouchableOpacity>
+                        {!isMe && (
+                            <TouchableOpacity
+                                style={[styles.followButton, { borderColor: colors.tint }]}
+                                onPress={onPressFollow}
+                            >
+                                <Text style={[styles.followButtonText, { color: colors.tint }]}>
+                                    {isFollowing ? 'フォロー中' : 'フォローする'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </View>
@@ -60,63 +66,63 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
 };
 
 const styles = StyleSheet.create({
-        headerContainer: {
-            paddingTop: 16,
-            paddingBottom: 16,
-            paddingHorizontal: 20,
-            alignItems: 'center',
-        },
-        profileName: {
-            fontSize: 20,
-            fontWeight: 'bold',
-            textAlign: 'center',
-        },
-        profileBio: {
-            fontSize: 14,
-            textAlign: 'center',
-            marginBottom: 12,
-        },
-        row: {
-            flexDirection: 'row',
-            gap: 16,
-        },
-        profileImage: {
-            width: 64,
-            height: 64,
-            borderRadius: 32,
-            marginRight: 16,
-        },
-        rightBox: {
-            flex: 1,
-            justifyContent: 'center',
-            flexDirection: 'column',
-        },
-        followRow: {
-            flexDirection: 'row',
-            marginBottom: 8,
-        },
-        followBox: {
-            marginRight: 16,
-            alignItems: 'center',
-        },
-        followCount: {
-            fontWeight: 'bold',
-            fontSize: 16,
-        },
-        followLabel: {
-            fontSize: 12,
-        },
-        followButton: {
-            borderWidth: 1,
-            borderRadius: 20,
-            paddingHorizontal: 24,
-            paddingVertical: 6,
-            alignSelf: 'flex-start',
-        },
-        followButtonText: {
-            fontSize: 14,
-            fontWeight: 'bold',
-        },
-    });
+    headerContainer: {
+        paddingTop: 16,
+        paddingBottom: 16,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+    },
+    profileName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    profileBio: {
+        fontSize: 14,
+        textAlign: 'center',
+        marginBottom: 12,
+    },
+    row: {
+        flexDirection: 'row',
+        gap: 16,
+    },
+    profileImage: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        marginRight: 16,
+    },
+    rightBox: {
+        flex: 1,
+        justifyContent: 'center',
+        flexDirection: 'column',
+    },
+    followRow: {
+        flexDirection: 'row',
+        marginBottom: 8,
+    },
+    followBox: {
+        marginRight: 16,
+        alignItems: 'center',
+    },
+    followCount: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    followLabel: {
+        fontSize: 12,
+    },
+    followButton: {
+        borderWidth: 1,
+        borderRadius: 20,
+        paddingHorizontal: 24,
+        paddingVertical: 6,
+        alignSelf: 'flex-start',
+    },
+    followButtonText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+});
 
 export default UserProfileHeader;

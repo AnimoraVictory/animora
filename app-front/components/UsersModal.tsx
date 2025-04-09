@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import {
     Modal,
     View,
@@ -15,6 +15,9 @@ import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { UserBase } from '@/constants/api';
 import UserProfileModal from './UserProfileModal';
+import { useModalStack } from '@/providers/ModalStackContext';
+
+const { width, height } = Dimensions.get('window');
 
 type Props = {
     currentUser: UserBase;
@@ -23,17 +26,32 @@ type Props = {
     users: UserBase[];
     selectedTab: 'follows' | 'followers';
     setSelectedTab: (tab: 'follows' | 'followers') => void;
-    slideAnim: Animated.Value
+    slideAnim: Animated.Value;
+    prevModalIdx: number
 };
 
-const { width, height } = Dimensions.get('window');
+const UsersModal: React.FC<Props> = ({
+    currentUser,
+    visible,
+    onClose,
+    users,
+    selectedTab,
+    setSelectedTab,
+    slideAnim,
+    prevModalIdx,
+}) => {
+    const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
+    const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(null);
+    const slideAnimProfile = useRef(new Animated.Value(width)).current;
+    const { push, pop, isTop } = useModalStack();
+    const modalKey = `${prevModalIdx + 1}`;
 
-const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, selectedTab, setSelectedTab, slideAnim }) => {
-    const [isUserModalVisible, setIsUserModalVisible] = React.useState(false);
-    const slideAnimUser = React.useRef(new Animated.Value(Dimensions.get("window").width)).current;
-    const openUserProfile = () => {
-        setIsUserModalVisible(true);
-        Animated.timing(slideAnimUser, {
+
+    const openUserProfile = (email: string) => {
+        setSelectedUserEmail(email);
+        setIsProfileModalVisible(true);
+        push(`${prevModalIdx + 2}`)
+        Animated.timing(slideAnimProfile, {
             toValue: 0,
             duration: 300,
             useNativeDriver: true,
@@ -41,21 +59,22 @@ const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, sel
     };
 
     const closeUserProfile = () => {
-        Animated.timing(slideAnimUser, {
-            toValue: Dimensions.get("window").width,
+        Animated.timing(slideAnimProfile, {
+            toValue: width,
             duration: 300,
             useNativeDriver: true,
-        }).start(() => setIsUserModalVisible(false));
+        }).start(() => {
+            setIsProfileModalVisible(false)
+            pop()
+        });
     };
 
-    const panResponder = React.useRef(
+    const panResponder = useMemo(() =>
         PanResponder.create({
-            onStartShouldSetPanResponder: () => {
-                return false
-            },
+            onStartShouldSetPanResponder: () => false,
             onMoveShouldSetPanResponder: (_, gestureState) => {
                 const isHorizontalSwipe = Math.abs(gestureState.dx) > 1 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-                return isHorizontalSwipe && gestureState.dx > 1;
+                return isHorizontalSwipe && gestureState.dx > 1 && isTop(modalKey);
             },
             onPanResponderMove: (_, gestureState) => {
                 if (gestureState.dx > 0) {
@@ -77,96 +96,59 @@ const UsersModal: React.FC<Props> = ({ currentUser, visible, onClose, users, sel
                 }
             },
         })
-    ).current;
+        , [modalKey, isTop, slideAnim, onClose]);
 
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? 'light'];
-
-
-    React.useEffect(() => {
-        if (visible) {
-            Animated.timing(slideAnim, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        } else {
-            Animated.timing(slideAnim, {
-                toValue: width,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [visible]);
 
     return (
         <Modal visible={visible} transparent animationType="none">
             <Animated.View style={[styles.overlay, { transform: [{ translateX: slideAnim }] }]} {...panResponder.panHandlers}>
                 <Animated.View style={[styles.topHeader, { backgroundColor: colors.background }]}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => onClose()}
-                    >
+                    <TouchableOpacity style={styles.backButton} onPress={onClose}>
                         <Text style={styles.backText}>＜</Text>
                     </TouchableOpacity>
-
                     <Text style={[styles.headerUserName, { color: colors.tint }]}>{currentUser.name}</Text>
                 </Animated.View>
-                <Animated.View
-                    style={[
-                        styles.modalContainer,
-                        { backgroundColor: colors.background, paddingTop: 80 },
-                    ]}
-                >
+                <Animated.View style={[styles.modalContainer, { backgroundColor: colors.background, paddingTop: 80 }]}>
                     <View style={styles.tabHeader}>
                         <TouchableOpacity
                             onPress={() => setSelectedTab('follows')}
-                            style={[
-                                styles.tabButton,
-                                selectedTab === 'follows' && { borderBottomColor: colors.tint },
-                            ]}
+                            style={[styles.tabButton, selectedTab === 'follows' && { borderBottomColor: colors.tint }]}
                         >
-                            <Text style={[styles.tabText, selectedTab === 'follows' && styles.activeTabText, { color: colors.tint }]}>
-                                フォロー中
-                            </Text>
+                            <Text style={[styles.tabText, selectedTab === 'follows' && styles.activeTabText, { color: colors.tint }]}>フォロー中</Text>
                         </TouchableOpacity>
-
                         <TouchableOpacity
                             onPress={() => setSelectedTab('followers')}
-                            style={[
-                                styles.tabButton,
-                                selectedTab === 'followers' && { borderBottomColor: colors.tint }
-                            ]}
+                            style={[styles.tabButton, selectedTab === 'followers' && { borderBottomColor: colors.tint }]}
                         >
-                            <Text style={[styles.tabText, selectedTab === 'followers' && styles.activeTabText, { color: colors.tint }]}>
-                                フォロワー
-                            </Text>
+                            <Text style={[styles.tabText, selectedTab === 'followers' && styles.activeTabText, { color: colors.tint }]}>フォロワー</Text>
                         </TouchableOpacity>
                     </View>
-
-
                     <FlatList
                         data={users}
-                        style={
-                            { backgroundColor: colors.middleBackground }
-                        }
+                        style={{ backgroundColor: colors.middleBackground }}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
-                            <TouchableOpacity style={styles.userItem} onPress={openUserProfile}>
+                            <TouchableOpacity style={styles.userItem} onPress={() => openUserProfile(item.email)}>
                                 <Image source={{ uri: item.iconImageUrl }} style={styles.avatar} />
                                 <Text style={[styles.userName, { color: colors.text }]}>{item.name}</Text>
-                                <UserProfileModal
-                                    key={item.id}
-                                    email={item.email}
-                                    visible={isUserModalVisible}
-                                    onClose={closeUserProfile}
-                                    slideAnim={slideAnimUser}
-                                ></UserProfileModal>
                             </TouchableOpacity>
                         )}
                     />
                 </Animated.View>
             </Animated.View>
+            {selectedUserEmail && (
+                <UserProfileModal
+                    prevModalIdx={prevModalIdx + 1}
+                    key={selectedUserEmail}
+                    currentUser={currentUser}
+                    email={selectedUserEmail}
+                    visible={isProfileModalVisible}
+                    onClose={closeUserProfile}
+                    slideAnim={slideAnimProfile}
+                />
+            )}
         </Modal>
     );
 };
@@ -204,7 +186,6 @@ const styles = StyleSheet.create({
     backText: {
         fontSize: 20,
     },
-
     tabHeader: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -223,26 +204,12 @@ const styles = StyleSheet.create({
     activeTabText: {
         fontWeight: 'bold',
     },
-
     modalContainer: {
         position: 'absolute',
         top: 0,
         right: 0,
         width: width,
         height: height,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-    },
-    headerText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    closeText: {
-        fontSize: 16,
-        fontWeight: '600',
     },
     userItem: {
         padding: 16,

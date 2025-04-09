@@ -22,6 +22,7 @@ import { PetRegiserModal } from "@/components/PetRegisterModal";
 import { UserPetList } from "@/components/UserPetsList";
 import { UserPostList } from "@/components/UserPostList";
 import UsersModal from "@/components/UsersModal";
+import { useModalStack } from "@/providers/ModalStackContext";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -29,6 +30,7 @@ const ProfileScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const styles = getStyles(colors);
+  const { push, pop } = useModalStack();
 
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
   const [selectedFollowTab, setSelectedFollowTab] =
@@ -83,7 +85,9 @@ const ProfileScreen: React.FC = () => {
       toValue: windowWidth,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsEditModalVisible(false));
+    }).start(() => {
+      setIsEditModalVisible(false)
+  });
   };
 
   const openRegisterPetModal = () => {
@@ -100,11 +104,14 @@ const ProfileScreen: React.FC = () => {
       toValue: windowWidth,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsRegisterPetModalVisible(false));
+    }).start(() => {
+      setIsRegisterPetModalVisible(false)
+  });
   };
 
   const openFollowModal = () => {
     setIsFollowModalVisible(true);
+    push("1")
     Animated.timing(slideAnimFollow, {
       toValue: 0,
       duration: 300,
@@ -117,7 +124,9 @@ const ProfileScreen: React.FC = () => {
       toValue: windowWidth,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsFollowModalVisible(false));
+    }).start(() => {setIsFollowModalVisible(false)
+      pop()
+    });
   };
 
   if (authLoading || !user) {
@@ -205,6 +214,7 @@ const ProfileScreen: React.FC = () => {
         refetchPets={refetchUser}
       />
       <UsersModal
+        prevModalIdx={0}
         slideAnim={slideAnimFollow}
         currentUser={user}
         visible={isFollowModalVisible}
