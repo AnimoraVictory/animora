@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/google/uuid"
 )
 
@@ -17,26 +18,36 @@ func NewCommentRepository(db *ent.Client) *CommentRepository {
 	}
 }
 
-func (r *CommentRepository) Create(userId, postId, content string) error {
+func (r *CommentRepository) Create(userId, postId, content string) (*ent.Comment, error) {
 	parsedUserID, err := uuid.Parse(userId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	parsedPostId, err := uuid.Parse(postId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = r.db.Comment.Create().
+	// ① コメント作成
+	created, err := r.db.Comment.Create().
 		SetUserID(parsedUserID).
 		SetPostID(parsedPostId).
 		SetContent(content).
 		Save(context.Background())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	// ② 作成後に WithUser で再取得
+	commentWithUser, err := r.db.Comment.Query().
+		Where(comment.IDEQ(created.ID)).
+		WithUser().
+		Only(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return commentWithUser, nil
 }
 
 func (r *CommentRepository) Delete(commentId string) error {

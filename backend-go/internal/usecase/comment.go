@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"fmt"
+
+	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
 )
 
@@ -16,12 +19,24 @@ func NewCommentUsecase(commentRepository repository.CommentRepository, storageRe
 	}
 }
 
-func (u *CommentUsecase) Create(userID, postId, content string) error {
-	err := u.commentRepository.Create(userID, postId, content)
+func (u *CommentUsecase) Create(userID, postId, content string) (*models.CommentResponse, error) {
+	comment, err := u.commentRepository.Create(userID, postId, content)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	user := comment.Edges.User
+	if user == nil {
+		return nil, fmt.Errorf("user edge not loaded")
+	}
+
+	iconURL, err := u.storageRepository.GetUrl(user.IconImageKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get icon image url: %w", err)
+	}
+
+	commentResponse := models.NewCommentResponse(comment, user, iconURL)
+	return &commentResponse, nil
 }
 
 func (u *CommentUsecase) Delete(commentId string) error {
