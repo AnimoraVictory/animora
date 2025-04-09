@@ -7,7 +7,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  Modal,
   Animated,
   Dimensions,
   ColorSchemeName,
