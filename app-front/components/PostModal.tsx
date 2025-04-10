@@ -79,9 +79,9 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
 
     return (
         <Modal visible={visible} transparent animationType="fade">
-            <View style={styles.modal}>
+            <View style={[styles.modal, {backgroundColor: colors.middleBackground}]}>
                 <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                    <Text style={styles.closeText}>×</Text>
+                    <Text style={[styles.closeText,{color: colors.tint}]}>×</Text>
                 </TouchableOpacity>
 
                 <View style={styles.header}>
@@ -156,7 +156,6 @@ const styles = StyleSheet.create({
     modal: {
         width,
         height,
-        backgroundColor: "#fff",
         borderRadius: 12,
         padding: 16,
     },

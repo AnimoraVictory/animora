@@ -168,8 +168,6 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
     const isMe: boolean = useMemo(() => {
         return !!user?.id && user.id === currentUser.id;
       }, [user?.id]);
-    
-    console.log(isMe, prevModalIdx + 1)
 
     if (!user || isLoading) return null;
 
