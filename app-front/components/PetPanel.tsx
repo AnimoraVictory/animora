@@ -46,6 +46,7 @@ const _PetPanel: React.FC<PetPanelProps> = ({
   colorScheme,
 }) => {
   const colors = Colors[colorScheme ?? "light"];
+  const panelBackgroundColor = colorScheme === "light" ? "rgba(0,0,0,0.1)": "#333333";
   const windowWidth = Dimensions.get("window").width;
   const windowHeight = Dimensions.get("window").height
   const imageHeight = windowWidth;
@@ -117,7 +118,7 @@ const _PetPanel: React.FC<PetPanelProps> = ({
 
   return (
 
-  <View style={styles.container}>
+  <View style={[styles.container, {backgroundColor: panelBackgroundColor}]}>
     <View style={styles.headerOverlay}>
     <Text style={[styles.petNameHeader, { color: colors.tint }]}>
       {pet.name}
@@ -148,10 +149,10 @@ const _PetPanel: React.FC<PetPanelProps> = ({
   )}
 
   <View style={styles.infoSection}>
-    <Text style={styles.subText}>
+    <Text style={[styles.subText, {color: colors.tint}]}>
       {reverseSpeciesMap[pet.type][pet.species]}
     </Text>
-    <Text style={styles.subText}>{birthDayParser(pet.birthDay)}</Text>
+    <Text style={[styles.subText, {color: colors.tint}]}>{birthDayParser(pet.birthDay)}</Text>
   </View>
 
   <PetEditModal
@@ -169,7 +170,6 @@ const _PetPanel: React.FC<PetPanelProps> = ({
 const styles = StyleSheet.create({
   container: {
     marginBottom: 24,
-    backgroundColor: "#f9f9f9",
   },
   image: {
     resizeMode: "cover",
@@ -181,18 +181,15 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#fff",
-    textShadowColor: "rgba(0,0,0,0.6)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
   },
   infoSection: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: "#f9f9f9",
   },
   subText: {
     fontSize: 16,
-    color: "#444",
     marginVertical: 2,
   },
   fullScreenOverlay: {

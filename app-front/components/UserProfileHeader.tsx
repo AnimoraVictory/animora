@@ -32,8 +32,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
 
     return (
         <View style={[styles.headerContainer, { backgroundColor }]}>
-            <Text style={styles.profileName}>{user.name}</Text>
-            <Text style={styles.profileBio}>{user.bio}</Text>
+            <Text style={[styles.profileName, {color: colors.tint}]}>{user.name}</Text>
+            <Text style={[styles.profileBio,{color: colors.tint}]}>{user.bio}</Text>
 
             <View style={styles.row}>
                 <Image source={{ uri: user.iconImageUrl }} style={styles.profileImage} />
@@ -41,12 +41,12 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 <View style={styles.rightBox}>
                     <View style={styles.followRow}>
                         <TouchableOpacity style={styles.followBox} onPress={() => handleOpenFollowModal("follows")}>
-                            <Text style={styles.followCount}>{user.followsCount}</Text>
-                            <Text style={styles.followLabel}>フォロー</Text>
+                            <Text style={[styles.followCount, {color: colors.tint}]}>{user.followsCount}</Text>
+                            <Text style={[styles.followLabel, {color: colors.tint}]}>フォロー</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.followBox} onPress={() => handleOpenFollowModal("followers")}>
-                            <Text style={styles.followCount}>{user.followersCount}</Text>
-                            <Text style={styles.followLabel}>フォロワー</Text>
+                            <Text style={[styles.followCount, {color: colors.tint}]}>{user.followersCount}</Text>
+                            <Text style={[styles.followLabel, {color: colors.tint}]}>フォロワー</Text>
                         </TouchableOpacity>
                         {!isMe && (
                             <TouchableOpacity
