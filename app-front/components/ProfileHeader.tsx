@@ -1,22 +1,27 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/Colors';
-import { User } from '@/constants/api';
+import React from "react";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { useColorScheme } from "react-native";
+import { Colors } from "@/constants/Colors";
+import { User } from "@/constants/api";
 
 type ProfileHeaderProps = {
   user: User;
   onLogout: () => void;
   onOpenFollowModal: () => void;
-  setSelectedTab: (tab: 'follows' | 'followers') => void;
+  setSelectedTab: (tab: "follows" | "followers") => void;
 };
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onLogout, onOpenFollowModal, setSelectedTab}) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+  user,
+  onLogout,
+  onOpenFollowModal,
+  setSelectedTab,
+}) => {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
+  const colors = Colors[colorScheme ?? "light"];
   const styles = getStyles(colors);
   const backgroundColor = colorScheme === "light" ? "white" : "black";
-  const handleOpenFollowModal = (tab: 'follows' | 'followers') => {
+  const handleOpenFollowModal = (tab: "follows" | "followers") => {
     setSelectedTab(tab);
     onOpenFollowModal();
   };
@@ -30,18 +35,31 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onLogout, on
       </View>
 
       <View style={styles.profileColumn}>
-        <Image source={{ uri: user.iconImageUrl }} style={styles.profileImage} />
+        <Image
+          source={
+            user.iconImageUrl
+              ? { uri: user.iconImageUrl }
+              : require("@/assets/images/profile.png")
+          }
+          style={styles.profileImage}
+        />
 
         <View style={styles.statsContainer}>
-        <Text style={styles.profileName}>{user.name}</Text>
-        <Text style={styles.profileBio}>{user.bio}</Text>
+          <Text style={styles.profileName}>{user.name}</Text>
+          <Text style={styles.profileBio}>{user.bio}</Text>
 
           <View style={styles.followContainer}>
-            <TouchableOpacity style={styles.followBox} onPress={() => handleOpenFollowModal("follows")}>
+            <TouchableOpacity
+              style={styles.followBox}
+              onPress={() => handleOpenFollowModal("follows")}
+            >
               <Text style={styles.followCount}>{user.followsCount}</Text>
               <Text style={styles.followLabel}>フォロー</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.followBox} onPress={() => handleOpenFollowModal("followers")}>
+            <TouchableOpacity
+              style={styles.followBox}
+              onPress={() => handleOpenFollowModal("followers")}
+            >
               <Text style={styles.followCount}>{user.followersCount}</Text>
               <Text style={styles.followLabel}>フォロワー</Text>
             </TouchableOpacity>
@@ -59,17 +77,17 @@ const getStyles = (colors: typeof Colors.light) =>
       paddingBottom: 8,
     },
     topRow: {
-      flexDirection: 'row-reverse',
+      flexDirection: "row-reverse",
       paddingRight: 20,
       paddingTop: 8,
     },
     logoutText: {
       color: colors.tint,
-      fontWeight: '600',
+      fontWeight: "600",
     },
     profileColumn: {
-      flexDirection: 'column',
-      alignItems: 'center',
+      flexDirection: "column",
+      alignItems: "center",
       paddingHorizontal: 20,
       marginTop: 8,
     },
@@ -80,12 +98,12 @@ const getStyles = (colors: typeof Colors.light) =>
     },
     statsContainer: {
       flex: 1,
-      alignItems: 'center',
+      alignItems: "center",
     },
     profileName: {
       fontSize: 20,
       paddingVertical: 8,
-      fontWeight: 'bold',
+      fontWeight: "bold",
       color: colors.text,
     },
     profileBio: {
@@ -94,21 +112,21 @@ const getStyles = (colors: typeof Colors.light) =>
       marginBottom: 8,
     },
     followContainer: {
-      flexDirection: 'row',
+      flexDirection: "row",
     },
     followBox: {
-      padding: 15
+      padding: 15,
     },
     followCount: {
-      fontWeight: 'bold',
+      fontWeight: "bold",
       fontSize: 16,
       color: colors.text,
-      textAlign: 'center',
+      textAlign: "center",
     },
     followLabel: {
       fontSize: 12,
       color: colors.icon,
-      textAlign: 'center',
+      textAlign: "center",
     },
   });
 

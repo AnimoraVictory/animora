@@ -67,7 +67,14 @@ const CommentInput: React.FC<CommentInputProps> = ({ currentUser, postId, queryK
   return (
     <View style={styles.container}>
       {currentUser && (
-        <Image source={{ uri: currentUser.iconImageUrl }} style={styles.avatar} />
+        <Image
+        source={
+          currentUser.iconImageUrl 
+            ? { uri: currentUser.iconImageUrl }
+            : require("@/assets/images/profile.png")
+        }
+        style={styles.avatar}
+      />
       )}
       <TextInput
         style={styles.input}
