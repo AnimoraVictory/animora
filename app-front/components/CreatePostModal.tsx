@@ -10,30 +10,34 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
+  Animated,
+  Easing,
 } from "react-native";
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { API_URL } from "@/app/_layout";
 import { z } from "zod";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/providers/AuthContext";
 import { useRouter } from "expo-router";
 
 type Props = {
   photoUri: string;
   onClose: () => void;
+  dailyTaskId: string | undefined;
 };
 
 const postInputSchema = z.object({
   imageUri: z.string().min(1),
   caption: z.string().min(0),
   userId: z.string().uuid(),
+  dailyTaskId: z.string().uuid().optional(),
 });
 
 type PostForm = z.infer<typeof postInputSchema>;
 
-export function CreatePostModal({ photoUri, onClose }: Props) {
+export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
   const router = useRouter();
 
   const { user } = useAuth();
@@ -41,9 +45,13 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
     imageUri: photoUri,
     caption: "",
     userId: user?.id ?? "",
+    dailyTaskId: dailyTaskId ?? undefined,
   };
 
   const [formData, setFormData] = useState<PostForm>(initialFormState);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const queryClient = useQueryClient();
 
   const createPostMutation = useMutation({
     mutationFn: (data: FormData) => {
@@ -51,8 +59,11 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      setIsSubmitting(true);
+      await queryClient.invalidateQueries({ queryKey: ["user"] });
       Alert.alert("投稿完了", "投稿が完了しました！");
+      setIsSubmitting(false);
       onClose();
       router.replace("/(tabs)/posts");
     },
@@ -80,13 +91,46 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
     } as any);
     fd.append("caption", formData.caption);
     fd.append("userId", formData.userId);
+    if (formData.dailyTaskId) {
+      fd.append("dailyTaskId", formData.dailyTaskId);
+    }
 
     createPostMutation.mutate(fd);
   };
 
+  const spinAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (isSubmitting) {
+      Animated.loop(
+        Animated.timing(spinAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      spinAnim.stopAnimation();
+      spinAnim.setValue(0);
+    }
+  }, [isSubmitting]);
+
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.inner}>
+        {isSubmitting && (
+          <View style={styles.loadingOverlay}>
+            <Animated.View style={{ transform: [{ rotate: spin }] }}>
+              <FontAwesome5 name="paw" size={48} color="#fff" />
+            </Animated.View>
+          </View>
+        )}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="arrow-back" size={28} color="#fff" />
@@ -108,16 +152,24 @@ export function CreatePostModal({ photoUri, onClose }: Props) {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <View style={styles.captionWrapper}>
-            <TextInput
-              placeholder="キャプションを入力"
-              placeholderTextColor="#fff"
-              style={styles.input}
-              value={formData.caption}
-              onChangeText={(value) =>
-                setFormData({ ...formData, caption: value })
-              }
-              multiline
-            />
+            <View style={styles.captionInputContainer}>
+              {user?.iconImageUrl && (
+                <Image
+                  source={{ uri: user.iconImageUrl }}
+                  style={styles.avatar}
+                />
+              )}
+              <TextInput
+                placeholder="キャプションを入力..."
+                placeholderTextColor="#888"
+                style={styles.captionInput}
+                value={formData.caption}
+                onChangeText={(value) =>
+                  setFormData({ ...formData, caption: value })
+                }
+                multiline
+              />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -162,15 +214,42 @@ const styles = StyleSheet.create({
   },
   captionWrapper: {
     paddingHorizontal: 20,
-    paddingBottom: 25,
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  input: {
-    backgroundColor: "rgba(255,255,255,0.8)",
-    borderRadius: 8,
-    paddingHorizontal: 12,
     paddingVertical: 10,
+    paddingBottom: 20,
+    backgroundColor: "white",
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  captionInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+    marginTop: 4,
+  },
+
+  captionInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     fontSize: 16,
     color: "#000",
+    textAlignVertical: "top",
+    backgroundColor: "#fff",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
 });

@@ -127,7 +127,10 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 		follows[i] = models.NewUserBaseResponse(follow, imageUrl)
 	}
 
-	userResponse := models.NewUserResponse(user, iconURL, postResponses, petResponses, followers, follows)
+	dailyTask := user.Edges.DailyTasks[0]
+	dailyTaskResoponse := models.NewDailyTaskResponse(dailyTask)
+
+	userResponse := models.NewUserResponse(user, iconURL, postResponses, petResponses, followers, follows, dailyTaskResoponse)
 	return userResponse, nil
 }
 

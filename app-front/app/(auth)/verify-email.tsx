@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Button, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback } from "react-native";
+import { View, Text, Button, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback, ImageBackground } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,7 @@ export default function VerifyEmailScreen() {
   });
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? "light"];
   const {mutate: verifyEmail} = useVerifyEmail()
 
   const onSubmit = (data: VerifyEmailInput) => {
@@ -44,8 +45,12 @@ export default function VerifyEmailScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>
+      <ImageBackground
+      source={require("../../assets/images/noise2.png")}
+      resizeMode="repeat"
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <Text style={[styles.title, { color: colors.text }]}>
         メール認証
       </Text>
       <Controller
@@ -57,7 +62,6 @@ export default function VerifyEmailScreen() {
                 value={value}
                 onChangeText={onChange}
                 theme={theme}
-                secureTextEntry
                 autoCapitalize="none"
                 error={errors.email?.message}
               />
@@ -83,7 +87,7 @@ export default function VerifyEmailScreen() {
         disabled={isSubmitting}
         color={Colors[colorScheme ?? "light"].tint}
       />
-    </View>
+    </ImageBackground>
     </TouchableWithoutFeedback>
   );
 }

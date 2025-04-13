@@ -30,10 +30,18 @@ type UserResponse struct {
 	Follows        []UserBaseResponse `json:"follows"`
 	FollowersCount int                `json:"followersCount"`
 	FollowsCount   int                `json:"followsCount"`
+	DailyTask      DailyTaskResponse  `json:"dailyTask"`
 }
 
 // NewPetResponse converts a Pet to a PetResponse
-func NewUserResponse(user *ent.User, imageURL string, posts []PostResponse, pets []PetResponse, followers []UserBaseResponse, follows []UserBaseResponse) UserResponse {
+func NewUserResponse(
+	user *ent.User,
+	imageURL string,
+	posts []PostResponse,
+	pets []PetResponse,
+	followers []UserBaseResponse,
+	follows []UserBaseResponse,
+	dailyTask DailyTaskResponse) UserResponse {
 	return UserResponse{
 		ID:             user.ID,
 		Name:           user.Name,
@@ -45,6 +53,7 @@ func NewUserResponse(user *ent.User, imageURL string, posts []PostResponse, pets
 		Follows:        follows,
 		FollowersCount: len(followers),
 		FollowsCount:   len(follows),
+		DailyTask:      dailyTask,
 	}
 }
 
