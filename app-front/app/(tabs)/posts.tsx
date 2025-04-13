@@ -33,7 +33,7 @@ export const userBaseSchema = z.object({
   email: z.string(),
   name: z.string(),
   bio: z.string(),
-  iconImageUrl: z.string()
+  iconImageUrl: z.string().nullable(),
 });
 
 export const dailyTaskBaseSchema = z.object({

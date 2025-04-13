@@ -30,9 +30,13 @@ func (u *CommentUsecase) Create(userID, postId, content string) (*models.Comment
 		return nil, fmt.Errorf("user edge not loaded")
 	}
 
-	iconURL, err := u.storageRepository.GetUrl(user.IconImageKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get icon image url: %w", err)
+	var iconURL string
+	if user.IconImageKey != "" {
+		var err error
+		iconURL, err = u.storageRepository.GetUrl(user.IconImageKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get icon image url: %w", err)
+		}
 	}
 
 	commentResponse := models.NewCommentResponse(comment, user, iconURL)

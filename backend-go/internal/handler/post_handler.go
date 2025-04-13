@@ -42,12 +42,16 @@ func (h *PostHandler) GetAllPosts(c echo.Context) error {
 				"error": err.Error(),
 			})
 		}
-		userImageURL, err := h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
-		if err != nil {
-			log.Errorf("Failed to get user image URL: %v", err)
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": err.Error(),
-			})
+		var userImageURL string
+		if post.Edges.User.IconImageKey != "" {
+			var err error
+			userImageURL, err = h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
+			if err != nil {
+				log.Errorf("Failed to get user image URL: %v", err)
+				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+					"error": err.Error(),
+				})
+			}
 		}
 
 		commentResponses := make([]models.CommentResponse, len(post.Edges.Comments))
