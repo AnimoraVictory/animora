@@ -111,13 +111,14 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	for _, followersRelation := range user.Edges.Followers {
 		follower := followersRelation.Edges.From
 
-		if follower.IconImageKey == "" {
-			continue
-		}
-
-		imageUrl, err := u.storageRepository.GetUrl(follower.IconImageKey)
-		if err != nil {
-			continue
+		imageUrl := ""
+		if follower.IconImageKey != "" {
+			url, err := u.storageRepository.GetUrl(follower.IconImageKey)
+			if err != nil {
+				log.Warnf("Failed to get icon URL for follower %s: %v", follower.Name, err)
+			} else {
+				imageUrl = url
+			}
 		}
 
 		followers = append(followers, models.NewUserBaseResponse(follower, imageUrl))
@@ -127,13 +128,14 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	for _, followsRelation := range user.Edges.Following {
 		follow := followsRelation.Edges.To
 
-		if follow.IconImageKey == "" {
-			continue
-		}
-
-		imageUrl, err := u.storageRepository.GetUrl(follow.IconImageKey)
-		if err != nil {
-			continue
+		imageUrl := ""
+		if follow.IconImageKey != "" {
+			url, err := u.storageRepository.GetUrl(follow.IconImageKey)
+			if err != nil {
+				log.Warnf("Failed to get icon URL for follow %s: %v", follow.Name, err)
+			} else {
+				imageUrl = url
+			}
 		}
 
 		follows = append(follows, models.NewUserBaseResponse(follow, imageUrl))

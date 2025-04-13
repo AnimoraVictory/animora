@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/google/uuid"
 )
 
@@ -27,5 +28,12 @@ func (FollowRelation) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("from", User.Type).Ref("following").Unique().Required(),
 		edge.From("to", User.Type).Ref("followers").Unique().Required(),
+	}
+}
+
+func (FollowRelation) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("from_id", "to_id").
+			Unique(),
 	}
 }
