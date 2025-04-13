@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { User } from "@/constants/api";
@@ -30,7 +37,21 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     <View style={[styles.headerContainer, { backgroundColor }]}>
       <View style={styles.topRow}>
         <TouchableOpacity onPress={onLogout}>
-          <Text style={styles.logoutText}>ログアウト</Text>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                "ログアウト確認",
+                "本当にログアウトしますか？",
+                [
+                  { text: "キャンセル", style: "cancel" },
+                  { text: "はい", onPress: onLogout },
+                ],
+                { cancelable: true }
+              );
+            }}
+          >
+            <Text style={styles.logoutText}>ログアウト</Text>
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
 
