@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
@@ -29,6 +30,7 @@ func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 		WithLikes(func(q *ent.LikeQuery) {
 			q.WithUser()
 		}).
+		WithDailyTask().
 		Where(post.DeletedAtIsNil()).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
@@ -48,6 +50,7 @@ func (r *PostRepository) GetPostsByUser(userID uuid.UUID) ([]*ent.Post, error) {
 		WithLikes(func(q *ent.LikeQuery) {
 			q.WithUser()
 		}).
+		WithDailyTask().
 		Where(post.HasUserWith(user.ID(userID))).
 		Where(post.DeletedAtIsNil()).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
@@ -58,6 +61,7 @@ func (r *PostRepository) GetPostsByUser(userID uuid.UUID) ([]*ent.Post, error) {
 	}
 	return posts, nil
 }
+
 func (r *PostRepository) CreatePost(caption, userID, fileKey string, dailyTaskId *string) (*ent.Post, error) {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
@@ -80,6 +84,18 @@ func (r *PostRepository) CreatePost(caption, userID, fileKey string, dailyTaskId
 		if err != nil {
 			return nil, err
 		}
+		err = r.db.Post.
+			Update().
+			Where(
+				post.HasDailyTaskWith(dailytask.ID(dailyTaskUUID)),
+				post.DeletedAtNotNil(), // 論理削除済みのみ対象
+			).
+			ClearDailyTask().
+			Exec(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
 		postCreate = postCreate.SetDailyTaskID(dailyTaskUUID)
 	}
 
