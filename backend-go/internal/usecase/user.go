@@ -107,24 +107,38 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 		petResponses[i] = models.NewPetResponse(pet, imageURL)
 	}
 
-	followers := make([]models.UserBaseResponse, len(user.Edges.Followers))
-	for i, followersRelation := range user.Edges.Followers {
+	followers := make([]models.UserBaseResponse, 0)
+	for _, followersRelation := range user.Edges.Followers {
 		follower := followersRelation.Edges.From
-		imageUrl, err := u.storageRepository.GetUrl(follower.IconImageKey)
-		if err != nil {
-			continue
+
+		imageUrl := ""
+		if follower.IconImageKey != "" {
+			url, err := u.storageRepository.GetUrl(follower.IconImageKey)
+			if err != nil {
+				log.Warnf("Failed to get icon URL for follower %s: %v", follower.Name, err)
+			} else {
+				imageUrl = url
+			}
 		}
-		followers[i] = models.NewUserBaseResponse(follower, imageUrl)
+
+		followers = append(followers, models.NewUserBaseResponse(follower, imageUrl))
 	}
 
-	follows := make([]models.UserBaseResponse, len(user.Edges.Following))
-	for i, followsRelation := range user.Edges.Following {
+	follows := make([]models.UserBaseResponse, 0)
+	for _, followsRelation := range user.Edges.Following {
 		follow := followsRelation.Edges.To
-		imageUrl, err := u.storageRepository.GetUrl(follow.IconImageKey)
-		if err != nil {
-			continue
+
+		imageUrl := ""
+		if follow.IconImageKey != "" {
+			url, err := u.storageRepository.GetUrl(follow.IconImageKey)
+			if err != nil {
+				log.Warnf("Failed to get icon URL for follow %s: %v", follow.Name, err)
+			} else {
+				imageUrl = url
+			}
 		}
-		follows[i] = models.NewUserBaseResponse(follow, imageUrl)
+
+		follows = append(follows, models.NewUserBaseResponse(follow, imageUrl))
 	}
 
 	dailyTask := user.Edges.DailyTasks[0]

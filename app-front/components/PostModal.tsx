@@ -85,7 +85,11 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
                 </TouchableOpacity>
 
                 <View style={styles.header}>
-                    <Image source={{ uri: post.user.iconImageUrl }} style={styles.avatar} />
+                    <Image source={
+                  post.user.iconImageUrl
+                    ? { uri: post.user.iconImageUrl }
+                    : require("@/assets/images/profile.png")
+                } style={styles.avatar} />
                     <Text style={[styles.userName, { color: colors.text }]}>
                         {post.user.name}
                     </Text>
