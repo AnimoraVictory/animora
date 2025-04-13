@@ -26,7 +26,7 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const profileEditSchema = z.object({
   imageUri: z.string().nullable(),
   name: z.string().min(1, { message: "名前は必須です" }),
-  bio: z.string().min(1, { message: "自己紹介を入力してください" }),
+  bio: z.string().min(0),
 });
 export type ProfileEditForm = z.infer<typeof profileEditSchema>;
 

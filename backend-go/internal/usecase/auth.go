@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 )
@@ -28,10 +27,6 @@ func (u *AuthUsecase) CreateUser(name, email, password string) error {
 
 func (u *AuthUsecase) SignIn(email, password string) (*cognitoidentityprovider.InitiateAuthOutput, error) {
 	return u.authRepository.SignIn(email, password)
-}
-
-func (u *AuthUsecase) FindByEmail(email string) (*ent.User, error) {
-	return u.userRepository.FindByEmail(email)
 }
 
 func (u *AuthUsecase) RefreshToken(refreshToken string) (*cognitoidentityprovider.InitiateAuthOutput, error) {

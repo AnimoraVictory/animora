@@ -6,6 +6,7 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
+	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
 )
@@ -67,6 +68,15 @@ func (r *UserRepository) FindByEmail(email string) (*ent.User, error) {
 			func(q *ent.FollowRelationQuery) {
 				q.WithFrom()
 			}).
+		WithDailyTasks(func(q *ent.DailyTaskQuery) {
+			q.WithPost(func(pq *ent.PostQuery) {
+				pq.Where(post.DeletedAtIsNil()).
+					Select(
+						post.FieldID,
+					)
+			})
+			q.Order(ent.Desc("created_at")).Limit(1)
+		}).
 		First(context.Background())
 	if err != nil {
 		return nil, err

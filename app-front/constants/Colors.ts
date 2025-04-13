@@ -10,6 +10,7 @@ export const Colors = {
     icon: '#264534',
     tabIconDefault: '#264534',
     tabIconSelected: tintColorLight,
+    card: '#ffffffee',
   },
   dark: {
     text: '#fff', // 黄（文字色）
@@ -19,5 +20,6 @@ export const Colors = {
     icon: '#fff',
     tabIconDefault: '#FFD966',
     tabIconSelected: tintColorDark,
+    card: '#ffffffee',
   },
 };
