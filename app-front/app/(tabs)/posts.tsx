@@ -20,17 +20,31 @@ import { PostPanel } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
 import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 import { petSchema } from "@/components/PetPanel";
+import { useAuth } from "@/providers/AuthContext";
+import DailyTaskPopUp from "@/components/DailyTaskPopUp";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
+export const postBaseSchema = z.object({
+  id: z.string().uuid(),
+})
 
 export const userBaseSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   email: z.string(),
   name: z.string(),
   bio: z.string(),
   iconImageUrl: z.string()
 });
 
+export const dailyTaskBaseSchema = z.object({
+  id: z.string().uuid(),
+  createdAt: z.string().datetime(),
+  type: z.string(),
+})
+
+export const dailyTaskSchema = dailyTaskBaseSchema.extend({
+  post: postBaseSchema,
+})
 
 export const commentSchema = z.object({
   id: z.string(),
@@ -55,6 +69,7 @@ export const postSchema = z.object({
   likes: z.array(likeSchema),
   likesCount: z.number(),
   createdAt: z.string().datetime(),
+  dailyTask: dailyTaskBaseSchema.optional().nullable(),
 });
 
 export const userSchema = userBaseSchema.extend({
@@ -64,6 +79,7 @@ export const userSchema = userBaseSchema.extend({
   followsCount: z.number(),
   posts: z.array(postSchema),
   pets: z.array(petSchema),
+  dailyTask: dailyTaskSchema,
 });
 
 export const getPostResponseSchema = z.object({
@@ -106,6 +122,9 @@ export default function PostsScreen() {
   });
 
   const { setHandler } = useHomeTabHandler();
+  const {user: currentUser} = useAuth();
+  const isDailyTaskDone = currentUser?.dailyTask.post ? true : false;
+
 
   useEffect(() => {
     setHandler(() => {
@@ -192,6 +211,11 @@ export default function PostsScreen() {
         )}
         scrollEventThrottle={16}
       />
+      {!isDailyTaskDone && (
+        <DailyTaskPopUp
+        dailyTask={currentUser?.dailyTask}
+        />
+      )}
     </ThemedView>
   );
 }

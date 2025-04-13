@@ -12,7 +12,7 @@ import {
 import { postSchema } from "@/app/(tabs)/posts";
 import { z } from "zod";
 import { Colors } from "@/constants/Colors";
-import { Ionicons, } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import CommentsModal from "@/components/CommentsModal";
 import { useAuth } from "@/providers/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +20,7 @@ import Constants from "expo-constants";
 import axios from "axios";
 import UserProfileModal from "./UserProfileModal";
 import { useModalStack } from "@/providers/ModalStackContext";
+import { TaskType, taskTypeMap } from "@/app/(tabs)/camera";
 
 export type Post = z.infer<typeof postSchema>;
 
@@ -30,13 +31,41 @@ type Props = {
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export const PostPanel = ({ post }: Props) => {
-  const {push, pop} = useModalStack()
+  const { push, pop } = useModalStack();
 
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [isUserModalVisible, setIsUserModalVisible] = React.useState(false);
 
   const slideAnim = useRef(new Animated.Value(300)).current;
-  const slideAnimUser = useRef(new Animated.Value(Dimensions.get("window").width)).current;
+  const slideAnimUser = useRef(
+    new Animated.Value(Dimensions.get("window").width)
+  ).current;
+
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    if (post.dailyTask) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(glowAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: false,
+          }),
+          Animated.timing(glowAnim, {
+            toValue: 0,
+            duration: 800,
+            useNativeDriver: false,
+          }),
+        ])
+      ).start();
+    }
+  }, [post.dailyTask]);
+  const animatedShadowOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.4, 1],
+  });
+
   const screenWidth = Dimensions.get("window").width;
   const imageHeight = (screenWidth * 14) / 9;
   const colorScheme = useColorScheme();
@@ -51,6 +80,7 @@ export const PostPanel = ({ post }: Props) => {
   });
 
   const { user: currentUser } = useAuth();
+
   const windowHeight = Dimensions.get("window").height;
 
   const likedByCurrentUser =
@@ -61,7 +91,9 @@ export const PostPanel = ({ post }: Props) => {
 
     const createLikeMutation = useMutation({
       mutationFn: () => {
-        return axios.post(`${API_URL}/likes/new?userId=${userId}&postId=${postId}`);
+        return axios.post(
+          `${API_URL}/likes/new?userId=${userId}&postId=${postId}`
+        );
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -73,7 +105,9 @@ export const PostPanel = ({ post }: Props) => {
 
     const deleteLikeMutation = useMutation({
       mutationFn: () => {
-        return axios.delete(`${API_URL}/likes/delete?userId=${userId}&postId=${postId}`);
+        return axios.delete(
+          `${API_URL}/likes/delete?userId=${userId}&postId=${postId}`
+        );
       },
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -96,7 +130,6 @@ export const PostPanel = ({ post }: Props) => {
 
   const { toggleLike } = useToggleLike(post.id, currentUser?.id ?? "");
 
-
   const OpenModal = () => {
     setIsModalVisible(true);
     Animated.timing(slideAnim, {
@@ -116,7 +149,7 @@ export const PostPanel = ({ post }: Props) => {
 
   const openUserProfile = () => {
     setIsUserModalVisible(true);
-    push("1")
+    push("1");
     Animated.timing(slideAnimUser, {
       toValue: 0,
       duration: 300,
@@ -130,38 +163,74 @@ export const PostPanel = ({ post }: Props) => {
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      setIsUserModalVisible(false)
-      pop()
+      setIsUserModalVisible(false);
+      pop();
     });
   };
 
   return (
     <>
       <View style={styles.wrapper}>
+        {post.dailyTask && (
+          <View style={styles.taskOverlay}>
+            <Text style={styles.taskOverlayText}>
+              🎯 {taskTypeMap[post.dailyTask.type as TaskType]}
+            </Text>
+          </View>
+        )}
         <TouchableOpacity style={styles.header} onPress={openUserProfile}>
-          <Image source={{ uri: post.user.iconImageUrl }} style={styles.avatar} />
+          <Image
+            source={{ uri: post.user.iconImageUrl }}
+            style={styles.avatar}
+          />
           <View style={styles.userInfo}>
-            <Text style={[styles.userName, { color: colors.text }]}>{post.user.name}</Text>
-            <Text style={[styles.postTime, { color: colors.icon }]}>{formattedDateTime}</Text>
+            <Text style={[styles.userName, { color: colors.text }]}>
+              {post.user.name}
+            </Text>
+            <Text style={[styles.postTime, { color: colors.icon }]}>
+              {formattedDateTime}
+            </Text>
           </View>
         </TouchableOpacity>
-        <View style={[styles.imageContainer, { height: imageHeight }]}>
-          <Image source={{ uri: post.imageUrl }} style={[styles.image, { height: imageHeight }]} />
+        <Animated.View
+          style={[
+            styles.imageGlowWrapper,
+            post.dailyTask && {
+              shadowOpacity: animatedShadowOpacity,
+              shadowColor: "#FFD700",
+              shadowOffset: { width: 0, height: 0 },
+              shadowRadius: 15,
+              borderRadius: 20,
+            },
+          ]}
+        >
+          <Image
+            source={{ uri: post.imageUrl }}
+            style={[styles.image, { height: imageHeight }]}
+          />
 
           <TouchableOpacity
             style={styles.likeBox}
             onPress={() => toggleLike(likedByCurrentUser)}
           >
-            <Ionicons name="heart" size={35} color={likedByCurrentUser ? "red" : "white"} />
+            <Ionicons
+              name="heart"
+              size={35}
+              color={likedByCurrentUser ? "red" : "white"}
+            />
             <Text style={{ color: "white" }}>{post.likesCount}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.commentBox} onPress={() => OpenModal()}>
-
+          <TouchableOpacity
+            style={styles.commentBox}
+            onPress={() => OpenModal()}
+          >
             <Ionicons name="chatbox-ellipses-outline" size={35} color="white" />
             <Text style={{ color: "white" }}>{post.commentsCount}</Text>
           </TouchableOpacity>
-        </View>
-        <Text style={[styles.caption, { color: colors.tint }]}>{post.caption}</Text>
+        </Animated.View>
+        <Text style={[styles.caption, { color: colors.tint }]}>
+          {post.caption}
+        </Text>
       </View>
       <CommentsModal
         slideAnim={slideAnim}
@@ -174,7 +243,7 @@ export const PostPanel = ({ post }: Props) => {
         onNewComment={() => {}}
       />
       <UserProfileModal
-      prevModalIdx={0}
+        prevModalIdx={0}
         key={post.user.id}
         currentUser={{
           id: currentUser?.id ?? "",
@@ -196,6 +265,22 @@ const styles = StyleSheet.create({
   wrapper: {
     marginBottom: 24,
     paddingHorizontal: 20,
+  },
+  taskOverlay: {
+    position: "absolute",
+    top: 60,
+    left: 30,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    zIndex: 2,
+  },
+  
+  taskOverlayText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   header: {
     flexDirection: "row",
@@ -221,6 +306,10 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     position: "relative",
+  },
+  imageGlowWrapper: {
+    backgroundColor: "transparent",
+    marginBottom: 10,
   },
   image: {
     borderRadius: 20,

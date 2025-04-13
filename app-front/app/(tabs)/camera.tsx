@@ -1,7 +1,13 @@
 import { CreatePostModal } from "@/components/CreatePostModal";
+import { useAuth } from "@/providers/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { CameraView, CameraType, useCameraPermissions, FlashMode } from "expo-camera";
+import {
+  CameraView,
+  CameraType,
+  useCameraPermissions,
+  FlashMode,
+} from "expo-camera";
 import { useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -16,6 +22,13 @@ import {
 } from "react-native";
 
 const { height } = Dimensions.get("window");
+export type TaskType = "eating" | "sleeping" | "playing";
+
+export const taskTypeMap: Record<TaskType, string> = {
+  eating: "ご飯を食べているところを撮影しよう！",
+  sleeping: "寝ているところを撮影しよう！",
+  playing: "遊んでいるところを撮影しよう！",
+};
 
 export default function CameraScreen() {
   const router = useRouter();
@@ -23,7 +36,9 @@ export default function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [flashMode, setFlashMode] = useState<FlashMode>("off");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [showTaskMessage, setShowTaskMessage] = useState(false);
   const cameraRef = useRef<any>(null);
+  const { user: currentUser } = useAuth();
 
   const slideAnim = useRef(new Animated.Value(height)).current;
   useFocusEffect(
@@ -46,6 +61,10 @@ export default function CameraScreen() {
     });
   };
 
+  const taskButtonColor = showTaskMessage ? "green" : "white";
+
+  const dailyTaskDone = currentUser?.dailyTask.post ? true : false;
+
   if (!permission) return null;
 
   return (
@@ -62,7 +81,15 @@ export default function CameraScreen() {
           )}
         </View>
       ) : photoUri ? (
-        <CreatePostModal photoUri={photoUri} onClose={() => setPhotoUri(null)} />
+        <CreatePostModal
+          photoUri={photoUri}
+          onClose={() => setPhotoUri(null)}
+          dailyTaskId={
+            !dailyTaskDone && showTaskMessage
+              ? currentUser?.dailyTask.id
+              : undefined
+          }
+        />
       ) : (
         <CameraView
           ref={cameraRef}
@@ -70,20 +97,30 @@ export default function CameraScreen() {
           facing={facing}
           flash={flashMode}
         >
+          {currentUser?.dailyTask && currentUser.dailyTask.post == null && (
+            <TouchableOpacity
+              style={[styles.taskButton, { backgroundColor: taskButtonColor }]}
+              onPress={() => setShowTaskMessage(!showTaskMessage)}
+            >
+              <Text style={styles.taskButtonText}>Today’s Task 🐾</Text>
+            </TouchableOpacity>
+          )}
+          {!dailyTaskDone && showTaskMessage && currentUser?.dailyTask && (
+            <View style={styles.taskMessageContainer}>
+              <Text style={styles.taskMessageText}>
+                {taskTypeMap[currentUser.dailyTask.type as TaskType]}
+              </Text>
+            </View>
+          )}
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <Text style={styles.closeText}>×</Text>
           </TouchableOpacity>
 
           <View style={styles.bottomControls}>
-            {/* フラッシュ切替ボタン */}
             <TouchableOpacity
               style={styles.flashButton}
               onPress={() =>
-                setFlashMode((prev) =>
-                  prev === "off"
-                    ? "on"
-                    : "off"
-                )
+                setFlashMode((prev) => (prev === "off" ? "on" : "off"))
               }
             >
               <Ionicons
@@ -180,11 +217,10 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 40,
+    top: 60,
     left: 20,
     width: 50,
-    height: 50,
-    borderRadius: 25,
+    borderRadius: 12,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
@@ -194,5 +230,36 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 24,
     textAlign: "center",
+  },
+  taskButton: {
+    position: "absolute",
+    top: 60,
+    right: 20,
+    backgroundColor: "#fff",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    zIndex: 3,
+  },
+  taskButtonText: {
+    fontWeight: "bold",
+    fontSize: 14,
+    color: "#333",
+  },
+  taskMessageContainer: {
+    position: "absolute",
+    top: "40%",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 5,
+  },
+  taskMessageText: {
+    color: "#000",
+    fontSize: 20,
+    opacity: 0.4,
+    fontWeight: "bold",
+    textAlign: "center",
+    paddingHorizontal: 20,
   },
 });
