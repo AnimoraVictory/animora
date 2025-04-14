@@ -9,6 +9,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   loading: boolean;
   refetch: () => Promise<void>;
+  isRefetching: boolean
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   loading: true,
   refetch: async () => {},
+  isRefetching: true,
 });
 
 // SecureStore のキー
@@ -42,6 +44,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   // ユーザー情報の取得
   const {
     data: user,
+    isRefetching,
     isLoading,
     refetch,
   } = useQuery({
@@ -120,6 +123,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         logout,
         loading: isLoading,
         refetch: refetchUser,
+        isRefetching,
       }}
     >
       {children}

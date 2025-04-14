@@ -40,6 +40,7 @@ const ProfileScreen: React.FC = () => {
   >("follows");
   const {
     user,
+    isRefetching,
     loading: authLoading,
     logout,
     refetch: refetchUser,
@@ -183,7 +184,7 @@ const ProfileScreen: React.FC = () => {
     <ScrollView
       refreshControl={
         <RefreshControl
-          refreshing={authLoading}
+          refreshing={isRefetching}
           onRefresh={refetchUser}
           tintColor={colorScheme === "light" ? "black" : "white"}
         />
