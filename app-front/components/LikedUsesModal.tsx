@@ -117,7 +117,7 @@ const LikedUserModal: React.FC<Props> = ({
           contentContainerStyle={{ paddingTop: 80, backgroundColor: colors.middleBackground }}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.userItem} onPress={() => openUserProfile(item.user.email)}>
-              <Image source={{ uri: item.user.iconImageUrl }} style={styles.avatar} />
+              <Image source={item.user.iconImageUrl ? { uri: item.user.iconImageUrl } : require("@/assets/images/profile.png")} style={styles.avatar} />
               <Text style={[styles.userName, { color: colors.text }]}>{item.user.name}</Text>
             </TouchableOpacity>
           )}

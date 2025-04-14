@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,19 +8,23 @@ import {
   Dimensions,
   TouchableOpacity,
   Animated,
+  Alert,
 } from "react-native";
+import {
+  GestureHandlerRootView,
+  TapGestureHandler,
+} from "react-native-gesture-handler";
+import * as Haptics from "expo-haptics";
 import { postSchema } from "@/app/(tabs)/posts";
 import { z } from "zod";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import CommentsModal from "@/components/CommentsModal";
 import { useAuth } from "@/providers/AuthContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Constants from "expo-constants";
-import axios from "axios";
 import UserProfileModal from "./UserProfileModal";
 import { useModalStack } from "@/providers/ModalStackContext";
 import { TaskType, taskTypeMap } from "@/app/(tabs)/camera";
+import useToggleLike from "@/hooks/useToggleLike";
 
 export type Post = z.infer<typeof postSchema>;
 
@@ -28,13 +32,12 @@ type Props = {
   post: Post;
 };
 
-const API_URL = Constants.expoConfig?.extra?.API_URL;
-
 export const PostPanel = ({ post }: Props) => {
   const { push, pop } = useModalStack();
 
-  const [isModalVisible, setIsModalVisible] = React.useState(false);
-  const [isUserModalVisible, setIsUserModalVisible] = React.useState(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isUserModalVisible, setIsUserModalVisible] = useState<boolean>(false);
+  const likeLockRef = useRef(false);
 
   const slideAnim = useRef(new Animated.Value(300)).current;
   const slideAnimUser = useRef(
@@ -83,52 +86,14 @@ export const PostPanel = ({ post }: Props) => {
 
   const windowHeight = Dimensions.get("window").height;
 
-  const likedByCurrentUser =
-    post.likes?.some((like) => like.user.id === currentUser?.id) ?? false;
+  const [likedByCurrentUser, setLikedByCurrentUser] = useState<boolean>(
+    post.likes?.some((like) => like.user.id === currentUser?.id) ?? false
+  );
 
-  const useToggleLike = (postId: string, userId: string) => {
-    const queryClient = useQueryClient();
-
-    const createLikeMutation = useMutation({
-      mutationFn: () => {
-        return axios.post(
-          `${API_URL}/likes/new?userId=${userId}&postId=${postId}`
-        );
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["posts"] });
-      },
-      onError: (error) => {
-        console.error("likeに失敗しました", error);
-      },
-    });
-
-    const deleteLikeMutation = useMutation({
-      mutationFn: () => {
-        return axios.delete(
-          `${API_URL}/likes/delete?userId=${userId}&postId=${postId}`
-        );
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["posts"] });
-      },
-      onError: (error) => {
-        console.error("Like削除エラー", error);
-      },
-    });
-
-    const toggleLike = (liked: boolean) => {
-      if (liked) {
-        deleteLikeMutation.mutate();
-      } else {
-        createLikeMutation.mutate();
-      }
-    };
-
-    return { toggleLike };
-  };
-
-  const { toggleLike } = useToggleLike(post.id, currentUser?.id ?? "");
+  const { toggleLike, isLoading: isLoadingLike } = useToggleLike(
+    post.id,
+    currentUser?.id ?? ""
+  );
 
   const OpenModal = () => {
     setIsModalVisible(true);
@@ -168,70 +133,133 @@ export const PostPanel = ({ post }: Props) => {
     });
   };
 
-  return (
-    <>
-      <View style={styles.wrapper}>
-        {post.dailyTask && (
-          <View style={styles.taskOverlay}>
-            <Text style={styles.taskOverlayText}>
-              🎯 {taskTypeMap[post.dailyTask.type as TaskType]}
-            </Text>
-          </View>
-        )}
-        <TouchableOpacity style={styles.header} onPress={openUserProfile}>
-          <Image
-            source={{ uri: post.user.iconImageUrl }}
-            style={styles.avatar}
-          />
-          <View style={styles.userInfo}>
-            <Text style={[styles.userName, { color: colors.text }]}>
-              {post.user.name}
-            </Text>
-            <Text style={[styles.postTime, { color: colors.icon }]}>
-              {formattedDateTime}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <Animated.View
-          style={[
-            styles.imageGlowWrapper,
-            post.dailyTask && {
-              shadowOpacity: animatedShadowOpacity,
-              shadowColor: "#FFD700",
-              shadowOffset: { width: 0, height: 0 },
-              shadowRadius: 15,
-              borderRadius: 20,
-            },
-          ]}
-        >
-          <Image
-            source={{ uri: post.imageUrl }}
-            style={[styles.image, { height: imageHeight }]}
-          />
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
-          <TouchableOpacity
-            style={styles.likeBox}
-            onPress={() => toggleLike(likedByCurrentUser)}
-          >
-            <Ionicons
-              name="heart"
-              size={35}
-              color={likedByCurrentUser ? "red" : "white"}
+  const handleToggleLike = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (isLoadingLike) return;
+  
+    if (!likedByCurrentUser) {
+      setLikedByCurrentUser(true);
+      toggleLike(false);
+    } else {
+      setLikedByCurrentUser(false);
+      toggleLike(true);
+      setLikedByCurrentUser(false);
+    }
+  
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.3,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handleDoubleTap = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.3,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      if (!likedByCurrentUser) {
+        setLikedByCurrentUser(true);
+        toggleLike(false);
+      }
+    });
+  };
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <TapGestureHandler numberOfTaps={2} onActivated={handleDoubleTap}>
+        <View style={styles.wrapper}>
+          {post.dailyTask && (
+            <View style={styles.taskOverlay}>
+              <Text style={styles.taskOverlayText}>
+                🎯 {taskTypeMap[post.dailyTask.type as TaskType]}
+              </Text>
+            </View>
+          )}
+          <TouchableOpacity style={styles.header} onPress={openUserProfile}>
+            <Image
+              source={
+                post.user.iconImageUrl
+                  ? { uri: post.user.iconImageUrl }
+                  : require("@/assets/images/profile.png")
+              }
+              style={styles.avatar}
             />
-            <Text style={{ color: "white" }}>{post.likesCount}</Text>
+            <View style={styles.userInfo}>
+              <Text style={[styles.userName, { color: colors.text }]}>
+                {post.user.name}
+              </Text>
+              <Text style={[styles.postTime, { color: colors.icon }]}>
+                {formattedDateTime}
+              </Text>
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.commentBox}
-            onPress={() => OpenModal()}
+          <Animated.View
+            style={[
+              styles.imageGlowWrapper,
+              post.dailyTask && {
+                shadowOpacity: animatedShadowOpacity,
+                shadowColor: "#FFD700",
+                shadowOffset: { width: 0, height: 0 },
+                shadowRadius: 15,
+                borderRadius: 20,
+              },
+            ]}
           >
-            <Ionicons name="chatbox-ellipses-outline" size={35} color="white" />
-            <Text style={{ color: "white" }}>{post.commentsCount}</Text>
-          </TouchableOpacity>
-        </Animated.View>
-        <Text style={[styles.caption, { color: colors.tint }]}>
-          {post.caption}
-        </Text>
-      </View>
+            <Image
+              source={{ uri: post.imageUrl }}
+              style={[styles.image, { height: imageHeight }]}
+            />
+
+            <TouchableOpacity
+              style={styles.likeBox}
+              onPress={handleToggleLike}
+              disabled={isLoadingLike}
+            >
+              <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <Ionicons
+                  name="heart"
+                  size={35}
+                  color={likedByCurrentUser ? "red" : "white"}
+                />
+              </Animated.View>
+              <Text style={{ color: "white" }}>{post.likesCount}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.commentBox}
+              onPress={() => OpenModal()}
+            >
+              <Ionicons
+                name="chatbox-ellipses-outline"
+                size={35}
+                color="white"
+              />
+              <Text style={{ color: "white" }}>{post.commentsCount}</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          <Text style={[styles.caption, { color: colors.tint }]}>
+            {post.caption}
+          </Text>
+        </View>
+      </TapGestureHandler>
       <CommentsModal
         slideAnim={slideAnim}
         postId={post.id}
@@ -257,7 +285,7 @@ export const PostPanel = ({ post }: Props) => {
         onClose={closeUserProfile}
         slideAnim={slideAnimUser}
       />
-    </>
+    </GestureHandlerRootView>
   );
 };
 
@@ -276,7 +304,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     zIndex: 2,
   },
-  
+
   taskOverlayText: {
     color: "white",
     fontSize: 14,

@@ -12,8 +12,8 @@ func NewLikeUsecase(likeRepository repository.LikeRepository) *LikeUsecase {
 	}
 }
 
-func (u *LikeUsecase) Create(userID, postId string) error {
-	err := u.likeRepository.Create(userID, postId)
+func (u *LikeUsecase) Create(userID, postID string) error {
+	err := u.likeRepository.Create(userID, postID)
 	return err
 }
 
