@@ -19,26 +19,21 @@ func NewLikeRepository(db *ent.Client) *LikeRepository {
 		db: db,
 	}
 }
-func (r *LikeRepository) Create(userID, postId string) error {
+func (r *LikeRepository) Create(userID, postID string) error {
 	parsedUserID, err := uuid.Parse(userID)
 	if err != nil {
 		return err
-
 	}
-	parsedPostId, err := uuid.Parse(postId)
+	parsedPostID, err := uuid.Parse(postID)
 	if err != nil {
 		return err
 	}
 
 	_, err = r.db.Like.Create().
 		SetUserID(parsedUserID).
-		SetPostID(parsedPostId).
+		SetPostID(parsedPostID).
 		Save(context.Background())
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (r *LikeRepository) Delete(userID, postId string) error {

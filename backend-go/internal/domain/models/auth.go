@@ -15,7 +15,7 @@ type UserBaseResponse struct {
 	Email        string    `json:"email"`
 	Name         string    `json:"name"`
 	Bio          string    `json:"bio"`
-	IconImageUrl string    `json:"iconImageUrl"`
+	IconImageUrl *string   `json:"iconImageUrl"`
 }
 
 type UserResponse struct {
@@ -58,11 +58,15 @@ func NewUserResponse(
 }
 
 func NewUserBaseResponse(user *ent.User, imageURL string) UserBaseResponse {
+	var iconURL *string
+	if imageURL != "" {
+		iconURL = &imageURL
+	}
 	return UserBaseResponse{
 		ID:           user.ID,
 		Email:        user.Email,
 		Name:         user.Name,
 		Bio:          user.Bio,
-		IconImageUrl: imageURL,
+		IconImageUrl: iconURL,
 	}
 }

@@ -21,6 +21,12 @@ func NewLikeHandler(likeUsecase usecase.LikeUsecase) *LikeHandler {
 func (h *LikeHandler) Create(c echo.Context) error {
 	userId := c.QueryParam("userId")
 	postId := c.QueryParam("postId")
+	if userId == "" || postId == "" {
+		log.Error("userId or postId is missing")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "userId または postId が指定されていません",
+		})
+	}
 	err := h.likeUsecase.Create(userId, postId)
 	if err != nil {
 		log.Errorf("Failed to create like: %v", err)

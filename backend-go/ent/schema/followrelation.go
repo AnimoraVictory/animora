@@ -33,7 +33,6 @@ func (FollowRelation) Edges() []ent.Edge {
 
 func (FollowRelation) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("from_id", "to_id").
-			Unique(),
+		index.Edges("from", "to").Unique(),
 	}
 }
