@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  FlatList,
-  Text,
-  View,
-  useColorScheme,
-} from "react-native";
+import { FlatList, Text, View, useColorScheme } from "react-native";
 import PetPanel from "@/components/PetPanel";
 import { Pet } from "@/constants/api";
 import { Colors } from "@/constants/Colors";

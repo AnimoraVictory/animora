@@ -38,9 +38,7 @@ export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({
   };
 
   return (
-    <View
-      style={[styles.tabContainer, { backgroundColor }]}
-    >
+    <View style={[styles.tabContainer, { backgroundColor }]}>
       <TouchableOpacity
         onPress={() => scrollToTab("posts")}
         style={[
