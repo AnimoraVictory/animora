@@ -41,7 +41,11 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
 
       <View style={styles.row}>
         <Image
-          source={{ uri: user.iconImageUrl }}
+          source={
+            user.iconImageUrl
+              ? { uri: user.iconImageUrl }
+              : require("@/assets/images/profile.png")
+          }
           style={styles.profileImage}
         />
 

@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  Text,
-  useColorScheme,
-  View,
-} from "react-native";
+import { FlatList, Text, useColorScheme } from "react-native";
 import ProfilePostPanel from "@/components/ProfilePostPanel";
 import { Post } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
@@ -14,19 +8,13 @@ import { useModalStack } from "@/providers/ModalStackContext";
 
 type Props = {
   posts: Post[];
-  refreshing: boolean;
-  onRefresh: () => void;
   colorScheme: ReturnType<typeof useColorScheme>;
-  headerComponent: React.JSX.Element;
   onScroll?: (event: any) => void;
 };
 
 export const UserPostList: React.FC<Props> = ({
   posts,
-  refreshing,
-  onRefresh,
   colorScheme,
-  headerComponent,
   onScroll,
 }) => {
   const { push, pop } = useModalStack();
@@ -50,20 +38,8 @@ export const UserPostList: React.FC<Props> = ({
             }}
           />
         )}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colorScheme === "light" ? "black" : "white"}
-          />
-        }
         onScroll={onScroll}
         scrollEventThrottle={16}
-        ListHeaderComponent={
-          <View style={{ backgroundColor: colors.background }}>
-            {headerComponent}
-          </View>
-        }
         contentContainerStyle={{
           flexGrow: 1,
           backgroundColor,
