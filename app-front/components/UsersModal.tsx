@@ -198,15 +198,15 @@ const UsersModal: React.FC<Props> = ({
           />
         </Animated.View>
       </Animated.View>
-        <UserProfileModal
-          prevModalIdx={prevModalIdx + 1}
-          key={prevModalIdx + 1}
-          currentUser={currentUser}
-          email={selectedUserEmail ?? ""}
-          visible={isProfileModalVisible && !!selectedUserEmail}
-          onClose={closeUserProfile}
-          slideAnim={slideAnimProfile}
-        />
+      <UserProfileModal
+        prevModalIdx={prevModalIdx + 1}
+        key={prevModalIdx + 1}
+        currentUser={currentUser}
+        email={selectedUserEmail ?? ""}
+        visible={isProfileModalVisible && !!selectedUserEmail}
+        onClose={closeUserProfile}
+        slideAnim={slideAnimProfile}
+      />
     </Modal>
   );
 };

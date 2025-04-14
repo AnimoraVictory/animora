@@ -210,7 +210,7 @@ const UserProfileModal: React.FC<Props> = ({
   });
 
   const headerOpacity = scrollY.interpolate({
-    inputRange: [- 20,0 ],
+    inputRange: [-20, 0],
     outputRange: [0, 1],
     extrapolate: "clamp",
   });
@@ -274,7 +274,7 @@ const UserProfileModal: React.FC<Props> = ({
             />
           }
           contentInset={{ top: 80 }}
-          contentOffset={{x: 0, y: -80 }}
+          contentOffset={{ x: 0, y: -80 }}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
           onScroll={Animated.event(

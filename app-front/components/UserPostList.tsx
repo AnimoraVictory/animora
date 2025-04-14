@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  FlatList,
-  Text,
-  useColorScheme,
-} from "react-native";
+import { FlatList, Text, useColorScheme } from "react-native";
 import ProfilePostPanel from "@/components/ProfilePostPanel";
 import { Post } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";

@@ -206,16 +206,10 @@ const ProfileScreen: React.FC = () => {
           scrollEventThrottle={16}
         >
           <View style={{ width: windowWidth }}>
-            <UserPostList
-              posts={user.posts}
-              colorScheme={colorScheme}
-            />
+            <UserPostList posts={user.posts} colorScheme={colorScheme} />
           </View>
           <View style={{ width: windowWidth }}>
-            <UserPetList
-              pets={user.pets}
-              colorScheme={colorScheme}
-            />
+            <UserPetList pets={user.pets} colorScheme={colorScheme} />
           </View>
         </ScrollView>
       </View>
