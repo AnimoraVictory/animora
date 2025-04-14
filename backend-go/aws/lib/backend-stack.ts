@@ -7,6 +7,7 @@ import * as targets from "aws-cdk-lib/aws-events-targets";
 import { Construct } from "constructs";
 import path = require("path");
 import { getRequiredEnvVars } from "../utils/env";
+import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 dotenv.config({ path: path.join(__dirname, "../../.env.stg") });
@@ -64,7 +65,17 @@ export class BackendStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.join(__dirname, "../../bin/dailytask")),
       environment: {
         DATABASE_URL,
+        // ... 他の環境変数 ...
       },
+      // IAMロールを明示的に設定
+      role: new Role(this, 'DailyTaskCreatorRole', {
+        assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+        description: 'Role for DailyTaskCreator Lambda function',
+        managedPolicies: [
+          // CloudWatchLogsへのアクセス権限
+          ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+        ],
+      }),
     });
 
     new events.Rule(this, "DailyTaskRule", {
