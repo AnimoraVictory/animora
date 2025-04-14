@@ -37,7 +37,6 @@ export const PostPanel = ({ post }: Props) => {
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isUserModalVisible, setIsUserModalVisible] = useState<boolean>(false);
-  const likeLockRef = useRef(false);
 
   const slideAnim = useRef(new Animated.Value(300)).current;
   const slideAnimUser = useRef(
@@ -109,7 +108,9 @@ export const PostPanel = ({ post }: Props) => {
       toValue: windowHeight * 0.8,
       duration: 200,
       useNativeDriver: true,
-    }).start(() => setIsModalVisible(false));
+    }).start(() => {
+      setIsModalVisible(false);
+    });
   };
 
   const openUserProfile = () => {
@@ -138,7 +139,7 @@ export const PostPanel = ({ post }: Props) => {
   const handleToggleLike = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     if (isLoadingLike) return;
-  
+
     if (!likedByCurrentUser) {
       setLikedByCurrentUser(true);
       toggleLike(false);
@@ -147,7 +148,7 @@ export const PostPanel = ({ post }: Props) => {
       toggleLike(true);
       setLikedByCurrentUser(false);
     }
-  
+
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 1.3,

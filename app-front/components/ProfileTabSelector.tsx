@@ -1,33 +1,41 @@
+import { Colors } from "../constants/Colors";
+import React from "react";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { useColorScheme } from "react-native";
 
-import { Colors } from '../constants/Colors';
-import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useColorScheme } from 'react-native';
-
-export type ProfileTabType = 'posts' | 'mypet';
+export type ProfileTabType = "posts" | "mypet";
 
 type ProfileTabSelectorProps = {
   selectedTab: ProfileTabType;
   onSelectTab: (tab: ProfileTabType) => void;
 };
 
-export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({ selectedTab, onSelectTab }) => {
+export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({
+  selectedTab,
+  onSelectTab,
+}) => {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  const backgroundColor = colorScheme === "light" ? "white" : "black"
+  const colors = Colors[colorScheme ?? "light"];
+  const backgroundColor = colorScheme === "light" ? "white" : "black";
   const styles = getStyles(colors);
 
   return (
-    <View style={[styles.tabContainer, {backgroundColor }]}>
+    <View style={[styles.tabContainer, { backgroundColor }]}>
       <TouchableOpacity
-        onPress={() => onSelectTab('posts')}
-        style={[styles.tabButton, selectedTab === 'posts' && styles.tabButtonActive]}
+        onPress={() => onSelectTab("posts")}
+        style={[
+          styles.tabButton,
+          selectedTab === "posts" && styles.tabButtonActive,
+        ]}
       >
         <Text style={styles.tabText}>投稿一覧</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={() => onSelectTab('mypet')}
-        style={[styles.tabButton, selectedTab === 'mypet' && styles.tabButtonActive]}
+        onPress={() => onSelectTab("mypet")}
+        style={[
+          styles.tabButton,
+          selectedTab === "mypet" && styles.tabButtonActive,
+        ]}
       >
         <Text style={styles.tabText}>マイペット</Text>
       </TouchableOpacity>
@@ -38,8 +46,8 @@ export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({ selected
 const getStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     tabContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
+      flexDirection: "row",
+      justifyContent: "center",
       borderColor: colors.icon,
     },
     tabButton: {
@@ -54,7 +62,7 @@ const getStyles = (colors: typeof Colors.light) =>
     },
     tabText: {
       fontSize: 16,
-      fontWeight: 'bold',
+      fontWeight: "bold",
       color: colors.text,
     },
   });

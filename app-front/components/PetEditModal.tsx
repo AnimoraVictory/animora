@@ -28,7 +28,6 @@ import Constants from "expo-constants";
 import { PetForm, petInputSchema } from "./PetRegisterModal";
 import { Pet } from "@/constants/api";
 
-
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 const getInitialFormState = (pet: Pet): PetForm => ({
@@ -145,160 +144,164 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.modalOverlay}>
-        <Animated.View
-          style={[
-            styles.modalContainer,
-            {
-              transform: [{ translateY: slideAnim }],
-              backgroundColor: colors.background,
-            },
-          ]}
-        >
-          <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={{ color: colors.tint }}>キャンセル</Text>
-          </TouchableOpacity>
-          <Text style={[styles.modalTitle, { color: colors.text }]}>
-            ペット情報を編集する
-          </Text>
-          <TouchableOpacity
-            style={styles.iconContainer}
-            onPress={pickIconImage}
-          >
-            {formData.iconImageUri ? (
-              <Image
-                source={{ uri: formData.iconImageUri }}
-                style={styles.iconImage}
-              />
-            ) : (
-              <Text style={[styles.iconPlaceholder, { color: colors.icon }]}>
-                アイコン画像
-              </Text>
-            )}
-          </TouchableOpacity>
-          <Text style={styles.inputTitle}>名前</Text>
-          <TextInput
+        <View style={styles.modalOverlay}>
+          <Animated.View
             style={[
-              styles.input,
-              { borderColor: colors.icon, color: colors.text },
+              styles.modalContainer,
+              {
+                transform: [{ translateY: slideAnim }],
+                backgroundColor: colors.background,
+              },
             ]}
-            placeholder="名前"
-            placeholderTextColor={colors.icon}
-            value={formData.name}
-            onChangeText={(value) => setFormData({ ...formData, name: value })}
-          />
-          <Text style={styles.inputTitle}>動物種</Text>
-          <TouchableOpacity
-            onPress={() => setShowPetTypeSelector(true)}
-            style={[styles.selectorInput, { borderColor: colors.icon }]}
           >
-            <Text style={{ color: colors.text }}>
-              {formData.petType === "dog" ? "犬" : "猫"}
+            <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
+              <Text style={{ color: colors.tint }}>キャンセル</Text>
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              ペット情報を編集する
             </Text>
-          </TouchableOpacity>
-          <Text style={styles.inputTitle}>品種</Text>
-          <TouchableOpacity
-            onPress={() => setShowSpeciesSelector(true)}
-            style={[styles.selectorInput, { borderColor: colors.icon }]}
-          >
-            <Text style={{ color: colors.text }}>{formData.species}</Text>
-          </TouchableOpacity>
-          <Text style={styles.inputTitle}>誕生日</Text>
-          <TextInput
-            style={[
-              styles.input,
-              { borderColor: colors.icon, color: colors.text },
-            ]}
-            placeholder="誕生日 (YYYY-MM-DD)"
-            placeholderTextColor={colors.icon}
-            value={formData.birthDay}
-            onChangeText={(value) =>
-              setFormData({ ...formData, birthDay: value })
-            }
-          />
-          <TouchableOpacity
-            onPress={handleSubmit}
-            style={[styles.submitButton, { backgroundColor: colors.tint }]}
-          >
-            <Text style={{ color: colors.background, fontWeight: "bold" }}>
-              更新する
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* ペット種セレクター */}
-        <Modal transparent visible={showPetTypeSelector} animationType="fade">
-          <TouchableOpacity
-            style={styles.selectorOverlay}
-            onPress={() => setShowPetTypeSelector(false)}
-          >
-            <View
-              style={[
-                styles.selectorContainer,
-                { backgroundColor: colors.background },
-              ]}
+            <TouchableOpacity
+              style={styles.iconContainer}
+              onPress={pickIconImage}
             >
-              <Text style={[styles.selectorTitle, { color: colors.text }]}>
-                種類を選択
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setFormData({ ...formData, petType: "dog", species: "" });
-                  setShowPetTypeSelector(false);
-                }}
-              >
-                <Text style={[styles.selectorItem, { color: colors.text }]}>
-                  犬
+              {formData.iconImageUri ? (
+                <Image
+                  source={{ uri: formData.iconImageUri }}
+                  style={styles.iconImage}
+                />
+              ) : (
+                <Text style={[styles.iconPlaceholder, { color: colors.icon }]}>
+                  アイコン画像
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setFormData({ ...formData, petType: "cat", species: "" });
-                  setShowPetTypeSelector(false);
-                }}
-              >
-                <Text style={[styles.selectorItem, { color: colors.text }]}>
-                  猫
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </Modal>
-
-        {/* 品種セレクター */}
-        <Modal transparent visible={showSpeciesSelector} animationType="fade">
-          <TouchableOpacity
-            style={styles.selectorOverlay}
-            onPress={() => setShowSpeciesSelector(false)}
-          >
-            <View
+              )}
+            </TouchableOpacity>
+            <Text style={styles.inputTitle}>名前</Text>
+            <TextInput
               style={[
-                styles.selectorContainerFixed,
-                { backgroundColor: colors.background },
+                styles.input,
+                { borderColor: colors.icon, color: colors.text },
               ]}
+              placeholder="名前"
+              placeholderTextColor={colors.icon}
+              value={formData.name}
+              onChangeText={(value) =>
+                setFormData({ ...formData, name: value })
+              }
+            />
+            <Text style={styles.inputTitle}>動物種</Text>
+            <TouchableOpacity
+              onPress={() => setShowPetTypeSelector(true)}
+              style={[styles.selectorInput, { borderColor: colors.icon }]}
             >
-              <Text style={[styles.selectorTitle, { color: colors.text }]}>
-                品種を選択
+              <Text style={{ color: colors.text }}>
+                {formData.petType === "dog" ? "犬" : "猫"}
               </Text>
-              <ScrollView>
-                {speciesOptions[formData.petType].map((s) => (
-                  <TouchableOpacity
-                    key={s}
-                    onPress={() => {
-                      setFormData({ ...formData, species: s });
-                      setShowSpeciesSelector(false);
-                    }}
-                  >
-                    <Text style={[styles.selectorItem, { color: colors.text }]}>
-                      {s}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </TouchableOpacity>
-        </Modal>
-      </View>
+            </TouchableOpacity>
+            <Text style={styles.inputTitle}>品種</Text>
+            <TouchableOpacity
+              onPress={() => setShowSpeciesSelector(true)}
+              style={[styles.selectorInput, { borderColor: colors.icon }]}
+            >
+              <Text style={{ color: colors.text }}>{formData.species}</Text>
+            </TouchableOpacity>
+            <Text style={styles.inputTitle}>誕生日</Text>
+            <TextInput
+              style={[
+                styles.input,
+                { borderColor: colors.icon, color: colors.text },
+              ]}
+              placeholder="誕生日 (YYYY-MM-DD)"
+              placeholderTextColor={colors.icon}
+              value={formData.birthDay}
+              onChangeText={(value) =>
+                setFormData({ ...formData, birthDay: value })
+              }
+            />
+            <TouchableOpacity
+              onPress={handleSubmit}
+              style={[styles.submitButton, { backgroundColor: colors.tint }]}
+            >
+              <Text style={{ color: colors.background, fontWeight: "bold" }}>
+                更新する
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* ペット種セレクター */}
+          <Modal transparent visible={showPetTypeSelector} animationType="fade">
+            <TouchableOpacity
+              style={styles.selectorOverlay}
+              onPress={() => setShowPetTypeSelector(false)}
+            >
+              <View
+                style={[
+                  styles.selectorContainer,
+                  { backgroundColor: colors.background },
+                ]}
+              >
+                <Text style={[styles.selectorTitle, { color: colors.text }]}>
+                  種類を選択
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setFormData({ ...formData, petType: "dog", species: "" });
+                    setShowPetTypeSelector(false);
+                  }}
+                >
+                  <Text style={[styles.selectorItem, { color: colors.text }]}>
+                    犬
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setFormData({ ...formData, petType: "cat", species: "" });
+                    setShowPetTypeSelector(false);
+                  }}
+                >
+                  <Text style={[styles.selectorItem, { color: colors.text }]}>
+                    猫
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          </Modal>
+
+          {/* 品種セレクター */}
+          <Modal transparent visible={showSpeciesSelector} animationType="fade">
+            <TouchableOpacity
+              style={styles.selectorOverlay}
+              onPress={() => setShowSpeciesSelector(false)}
+            >
+              <View
+                style={[
+                  styles.selectorContainerFixed,
+                  { backgroundColor: colors.background },
+                ]}
+              >
+                <Text style={[styles.selectorTitle, { color: colors.text }]}>
+                  品種を選択
+                </Text>
+                <ScrollView>
+                  {speciesOptions[formData.petType].map((s) => (
+                    <TouchableOpacity
+                      key={s}
+                      onPress={() => {
+                        setFormData({ ...formData, species: s });
+                        setShowSpeciesSelector(false);
+                      }}
+                    >
+                      <Text
+                        style={[styles.selectorItem, { color: colors.text }]}
+                      >
+                        {s}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </TouchableOpacity>
+          </Modal>
+        </View>
       </TouchableWithoutFeedback>
     </Modal>
   );

@@ -9,7 +9,6 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 
-
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { triggerHandler } = useHomeTabHandler();
@@ -65,4 +64,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
