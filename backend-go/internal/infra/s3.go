@@ -53,25 +53,47 @@ func (r *S3Repository) UploadImage(file *multipart.FileHeader, directory string)
 	}
 	defer src.Close()
 
-	// Read the file content
+	// ファイルの内容を読み込む
 	buffer := make([]byte, file.Size)
-	if _, err := src.Read(buffer); err != nil && err != io.EOF {
-		return "", fmt.Errorf("failed to read file: %w", err)
+	totalRead := 0
+	for totalRead < int(file.Size) {
+		n, err := src.Read(buffer[totalRead:])
+		if err != nil && err != io.EOF {
+			return "", fmt.Errorf("failed to read file: %w", err)
+		}
+		if n == 0 {
+			break
+		}
+		totalRead += n
 	}
 
+	if totalRead == 0 {
+		return "", fmt.Errorf("file is empty")
+	}
+
+	// デバッグログ
+	log.Printf("File read complete: read %d bytes of %d expected", totalRead, file.Size)
+
 	fileKey := fmt.Sprintf("%s/%s-%s", directory, uuid.New().String(), filepath.Base(file.Filename))
+
+	contentType := file.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
 
 	// Upload the file to S3
 	_, err = r.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(r.bucketName),
 		Key:         aws.String(fileKey),
-		Body:        bytes.NewReader(buffer),
-		ContentType: aws.String(file.Header.Get("Content-Type")),
+		Body:        bytes.NewReader(buffer[:totalRead]),
+		ContentType: aws.String(contentType),
 	})
 	if err != nil {
+		log.Printf("S3 upload error: %v", err)
 		return "", fmt.Errorf("failed to upload file to S3: %w", err)
 	}
 
+	log.Printf("Successfully uploaded file %s with content type %s", fileKey, contentType)
 	return fileKey, nil
 }
 

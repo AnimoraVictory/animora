@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
@@ -116,6 +117,21 @@ func (h *PostHandler) CreatePost(c echo.Context) error {
 		log.Errorf("Failed to create post: image file is required: %v", err)
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "画像ファイルが必要です",
+		})
+	}
+
+	// ファイル情報のデバッグログ
+	log.Printf("Received file: name=%s, size=%d, content-type=%s",
+		file.Filename,
+		file.Size,
+		file.Header.Get("Content-Type"))
+
+	// Content-Typeの検証
+	contentType := file.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "image/") {
+		log.Errorf("Invalid content type: %s", contentType)
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "画像ファイルのみアップロード可能です",
 		})
 	}
 
