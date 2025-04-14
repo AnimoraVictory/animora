@@ -7,6 +7,8 @@ import {
   Animated,
   Dimensions,
   useColorScheme,
+  ScrollView,
+  RefreshControl,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/providers/AuthContext";
@@ -139,6 +141,14 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
+  const scrollRef = useRef<ScrollView>(null);
+
+  const onScrollEnd = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / windowWidth);
+    setSelectedTab(newIndex === 0 ? "posts" : "mypet");
+  };
+
   const headerContent = (
     <View style={{ backgroundColor }}>
       <ProfileHeader
@@ -164,37 +174,47 @@ const ProfileScreen: React.FC = () => {
       <ProfileTabSelector
         selectedTab={selectedTab}
         onSelectTab={setSelectedTab}
+        scrollRef={scrollRef}
       />
     </View>
   );
 
-  const contentList =
-    selectedTab === "mypet" ? (
-      <UserPetList
-        pets={user.pets}
-        onRefresh={refetchUser}
-        refreshing={authLoading}
-        colorScheme={colorScheme}
-        headerComponent={headerContent}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-      />
-    ) : (
-      <UserPostList
-        posts={user.posts}
-        onRefresh={refetchUser}
-        refreshing={authLoading}
-        colorScheme={colorScheme}
-        headerComponent={headerContent}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-      />
-    );
-
+  const contentList = (
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={authLoading}
+          onRefresh={refetchUser}
+          tintColor={colorScheme === "light" ? "black" : "white"}
+        />
+      }
+      scrollEventThrottle={16}
+      showsVerticalScrollIndicator={false}
+      onScroll={Animated.event(
+        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+        { useNativeDriver: false }
+      )}
+    >
+      <View>
+        {headerContent}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          ref={scrollRef}
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={onScrollEnd}
+          scrollEventThrottle={16}
+        >
+          <View style={{ width: windowWidth }}>
+            <UserPostList posts={user.posts} colorScheme={colorScheme} />
+          </View>
+          <View style={{ width: windowWidth }}>
+            <UserPetList pets={user.pets} colorScheme={colorScheme} />
+          </View>
+        </ScrollView>
+      </View>
+    </ScrollView>
+  );
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <Animated.View
@@ -242,7 +262,6 @@ const getStyles = (colors: typeof Colors.light) =>
     container: {
       flex: 1,
     },
-
     topHeader: {
       paddingTop: 42,
       paddingBottom: 12,

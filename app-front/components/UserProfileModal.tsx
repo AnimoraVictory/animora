@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useEffect } from "react";
 import {
   Modal,
   View,
@@ -8,6 +8,9 @@ import {
   Dimensions,
   StyleSheet,
   PanResponder,
+  ScrollView,
+  RefreshControl,
+  Easing,
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/Colors";
@@ -21,11 +24,12 @@ import { ProfileTabSelector } from "./ProfileTabSelector";
 import UserProfileHeader from "./UserProfileHeader";
 import UsersModal from "./UsersModal";
 import { useModalStack } from "@/providers/ModalStackContext";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-type UserProfileProps = {
+type Props = {
   email: string;
   visible: boolean;
   onClose: () => void;
@@ -34,7 +38,9 @@ type UserProfileProps = {
   prevModalIdx: number;
 };
 
-const UserProfileModal: React.FC<UserProfileProps> = ({
+const windowWidth = Dimensions.get("window").width;
+
+const UserProfileModal: React.FC<Props> = ({
   email,
   visible,
   onClose,
@@ -48,44 +54,17 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
   >("follows");
   const [isFollowModalVisible, setIsFollowModalVisible] = useState(false);
   const slideAnimFollow = useRef(new Animated.Value(width)).current;
-  const queryClient = useQueryClient();
+
   const { push, pop, isTop } = useModalStack();
-  const modalKey: string = `${prevModalIdx + 1}`;
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
-        onMoveShouldSetPanResponder: (_, gestureState) => {
-          const isHorizontalSwipe =
-            Math.abs(gestureState.dx) > 1 &&
-            Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-          return isHorizontalSwipe && gestureState.dx > 1 && isTop(modalKey);
-        },
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dx > 0) {
-            slideAnim.setValue(gestureState.dx);
-          }
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          if (gestureState.dx > 100) {
-            Animated.timing(slideAnim, {
-              toValue: width,
-              duration: 200,
-              useNativeDriver: true,
-            }).start(() => onClose());
-          } else {
-            Animated.spring(slideAnim, {
-              toValue: 0,
-              useNativeDriver: true,
-            }).start();
-          }
-        },
-      }),
-    [modalKey, isTop, slideAnim, onClose]
-  );
+  const modalKey = `${prevModalIdx + 1}`;
+
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const backgroundColor = colorScheme === "light" ? "white" : "black";
+
+  const queryClient = useQueryClient();
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const {
     data: user,
@@ -98,13 +77,61 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
       const res = await axios.get(`${API_URL}/users/?email=${email}`);
       return res.data.user;
     },
-    enabled: visible,
+    enabled: !!email && visible,
   });
+
+  const isMe = useMemo(() => {
+    return !!user?.id && user.id === currentUser.id;
+  }, [user?.id]);
 
   const isFollowing = useMemo(() => {
     if (!user) return false;
-    return user.followers.some((follower) => follower.id === currentUser.id);
-  }, [user?.followers, currentUser?.id]);
+    return user.followers.some((f) => f.id === currentUser.id);
+  }, [user, currentUser.id]);
+
+  const followMutation = useMutation({
+    mutationFn: () =>
+      axios.post(
+        `${API_URL}/users/follow?toId=${user?.id}&fromId=${currentUser.id}`
+      ),
+    onSuccess: () => {
+      queryClient.setQueryData(
+        ["userProfile", email],
+        (prev: User | undefined) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            followers: [...prev.followers, currentUser],
+            followersCount: prev.followersCount + 1,
+          };
+        }
+      );
+    },
+  });
+
+  const unfollowMutation = useMutation({
+    mutationFn: () =>
+      axios.delete(
+        `${API_URL}/users/unfollow?toId=${user?.id}&fromId=${currentUser.id}`
+      ),
+    onSuccess: () => {
+      queryClient.setQueryData(
+        ["userProfile", email],
+        (prev: User | undefined) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            followers: prev.followers.filter((f) => f.id !== currentUser.id),
+            followersCount: prev.followersCount - 1,
+          };
+        }
+      );
+    },
+  });
+
+  const handlePressFollowButton = () => {
+    isFollowing ? unfollowMutation.mutate() : followMutation.mutate();
+  };
 
   const onOpenFollowModal = () => {
     setIsFollowModalVisible(true);
@@ -127,94 +154,99 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
     });
   };
 
-  const followMutation = useMutation({
-    mutationFn: () => {
-      return axios.post(
-        `${API_URL}/users/follow?toId=${user?.id}&fromId=${
-          currentUser?.id ?? ""
-        }`
-      );
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(
-        ["userProfile", email],
-        (prev: User | undefined) => {
-          if (!prev || !currentUser) return prev;
-          return {
-            ...prev,
-            followers: [...prev.followers, currentUser],
-            followersCount: prev.followersCount + 1,
-          };
-        }
-      );
-    },
-    onError: (error) => {
-      console.error("フォローエラー", error);
-    },
-  });
-
-  const unfollowMutation = useMutation({
-    mutationFn: () => {
-      return axios.delete(
-        `${API_URL}/users/unfollow?toId=${user?.id}&fromId=${
-          currentUser?.id ?? ""
-        }`
-      );
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(
-        ["userProfile", email],
-        (prev: User | undefined) => {
-          if (!prev || !currentUser) return prev;
-          return {
-            ...prev,
-            followers: prev.followers.filter((f) => f.id !== currentUser.id),
-            followersCount: prev.followersCount - 1,
-          };
-        }
-      );
-    },
-    onError: (error) => {
-      console.error("アンフォローエラー", error);
-    },
-  });
-
-  const handlePressFollowButton = () => {
-    if (isFollowing) {
-      unfollowMutation.mutate();
-    } else {
-      followMutation.mutate();
-    }
-  };
-
-  const isMe: boolean = useMemo(() => {
-    return !!user?.id && user.id === currentUser.id;
-  }, [user?.id]);
-
-  if (!user || isLoading) return null;
-
-  const headerContent = (
-    <View style={{ backgroundColor }}>
-      <UserProfileHeader
-        key={prevModalIdx + 1}
-        isMe={isMe}
-        user={user}
-        onPressFollow={handlePressFollowButton}
-        onOpenFollowModal={onOpenFollowModal}
-        setSelectedTab={setSelectedFollowTab}
-        isFollowing={isFollowing}
-      />
-      <ProfileTabSelector
-        selectedTab={selectedTab}
-        onSelectTab={setSelectedTab}
-      />
-    </View>
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_, gestureState) =>
+          Math.abs(gestureState.dx) > 1 &&
+          Math.abs(gestureState.dx) > Math.abs(gestureState.dy) &&
+          gestureState.dx > 1 &&
+          isTop(modalKey),
+        onPanResponderMove: (_, gestureState) => {
+          if (gestureState.dx > 0) {
+            slideAnim.setValue(gestureState.dx);
+          }
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          if (gestureState.dx > 10) {
+            Animated.timing(slideAnim, {
+              toValue: width,
+              duration: 200,
+              useNativeDriver: true,
+            }).start(() => onClose());
+          } else {
+            Animated.spring(slideAnim, {
+              toValue: 0,
+              useNativeDriver: true,
+            }).start();
+          }
+        },
+      }),
+    [modalKey, slideAnim, isTop, onClose]
   );
 
+  const spinAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible && isLoading) {
+      Animated.loop(
+        Animated.timing(spinAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      spinAnim.stopAnimation();
+      spinAnim.setValue(0);
+    }
+  }, [isLoading, visible]);
+
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [-20, 0],
+    outputRange: [0, 1],
+    extrapolate: "clamp",
+  });
+
+  if (!user || isLoading) {
+    return (
+      <Modal visible={visible} animationType="none" transparent>
+        <Animated.View
+          style={[
+            styles.overlay,
+            {
+              transform: [{ translateX: slideAnim }],
+              backgroundColor: colors.middleBackground,
+              justifyContent: "center",
+              alignItems: "center",
+            },
+          ]}
+        >
+          <Animated.View style={{ transform: [{ rotate: spin }] }}>
+            <FontAwesome5 name="paw" size={48} color="#000" />
+          </Animated.View>
+        </Animated.View>
+      </Modal>
+    );
+  }
+
   return (
-    <Modal visible={visible} transparent animationType="none">
+    <Modal visible={visible} animationType="none" transparent>
       <Animated.View
-        style={[styles.overlay, { transform: [{ translateX: slideAnim }] }]}
+        style={[
+          styles.overlay,
+          {
+            transform: [{ translateX: slideAnim }],
+            backgroundColor: colors.middleBackground,
+          },
+        ]}
         {...panResponder.panHandlers}
       >
         <View
@@ -223,53 +255,87 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
           <TouchableOpacity style={styles.backButton} onPress={onClose}>
             <Text style={styles.backText}>＜</Text>
           </TouchableOpacity>
-          <Text style={[styles.userName, { color: colors.tint }]}>
-            {" "}
-            {user.name}{" "}
-          </Text>
+          <Animated.Text
+            style={[
+              styles.userName,
+              { color: colors.tint, opacity: headerOpacity },
+            ]}
+          >
+            {user.name}
+          </Animated.Text>
         </View>
 
-        <View
-          style={[
-            styles.container,
-            { backgroundColor: colors.middleBackground },
-          ]}
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor={colorScheme === "light" ? "black" : "white"}
+            />
+          }
+          contentInset={{ top: 80 }}
+          contentOffset={{ x: 0, y: -80 }}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
         >
-          <View style={{ marginTop: 80, flex: 1 }}>
-            {selectedTab === "posts" ? (
-              <UserPostList
-                posts={user.posts}
-                colorScheme={colorScheme}
-                onRefresh={refetch}
-                refreshing={isRefetching}
-                headerComponent={headerContent}
-              />
-            ) : (
-              <UserPetList
-                pets={user.pets}
-                colorScheme={colorScheme}
-                onRefresh={refetch}
-                refreshing={isRefetching}
-                headerComponent={headerContent}
-              />
-            )}
+          <View style={{ backgroundColor }}>
+            <UserProfileHeader
+              key={prevModalIdx}
+              isMe={isMe}
+              user={user}
+              onPressFollow={handlePressFollowButton}
+              onOpenFollowModal={onOpenFollowModal}
+              setSelectedTab={setSelectedFollowTab}
+              isFollowing={isFollowing}
+            />
+            <ProfileTabSelector
+              selectedTab={selectedTab}
+              onSelectTab={setSelectedTab}
+              scrollRef={scrollRef}
+            />
           </View>
-        </View>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            ref={scrollRef}
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={(event) => {
+              const offsetX = event.nativeEvent.contentOffset.x;
+              const newIndex = Math.round(offsetX / windowWidth);
+              setSelectedTab(newIndex === 0 ? "posts" : "mypet");
+            }}
+            scrollEventThrottle={16}
+          >
+            <View style={{ width: windowWidth }}>
+              <UserPostList posts={user.posts} colorScheme={colorScheme} />
+            </View>
+            <View style={{ width: windowWidth }}>
+              <UserPetList pets={user.pets} colorScheme={colorScheme} />
+            </View>
+          </ScrollView>
+        </ScrollView>
       </Animated.View>
-      <UsersModal
-        key={prevModalIdx + 1}
-        prevModalIdx={prevModalIdx + 1}
-        visible={isFollowModalVisible}
-        user={user}
-        currentUser={currentUser}
-        onClose={onCloseFollowModal}
-        users={
-          selectedFollowTab === "followers" ? user.followers : user.follows
-        }
-        selectedTab={selectedFollowTab}
-        setSelectedTab={setSelectedFollowTab}
-        slideAnim={slideAnimFollow}
-      />
+
+      {visible && user && isFollowModalVisible && (
+        <UsersModal
+          key={prevModalIdx + 1}
+          prevModalIdx={prevModalIdx + 1}
+          visible={isFollowModalVisible}
+          user={user}
+          currentUser={currentUser}
+          onClose={onCloseFollowModal}
+          users={
+            selectedFollowTab === "followers" ? user.followers : user.follows
+          }
+          selectedTab={selectedFollowTab}
+          setSelectedTab={setSelectedFollowTab}
+          slideAnim={slideAnimFollow}
+        />
+      )}
     </Modal>
   );
 };
@@ -279,7 +345,6 @@ export default UserProfileModal;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   topHeader: {
     position: "absolute",
@@ -288,7 +353,7 @@ const styles = StyleSheet.create({
     width: width,
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: 40,
+    paddingTop: 42,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
     zIndex: 2,
@@ -303,35 +368,6 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 20,
-    fontWeight: "bold",
-  },
-  container: {
-    flex: 1,
-    alignItems: "center",
-  },
-  profileSection: {
-    alignItems: "center",
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 10,
-  },
-  bioText: {
-    fontSize: 14,
-    textAlign: "center",
-    marginVertical: 8,
-  },
-  followButton: {
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 6,
-    marginTop: 10,
-  },
-  followButtonText: {
-    fontSize: 16,
     fontWeight: "bold",
   },
 });

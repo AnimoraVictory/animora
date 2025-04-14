@@ -88,7 +88,7 @@ const UsersModal: React.FC<Props> = ({
           }
         },
         onPanResponderRelease: (_, gestureState) => {
-          if (gestureState.dx > 100) {
+          if (gestureState.dx > 10) {
             Animated.timing(slideAnim, {
               toValue: width,
               duration: 200,
@@ -109,7 +109,12 @@ const UsersModal: React.FC<Props> = ({
   const colors = Colors[colorScheme ?? "light"];
 
   return (
-    <Modal visible={visible} transparent animationType="none">
+    <Modal
+      key={prevModalIdx}
+      visible={visible}
+      transparent
+      animationType="none"
+    >
       <Animated.View
         style={[styles.overlay, { transform: [{ translateX: slideAnim }] }]}
         {...panResponder.panHandlers}
@@ -193,17 +198,15 @@ const UsersModal: React.FC<Props> = ({
           />
         </Animated.View>
       </Animated.View>
-      {selectedUserEmail && (
-        <UserProfileModal
-          prevModalIdx={prevModalIdx + 1}
-          key={prevModalIdx + 1}
-          currentUser={currentUser}
-          email={selectedUserEmail}
-          visible={isProfileModalVisible}
-          onClose={closeUserProfile}
-          slideAnim={slideAnimProfile}
-        />
-      )}
+      <UserProfileModal
+        prevModalIdx={prevModalIdx + 1}
+        key={prevModalIdx + 1}
+        currentUser={currentUser}
+        email={selectedUserEmail ?? ""}
+        visible={isProfileModalVisible && !!selectedUserEmail}
+        onClose={closeUserProfile}
+        slideAnim={slideAnimProfile}
+      />
     </Modal>
   );
 };
