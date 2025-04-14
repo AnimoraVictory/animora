@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   Animated,
 } from "react-native";
+import { GestureHandlerRootView, TapGestureHandler } from "react-native-gesture-handler";
+import * as Haptics from "expo-haptics";
 import { postSchema } from "@/app/(tabs)/posts";
 import { z } from "zod";
 import { Colors } from "@/constants/Colors";
@@ -21,14 +23,13 @@ import axios from "axios";
 import UserProfileModal from "./UserProfileModal";
 import { useModalStack } from "@/providers/ModalStackContext";
 import { TaskType, taskTypeMap } from "@/app/(tabs)/camera";
+import useToggleLike from "@/hooks/useToggleLike";
 
 export type Post = z.infer<typeof postSchema>;
 
 type Props = {
   post: Post;
 };
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export const PostPanel = ({ post }: Props) => {
   const { push, pop } = useModalStack();
@@ -86,49 +87,10 @@ export const PostPanel = ({ post }: Props) => {
   const likedByCurrentUser =
     post.likes?.some((like) => like.user.id === currentUser?.id) ?? false;
 
-  const useToggleLike = (postId: string, userId: string) => {
-    const queryClient = useQueryClient();
-
-    const createLikeMutation = useMutation({
-      mutationFn: () => {
-        return axios.post(
-          `${API_URL}/likes/new?userId=${userId}&postId=${postId}`
-        );
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["posts"] });
-      },
-      onError: (error) => {
-        console.error("likeに失敗しました", error);
-      },
-    });
-
-    const deleteLikeMutation = useMutation({
-      mutationFn: () => {
-        return axios.delete(
-          `${API_URL}/likes/delete?userId=${userId}&postId=${postId}`
-        );
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["posts"] });
-      },
-      onError: (error) => {
-        console.error("Like削除エラー", error);
-      },
-    });
-
-    const toggleLike = (liked: boolean) => {
-      if (liked) {
-        deleteLikeMutation.mutate();
-      } else {
-        createLikeMutation.mutate();
-      }
-    };
-
-    return { toggleLike };
-  };
-
-  const { toggleLike } = useToggleLike(post.id, currentUser?.id ?? "");
+  const { toggleLike, isLoading: isLoadingLike } = useToggleLike(
+    post.id,
+    currentUser?.id ?? ""
+  );
 
   const OpenModal = () => {
     setIsModalVisible(true);
@@ -168,8 +130,48 @@ export const PostPanel = ({ post }: Props) => {
     });
   };
 
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handleToggleLike = () => {
+    toggleLike(likedByCurrentUser);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.3,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handleDoubleTap = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.3,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      if (!likedByCurrentUser) {
+        toggleLike(likedByCurrentUser);
+      }
+    });
+  };
+
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+    <TapGestureHandler numberOfTaps={2} onActivated={handleDoubleTap}>
       <View style={styles.wrapper}>
         {post.dailyTask && (
           <View style={styles.taskOverlay}>
@@ -180,7 +182,11 @@ export const PostPanel = ({ post }: Props) => {
         )}
         <TouchableOpacity style={styles.header} onPress={openUserProfile}>
           <Image
-            source={{ uri: post.user.iconImageUrl }}
+            source={
+              post.user.iconImageUrl
+                ? { uri: post.user.iconImageUrl }
+                : require("@/assets/images/profile.png")
+            }
             style={styles.avatar}
           />
           <View style={styles.userInfo}>
@@ -211,13 +217,16 @@ export const PostPanel = ({ post }: Props) => {
 
           <TouchableOpacity
             style={styles.likeBox}
-            onPress={() => toggleLike(likedByCurrentUser)}
+            onPress={handleToggleLike}
+            disabled={isLoadingLike}
           >
-            <Ionicons
-              name="heart"
-              size={35}
-              color={likedByCurrentUser ? "red" : "white"}
-            />
+            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+              <Ionicons
+                name="heart"
+                size={35}
+                color={likedByCurrentUser ? "red" : "white"}
+              />
+            </Animated.View>
             <Text style={{ color: "white" }}>{post.likesCount}</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -232,6 +241,7 @@ export const PostPanel = ({ post }: Props) => {
           {post.caption}
         </Text>
       </View>
+      </TapGestureHandler>
       <CommentsModal
         slideAnim={slideAnim}
         postId={post.id}
@@ -257,7 +267,7 @@ export const PostPanel = ({ post }: Props) => {
         onClose={closeUserProfile}
         slideAnim={slideAnimUser}
       />
-    </>
+      </GestureHandlerRootView>
   );
 };
 
@@ -276,7 +286,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     zIndex: 2,
   },
-  
+
   taskOverlayText: {
     color: "white",
     fontSize: 14,

@@ -103,10 +103,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     fd.append("name", formData.name);
     fd.append("bio", formData.bio);
 
-    if (
-      formData.imageUri &&
-      formData.imageUri !== user.iconImageUrl // 変更されているか確認
-    ) {
+    if (formData.imageUri && formData.imageUri !== user.iconImageUrl) {
       const filename = formData.imageUri.split("/").pop();
       const match = /\.(\w+)$/.exec(filename || "");
       const mimeType = match ? `image/${match[1]}` : "image";
@@ -188,9 +185,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               placeholder="自己紹介"
               placeholderTextColor={colors.icon}
               value={formData.bio}
-              onChangeText={(value) =>
-                setFormData({ ...formData, bio: value })
-              }
+              onChangeText={(value) => setFormData({ ...formData, bio: value })}
               multiline
             />
             <TouchableOpacity
