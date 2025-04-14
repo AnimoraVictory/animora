@@ -1,7 +1,6 @@
 import React from "react";
 import {
   FlatList,
-  RefreshControl,
   Text,
   View,
   useColorScheme,
@@ -12,19 +11,13 @@ import { Colors } from "@/constants/Colors";
 
 type Props = {
   pets: Pet[];
-  refreshing: boolean;
-  onRefresh: () => void;
   colorScheme: ReturnType<typeof useColorScheme>;
-  headerComponent: React.JSX.Element;
   onScroll?: (event: any) => void;
 };
 
 export const UserPetList: React.FC<Props> = ({
   pets,
-  refreshing,
-  onRefresh,
   colorScheme,
-  headerComponent,
   onScroll,
 }) => {
   const colors = Colors[colorScheme ?? "light"];
@@ -40,20 +33,8 @@ export const UserPetList: React.FC<Props> = ({
           <PetPanel pet={item} colorScheme={colorScheme} />
         </View>
       )}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colorScheme === "light" ? "black" : "white"}
-        />
-      }
       onScroll={onScroll}
       scrollEventThrottle={16}
-      ListHeaderComponent={
-        <View style={{ backgroundColor: colors.background }}>
-          {headerComponent}
-        </View>
-      }
       contentContainerStyle={{
         flexGrow: 1,
         backgroundColor,

@@ -1,28 +1,48 @@
 import { Colors } from "../constants/Colors";
-import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import React, { useRef } from "react";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  Animated,
+} from "react-native";
 import { useColorScheme } from "react-native";
 
 export type ProfileTabType = "posts" | "mypet";
 
 type ProfileTabSelectorProps = {
+  scrollRef: React.RefObject<ScrollView>;
   selectedTab: ProfileTabType;
   onSelectTab: (tab: ProfileTabType) => void;
 };
 
+const windowWidth = Dimensions.get("window").width;
+
 export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({
   selectedTab,
   onSelectTab,
+  scrollRef,
 }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const backgroundColor = colorScheme === "light" ? "white" : "black";
   const styles = getStyles(colors);
 
+  const scrollToTab = (tab: ProfileTabType) => {
+    onSelectTab(tab);
+    const pageIndex = tab === "posts" ? 0 : 1;
+    scrollRef.current?.scrollTo({ x: pageIndex * windowWidth, animated: true });
+  };
+
   return (
-    <View style={[styles.tabContainer, { backgroundColor }]}>
+    <View
+      style={[styles.tabContainer, { backgroundColor }]}
+    >
       <TouchableOpacity
-        onPress={() => onSelectTab("posts")}
+        onPress={() => scrollToTab("posts")}
         style={[
           styles.tabButton,
           selectedTab === "posts" && styles.tabButtonActive,
@@ -31,7 +51,7 @@ export const ProfileTabSelector: React.FC<ProfileTabSelectorProps> = ({
         <Text style={styles.tabText}>投稿一覧</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={() => onSelectTab("mypet")}
+        onPress={() => scrollToTab("mypet")}
         style={[
           styles.tabButton,
           selectedTab === "mypet" && styles.tabButtonActive,
