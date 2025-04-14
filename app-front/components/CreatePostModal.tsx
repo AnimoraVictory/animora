@@ -155,13 +155,13 @@ export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
             <View style={styles.captionInputContainer}>
               {user?.iconImageUrl && (
                 <Image
-                source={
-                  user.iconImageUrl
-                    ? { uri: user.iconImageUrl }
-                    : require("@/assets/images/profile.png")
-                }
-                style={styles.avatar}
-              />
+                  source={
+                    user.iconImageUrl
+                      ? { uri: user.iconImageUrl }
+                      : require("@/assets/images/profile.png")
+                  }
+                  style={styles.avatar}
+                />
               )}
               <TextInput
                 placeholder="キャプションを入力..."
