@@ -7,13 +7,11 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
-	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 )
@@ -24,21 +22,24 @@ type S3Repository struct {
 }
 
 func NewS3Repository(bucketName string) *S3Repository {
-	region := os.Getenv("AWS_REGION")
-	accessKeyId := os.Getenv("AWS_ACCESS_KEY_ID")
-	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion(region),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			accessKeyId,
-			secretAccessKey,
-			"",
-		)),
+	ctx := context.TODO()
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion("ap-northeast-1"),
 	)
 	if err != nil {
 		log.Fatalf("Failed to load AWS config: %v", err)
 	}
+
+	// デバッグ用のログ
+	creds, err := cfg.Credentials.Retrieve(ctx)
+	if err != nil {
+		log.Printf("Failed to retrieve credentials: %v", err)
+	} else {
+		log.Printf("Using credentials from provider: %s", creds.Source)
+	}
+
 	s3Client := s3.NewFromConfig(cfg)
+
 	return &S3Repository{
 		s3Client:   s3Client,
 		bucketName: bucketName,
