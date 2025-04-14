@@ -130,7 +130,9 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
   const followMutation = useMutation({
     mutationFn: () => {
       return axios.post(
-        `${API_URL}/users/follow?toId=${user?.id}&fromId=${currentUser?.id ?? ""}`
+        `${API_URL}/users/follow?toId=${user?.id}&fromId=${
+          currentUser?.id ?? ""
+        }`
       );
     },
     onSuccess: () => {
@@ -154,7 +156,9 @@ const UserProfileModal: React.FC<UserProfileProps> = ({
   const unfollowMutation = useMutation({
     mutationFn: () => {
       return axios.delete(
-        `${API_URL}/users/unfollow?toId=${user?.id}&fromId=${currentUser?.id ?? ""}`
+        `${API_URL}/users/unfollow?toId=${user?.id}&fromId=${
+          currentUser?.id ?? ""
+        }`
       );
     },
     onSuccess: () => {

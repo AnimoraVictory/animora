@@ -10,6 +10,7 @@ import ProfilePostPanel from "@/components/ProfilePostPanel";
 import { Post } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
 import PostModal from "./PostModal";
+import { useModalStack } from "@/providers/ModalStackContext";
 
 type Props = {
   posts: Post[];
@@ -28,6 +29,7 @@ export const UserPostList: React.FC<Props> = ({
   headerComponent,
   onScroll,
 }) => {
+  const { push, pop } = useModalStack();
   const colors = Colors[colorScheme ?? "light"];
   const backgroundColor = colorScheme === "light" ? "white" : "black";
 
@@ -42,7 +44,10 @@ export const UserPostList: React.FC<Props> = ({
         renderItem={({ item }) => (
           <ProfilePostPanel
             imageUrl={item.imageUrl}
-            onPress={() => setSelectedPost(item)}
+            onPress={() => {
+              push("post");
+              setSelectedPost(item);
+            }}
           />
         )}
         refreshControl={
@@ -65,7 +70,9 @@ export const UserPostList: React.FC<Props> = ({
           paddingBottom: 200,
         }}
         ListEmptyComponent={
-          <Text style={{ color: colors.text, textAlign: "center", marginTop: 32 }}>
+          <Text
+            style={{ color: colors.text, textAlign: "center", marginTop: 32 }}
+          >
             投稿しましょう！
           </Text>
         }
@@ -75,7 +82,10 @@ export const UserPostList: React.FC<Props> = ({
         <PostModal
           post={selectedPost}
           visible={true}
-          onClose={() => setSelectedPost(null)}
+          onClose={() => {
+            pop();
+            setSelectedPost(null);
+          }}
         />
       )}
     </>
