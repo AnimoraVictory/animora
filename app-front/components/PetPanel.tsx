@@ -41,18 +41,16 @@ const birthDayParser = (birthDay: string) => {
   return `${year}年${month}月${day}日`;
 };
 
-const _PetPanel: React.FC<PetPanelProps> = ({
-  pet,
-  colorScheme,
-}) => {
+const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
   const colors = Colors[colorScheme ?? "light"];
-  const panelBackgroundColor = colorScheme === "light" ? "rgba(0,0,0,0.1)": "#333333";
+  const panelBackgroundColor =
+    colorScheme === "light" ? "rgba(0,0,0,0.1)" : "#333333";
   const windowWidth = Dimensions.get("window").width;
-  const windowHeight = Dimensions.get("window").height
+  const windowHeight = Dimensions.get("window").height;
   const imageHeight = windowWidth;
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [menuVisible, setMenuVisible] = useState(false)
+  const [menuVisible, setMenuVisible] = useState(false);
   const slideAnimEditPet = useRef(new Animated.Value(imageHeight)).current;
   const queryClient = useQueryClient();
 
@@ -117,55 +115,61 @@ const _PetPanel: React.FC<PetPanelProps> = ({
   };
 
   return (
+    <View style={[styles.container, { backgroundColor: panelBackgroundColor }]}>
+      <View style={styles.headerOverlay}>
+        <Text style={[styles.petNameHeader, { color: colors.tint }]}>
+          {pet.name}
+        </Text>
+        <TouchableOpacity onPress={() => setMenuVisible(true)}>
+          <Text style={[styles.menuIcon, { color: colors.tint }]}>⋯</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={{ position: "relative" }}>
+        <Image
+          source={{ uri: pet.imageUrl }}
+          style={[styles.image, { width: windowWidth, height: imageHeight }]}
+        />
+      </View>
 
-  <View style={[styles.container, {backgroundColor: panelBackgroundColor}]}>
-    <View style={styles.headerOverlay}>
-    <Text style={[styles.petNameHeader, { color: colors.tint }]}>
-      {pet.name}
-    </Text>
-    <TouchableOpacity onPress={() => setMenuVisible(true)}>
-      <Text style={[styles.menuIcon, {color: colors.tint}]}>⋯</Text>
-    </TouchableOpacity>
-  </View>
-    <View style={{ position: "relative" }}>
-      <Image
-        source={{ uri: pet.imageUrl }}
-        style={[styles.image, { width: windowWidth, height: imageHeight }]}
+      {menuVisible && (
+        <View style={styles.menuOverlay}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleOpenEditPetModal}
+          >
+            <Text>編集</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+            <Text>削除</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => setMenuVisible(false)}
+          >
+            <Text>閉じる</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <View style={styles.infoSection}>
+        <Text style={[styles.subText, { color: colors.tint }]}>
+          {reverseSpeciesMap[pet.type][pet.species]}
+        </Text>
+        <Text style={[styles.subText, { color: colors.tint }]}>
+          {birthDayParser(pet.birthDay)}
+        </Text>
+      </View>
+
+      <PetEditModal
+        visible={isEditModalVisible}
+        onClose={closeEditPetModal}
+        slideAnim={slideAnimEditPet}
+        colorScheme={colorScheme}
+        pet={pet}
       />
     </View>
-
-  {menuVisible && (
-    <View style={styles.menuOverlay}>
-      <TouchableOpacity style={styles.menuItem} onPress={handleOpenEditPetModal}>
-        <Text>編集</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
-        <Text>削除</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuItem} onPress={() => setMenuVisible(false)}>
-        <Text>閉じる</Text>
-      </TouchableOpacity>
-    </View>
-  )}
-
-  <View style={styles.infoSection}>
-    <Text style={[styles.subText, {color: colors.tint}]}>
-      {reverseSpeciesMap[pet.type][pet.species]}
-    </Text>
-    <Text style={[styles.subText, {color: colors.tint}]}>{birthDayParser(pet.birthDay)}</Text>
-  </View>
-
-  <PetEditModal
-    visible={isEditModalVisible}
-    onClose={closeEditPetModal}
-    slideAnim={slideAnimEditPet}
-    colorScheme={colorScheme}
-    pet={pet}
-  />
-</View>
-
-)}
-
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -218,7 +222,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
   },
-  
+
   menuOverlay: {
     position: "absolute",
     top: 50,
@@ -233,9 +237,7 @@ const styles = StyleSheet.create({
   menuItem: {
     paddingVertical: 8,
   },
-  
 });
-
 
 const PetPanel = React.memo(_PetPanel);
 

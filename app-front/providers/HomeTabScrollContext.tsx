@@ -5,9 +5,13 @@ type HomeTabScrollContextType = {
   triggerHandler: () => void;
 };
 
-const HomeTabScrollContext = createContext<HomeTabScrollContextType | undefined>(undefined);
+const HomeTabScrollContext = createContext<
+  HomeTabScrollContextType | undefined
+>(undefined);
 
-export const HomeTabScrollProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const HomeTabScrollProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const handlerRef = useRef<(() => void) | null>(null);
 
   const setHandler = (handler: () => void) => {
@@ -28,7 +32,9 @@ export const HomeTabScrollProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useHomeTabHandler = () => {
   const context = useContext(HomeTabScrollContext);
   if (!context) {
-    throw new Error("useHomeTabHandler must be used within HomeTabScrollProvider");
+    throw new Error(
+      "useHomeTabHandler must be used within HomeTabScrollProvider"
+    );
   }
   return context;
 };

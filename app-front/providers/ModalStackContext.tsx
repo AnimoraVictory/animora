@@ -12,7 +12,9 @@ const ModalStackContext = createContext<{
   isTop: () => false,
 });
 
-export const ModalStackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ModalStackProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [stack, setStack] = useState<string[]>([]);
 
   const push = (id: string) => setStack((prev) => [...prev, id]);

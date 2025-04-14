@@ -33,8 +33,9 @@ const ProfileScreen: React.FC = () => {
   const { push, pop } = useModalStack();
 
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
-  const [selectedFollowTab, setSelectedFollowTab] =
-    useState<"follows" | "followers">("follows");
+  const [selectedFollowTab, setSelectedFollowTab] = useState<
+    "follows" | "followers"
+  >("follows");
   const {
     user,
     loading: authLoading,
@@ -86,8 +87,8 @@ const ProfileScreen: React.FC = () => {
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      setIsEditModalVisible(false)
-  });
+      setIsEditModalVisible(false);
+    });
   };
 
   const openRegisterPetModal = () => {
@@ -105,13 +106,13 @@ const ProfileScreen: React.FC = () => {
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      setIsRegisterPetModalVisible(false)
-  });
+      setIsRegisterPetModalVisible(false);
+    });
   };
 
   const openFollowModal = () => {
     setIsFollowModalVisible(true);
-    push("1")
+    push("1");
     Animated.timing(slideAnimFollow, {
       toValue: 0,
       duration: 300,
@@ -124,8 +125,9 @@ const ProfileScreen: React.FC = () => {
       toValue: windowWidth,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => {setIsFollowModalVisible(false)
-      pop()
+    }).start(() => {
+      setIsFollowModalVisible(false);
+      pop();
     });
   };
 
@@ -138,8 +140,13 @@ const ProfileScreen: React.FC = () => {
   }
 
   const headerContent = (
-    <View style={{backgroundColor}}>
-      <ProfileHeader user={user} onLogout={handleLogout} onOpenFollowModal={openFollowModal} setSelectedTab={setSelectedFollowTab}/>
+    <View style={{ backgroundColor }}>
+      <ProfileHeader
+        user={user}
+        onLogout={handleLogout}
+        onOpenFollowModal={openFollowModal}
+        setSelectedTab={setSelectedFollowTab}
+      />
       <View style={[styles.editButtonsContainer]}>
         <TouchableOpacity
           style={styles.editButton}
@@ -220,7 +227,9 @@ const ProfileScreen: React.FC = () => {
         currentUser={user}
         visible={isFollowModalVisible}
         onClose={() => closeFollowModal()}
-        users={selectedFollowTab === "followers" ? user.followers : user.follows}
+        users={
+          selectedFollowTab === "followers" ? user.followers : user.follows
+        }
         selectedTab={selectedFollowTab}
         setSelectedTab={setSelectedFollowTab}
       />
@@ -233,7 +242,7 @@ const getStyles = (colors: typeof Colors.light) =>
     container: {
       flex: 1,
     },
-    
+
     topHeader: {
       paddingTop: 42,
       paddingBottom: 12,

@@ -36,7 +36,7 @@ export const UserPetList: React.FC<Props> = ({
       keyExtractor={(item) => item.id}
       numColumns={1}
       renderItem={({ item }) => (
-        <View style={{paddingTop: 2, borderColor: colors.icon }}>
+        <View style={{ paddingTop: 2, borderColor: colors.icon }}>
           <PetPanel pet={item} colorScheme={colorScheme} />
         </View>
       )}
@@ -60,7 +60,9 @@ export const UserPetList: React.FC<Props> = ({
         paddingBottom: 200,
       }}
       ListEmptyComponent={
-        <Text style={{ color: colors.text, textAlign: "center", marginTop: 32 }}>
+        <Text
+          style={{ color: colors.text, textAlign: "center", marginTop: 32 }}
+        >
           マイペットを登録しましょう！
         </Text>
       }

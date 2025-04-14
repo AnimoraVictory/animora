@@ -26,7 +26,7 @@ import DailyTaskPopUp from "@/components/DailyTaskPopUp";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const postBaseSchema = z.object({
   id: z.string().uuid(),
-})
+});
 
 export const userBaseSchema = z.object({
   id: z.string().uuid(),
@@ -40,24 +40,24 @@ export const dailyTaskBaseSchema = z.object({
   id: z.string().uuid(),
   createdAt: z.string().datetime(),
   type: z.string(),
-})
+});
 
 export const dailyTaskSchema = dailyTaskBaseSchema.extend({
   post: postBaseSchema,
-})
+});
 
 export const commentSchema = z.object({
   id: z.string(),
   user: userBaseSchema,
   content: z.string(),
   createdAt: z.string().datetime(),
-})
+});
 
 export const likeSchema = z.object({
   id: z.string(),
   user: userBaseSchema,
   createdAt: z.string().datetime(),
-})
+});
 
 export const postSchema = z.object({
   id: z.string().uuid(),
@@ -122,9 +122,8 @@ export default function PostsScreen() {
   });
 
   const { setHandler } = useHomeTabHandler();
-  const {user: currentUser} = useAuth();
+  const { user: currentUser } = useAuth();
   const isDailyTaskDone = currentUser?.dailyTask.post ? true : false;
-
 
   useEffect(() => {
     setHandler(() => {
@@ -212,9 +211,7 @@ export default function PostsScreen() {
         scrollEventThrottle={16}
       />
       {!isDailyTaskDone && (
-        <DailyTaskPopUp
-        dailyTask={currentUser?.dailyTask}
-        />
+        <DailyTaskPopUp dailyTask={currentUser?.dailyTask} />
       )}
     </ThemedView>
   );
