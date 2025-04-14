@@ -135,7 +135,10 @@ export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="arrow-back" size={28} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSubmit}>
+          <TouchableOpacity
+            onPress={handleSubmit}
+            disabled={createPostMutation.isPending}
+          >
             <Text style={styles.postButton}>投稿</Text>
           </TouchableOpacity>
         </View>
