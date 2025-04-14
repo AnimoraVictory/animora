@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,12 @@ import {
   Dimensions,
   TouchableOpacity,
   Animated,
+  Alert,
 } from "react-native";
-import { GestureHandlerRootView, TapGestureHandler } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  TapGestureHandler,
+} from "react-native-gesture-handler";
 import * as Haptics from "expo-haptics";
 import { postSchema } from "@/app/(tabs)/posts";
 import { z } from "zod";
@@ -17,9 +21,6 @@ import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import CommentsModal from "@/components/CommentsModal";
 import { useAuth } from "@/providers/AuthContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import Constants from "expo-constants";
-import axios from "axios";
 import UserProfileModal from "./UserProfileModal";
 import { useModalStack } from "@/providers/ModalStackContext";
 import { TaskType, taskTypeMap } from "@/app/(tabs)/camera";
@@ -34,8 +35,9 @@ type Props = {
 export const PostPanel = ({ post }: Props) => {
   const { push, pop } = useModalStack();
 
-  const [isModalVisible, setIsModalVisible] = React.useState(false);
-  const [isUserModalVisible, setIsUserModalVisible] = React.useState(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isUserModalVisible, setIsUserModalVisible] = useState<boolean>(false);
+  const likeLockRef = useRef(false);
 
   const slideAnim = useRef(new Animated.Value(300)).current;
   const slideAnimUser = useRef(
@@ -84,8 +86,9 @@ export const PostPanel = ({ post }: Props) => {
 
   const windowHeight = Dimensions.get("window").height;
 
-  const likedByCurrentUser =
-    post.likes?.some((like) => like.user.id === currentUser?.id) ?? false;
+  const [likedByCurrentUser, setLikedByCurrentUser] = useState<boolean>(
+    post.likes?.some((like) => like.user.id === currentUser?.id) ?? false
+  );
 
   const { toggleLike, isLoading: isLoadingLike } = useToggleLike(
     post.id,
@@ -132,9 +135,19 @@ export const PostPanel = ({ post }: Props) => {
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const handleToggleLike = () => {
-    toggleLike(likedByCurrentUser);
+  const handleToggleLike = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (isLoadingLike) return;
+  
+    if (!likedByCurrentUser) {
+      setLikedByCurrentUser(true);
+      toggleLike(false);
+    } else {
+      setLikedByCurrentUser(false);
+      toggleLike(true);
+      setLikedByCurrentUser(false);
+    }
+  
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 1.3,
@@ -164,83 +177,88 @@ export const PostPanel = ({ post }: Props) => {
       }),
     ]).start(() => {
       if (!likedByCurrentUser) {
-        toggleLike(likedByCurrentUser);
+        setLikedByCurrentUser(true);
+        toggleLike(false);
       }
     });
   };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <TapGestureHandler numberOfTaps={2} onActivated={handleDoubleTap}>
-      <View style={styles.wrapper}>
-        {post.dailyTask && (
-          <View style={styles.taskOverlay}>
-            <Text style={styles.taskOverlayText}>
-              🎯 {taskTypeMap[post.dailyTask.type as TaskType]}
-            </Text>
-          </View>
-        )}
-        <TouchableOpacity style={styles.header} onPress={openUserProfile}>
-          <Image
-            source={
-              post.user.iconImageUrl
-                ? { uri: post.user.iconImageUrl }
-                : require("@/assets/images/profile.png")
-            }
-            style={styles.avatar}
-          />
-          <View style={styles.userInfo}>
-            <Text style={[styles.userName, { color: colors.text }]}>
-              {post.user.name}
-            </Text>
-            <Text style={[styles.postTime, { color: colors.icon }]}>
-              {formattedDateTime}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <Animated.View
-          style={[
-            styles.imageGlowWrapper,
-            post.dailyTask && {
-              shadowOpacity: animatedShadowOpacity,
-              shadowColor: "#FFD700",
-              shadowOffset: { width: 0, height: 0 },
-              shadowRadius: 15,
-              borderRadius: 20,
-            },
-          ]}
-        >
-          <Image
-            source={{ uri: post.imageUrl }}
-            style={[styles.image, { height: imageHeight }]}
-          />
+      <TapGestureHandler numberOfTaps={2} onActivated={handleDoubleTap}>
+        <View style={styles.wrapper}>
+          {post.dailyTask && (
+            <View style={styles.taskOverlay}>
+              <Text style={styles.taskOverlayText}>
+                🎯 {taskTypeMap[post.dailyTask.type as TaskType]}
+              </Text>
+            </View>
+          )}
+          <TouchableOpacity style={styles.header} onPress={openUserProfile}>
+            <Image
+              source={
+                post.user.iconImageUrl
+                  ? { uri: post.user.iconImageUrl }
+                  : require("@/assets/images/profile.png")
+              }
+              style={styles.avatar}
+            />
+            <View style={styles.userInfo}>
+              <Text style={[styles.userName, { color: colors.text }]}>
+                {post.user.name}
+              </Text>
+              <Text style={[styles.postTime, { color: colors.icon }]}>
+                {formattedDateTime}
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <Animated.View
+            style={[
+              styles.imageGlowWrapper,
+              post.dailyTask && {
+                shadowOpacity: animatedShadowOpacity,
+                shadowColor: "#FFD700",
+                shadowOffset: { width: 0, height: 0 },
+                shadowRadius: 15,
+                borderRadius: 20,
+              },
+            ]}
+          >
+            <Image
+              source={{ uri: post.imageUrl }}
+              style={[styles.image, { height: imageHeight }]}
+            />
 
-          <TouchableOpacity
-            style={styles.likeBox}
-            onPress={handleToggleLike}
-            disabled={isLoadingLike}
-          >
-            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <TouchableOpacity
+              style={styles.likeBox}
+              onPress={handleToggleLike}
+              disabled={isLoadingLike}
+            >
+              <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <Ionicons
+                  name="heart"
+                  size={35}
+                  color={likedByCurrentUser ? "red" : "white"}
+                />
+              </Animated.View>
+              <Text style={{ color: "white" }}>{post.likesCount}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.commentBox}
+              onPress={() => OpenModal()}
+            >
               <Ionicons
-                name="heart"
+                name="chatbox-ellipses-outline"
                 size={35}
-                color={likedByCurrentUser ? "red" : "white"}
+                color="white"
               />
-            </Animated.View>
-            <Text style={{ color: "white" }}>{post.likesCount}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.commentBox}
-            onPress={() => OpenModal()}
-          >
-            <Ionicons name="chatbox-ellipses-outline" size={35} color="white" />
-            <Text style={{ color: "white" }}>{post.commentsCount}</Text>
-          </TouchableOpacity>
-        </Animated.View>
-        <Text style={[styles.caption, { color: colors.tint }]}>
-          {post.caption}
-        </Text>
-      </View>
+              <Text style={{ color: "white" }}>{post.commentsCount}</Text>
+            </TouchableOpacity>
+          </Animated.View>
+          <Text style={[styles.caption, { color: colors.tint }]}>
+            {post.caption}
+          </Text>
+        </View>
       </TapGestureHandler>
       <CommentsModal
         slideAnim={slideAnim}
@@ -267,7 +285,7 @@ export const PostPanel = ({ post }: Props) => {
         onClose={closeUserProfile}
         slideAnim={slideAnimUser}
       />
-      </GestureHandlerRootView>
+    </GestureHandlerRootView>
   );
 };
 
