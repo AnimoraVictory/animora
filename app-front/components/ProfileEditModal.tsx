@@ -191,6 +191,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
             <TouchableOpacity
               onPress={handleSubmit}
               style={[styles.submitButton, { backgroundColor: colors.tint }]}
+              disabled={updateProfileMutation.isPending}
             >
               <Text style={{ color: colors.background, fontWeight: "bold" }}>
                 更新する

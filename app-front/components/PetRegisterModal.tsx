@@ -238,6 +238,7 @@ export const PetRegiserModal: React.FC<PetRegiserModalProps> = ({
             <TouchableOpacity
               onPress={handleSubmit}
               style={[styles.submitButton, { backgroundColor: colors.tint }]}
+              disabled={registerPetMutation.isPending}
             >
               <Text style={{ color: colors.background, fontWeight: "bold" }}>
                 登録する

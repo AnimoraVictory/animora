@@ -91,6 +91,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
       <TouchableOpacity
         onPress={handleSubmit}
         style={[styles.button, { backgroundColor: colors.background }]}
+        disabled={createCommentMutation.isPending}
       >
         <Text style={styles.buttonText}>送信</Text>
       </TouchableOpacity>
