@@ -22,6 +22,7 @@ import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 import { petSchema } from "@/components/PetPanel";
 import { useAuth } from "@/providers/AuthContext";
 import DailyTaskPopUp from "@/components/DailyTaskPopUp";
+import * as Haptics from "expo-haptics";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const postBaseSchema = z.object({
@@ -156,7 +157,10 @@ export default function PostsScreen() {
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
-              onRefresh={() => refetch()}
+              onRefresh={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                refetch();
+              }}
               progressViewOffset={HEADER_HEIGHT}
               tintColor={colorScheme === "light" ? "black" : "white"}
             />
@@ -197,7 +201,10 @@ export default function PostsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => refetch()}
+            onRefresh={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              refetch()
+            }}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
         }

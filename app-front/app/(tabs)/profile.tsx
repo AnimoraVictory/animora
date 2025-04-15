@@ -25,8 +25,10 @@ import { UserPetList } from "@/components/UserPetsList";
 import { UserPostList } from "@/components/UserPostList";
 import UsersModal from "@/components/UsersModal";
 import { useModalStack } from "@/providers/ModalStackContext";
+import * as Haptics from "expo-haptics"
 
 const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
 const ProfileScreen: React.FC = () => {
   const colorScheme = useColorScheme();
@@ -185,7 +187,10 @@ const ProfileScreen: React.FC = () => {
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
-          onRefresh={refetchUser}
+          onRefresh={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            refetchUser()
+          }}
           tintColor={colorScheme === "light" ? "black" : "white"}
         />
       }
@@ -205,6 +210,7 @@ const ProfileScreen: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={onScrollEnd}
           scrollEventThrottle={16}
+          contentContainerStyle={{ minHeight: windowHeight * 0.6 }}
         >
           <View style={{ width: windowWidth }}>
             <UserPostList posts={user.posts} colorScheme={colorScheme} />

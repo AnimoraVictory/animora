@@ -10,6 +10,10 @@ import {
   Dimensions,
   Animated,
   PanResponder,
+  Pressable,
+  ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/Colors";
@@ -72,37 +76,55 @@ const UsersModal: React.FC<Props> = ({
     });
   };
 
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [tabIndex, setTabIndex] = useState(selectedTab === "follows" ? 0 : 1); // 0 = follows, 1 = followers
+
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
+        onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: (_, gestureState) => {
-          const isHorizontalSwipe =
-            Math.abs(gestureState.dx) > 1 &&
-            Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-          return isHorizontalSwipe && gestureState.dx > 1 && isTop(modalKey);
+          const { dx, dy } = gestureState;
+          return Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy);
         },
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dx > 0) {
-            slideAnim.setValue(gestureState.dx);
-          }
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          if (gestureState.dx > 10) {
-            Animated.timing(slideAnim, {
-              toValue: width,
-              duration: 200,
-              useNativeDriver: true,
-            }).start(() => onClose());
-          } else {
-            Animated.spring(slideAnim, {
-              toValue: 0,
-              useNativeDriver: true,
-            }).start();
+        onPanResponderRelease: (evt, gestureState) => {
+          const { dx } = gestureState;
+
+          if (!isTop(modalKey)) return;
+
+          if (tabIndex === 0) {
+            if (dx > 30) {
+              // followsで右スワイプ => モーダルを閉じる
+              Animated.timing(slideAnim, {
+                toValue: width,
+                duration: 200,
+                useNativeDriver: true,
+              }).start(() => onClose());
+            } else if (dx < -30) {
+              // followsで左スワイプ => followersへ
+              scrollRef.current?.scrollTo({ x: width, animated: true });
+              setTabIndex(1);
+              setSelectedTab("followers");
+            }
+          } else if (tabIndex === 1) {
+            if (dx < -30 && evt.nativeEvent.pageX < 50) {
+              // followersで左端から左スワイプ => 閉じる
+              Animated.timing(slideAnim, {
+                toValue: width,
+                duration: 200,
+                useNativeDriver: true,
+              }).start(() => onClose());
+            } else if (dx > 30) {
+              // followersで右スワイプ => followsへ
+              scrollRef.current?.scrollTo({ x: 0, animated: true });
+              setTabIndex(0);
+              setSelectedTab("follows");
+            }
           }
         },
       }),
-    [modalKey, isTop, slideAnim, onClose]
+    [tabIndex, isTop, slideAnim, onClose]
   );
 
   const colorScheme = useColorScheme();
@@ -173,29 +195,54 @@ const UsersModal: React.FC<Props> = ({
               </Text>
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={users}
-            style={{ backgroundColor: colors.middleBackground }}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.userItem}
-                onPress={() => openUserProfile(item.email)}
-              >
-                <Image
-                  source={
-                    item.iconImageUrl
-                      ? { uri: item.iconImageUrl }
-                      : require("@/assets/images/profile.png")
+          <View pointerEvents="box-none">
+            <Pressable style={{ minHeight: height }} {...panResponder}>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                ref={scrollRef}
+                showsHorizontalScrollIndicator={false}
+                scrollEnabled={false}
+                onScroll={Animated.event(
+                  [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                  {
+                    useNativeDriver: false,
+                    listener: (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+                      const x = e.nativeEvent.contentOffset.x;
+                      setTabIndex(x >= width / 2 ? 1 : 0);
+                      setSelectedTab(x >= width / 2 ? "followers" : "follows");
+                    },
                   }
-                  style={styles.avatar}
+                )}
+                scrollEventThrottle={16}
+                {...panResponder.panHandlers}
+              >
+                <FlatList
+                  data={users}
+                  style={{ width, backgroundColor: colors.middleBackground }}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.userItem}
+                      onPress={() => openUserProfile(item.email)}
+                    >
+                      <Image
+                        source={
+                          item.iconImageUrl
+                            ? { uri: item.iconImageUrl }
+                            : require("@/assets/images/profile.png")
+                        }
+                        style={styles.avatar}
+                      />
+                      <Text style={[styles.userName, { color: colors.text }]}>
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 />
-                <Text style={[styles.userName, { color: colors.text }]}>
-                  {item.name}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
+              </ScrollView>
+            </Pressable>
+          </View>
         </Animated.View>
       </Animated.View>
       <UserProfileModal
