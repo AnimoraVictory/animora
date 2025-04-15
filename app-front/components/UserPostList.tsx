@@ -9,14 +9,9 @@ import { useModalStack } from "@/providers/ModalStackContext";
 type Props = {
   posts: Post[];
   colorScheme: ReturnType<typeof useColorScheme>;
-  onScroll?: (event: any) => void;
 };
 
-export const UserPostList: React.FC<Props> = ({
-  posts,
-  colorScheme,
-  onScroll,
-}) => {
+export const UserPostList: React.FC<Props> = ({ posts, colorScheme }) => {
   const { push, pop } = useModalStack();
   const colors = Colors[colorScheme ?? "light"];
   const backgroundColor = colorScheme === "light" ? "white" : "black";
@@ -38,7 +33,7 @@ export const UserPostList: React.FC<Props> = ({
             }}
           />
         )}
-        onScroll={onScroll}
+        scrollEnabled={false}
         scrollEventThrottle={16}
         contentContainerStyle={{
           flexGrow: 1,

@@ -1,5 +1,11 @@
-import React from "react";
-import { TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native";
+import React, { useRef } from "react";
+import {
+  Image,
+  StyleSheet,
+  Dimensions,
+  GestureResponderEvent,
+  Pressable,
+} from "react-native";
 
 export type ProfilePostPanelProps = {
   imageUrl: string;
@@ -14,14 +20,33 @@ export const ProfilePostPanel: React.FC<ProfilePostPanelProps> = ({
   imageUrl,
   onPress,
 }) => {
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const handlePress = (e: GestureResponderEvent) => {
+    const dx = Math.abs(e.nativeEvent.pageX - touchStartX.current);
+    const dy = Math.abs(e.nativeEvent.pageY - touchStartY.current);
+    const swipeThreshold = 10;
+
+    // スワイプではなく純粋なタップと判定されたときだけ実行
+    if (dx < swipeThreshold && dy < swipeThreshold) {
+      onPress();
+    }
+  };
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <Pressable
+      onPress={handlePress}
+      onTouchStart={(e) => {
+        touchStartX.current = e.nativeEvent.pageX;
+        touchStartY.current = e.nativeEvent.pageY;
+      }}
+      style={styles.container}
+    >
       <Image
         source={{ uri: imageUrl }}
         style={styles.image}
         resizeMode="cover"
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

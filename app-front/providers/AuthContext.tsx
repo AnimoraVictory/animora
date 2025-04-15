@@ -9,7 +9,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   loading: boolean;
   refetch: () => Promise<void>;
-  isRefetching: boolean
+  isRefetching: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
