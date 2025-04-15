@@ -11,6 +11,7 @@ import {
   ScrollView,
   RefreshControl,
   Easing,
+  Pressable,
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/Colors";
@@ -25,6 +26,7 @@ import UserProfileHeader from "./UserProfileHeader";
 import UsersModal from "./UsersModal";
 import { useModalStack } from "@/providers/ModalStackContext";
 import { FontAwesome5 } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 
 const { width } = Dimensions.get("window");
 const API_URL = Constants.expoConfig?.extra?.API_URL;
@@ -39,6 +41,7 @@ type Props = {
 };
 
 const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
 const UserProfileModal: React.FC<Props> = ({
   email,
@@ -48,12 +51,12 @@ const UserProfileModal: React.FC<Props> = ({
   currentUser,
   prevModalIdx,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<"posts" | "mypet">("posts");
   const [selectedFollowTab, setSelectedFollowTab] = useState<
     "follows" | "followers"
   >("follows");
   const [isFollowModalVisible, setIsFollowModalVisible] = useState(false);
   const slideAnimFollow = useRef(new Animated.Value(width)).current;
+  const [scrollX, setScrollX] = useState(0);
 
   const { push, pop, isTop } = useModalStack();
   const modalKey = `${prevModalIdx + 1}`;
@@ -65,6 +68,8 @@ const UserProfileModal: React.FC<Props> = ({
   const queryClient = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const selectedTab = scrollX < windowWidth / 2 ? "posts" : "mypet";
+  const postListWidth = useRef(0);
 
   const {
     data: user,
@@ -157,33 +162,52 @@ const UserProfileModal: React.FC<Props> = ({
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
-        onMoveShouldSetPanResponder: (_, gestureState) =>
-          Math.abs(gestureState.dx) > 1 &&
-          Math.abs(gestureState.dx) > Math.abs(gestureState.dy) &&
-          gestureState.dx > 1 &&
-          isTop(modalKey),
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dx > 0) {
-            slideAnim.setValue(gestureState.dx);
-          }
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponderCapture: (_, gestureState) => {
+          const { dx, dy } = gestureState;
+          const isHorizontalSwipe =
+            Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.5;
+          return isHorizontalSwipe;
         },
-        onPanResponderRelease: (_, gestureState) => {
-          if (gestureState.dx > 10) {
-            Animated.timing(slideAnim, {
-              toValue: width,
-              duration: 200,
-              useNativeDriver: true,
-            }).start(() => onClose());
-          } else {
-            Animated.spring(slideAnim, {
-              toValue: 0,
-              useNativeDriver: true,
-            }).start();
+        onPanResponderRelease: (e, gestureState) => {
+          const dx = gestureState.dx;
+          const startX = e.nativeEvent.pageX;
+          if (!isTop(modalKey)) {
+            return;
           }
+          if (selectedTab === "posts") {
+            if (dx < -30) {
+              scrollRef.current?.scrollTo({ x: windowWidth, animated: true });
+            } else if (dx > 30) {
+              // posts にいて右スワイプ → モーダル閉じる
+              Animated.timing(slideAnim, {
+                toValue: windowWidth,
+                duration: 200,
+                useNativeDriver: true,
+              }).start(() => onClose());
+            }
+          } else if (selectedTab === "mypet") {
+            const leftEdgeThreshold = windowWidth / 2 + 50;
+            const adjustedStartX = startX;
+            if (dx > 30) {
+              if (adjustedStartX < leftEdgeThreshold) {
+                // 左端からのスワイプとみなして閉じる
+                Animated.timing(slideAnim, {
+                  toValue: windowWidth,
+                  duration: 200,
+                  useNativeDriver: true,
+                }).start(() => onClose());
+              } else {
+                // pets にいて右スワイプ && 画面内から → post に戻す
+                scrollRef.current?.scrollTo({ x: 0, animated: true });
+              }
+            }
+          }
+
+          // 上記に該当しないときは何もしない
         },
       }),
-    [modalKey, slideAnim, isTop, onClose]
+    [selectedTab, scrollRef, slideAnim, onClose]
   );
 
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -208,6 +232,13 @@ const UserProfileModal: React.FC<Props> = ({
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
   });
+
+  useEffect(() => {
+    if (visible) {
+      scrollRef.current?.scrollTo({ x: 0, animated: false });
+      setScrollX(0);
+    }
+  }, [visible]);
 
   const headerOpacity = scrollY.interpolate({
     inputRange: [-20, 0],
@@ -236,6 +267,7 @@ const UserProfileModal: React.FC<Props> = ({
       </Modal>
     );
   }
+  // タップをしているのか、スワイプをしようとしているかの判定用
 
   return (
     <Modal visible={visible} animationType="none" transparent>
@@ -248,6 +280,7 @@ const UserProfileModal: React.FC<Props> = ({
           },
         ]}
         {...panResponder.panHandlers}
+        pointerEvents="box-none"
       >
         <View
           style={[styles.topHeader, { backgroundColor: colors.background }]}
@@ -269,14 +302,17 @@ const UserProfileModal: React.FC<Props> = ({
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
-              onRefresh={refetch}
+              onRefresh={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                refetch();
+              }}
               tintColor={colorScheme === "light" ? "black" : "white"}
             />
           }
           contentInset={{ top: 80 }}
           contentOffset={{ x: 0, y: -80 }}
           scrollEventThrottle={16}
-          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ minHeight: windowHeight * 0.6 }}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: false }
@@ -294,29 +330,45 @@ const UserProfileModal: React.FC<Props> = ({
             />
             <ProfileTabSelector
               selectedTab={selectedTab}
-              onSelectTab={setSelectedTab}
+              onSelectTab={(tab) => {
+                scrollRef.current?.scrollTo({
+                  x: tab === "posts" ? 0 : windowWidth,
+                  animated: true,
+                });
+                setScrollX(tab === "posts" ? 0 : windowWidth);
+              }}
               scrollRef={scrollRef}
             />
           </View>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            ref={scrollRef}
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={(event) => {
-              const offsetX = event.nativeEvent.contentOffset.x;
-              const newIndex = Math.round(offsetX / windowWidth);
-              setSelectedTab(newIndex === 0 ? "posts" : "mypet");
-            }}
-            scrollEventThrottle={16}
-          >
-            <View style={{ width: windowWidth }}>
-              <UserPostList posts={user.posts} colorScheme={colorScheme} />
-            </View>
-            <View style={{ width: windowWidth }}>
-              <UserPetList pets={user.pets} colorScheme={colorScheme} />
-            </View>
-          </ScrollView>
+
+          <View pointerEvents="box-none">
+            <Pressable>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                ref={scrollRef}
+                scrollEnabled={false}
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={(event) => {
+                  const offsetX = event.nativeEvent.contentOffset.x;
+                  setScrollX(offsetX);
+                }}
+                scrollEventThrottle={16}
+              >
+                <View
+                  style={{ width: windowWidth }}
+                  onLayout={(e) => {
+                    postListWidth.current = e.nativeEvent.layout.width;
+                  }}
+                >
+                  <UserPostList posts={user.posts} colorScheme={colorScheme} />
+                </View>
+                <View style={{ width: windowWidth }}>
+                  <UserPetList pets={user.pets} colorScheme={colorScheme} />
+                </View>
+              </ScrollView>
+            </Pressable>
+          </View>
         </ScrollView>
       </Animated.View>
 
