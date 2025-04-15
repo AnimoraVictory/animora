@@ -3,18 +3,14 @@ import { FlatList, Text, View, useColorScheme } from "react-native";
 import PetPanel from "@/components/PetPanel";
 import { Pet } from "@/constants/api";
 import { Colors } from "@/constants/Colors";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 type Props = {
   pets: Pet[];
   colorScheme: ReturnType<typeof useColorScheme>;
-  onScroll?: (event: any) => void;
 };
 
-export const UserPetList: React.FC<Props> = ({
-  pets,
-  colorScheme,
-  onScroll,
-}) => {
+export const UserPetList: React.FC<Props> = ({ pets, colorScheme }) => {
   const colors = Colors[colorScheme ?? "light"];
   const backgroundColor = colorScheme === "dark" ? "black" : "white";
 
@@ -28,7 +24,7 @@ export const UserPetList: React.FC<Props> = ({
           <PetPanel pet={item} colorScheme={colorScheme} />
         </View>
       )}
-      onScroll={onScroll}
+      scrollEnabled={false}
       scrollEventThrottle={16}
       contentContainerStyle={{
         flexGrow: 1,
