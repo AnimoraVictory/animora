@@ -38,6 +38,28 @@ export class BackendStack extends cdk.Stack {
       "AWS_S3_BUCKET_NAME",
     ]);
 
+    const apiFnRole = new Role(this, "ApiFunctionRole", {
+      assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+      managedPolicies: [
+        ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
+      ],
+    });
+    
+    apiFnRole.addToPolicy(
+      new cdk.aws_iam.PolicyStatement({
+        actions: [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ],
+        resources: [
+          `arn:aws:s3:::${AWS_S3_BUCKET_NAME}`,
+          `arn:aws:s3:::${AWS_S3_BUCKET_NAME}/*`
+        ],
+      })
+    );
+
     const apiFn = new lambda.Function(this, "AnimaliaBackend", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
       handler: "bootstrap",
@@ -53,12 +75,37 @@ export class BackendStack extends cdk.Stack {
         // AWS_SECRET_ACCESS_KEY,
         AWS_S3_BUCKET_NAME,
       },
+      role: apiFnRole
     });
 
-    new apigw.LambdaRestApi(this, "AnimaliaAPI", {
+    const api = new apigw.LambdaRestApi(this, "AnimaliaAPI", {
       handler: apiFn,
+      binaryMediaTypes: [
+        "multipart/form-data",
+        "image/*"
+      ],
+      defaultMethodOptions: {
+        apiKeyRequired: false,
+      },
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowMethods: apigw.Cors.ALL_METHODS,
+        allowHeaders: [
+          "Content-Type",
+          "X-Amz-Date",
+          "Authorization",
+          "X-Api-Key",
+          "X-Amz-Security-Token",
+          "Access-Control-Allow-Origin",
+          "Access-Control-Allow-Headers"
+        ],
+      },
     });
 
+    // API Gatewayのステージ設定を調整
+    const stage = api.deploymentStage.node.defaultChild as apigw.CfnStage;
+    stage.addPropertyOverride("TracingEnabled", true);
+    
     const dailyTaskFn = new lambda.Function(this, "DailyTaskCreator", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
       handler: "bootstrap",

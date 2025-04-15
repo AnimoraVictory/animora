@@ -7,13 +7,11 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
-	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 )
@@ -24,21 +22,24 @@ type S3Repository struct {
 }
 
 func NewS3Repository(bucketName string) *S3Repository {
-	region := os.Getenv("AWS_REGION")
-	accessKeyId := os.Getenv("AWS_ACCESS_KEY_ID")
-	secretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion(region),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			accessKeyId,
-			secretAccessKey,
-			"",
-		)),
+	ctx := context.TODO()
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion("ap-northeast-1"),
 	)
 	if err != nil {
 		log.Fatalf("Failed to load AWS config: %v", err)
 	}
+
+	// デバッグ用のログ
+	creds, err := cfg.Credentials.Retrieve(ctx)
+	if err != nil {
+		log.Printf("Failed to retrieve credentials: %v", err)
+	} else {
+		log.Printf("Using credentials from provider: %s", creds.Source)
+	}
+
 	s3Client := s3.NewFromConfig(cfg)
+
 	return &S3Repository{
 		s3Client:   s3Client,
 		bucketName: bucketName,
@@ -52,25 +53,47 @@ func (r *S3Repository) UploadImage(file *multipart.FileHeader, directory string)
 	}
 	defer src.Close()
 
-	// Read the file content
+	// ファイルの内容を読み込む
 	buffer := make([]byte, file.Size)
-	if _, err := src.Read(buffer); err != nil && err != io.EOF {
-		return "", fmt.Errorf("failed to read file: %w", err)
+	totalRead := 0
+	for totalRead < int(file.Size) {
+		n, err := src.Read(buffer[totalRead:])
+		if err != nil && err != io.EOF {
+			return "", fmt.Errorf("failed to read file: %w", err)
+		}
+		if n == 0 {
+			break
+		}
+		totalRead += n
 	}
 
+	if totalRead == 0 {
+		return "", fmt.Errorf("file is empty")
+	}
+
+	// デバッグログ
+	log.Printf("File read complete: read %d bytes of %d expected", totalRead, file.Size)
+
 	fileKey := fmt.Sprintf("%s/%s-%s", directory, uuid.New().String(), filepath.Base(file.Filename))
+
+	contentType := file.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
 
 	// Upload the file to S3
 	_, err = r.s3Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket:      aws.String(r.bucketName),
 		Key:         aws.String(fileKey),
-		Body:        bytes.NewReader(buffer),
-		ContentType: aws.String(file.Header.Get("Content-Type")),
+		Body:        bytes.NewReader(buffer[:totalRead]),
+		ContentType: aws.String(contentType),
 	})
 	if err != nil {
+		log.Printf("S3 upload error: %v", err)
 		return "", fmt.Errorf("failed to upload file to S3: %w", err)
 	}
 
+	log.Printf("Successfully uploaded file %s with content type %s", fileKey, contentType)
 	return fileKey, nil
 }
 
