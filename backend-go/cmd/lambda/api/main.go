@@ -1,3 +1,5 @@
+// The above code sets up an AWS Lambda function using Echo framework to handle API requests for an
+// application called Animalia.
 package main
 
 import (
