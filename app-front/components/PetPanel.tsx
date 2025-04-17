@@ -58,7 +58,7 @@ const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
     setIsEditModalVisible(true);
     Animated.timing(slideAnimEditPet, {
       toValue: 0,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start();
   };
@@ -66,7 +66,7 @@ const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
   const closeEditPetModal = () => {
     Animated.timing(slideAnimEditPet, {
       toValue: windowHeight,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsEditModalVisible(false);

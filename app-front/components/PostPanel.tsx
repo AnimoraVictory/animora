@@ -106,7 +106,7 @@ export const PostPanel = ({ post }: Props) => {
   const closeModal = () => {
     Animated.timing(slideAnim, {
       toValue: windowHeight * 0.8,
-      duration: 200,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsModalVisible(false);
@@ -126,7 +126,7 @@ export const PostPanel = ({ post }: Props) => {
   const closeUserProfile = () => {
     Animated.timing(slideAnimUser, {
       toValue: Dimensions.get("window").width,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsUserModalVisible(false);

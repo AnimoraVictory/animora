@@ -14,6 +14,7 @@ import {
   ScrollView,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  RefreshControl,
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/Colors";
@@ -49,7 +50,6 @@ const UsersModal: React.FC<Props> = ({
   prevModalIdx,
   currentUser,
 }) => {
-  const [initialRender, setInitialRender] = useState(true);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(
     null
@@ -65,7 +65,6 @@ const UsersModal: React.FC<Props> = ({
           scrollRef.current?.scrollTo({ x: width, animated: false });
         });
       }
-      setInitialRender(false);
     }
   }, [visible]);
   const openUserProfile = (email: string) => {
@@ -82,7 +81,7 @@ const UsersModal: React.FC<Props> = ({
   const closeUserProfile = () => {
     Animated.timing(slideAnimProfile, {
       toValue: width,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsProfileModalVisible(false);
@@ -91,7 +90,22 @@ const UsersModal: React.FC<Props> = ({
   };
 
   const scrollRef = useRef<ScrollView | null>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollX = useRef(
+    new Animated.Value(selectedTab === "followers" ? width : 0)
+  ).current;
+
+  const scrollToTab = (tab: "follows" | "followers") => {
+    const toValue = tab === "follows" ? 0 : width;
+
+    Animated.timing(scrollX, {
+      toValue,
+      duration: 100, // ← ここで速度調整（小さいほど速い）
+      useNativeDriver: false,
+    }).start(() => {
+      setSelectedTab(tab);
+    });
+  };
 
   const panResponder = useMemo(
     () =>
@@ -110,7 +124,7 @@ const UsersModal: React.FC<Props> = ({
             if (dx > 30) {
               Animated.timing(slideAnim, {
                 toValue: width,
-                duration: 200,
+                duration: 100,
                 useNativeDriver: true,
               }).start(() => onClose());
             } else if (dx < -30) {
@@ -121,7 +135,7 @@ const UsersModal: React.FC<Props> = ({
             if (dx < -30 && evt.nativeEvent.pageX < 50) {
               Animated.timing(slideAnim, {
                 toValue: width,
-                duration: 200,
+                duration: 100,
                 useNativeDriver: true,
               }).start(() => onClose());
             } else if (dx > 30) {
@@ -145,10 +159,16 @@ const UsersModal: React.FC<Props> = ({
       animationType="none"
     >
       <Animated.View
-        style={[styles.overlay, { transform: [{ translateX: slideAnim }] }]}
+        style={[
+          styles.overlay,
+          {
+            backgroundColor: colors.middleBackground,
+            transform: [{ translateX: slideAnim }],
+          },
+        ]}
         {...panResponder.panHandlers}
       >
-        <Animated.View
+        <View
           style={[styles.topHeader, { backgroundColor: colors.background }]}
         >
           <TouchableOpacity style={styles.backButton} onPress={onClose}>
@@ -157,19 +177,19 @@ const UsersModal: React.FC<Props> = ({
           <Text style={[styles.headerUserName, { color: colors.tint }]}>
             {user.name}
           </Text>
-        </Animated.View>
-        <Animated.View
-          style={[
-            styles.modalContainer,
-            { backgroundColor: colors.background, paddingTop: 80 },
-          ]}
+        </View>
+        <ScrollView
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+          contentInset={{ top: 90 }}
+          contentOffset={{ x: 0, y: -90 }}
         >
           <View style={styles.tabHeader}>
             <TouchableOpacity
-              onPress={() => {
-                scrollRef.current?.scrollTo({ x: 0, animated: true });
-                setSelectedTab("follows");
-              }}
+              onPress={() => scrollToTab("follows")}
               style={[
                 styles.tabButton,
                 selectedTab === "follows" && { borderBottomColor: colors.tint },
@@ -186,10 +206,7 @@ const UsersModal: React.FC<Props> = ({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => {
-                scrollRef.current?.scrollTo({ x: width, animated: true });
-                setSelectedTab("followers");
-              }}
+              onPress={() => scrollToTab("followers")}
               style={[
                 styles.tabButton,
                 selectedTab === "followers" && {
@@ -214,20 +231,9 @@ const UsersModal: React.FC<Props> = ({
                 horizontal
                 pagingEnabled
                 ref={scrollRef}
-                showsHorizontalScrollIndicator={false}
                 scrollEnabled={false}
-                onScroll={Animated.event(
-                  [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-
-                  {
-                    useNativeDriver: false,
-                    listener: (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-                      const x = e.nativeEvent.contentOffset.x;
-                    },
-                  }
-                )}
+                showsHorizontalScrollIndicator={false}
                 scrollEventThrottle={16}
-                {...panResponder.panHandlers}
               >
                 <UsersList
                   users={follows}
@@ -242,7 +248,7 @@ const UsersModal: React.FC<Props> = ({
               </ScrollView>
             </Pressable>
           </View>
-        </Animated.View>
+        </ScrollView>
       </Animated.View>
       <UserProfileModal
         prevModalIdx={prevModalIdx + 1}
@@ -262,7 +268,6 @@ export default UsersModal;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   headerUserName: {
     fontSize: 20,
@@ -273,7 +278,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: 90,
     justifyContent: "center",
     alignItems: "center",
     borderBottomWidth: StyleSheet.hairlineWidth,

@@ -54,7 +54,7 @@ export default function CameraScreen() {
   const handleClose = () => {
     Animated.timing(slideAnim, {
       toValue: height,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       router.replace("/(tabs)/posts");

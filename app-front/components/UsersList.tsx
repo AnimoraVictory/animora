@@ -26,6 +26,7 @@ export default function UsersList({
     <FlatList
       data={users}
       style={{ width, backgroundColor }}
+      scrollEnabled={false}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <TouchableOpacity
