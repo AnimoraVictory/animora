@@ -20,6 +20,7 @@ import { Colors } from "@/constants/Colors";
 import { UserBase } from "@/constants/api";
 import UserProfileModal from "./UserProfileModal";
 import { useModalStack } from "@/providers/ModalStackContext";
+import UsersList from "./UsersList";
 
 const { width, height } = Dimensions.get("window");
 
@@ -27,7 +28,8 @@ type Props = {
   user: UserBase;
   visible: boolean;
   onClose: () => void;
-  users: UserBase[];
+  follows: UserBase[];
+  followers: UserBase[];
   selectedTab: "follows" | "followers";
   setSelectedTab: (tab: "follows" | "followers") => void;
   slideAnim: Animated.Value;
@@ -39,13 +41,15 @@ const UsersModal: React.FC<Props> = ({
   user,
   visible,
   onClose,
-  users,
+  follows,
+  followers,
   selectedTab,
   setSelectedTab,
   slideAnim,
   prevModalIdx,
   currentUser,
 }) => {
+  const [initialRender, setInitialRender] = useState(true);
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(
     null
@@ -54,6 +58,16 @@ const UsersModal: React.FC<Props> = ({
   const { push, pop, isTop } = useModalStack();
   const modalKey = `${prevModalIdx + 1}`;
 
+  useEffect(() => {
+    if (visible) {
+      if (selectedTab === "followers") {
+        requestAnimationFrame(() => {
+          scrollRef.current?.scrollTo({ x: width, animated: false });
+        });
+      }
+      setInitialRender(false);
+    }
+  }, [visible]);
   const openUserProfile = (email: string) => {
     setSelectedUserEmail(email);
     setIsProfileModalVisible(true);
@@ -76,9 +90,8 @@ const UsersModal: React.FC<Props> = ({
     });
   };
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
-  const [tabIndex, setTabIndex] = useState(selectedTab === "follows" ? 0 : 1); // 0 = follows, 1 = followers
 
   const panResponder = useMemo(
     () =>
@@ -93,38 +106,32 @@ const UsersModal: React.FC<Props> = ({
 
           if (!isTop(modalKey)) return;
 
-          if (tabIndex === 0) {
+          if (selectedTab === "follows") {
             if (dx > 30) {
-              // followsで右スワイプ => モーダルを閉じる
               Animated.timing(slideAnim, {
                 toValue: width,
                 duration: 200,
                 useNativeDriver: true,
               }).start(() => onClose());
             } else if (dx < -30) {
-              // followsで左スワイプ => followersへ
               scrollRef.current?.scrollTo({ x: width, animated: true });
-              setTabIndex(1);
               setSelectedTab("followers");
             }
-          } else if (tabIndex === 1) {
+          } else if (selectedTab === "followers") {
             if (dx < -30 && evt.nativeEvent.pageX < 50) {
-              // followersで左端から左スワイプ => 閉じる
               Animated.timing(slideAnim, {
                 toValue: width,
                 duration: 200,
                 useNativeDriver: true,
               }).start(() => onClose());
             } else if (dx > 30) {
-              // followersで右スワイプ => followsへ
               scrollRef.current?.scrollTo({ x: 0, animated: true });
-              setTabIndex(0);
               setSelectedTab("follows");
             }
           }
         },
       }),
-    [tabIndex, isTop, slideAnim, onClose]
+    [isTop, slideAnim, onClose]
   );
 
   const colorScheme = useColorScheme();
@@ -159,7 +166,10 @@ const UsersModal: React.FC<Props> = ({
         >
           <View style={styles.tabHeader}>
             <TouchableOpacity
-              onPress={() => setSelectedTab("follows")}
+              onPress={() => {
+                scrollRef.current?.scrollTo({ x: 0, animated: true });
+                setSelectedTab("follows");
+              }}
               style={[
                 styles.tabButton,
                 selectedTab === "follows" && { borderBottomColor: colors.tint },
@@ -176,7 +186,10 @@ const UsersModal: React.FC<Props> = ({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setSelectedTab("followers")}
+              onPress={() => {
+                scrollRef.current?.scrollTo({ x: width, animated: true });
+                setSelectedTab("followers");
+              }}
               style={[
                 styles.tabButton,
                 selectedTab === "followers" && {
@@ -196,7 +209,7 @@ const UsersModal: React.FC<Props> = ({
             </TouchableOpacity>
           </View>
           <View pointerEvents="box-none">
-            <Pressable style={{ minHeight: height }} {...panResponder}>
+            <Pressable style={{ minHeight: height }}>
               <ScrollView
                 horizontal
                 pagingEnabled
@@ -205,40 +218,26 @@ const UsersModal: React.FC<Props> = ({
                 scrollEnabled={false}
                 onScroll={Animated.event(
                   [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+
                   {
                     useNativeDriver: false,
                     listener: (e: NativeSyntheticEvent<NativeScrollEvent>) => {
                       const x = e.nativeEvent.contentOffset.x;
-                      setTabIndex(x >= width / 2 ? 1 : 0);
-                      setSelectedTab(x >= width / 2 ? "followers" : "follows");
                     },
                   }
                 )}
                 scrollEventThrottle={16}
                 {...panResponder.panHandlers}
               >
-                <FlatList
-                  data={users}
-                  style={{ width, backgroundColor: colors.middleBackground }}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.userItem}
-                      onPress={() => openUserProfile(item.email)}
-                    >
-                      <Image
-                        source={
-                          item.iconImageUrl
-                            ? { uri: item.iconImageUrl }
-                            : require("@/assets/images/profile.png")
-                        }
-                        style={styles.avatar}
-                      />
-                      <Text style={[styles.userName, { color: colors.text }]}>
-                        {item.name}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                <UsersList
+                  users={follows}
+                  onSelectUser={openUserProfile}
+                  backgroundColor={colors.middleBackground}
+                />
+                <UsersList
+                  users={followers}
+                  onSelectUser={openUserProfile}
+                  backgroundColor={colors.middleBackground}
                 />
               </ScrollView>
             </Pressable>
