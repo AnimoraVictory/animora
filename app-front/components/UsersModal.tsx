@@ -2,19 +2,14 @@ import React, { useRef, useState, useEffect, useMemo } from "react";
 import {
   Modal,
   View,
-  FlatList,
   Text,
   TouchableOpacity,
-  Image,
   StyleSheet,
   Dimensions,
   Animated,
   PanResponder,
   Pressable,
   ScrollView,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  RefreshControl,
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/Colors";
