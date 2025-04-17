@@ -203,7 +203,7 @@ export default function PostsScreen() {
             refreshing={isRefetching}
             onRefresh={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              refetch()
+              refetch();
             }}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
