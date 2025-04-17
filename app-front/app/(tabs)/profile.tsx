@@ -288,7 +288,7 @@ const getStyles = (colors: typeof Colors.light) =>
       zIndex: 10,
       justifyContent: "flex-start",
       alignItems: "center",
-      backgroundColor: colors.background
+      backgroundColor: colors.background,
     },
     userName: {
       fontSize: 20,
