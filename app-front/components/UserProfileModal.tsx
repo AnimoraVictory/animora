@@ -151,7 +151,7 @@ const UserProfileModal: React.FC<Props> = ({
   const onCloseFollowModal = () => {
     Animated.timing(slideAnimFollow, {
       toValue: width,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsFollowModalVisible(false);
@@ -182,7 +182,7 @@ const UserProfileModal: React.FC<Props> = ({
               // posts にいて右スワイプ → モーダル閉じる
               Animated.timing(slideAnim, {
                 toValue: windowWidth,
-                duration: 200,
+                duration: 100,
                 useNativeDriver: true,
               }).start(() => onClose());
             }
@@ -194,7 +194,7 @@ const UserProfileModal: React.FC<Props> = ({
                 // 左端からのスワイプとみなして閉じる
                 Animated.timing(slideAnim, {
                   toValue: windowWidth,
-                  duration: 200,
+                  duration: 100,
                   useNativeDriver: true,
                 }).start(() => onClose());
               } else {
@@ -241,7 +241,7 @@ const UserProfileModal: React.FC<Props> = ({
   }, [visible]);
 
   const headerOpacity = scrollY.interpolate({
-    inputRange: [-20, 0],
+    inputRange: [0, 80],
     outputRange: [0, 1],
     extrapolate: "clamp",
   });
@@ -267,7 +267,6 @@ const UserProfileModal: React.FC<Props> = ({
       </Modal>
     );
   }
-  // タップをしているのか、スワイプをしようとしているかの判定用
 
   return (
     <Modal visible={visible} animationType="none" transparent>
@@ -309,8 +308,8 @@ const UserProfileModal: React.FC<Props> = ({
               tintColor={colorScheme === "light" ? "black" : "white"}
             />
           }
-          contentInset={{ top: 80 }}
-          contentOffset={{ x: 0, y: -80 }}
+          contentInset={{ top: 90 }}
+          contentOffset={{ x: 0, y: -90 }}
           scrollEventThrottle={16}
           contentContainerStyle={{ minHeight: windowHeight * 0.6 }}
           onScroll={Animated.event(
@@ -380,9 +379,8 @@ const UserProfileModal: React.FC<Props> = ({
           user={user}
           currentUser={currentUser}
           onClose={onCloseFollowModal}
-          users={
-            selectedFollowTab === "followers" ? user.followers : user.follows
-          }
+          follows={user.follows}
+          followers={user.followers}
           selectedTab={selectedFollowTab}
           setSelectedTab={setSelectedFollowTab}
           slideAnim={slideAnimFollow}
@@ -401,7 +399,7 @@ const styles = StyleSheet.create({
   topHeader: {
     position: "absolute",
     top: 0,
-    height: 80,
+    height: 90,
     width: width,
     justifyContent: "center",
     alignItems: "center",

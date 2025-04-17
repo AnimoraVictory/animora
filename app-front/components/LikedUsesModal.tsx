@@ -62,7 +62,7 @@ const LikedUserModal: React.FC<Props> = ({
   const closeUserProfile = () => {
     Animated.timing(slideAnimProfile, {
       toValue: width,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsProfileModalVisible(false);
