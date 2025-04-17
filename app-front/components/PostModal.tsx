@@ -43,7 +43,7 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
     setIsCommentModalVisible(true);
     Animated.timing(slideAnimComment, {
       toValue: 0,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start();
   };
@@ -61,7 +61,7 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
     push("1");
     Animated.timing(slideAnimLike, {
       toValue: 0,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start();
   };
@@ -69,7 +69,7 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
   const onCloseLikeModal = () => {
     Animated.timing(slideAnimLike, {
       toValue: height,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsLikedUserModalVisible(false);
