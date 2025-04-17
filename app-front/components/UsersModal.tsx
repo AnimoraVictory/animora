@@ -132,7 +132,7 @@ const UsersModal: React.FC<Props> = ({
               setSelectedTab("followers");
             }
           } else if (selectedTab === "followers") {
-            if (dx < -30 && evt.nativeEvent.pageX < 50) {
+            if (dx > 30 && evt.nativeEvent.pageX < width / 2 + 50) {
               Animated.timing(slideAnim, {
                 toValue: width,
                 duration: 100,
