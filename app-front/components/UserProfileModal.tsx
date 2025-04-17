@@ -267,7 +267,6 @@ const UserProfileModal: React.FC<Props> = ({
       </Modal>
     );
   }
-  // タップをしているのか、スワイプをしようとしているかの判定用
 
   return (
     <Modal visible={visible} animationType="none" transparent>
@@ -380,9 +379,8 @@ const UserProfileModal: React.FC<Props> = ({
           user={user}
           currentUser={currentUser}
           onClose={onCloseFollowModal}
-          users={
-            selectedFollowTab === "followers" ? user.followers : user.follows
-          }
+          follows={user.follows}
+          followers={user.followers}
           selectedTab={selectedFollowTab}
           setSelectedTab={setSelectedFollowTab}
           slideAnim={slideAnimFollow}
