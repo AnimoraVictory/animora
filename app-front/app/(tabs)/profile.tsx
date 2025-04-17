@@ -9,6 +9,7 @@ import {
   useColorScheme,
   ScrollView,
   RefreshControl,
+  Image,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/providers/AuthContext";
@@ -25,7 +26,7 @@ import { UserPetList } from "@/components/UserPetsList";
 import { UserPostList } from "@/components/UserPostList";
 import UsersModal from "@/components/UsersModal";
 import { useModalStack } from "@/providers/ModalStackContext";
-import * as Haptics from "expo-haptics"
+import * as Haptics from "expo-haptics";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
@@ -60,13 +61,17 @@ const ProfileScreen: React.FC = () => {
   const backgroundColor = colorScheme === "light" ? "white" : "black";
 
   const scrollY = useRef(new Animated.Value(0)).current;
-  const HEADER_THRESHOLD = 150;
 
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [HEADER_THRESHOLD - 20, HEADER_THRESHOLD],
-    outputRange: [0, 1],
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, -150],
     extrapolate: "clamp",
   });
+
+  const icon =
+    colorScheme === "light"
+      ? require("../../assets/images/icon-green.png")
+      : require("../../assets/images/icon-dark.png");
 
   const handleLogout = async () => {
     try {
@@ -89,7 +94,7 @@ const ProfileScreen: React.FC = () => {
   const closeEditProfileModal = () => {
     Animated.timing(slideAnimProfile, {
       toValue: windowWidth,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsEditModalVisible(false);
@@ -108,7 +113,7 @@ const ProfileScreen: React.FC = () => {
   const closeRegisterPetModal = () => {
     Animated.timing(slideAnimPet, {
       toValue: windowWidth,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsRegisterPetModalVisible(false);
@@ -128,7 +133,7 @@ const ProfileScreen: React.FC = () => {
   const closeFollowModal = () => {
     Animated.timing(slideAnimFollow, {
       toValue: windowWidth,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
     }).start(() => {
       setIsFollowModalVisible(false);
@@ -183,13 +188,13 @@ const ProfileScreen: React.FC = () => {
   );
 
   const contentList = (
-    <ScrollView
+    <Animated.ScrollView
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
           onRefresh={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            refetchUser()
+            refetchUser();
           }}
           tintColor={colorScheme === "light" ? "black" : "white"}
         />
@@ -200,6 +205,8 @@ const ProfileScreen: React.FC = () => {
         [{ nativeEvent: { contentOffset: { y: scrollY } } }],
         { useNativeDriver: false }
       )}
+      contentInset={{ top: 90 }}
+      contentOffset={{ x: 0, y: -90 }}
     >
       <View>
         {headerContent}
@@ -210,7 +217,7 @@ const ProfileScreen: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={onScrollEnd}
           scrollEventThrottle={16}
-          contentContainerStyle={{ minHeight: windowHeight * 0.6 }}
+          contentContainerStyle={{ minHeight: windowHeight * 0.8 }}
         >
           <View style={{ width: windowWidth }}>
             <UserPostList posts={user.posts} colorScheme={colorScheme} />
@@ -220,16 +227,19 @@ const ProfileScreen: React.FC = () => {
           </View>
         </ScrollView>
       </View>
-    </ScrollView>
+    </Animated.ScrollView>
   );
   return (
-    <ThemedView style={[styles.container, { backgroundColor }]}>
+    <ThemedView style={styles.container}>
       <Animated.View
-        style={[styles.topHeader, { backgroundColor: colors.background }]}
+        style={[
+          styles.topHeader,
+          {
+            transform: [{ translateY: headerTranslateY }],
+          },
+        ]}
       >
-        <Animated.Text style={[styles.userName, { opacity: headerOpacity }]}>
-          {user.name}
-        </Animated.Text>
+        <Image source={icon} style={styles.logo} />
       </Animated.View>
       {contentList}
       <ProfileEditModal
@@ -254,9 +264,8 @@ const ProfileScreen: React.FC = () => {
         currentUser={user}
         visible={isFollowModalVisible}
         onClose={() => closeFollowModal()}
-        users={
-          selectedFollowTab === "followers" ? user.followers : user.follows
-        }
+        follows={user.follows}
+        followers={user.followers}
         selectedTab={selectedFollowTab}
         setSelectedTab={setSelectedFollowTab}
       />
@@ -268,19 +277,29 @@ const getStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: colors.middleBackground,
     },
     topHeader: {
-      paddingTop: 42,
-      paddingBottom: 12,
-      backgroundColor: colors.background,
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 90,
+      zIndex: 10,
+      justifyContent: "flex-start",
       alignItems: "center",
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.icon,
+      backgroundColor: colors.background
     },
     userName: {
       fontSize: 20,
       fontWeight: "bold",
-      color: colors.text,
+      color: colors.tint,
+    },
+    logo: {
+      width: 32,
+      height: 32,
+      marginTop: 50,
+      resizeMode: "contain",
     },
     loadingContainer: {
       flex: 1,
