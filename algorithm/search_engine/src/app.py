@@ -6,7 +6,7 @@ from fastapi import  FastAPI, HTTPException, File, UploadFile, Form
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv, find_dotenv
-from image_search import get_connection, compute_image_embeddings, compute_text_embeddings
+from search_engine.src.image_search import get_connection, compute_image_embeddings, compute_text_embeddings
 
 _ = load_dotenv(find_dotenv())
 
