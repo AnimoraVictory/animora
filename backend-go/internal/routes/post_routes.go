@@ -10,8 +10,8 @@ func SetupPostRoutes(app *echo.Echo) {
 	postHandler := injector.InjectPostHandler()
 	postGroup := app.Group("/posts")
 
-	// Get all posts
-	postGroup.GET("/", postHandler.GetPostsFromFastAPI)
+	// get posts for timeline
+	postGroup.POST("/timeline", postHandler.GetPostsFromFastAPI)
 
 	// Create a new post
 	postGroup.POST("/", postHandler.CreatePost)

@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -85,8 +85,10 @@ export const userSchema = userBaseSchema.extend({
 
 export const getPostResponseSchema = z.object({
   posts: z.array(postSchema),
-  next_cursor: z.string().nullable(),
+  next_cursor: z.number().nullable(),
 });
+
+type GetPostsResponse = z.infer<typeof getPostResponseSchema>;
 
 export default function PostsScreen() {
   const colorScheme = useColorScheme();
@@ -99,24 +101,50 @@ export default function PostsScreen() {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const { user: currentUser } = useAuth();
 
+  const fetchPosts = async (userId: string) => {
+    const res = await axios.post(`${API_URL}/posts`, {
+      user_id: userId,
+      limit: 10,
+    });
+    const result = getPostResponseSchema.safeParse(res.data);
+    if (!result.success) throw new Error("Failed to parse");
+    return result.data;
+  };
 
-  const { isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["posts", currentUser?.id],
-    queryFn: async () => {
-      if (!currentUser?.id) return [];
-      const response = await axios.post(`${API_URL}/timeline`, {
-        user_id: currentUser.id,
+  const queryClient = useQueryClient();
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isRefetching,
+    isError,
+    refetch,
+  } = useInfiniteQuery<
+    GetPostsResponse,
+    Error,
+    GetPostsResponse,
+    [string, string?],
+    number | undefined
+  >({
+    queryKey: ["timeline", currentUser?.id],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await axios.post(`${API_URL}/posts/timeline`, {
+        user_id: currentUser?.id,
         limit: 10,
+        cursor: pageParam,
       });
+
       const result = getPostResponseSchema.safeParse(response.data);
-      if (!result.success) throw new Error("Failed to parse");
-      setPosts(result.data.posts);
-      setCursor(result.data.next_cursor ?? undefined);
-      return result.data.posts;
+      if (!result.success) throw new Error("parse failed");
+      return result.data;
     },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
     enabled: !!currentUser?.id,
   });
-
   const icon =
     colorScheme === "light"
       ? require("../../assets/images/icon-green.png")
@@ -144,24 +172,6 @@ export default function PostsScreen() {
     });
   }, [setHandler]);
 
-  const onRefresh = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsFetchingMore(false);
-    try {
-      const response = await axios.post(`${API_URL}/timeline`, {
-        user_id: currentUser?.id,
-        limit: 10,
-      });
-      const result = getPostResponseSchema.safeParse(response.data);
-      if (result.success) {
-        setPosts(result.data.posts);
-        setCursor(result.data.next_cursor ?? undefined);
-      }
-    } catch (err) {
-      console.error("Failed to refresh posts", err);
-    }
-  };
-
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
@@ -170,7 +180,7 @@ export default function PostsScreen() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <ThemedView style={styles.container}>
         <Animated.FlatList
@@ -244,24 +254,9 @@ export default function PostsScreen() {
         )}
         scrollEventThrottle={16}
         onEndReached={() => {
-          if (isFetchingMore || !cursor) return;
-          setIsFetchingMore(true);
-        
-          axios
-            .post(`${API_URL}/timeline`, {
-              user_id: currentUser?.id,
-              limit: 10,
-              cursor: cursor,
-            })
-            .then((response) => {
-              const result = getPostResponseSchema.safeParse(response.data);
-              if (result.success) {
-                setPosts((prev) => [...prev, ...result.data.posts]);
-                setCursor(result.data.next_cursor ?? undefined);
-              }
-            })
-            .catch((err) => console.error(err))
-            .finally(() => setIsFetchingMore(false));
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
         }}
       />
       {!isDailyTaskDone && (

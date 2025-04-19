@@ -11,6 +11,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models/fastapi"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 )
@@ -20,9 +21,9 @@ type PostHandler struct {
 	storageUsecase usecase.StorageUsecase
 }
 type TimelineRequest struct {
-	UserID int  `json:"user_id"`
-	Cursor *int `json:"cursor,omitempty"`
-	Limit  int  `json:"limit"`
+	UserID uuid.UUID `json:"user_id"`
+	Cursor *int      `json:"cursor,omitempty"`
+	Limit  int       `json:"limit"`
 }
 
 func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase) *PostHandler {
@@ -37,12 +38,6 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 	if err := c.Bind(&reqBody); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "invalid request body",
-		})
-	}
-
-	if reqBody.UserID == 0 {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "user_id is required",
 		})
 	}
 	// reqBody は TimelineRequest 構造体
@@ -81,8 +76,12 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 	respBody, _ := io.ReadAll(resp.Body)
 
 	var result struct {
-		Posts []fastapi.FastAPIPost `json:"posts"`
+		Posts      []fastapi.FastAPIPost `json:"posts"`
+		NextCursor *int                  `json:"next_cursor"`
 	}
+
+	fmt.Printf("%+v\n", result)
+
 	if err := json.Unmarshal(respBody, &result); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "invalid response from FastAPI",

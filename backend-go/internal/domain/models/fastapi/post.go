@@ -1,6 +1,7 @@
 package fastapi
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
@@ -11,9 +12,9 @@ type FastAPIPost struct {
 	ID        string            `json:"id"`
 	Caption   string            `json:"caption"`
 	ImageKey  string            `json:"image_key"`
-	CreatedAt time.Time         `json:"created_at"`
+	CreatedAt string            `json:"created_at"`
 	Score     float64           `json:"score"`
-	User      FastAPIUserBase   `json:"users"`
+	User      FastAPIUserBase   `json:"user"`
 	Comments  []FastAPIComment  `json:"comments"`
 	Likes     []FastAPILike     `json:"likes"`
 	DailyTask *FastAPIDailyTask `json:"daily_task,omitempty"`
@@ -31,12 +32,21 @@ func NewPostResponseFromFastAPI(
 		resp := NewDailyTaskResponseFromFastAPI(post.DailyTask)
 		dailyTaskResponse = &resp
 	}
+	CreatedAt, err := time.Parse(time.RFC3339Nano, post.CreatedAt)
+	if err != nil {
+		fmt.Printf("failed to parse CreatedAt: %v\n", err)
+	}
+	UserID, err := uuid.Parse(post.User.ID)
+	if err != nil {
+		fmt.Printf("failed to parse UUID: %v\n", err)
+	}
+
 	return models.PostResponse{
 		ID:       uuid.MustParse(post.ID),
 		Caption:  post.Caption,
 		ImageURL: imageURL,
 		User: models.UserBaseResponse{
-			ID:           post.User.ID,
+			ID:           UserID,
 			Email:        post.User.Email,
 			Name:         post.User.Name,
 			Bio:          post.User.Bio,
@@ -46,7 +56,7 @@ func NewPostResponseFromFastAPI(
 		CommentsCount: len(commentResponses),
 		Likes:         likeResponses,
 		LikesCount:    len(likeResponses),
-		CreatedAt:     post.CreatedAt,
+		CreatedAt:     CreatedAt,
 		DailyTask:     dailyTaskResponse,
 	}
 }
