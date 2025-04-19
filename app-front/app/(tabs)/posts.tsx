@@ -99,23 +99,58 @@ export default function PostsScreen() {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const { user: currentUser } = useAuth();
 
+  const fetchPosts = async (userId: string) => {
+    const res = await axios.post(`${API_URL}/timeline`, {
+      user_id: userId,
+      limit: 10,
+    });
+    const result = getPostResponseSchema.safeParse(res.data);
+    if (!result.success) throw new Error("Failed to parse");
+    return result.data;
+  };
 
   const { isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["posts", currentUser?.id],
-    queryFn: async () => {
-      if (!currentUser?.id) return [];
-      const response = await axios.post(`${API_URL}/timeline`, {
-        user_id: currentUser.id,
-        limit: 10,
-      });
-      const result = getPostResponseSchema.safeParse(response.data);
-      if (!result.success) throw new Error("Failed to parse");
-      setPosts(result.data.posts);
-      setCursor(result.data.next_cursor ?? undefined);
-      return result.data.posts;
-    },
+    queryKey: ["posts"],
+    queryFn: () => fetchPosts(currentUser!.id),
     enabled: !!currentUser?.id,
   });
+
+  const loadInitialPosts = async () => {
+    if (!currentUser?.id) return;
+    const data = await fetchPosts(currentUser.id);
+    setPosts(data.posts);
+    setCursor(data.next_cursor ?? undefined);
+  };
+
+  const onRefresh = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await loadInitialPosts();
+  };
+
+  const fetchMorePosts = async (userId: string, cursor: string) => {
+    const res = await axios.post(`${API_URL}/timeline`, {
+      user_id: userId,
+      limit: 10,
+      cursor,
+    });
+    const result = getPostResponseSchema.safeParse(res.data);
+    if (!result.success) throw new Error("Failed to parse");
+    return result.data;
+  };
+
+  const onEndReached = async () => {
+    if (isFetchingMore || !cursor) return;
+    setIsFetchingMore(true);
+    try {
+      const data = await fetchMorePosts(currentUser!.id, cursor);
+      setPosts((prev) => [...prev, ...data.posts]);
+      setCursor(data.next_cursor ?? undefined);
+    } catch (err) {
+      console.error("Fetch more failed", err);
+    } finally {
+      setIsFetchingMore(false);
+    }
+  };
 
   const icon =
     colorScheme === "light"
@@ -143,24 +178,6 @@ export default function PostsScreen() {
       });
     });
   }, [setHandler]);
-
-  const onRefresh = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setIsFetchingMore(false);
-    try {
-      const response = await axios.post(`${API_URL}/timeline`, {
-        user_id: currentUser?.id,
-        limit: 10,
-      });
-      const result = getPostResponseSchema.safeParse(response.data);
-      if (result.success) {
-        setPosts(result.data.posts);
-        setCursor(result.data.next_cursor ?? undefined);
-      }
-    } catch (err) {
-      console.error("Failed to refresh posts", err);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -228,10 +245,7 @@ export default function PostsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              refetch();
-            }}
+            onRefresh={onRefresh}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
         }
@@ -243,26 +257,7 @@ export default function PostsScreen() {
           }
         )}
         scrollEventThrottle={16}
-        onEndReached={() => {
-          if (isFetchingMore || !cursor) return;
-          setIsFetchingMore(true);
-        
-          axios
-            .post(`${API_URL}/timeline`, {
-              user_id: currentUser?.id,
-              limit: 10,
-              cursor: cursor,
-            })
-            .then((response) => {
-              const result = getPostResponseSchema.safeParse(response.data);
-              if (result.success) {
-                setPosts((prev) => [...prev, ...result.data.posts]);
-                setCursor(result.data.next_cursor ?? undefined);
-              }
-            })
-            .catch((err) => console.error(err))
-            .finally(() => setIsFetchingMore(false));
-        }}
+        onEndReached={onEndReached}
       />
       {!isDailyTaskDone && (
         <DailyTaskPopUp dailyTask={currentUser?.dailyTask} />
