@@ -163,7 +163,6 @@ def recommend_timeline(request: TimelineRequest):
 
         posts_data = recommended[: request.limit]
 
-        print(f"取得された投稿数: {len(posts_data)}")
         for p in posts_data:
             p["post_id"] = get_uuid_from_post_id(p["post_id"])
             print(
