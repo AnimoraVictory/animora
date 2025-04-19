@@ -119,7 +119,7 @@ existing_user_query = """
                                 'type', D.type
                             )
                             FROM daily_tasks D
-                            WHERE D.post_id = P.id
+                            WHERE D.post_daily_task = P.id
                             LIMIT 1
                         ) AS daily_task
 
@@ -192,7 +192,7 @@ new_user_query = """
                                 'type', D.type
                             )
                             FROM daily_tasks D
-                            WHERE D.post_id = P.id
+                            WHERE D.post_daily_task = P.id
                             LIMIT 1
                         ) AS daily_task
                  FROM posts P
