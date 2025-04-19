@@ -76,8 +76,12 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 	respBody, _ := io.ReadAll(resp.Body)
 
 	var result struct {
-		Posts []fastapi.FastAPIPost `json:"posts"`
+		Posts      []fastapi.FastAPIPost `json:"posts"`
+		NextCursor *int                  `json:"next_cursor"`
 	}
+
+	fmt.Printf("%+v\n", result)
+
 	if err := json.Unmarshal(respBody, &result); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "invalid response from FastAPI",
