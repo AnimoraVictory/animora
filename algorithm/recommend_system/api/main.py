@@ -127,6 +127,10 @@ def recommend_timeline(request: TimelineRequest):
             recommended = recommended[cursor_index + 1 :]
 
         posts_data = recommended[: request.limit]
+        
+        print(f"取得された投稿数: {len(posts_data)}")
+        for p in posts_data:
+            print(f"- post_id: {p['post_id']}, score: {p['score']}, created_at: {p['created_at']}")
 
         posts = [
             Post(
@@ -149,6 +153,7 @@ def recommend_timeline(request: TimelineRequest):
             )
             for rc in posts_data
         ]
+
         next_cursor = posts_data[-1]["post_id"] if posts_data and len(posts_data) == request.limit else None
         return TimelineResponse(posts=posts, next_cursor=next_cursor)
     except Exception as e:
