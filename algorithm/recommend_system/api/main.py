@@ -178,7 +178,7 @@ def recommend_timeline(request: TimelineRequest):
                 image_key=rc["image_key"],
                 created_at=str(rc["created_at"]),
                 score=rc["score"],
-                users=FastAPIUser(
+                user=FastAPIUser(
                     id=rc["user_id"],
                     name=rc["name"],
                     email=rc["email"],
