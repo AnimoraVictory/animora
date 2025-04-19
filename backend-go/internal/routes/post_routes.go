@@ -11,7 +11,7 @@ func SetupPostRoutes(app *echo.Echo) {
 	postGroup := app.Group("/posts")
 
 	// Get all posts
-	postGroup.GET("/", postHandler.GetAllPosts)
+	postGroup.GET("/", postHandler.GetPostsFromFastAPI)
 
 	// Create a new post
 	postGroup.POST("/", postHandler.CreatePost)
