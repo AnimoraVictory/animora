@@ -8,6 +8,26 @@ import json
 from common.utils.database import get_connection
 from recommend_system.utils.config import new_user_threshold, existing_user_threshold
 
+# ----------------------------------
+# PostgreSQLからユーザーIDに対応するindexを取得する関数
+# ----------------------------------
+def get_user_id(user_id):
+    """
+    ユーザーIDに対応するindexを取得する
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT "index" FROM users WHERE id = %s
+        """,
+        (user_id,),
+    )
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row else None
+
 
 # ----------------------------------
 # PostgreSQLから候補投稿を取得する関数
