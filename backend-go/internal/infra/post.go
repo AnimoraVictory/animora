@@ -53,6 +53,7 @@ func (r *PostRepository) GetPostsByUser(userID uuid.UUID) ([]*ent.Post, error) {
 		WithDailyTask().
 		Where(post.HasUserWith(user.ID(userID))).
 		Where(post.DeletedAtIsNil()).
+		Order(ent.Desc(post.FieldCreatedAt)).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
 	if err != nil {
