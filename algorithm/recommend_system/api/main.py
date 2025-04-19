@@ -2,7 +2,7 @@
 #                      レコメンドタイムラインを生成するオンライン推論API                  　 #
 # ---------------------------------------------------------------------------------  #
 # ライブラリのインポート
-from typing import Optional
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 import traceback
 from pydantic import BaseModel
@@ -34,13 +34,43 @@ class TimelineRequest(BaseModel):
     limit: int = 10  # 取得する投稿数
 
 
+class FastAPIUser(BaseModel):
+    id: str
+    name: str
+    email: str
+    bio: str
+    icon_image_key: Optional[str]
+
+
+class FastAPIComment(BaseModel):
+    id: str
+    content: str
+    created_at: str
+    user: FastAPIUser
+
+
+class FastAPILike(BaseModel):
+    id: str
+    created_at: str
+    user: FastAPIUser
+
+
+class FastAPIDailyTask(BaseModel):
+    id: str
+    created_at: str
+    type: str
+
+
 class Post(BaseModel):
     id: str
     caption: str
     image_key: str
     created_at: str
     score: float
-    users: dict[str, str]
+    users: FastAPIUser
+    comments: List[FastAPIComment]
+    likes: List[FastAPILike]
+    daily_task: Optional[FastAPIDailyTask] = None
 
 
 class TimelineResponse(BaseModel):
@@ -117,7 +147,7 @@ def recommend_timeline(request: TimelineRequest):
         recommended = get_recommended_timeline(
             request.user_id, candidates, model, device, is_existing_user
         )
-            # recommended: candidate(辞書)のリスト
+        # recommended: candidate(辞書)のリスト
 
         # カーソルによるフィルタリング（post_idがcursorより後ろ）
         if request.cursor is not None:
@@ -132,35 +162,40 @@ def recommend_timeline(request: TimelineRequest):
             recommended = recommended[cursor_index + 1 :]
 
         posts_data = recommended[: request.limit]
-        
+
         print(f"取得された投稿数: {len(posts_data)}")
         for p in posts_data:
             p["post_id"] = get_uuid_from_post_id(p["post_id"])
-            print(f"- post_id: {p['post_id']}, score: {p['score']}, created_at: {p['created_at']}")
+            print(
+                f"- post_id: {p['post_id']}, score: {p['score']}, created_at: {p['created_at']}"
+            )
 
         posts = [
             Post(
-                id=rc["post_id"],
+                id=rc["post_uuid"],  # post_id ではなく UUID（string）
                 caption=rc["caption"],
                 image_key=rc["image_key"],
                 created_at=str(rc["created_at"]),
                 score=rc["score"],
-                users=(
-                    {
-                        "id": rc["user_id"],
-                        "name": rc["name"],
-                        "email": rc["email"],
-                        "bio": rc["bio"],
-                        "icon_image_key": rc["icon_image_key"],
-                    }
-                    if is_existing_user
-                    else {}
+                users=FastAPIUser(
+                    id=rc["user_id"],
+                    name=rc["name"],
+                    email=rc["email"],
+                    bio=rc["bio"],
+                    icon_image_key=rc.get("icon_image_key"),
                 ),
+                comments=rc.get("comments", []),  # コメント埋め込み済み前提
+                likes=rc.get("likes", []),  # いいね埋め込み済み前提
+                daily_task=rc.get("daily_task"),
             )
             for rc in posts_data
         ]
 
-        next_cursor = posts_data[-1]["post_id"] if posts_data and len(posts_data) == request.limit else None
+        next_cursor = (
+            posts_data[-1]["post_id"]
+            if posts_data and len(posts_data) == request.limit
+            else None
+        )
         return TimelineResponse(posts=posts, next_cursor=next_cursor)
     except Exception as e:
         traceback.print_exc()  # ← 追加！ターミナルにスタックトレースを表示
