@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------  # 
+# ---------------------------------------------------------------------------------  #
 #                                   設定ファイル                                       #
 # ---------------------------------------------------------------------------------  #
 
@@ -11,8 +11,8 @@ sim_config = {
     "batch_size": 512,
     "optimizer": "adam",
     "adam_lr": 1e-3,
-    "num_users": 100, # 擬似データ用のユーザー数
-    "num_items": 200, # 擬似データ用のアイテム数
+    "num_users": 100,  # 擬似データ用のユーザー数
+    "num_items": 200,  # 擬似データ用のアイテム数
     "latent_dim_mf": 8,
     "latent_dim_mlp": 8,
     "num_negative": 4,
@@ -27,7 +27,7 @@ sim_config = {
     "image_emb_dim": 16,
     "text_emb_dim": 16,
     "image_feature_dim": 768,
-    "text_feature_dim": 768
+    "text_feature_dim": 768,
 }
 
 # ----------------------------------
@@ -39,7 +39,7 @@ prod_config = {
     "batch_size": 512,
     "optimizer": "adam",
     "adam_lr": 1e-3,
-    "num_users": "", # データから実際のユーザー数・アイテム数を取得
+    "num_users": "",  # データから実際のユーザー数・アイテム数を取得
     "num_items": "",
     "latent_dim_mf": 8,
     "latent_dim_mlp": 8,
@@ -56,7 +56,7 @@ prod_config = {
     "image_emb_dim": 16,
     "text_emb_dim": 16,
     "image_feature_dim": 768,
-    "text_feature_dim": 768
+    "text_feature_dim": 768,
 }
 # ----------------------------------
 # 学習済みユーザーに対する投稿を取得するクエリと閾値
@@ -209,7 +209,7 @@ new_user_threshold = 2
 # ----------------------------------
 # ratingsデータフレームを作成するクエリ
 # ----------------------------------
-rating_query =  """
+rating_query = """
                 -- 投稿自体のインタラクション(投稿者による投稿)
                 SELECT
                     U.index AS user_id, P.index AS post_id, 1 AS rating, P.created_at AS created_at, 
