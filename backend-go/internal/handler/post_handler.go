@@ -149,7 +149,8 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"posts": postResponses,
+		"posts":       postResponses,
+		"next_cursor": result.NextCursor,
 	})
 }
 
