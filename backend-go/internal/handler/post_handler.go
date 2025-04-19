@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
+	"github.com/aki-13627/animalia/backend-go/internal/domain/models/fastapi"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -15,12 +19,139 @@ type PostHandler struct {
 	postUsecase    usecase.PostUsecase
 	storageUsecase usecase.StorageUsecase
 }
+type TimelineRequest struct {
+	UserID int  `json:"user_id"`
+	Cursor *int `json:"cursor,omitempty"`
+	Limit  int  `json:"limit"`
+}
 
 func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase) *PostHandler {
 	return &PostHandler{
 		postUsecase:    postUsecase,
 		storageUsecase: storageUsecase,
 	}
+}
+
+func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
+	var reqBody TimelineRequest
+	if err := c.Bind(&reqBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid request body",
+		})
+	}
+
+	if reqBody.UserID == 0 {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "user_id is required",
+		})
+	}
+	// reqBody は TimelineRequest 構造体
+	jsonBody, err := json.Marshal(reqBody)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to marshal request body",
+		})
+	}
+
+	// POSTリクエストを作成
+	req, err := http.NewRequest(
+		"POST",
+		"https://animalia-lnzk.onrender.com/timeline",
+		bytes.NewBuffer(jsonBody),
+	)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to create request",
+		})
+	}
+
+	// ヘッダー設定
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to send request",
+		})
+	}
+	defer resp.Body.Close()
+
+	// 以降の処理（デコード・変換）はこれまでと同様でOK
+	respBody, _ := io.ReadAll(resp.Body)
+
+	var result struct {
+		Posts []fastapi.FastAPIPost `json:"posts"`
+	}
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "invalid response from FastAPI",
+		})
+	}
+
+	postResponses := make([]models.PostResponse, len(result.Posts))
+	for i, post := range result.Posts {
+		imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
+		if err != nil {
+			log.Errorf("Failed to get image URL: %v", err)
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "failed to get image URL",
+			})
+		}
+
+		var userIconURL *string
+		if post.User.IconImageKey != "" {
+			iconURL, err := h.storageUsecase.GetUrl(post.User.IconImageKey)
+			if err != nil {
+				log.Errorf("Failed to get user icon URL: %v", err)
+				return c.JSON(http.StatusInternalServerError, map[string]string{
+					"error": "failed to get user icon URL",
+				})
+			}
+			userIconURL = &iconURL
+		}
+
+		// コメント
+		commentResponses := make([]models.CommentResponse, len(post.Comments))
+		for j, comment := range post.Comments {
+			var commentUserIconURL string
+			if comment.User.IconImageKey != "" {
+				url, err := h.storageUsecase.GetUrl(comment.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get comment user icon URL: %v", err)
+					return c.JSON(http.StatusInternalServerError, map[string]string{
+						"error": "failed to get comment user icon URL",
+					})
+				}
+				commentUserIconURL = url
+			}
+
+			commentResponses[j] = fastapi.NewCommentResponseFromFastAPI(comment, commentUserIconURL)
+		}
+
+		// いいね
+		likeResponses := make([]models.LikeResponse, len(post.Likes))
+		for j, like := range post.Likes {
+			var likeUserIconURL string
+			if like.User.IconImageKey != "" {
+				url, err := h.storageUsecase.GetUrl(like.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get like user icon URL: %v", err)
+					return c.JSON(http.StatusInternalServerError, map[string]string{
+						"error": "failed to get like user icon URL",
+					})
+				}
+				likeUserIconURL = url
+			}
+			likeResponses[j] = fastapi.NewLikeResponseFromFastAPI(like, likeUserIconURL)
+		}
+
+		postResponses[i] = fastapi.NewPostResponseFromFastAPI(post, imageURL, userIconURL, commentResponses, likeResponses)
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"posts": postResponses,
+	})
 }
 
 func (h *PostHandler) GetAllPosts(c echo.Context) error {
