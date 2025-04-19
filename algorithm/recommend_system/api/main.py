@@ -110,6 +110,13 @@ async def lifespan(app: FastAPI):
 # ----------------------------------
 app = FastAPI(lifespan=lifespan)
 
+# ----------------------------------
+# / エンドポイント
+# ----------------------------------
+@app.get("/")
+def root():
+    return {"message": "Service is up and running"}
+
 
 # ----------------------------------
 # /reload エンドポイント
