@@ -12,14 +12,14 @@ from recommend_system.utils.config import new_user_threshold, existing_user_thre
 # ----------------------------------
 # PostgreSQLから候補投稿を取得する関数
 # ----------------------------------
-def get_candidate_posts(query):
+def get_candidate_posts(query, num_item):
     """
     学習の際に存在しなかった新規ユーザー -> 閾値より高い投稿を時系列順に並べて返す
     学習済みのユーザー -> モデルを使ってスコアを計算し、閾値より高い投稿を時系列順に並べて返す
     """
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(query)
+    cur.execute(query, (num_item, ))
     rows = cur.fetchall()
 
     # カラム名のリスト
@@ -41,6 +41,27 @@ def get_candidate_posts(query):
     cur.close()
     conn.close()
     return candidates
+
+
+# ----------------------------------
+# PostgreSQLから候補投稿を取得する関数
+# ----------------------------------
+def get_uuid_from_post_id(post_id):
+    """
+    indexからuuidを取得する
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id FROM posts WHERE "index" = %s
+        """,
+        (post_id,),
+    )
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row else None
 
 
 # ----------------------------------

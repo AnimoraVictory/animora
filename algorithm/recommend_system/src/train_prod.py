@@ -3,6 +3,7 @@
 # ---------------------------------------------------------------------------------  #
 
 # ライブラリのインポート
+import traceback
 import pandas as pd
 import json
 import subprocess
@@ -39,8 +40,10 @@ if __name__ == "__main__":
     # 3. プロダクション用の設定(config)
     # ----------------------------------
     # データから実際のユーザー数・アイテム数を取得
-    prod_config["num_users"] = int(prod_df["user_id"].nunique())
-    prod_config["num_items"] = int(prod_df["post_id"].nunique())
+    print(f"ユーザー数: {prod_df["user_id"].max()}")
+    print(f"アイテム数: {prod_df["post_id"].max()}")
+    prod_config["num_users"] = int(prod_df["user_id"].max() + 1)
+    prod_config["num_items"] = int(prod_df["post_id"].max() + 1)
 
     # ----------------------------------
     # 4. サンプル生成器の作成と評価データの準備
@@ -76,5 +79,6 @@ if __name__ == "__main__":
         else:
             print("Failed to reload model", response.json())
     except Exception as e:
+        traceback.print_exc()
         print("Failed to reload model", str(e))
 
