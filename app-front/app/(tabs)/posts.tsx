@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Animated,
@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { PostPanel } from "@/components/PostPanel";
+import { Post, PostPanel } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
 import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 import { petSchema } from "@/components/PetPanel";
@@ -85,6 +85,7 @@ export const userSchema = userBaseSchema.extend({
 
 export const getPostResponseSchema = z.object({
   posts: z.array(postSchema),
+  next_cursor: z.string().nullable(),
 });
 
 export default function PostsScreen() {
@@ -93,24 +94,33 @@ export default function PostsScreen() {
   const scrollYRef = useRef(0);
   const listRef = useRef<FlatList>(null);
   const HEADER_HEIGHT = 90;
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const { user: currentUser } = useAuth();
+
+
+  const { isLoading, error, refetch, isRefetching } = useQuery({
+    queryKey: ["posts", currentUser?.id],
+    queryFn: async () => {
+      if (!currentUser?.id) return [];
+      const response = await axios.post(`${API_URL}/timeline`, {
+        user_id: currentUser.id,
+        limit: 10,
+      });
+      const result = getPostResponseSchema.safeParse(response.data);
+      if (!result.success) throw new Error("Failed to parse");
+      setPosts(result.data.posts);
+      setCursor(result.data.next_cursor ?? undefined);
+      return result.data.posts;
+    },
+    enabled: !!currentUser?.id,
+  });
 
   const icon =
     colorScheme === "light"
       ? require("../../assets/images/icon-green.png")
       : require("../../assets/images/icon-dark.png");
-
-  const { data, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["posts"],
-    queryFn: async () => {
-      const response = await axios.get(`${API_URL}/posts/`);
-      const result = getPostResponseSchema.safeParse(response.data);
-      if (result.error) {
-        console.error(result.error);
-        throw new Error(`error: ${result.error}`);
-      }
-      return result.data.posts;
-    },
-  });
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollYRef.current = event.nativeEvent.contentOffset.y;
@@ -123,7 +133,6 @@ export default function PostsScreen() {
   });
 
   const { setHandler } = useHomeTabHandler();
-  const { user: currentUser } = useAuth();
   const isDailyTaskDone = currentUser?.dailyTask.post ? true : false;
 
   useEffect(() => {
@@ -134,6 +143,24 @@ export default function PostsScreen() {
       });
     });
   }, [setHandler]);
+
+  const onRefresh = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsFetchingMore(false);
+    try {
+      const response = await axios.post(`${API_URL}/timeline`, {
+        user_id: currentUser?.id,
+        limit: 10,
+      });
+      const result = getPostResponseSchema.safeParse(response.data);
+      if (result.success) {
+        setPosts(result.data.posts);
+        setCursor(result.data.next_cursor ?? undefined);
+      }
+    } catch (err) {
+      console.error("Failed to refresh posts", err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -195,7 +222,7 @@ export default function PostsScreen() {
         contentInset={{ top: HEADER_HEIGHT + 20 }}
         contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 20) }}
         contentContainerStyle={{ paddingBottom: 75 }}
-        data={data}
+        data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PostPanel post={item} />}
         refreshControl={
@@ -216,6 +243,26 @@ export default function PostsScreen() {
           }
         )}
         scrollEventThrottle={16}
+        onEndReached={() => {
+          if (isFetchingMore || !cursor) return;
+          setIsFetchingMore(true);
+        
+          axios
+            .post(`${API_URL}/timeline`, {
+              user_id: currentUser?.id,
+              limit: 10,
+              cursor: cursor,
+            })
+            .then((response) => {
+              const result = getPostResponseSchema.safeParse(response.data);
+              if (result.success) {
+                setPosts((prev) => [...prev, ...result.data.posts]);
+                setCursor(result.data.next_cursor ?? undefined);
+              }
+            })
+            .catch((err) => console.error(err))
+            .finally(() => setIsFetchingMore(false));
+        }}
       />
       {!isDailyTaskDone && (
         <DailyTaskPopUp dailyTask={currentUser?.dailyTask} />
