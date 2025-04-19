@@ -5,7 +5,7 @@ from PIL import Image
 import torch
 import psycopg2
 import streamlit as st
-from image_search import search_images, get_multiple_image_data, load_initial_images
+from search_engine.src.image_search import search_images, get_multiple_image_data, load_initial_images
 import asyncio
 import nest_asyncio
 
