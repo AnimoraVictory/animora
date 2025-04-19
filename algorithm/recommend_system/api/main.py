@@ -149,7 +149,7 @@ def recommend_timeline(request: TimelineRequest):
             )
             for rc in posts_data
         ]
-        next_cursor = posts_data[-1]["post_id"] if len(posts_data) == request.limit else None
+        next_cursor = posts_data[-1]["post_id"] if posts_data and len(posts_data) == request.limit else None
         return TimelineResponse(posts=posts, next_cursor=next_cursor)
     except Exception as e:
         traceback.print_exc()  # ← 追加！ターミナルにスタックトレースを表示
