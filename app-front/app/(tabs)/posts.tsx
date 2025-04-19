@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -85,8 +85,10 @@ export const userSchema = userBaseSchema.extend({
 
 export const getPostResponseSchema = z.object({
   posts: z.array(postSchema),
-  next_cursor: z.string().nullable(),
+  next_cursor: z.number().nullable(),
 });
+
+type GetPostsResponse = z.infer<typeof getPostResponseSchema>;
 
 export default function PostsScreen() {
   const colorScheme = useColorScheme();
@@ -100,7 +102,7 @@ export default function PostsScreen() {
   const { user: currentUser } = useAuth();
 
   const fetchPosts = async (userId: string) => {
-    const res = await axios.post(`${API_URL}/timeline`, {
+    const res = await axios.post(`${API_URL}/posts`, {
       user_id: userId,
       limit: 10,
     });
@@ -109,49 +111,40 @@ export default function PostsScreen() {
     return result.data;
   };
 
-  const { isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["posts"],
-    queryFn: () => fetchPosts(currentUser!.id),
+  const queryClient = useQueryClient();
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isRefetching,
+    isError,
+    refetch,
+  } = useInfiniteQuery<
+    GetPostsResponse,
+    Error,
+    GetPostsResponse,
+    [string, string?],
+    number | undefined
+  >({
+    queryKey: ["timeline", currentUser?.id],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await axios.post(`${API_URL}/posts/timeline`, {
+        user_id: currentUser?.id,
+        limit: 10,
+        cursor: pageParam,
+      });
+
+      const result = getPostResponseSchema.safeParse(response.data);
+      if (!result.success) throw new Error("parse failed");
+      return result.data;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
     enabled: !!currentUser?.id,
   });
-
-  const loadInitialPosts = async () => {
-    if (!currentUser?.id) return;
-    const data = await fetchPosts(currentUser.id);
-    setPosts(data.posts);
-    setCursor(data.next_cursor ?? undefined);
-  };
-
-  const onRefresh = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await loadInitialPosts();
-  };
-
-  const fetchMorePosts = async (userId: string, cursor: string) => {
-    const res = await axios.post(`${API_URL}/timeline`, {
-      user_id: userId,
-      limit: 10,
-      cursor,
-    });
-    const result = getPostResponseSchema.safeParse(res.data);
-    if (!result.success) throw new Error("Failed to parse");
-    return result.data;
-  };
-
-  const onEndReached = async () => {
-    if (isFetchingMore || !cursor) return;
-    setIsFetchingMore(true);
-    try {
-      const data = await fetchMorePosts(currentUser!.id, cursor);
-      setPosts((prev) => [...prev, ...data.posts]);
-      setCursor(data.next_cursor ?? undefined);
-    } catch (err) {
-      console.error("Fetch more failed", err);
-    } finally {
-      setIsFetchingMore(false);
-    }
-  };
-
   const icon =
     colorScheme === "light"
       ? require("../../assets/images/icon-green.png")
@@ -187,7 +180,7 @@ export default function PostsScreen() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <ThemedView style={styles.container}>
         <Animated.FlatList
@@ -245,7 +238,10 @@ export default function PostsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={onRefresh}
+            onRefresh={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              refetch();
+            }}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
         }
@@ -257,7 +253,11 @@ export default function PostsScreen() {
           }
         )}
         scrollEventThrottle={16}
-        onEndReached={onEndReached}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
       />
       {!isDailyTaskDone && (
         <DailyTaskPopUp dailyTask={currentUser?.dailyTask} />
