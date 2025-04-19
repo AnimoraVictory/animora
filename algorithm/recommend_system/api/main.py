@@ -13,6 +13,7 @@ from recommend_system.components.mmneumf import MultiModalNeuMF
 from recommend_system.src.download_model import download_latest_model
 from recommend_system.api.recommend_timeline import (
     get_candidate_posts,
+    get_uuid_from_post_id,
     get_recommended_timeline,
 )
 from recommend_system.utils.config import new_user_query, existing_user_query
@@ -34,7 +35,7 @@ class TimelineRequest(BaseModel):
 
 
 class Post(BaseModel):
-    id: int
+    id: str
     caption: str
     image_key: str
     created_at: str
@@ -107,12 +108,16 @@ def recommend_timeline(request: TimelineRequest):
             print("新規ユーザー")
             query = new_user_query
 
+        # モデル訓練時のconfigから、候補投稿のアイテム数を取得し、時系列順で取得する
+        num_item = config["num_items"]
+
         # PostgreSQLから候補投稿画像を取得
-        candidates = get_candidate_posts(query)
+        candidates = get_candidate_posts(query, num_item)
         print(f"取得した候補数: {len(candidates)}")
         recommended = get_recommended_timeline(
             request.user_id, candidates, model, device, is_existing_user
         )
+            # recommended: candidate(辞書)のリスト
 
         # カーソルによるフィルタリング（post_idがcursorより後ろ）
         if request.cursor is not None:
@@ -130,6 +135,7 @@ def recommend_timeline(request: TimelineRequest):
         
         print(f"取得された投稿数: {len(posts_data)}")
         for p in posts_data:
+            p["post_id"] = get_uuid_from_post_id(p["post_id"])
             print(f"- post_id: {p['post_id']}, score: {p['score']}, created_at: {p['created_at']}")
 
         posts = [
