@@ -172,7 +172,7 @@ def recommend_timeline(request: TimelineRequest):
 
         posts = [
             Post(
-                id=rc["post_uuid"],  # post_id ではなく UUID（string）
+                id=rc["post_id"],
                 caption=rc["caption"],
                 image_key=rc["image_key"],
                 created_at=str(rc["created_at"]),
