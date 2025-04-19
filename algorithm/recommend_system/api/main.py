@@ -68,7 +68,7 @@ class Post(BaseModel):
     image_key: str
     created_at: str
     score: float
-    users: FastAPIUser
+    user: FastAPIUser
     comments: List[FastAPIComment]
     likes: List[FastAPILike]
     daily_task: Optional[FastAPIDailyTask] = None
