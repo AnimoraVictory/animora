@@ -12,6 +12,7 @@ import uvicorn
 from recommend_system.components.mmneumf import MultiModalNeuMF
 from recommend_system.src.download_model import download_latest_model
 from recommend_system.api.recommend_timeline import (
+    get_user_id,
     get_candidate_posts,
     get_uuid_from_post_id,
     get_recommended_timeline,
@@ -29,7 +30,7 @@ MODEL_PATH = "recommend_system/models/latest.model"
 # APIリクエストとレスポンスのデータモデル
 # ----------------------------------
 class TimelineRequest(BaseModel):
-    user_id: int
+    user_id: str
     cursor: Optional[int] = None  # どれだけスキップするか
     limit: int = 10  # 取得する投稿数
 
@@ -130,7 +131,8 @@ def reload_model():
 @app.post("/timeline", response_model=TimelineResponse)
 def recommend_timeline(request: TimelineRequest):
     try:
-        is_existing_user = request.user_id < config["num_users"]
+        user_index = get_user_id(request.user_id)
+        is_existing_user = user_index < config["num_users"]
         if is_existing_user:
             print("学習済みユーザー")
             query = existing_user_query
@@ -145,7 +147,7 @@ def recommend_timeline(request: TimelineRequest):
         candidates = get_candidate_posts(query, num_item)
         print(f"取得した候補数: {len(candidates)}")
         recommended = get_recommended_timeline(
-            request.user_id, candidates, model, device, is_existing_user
+            user_index, candidates, model, device, is_existing_user
         )
         # recommended: candidate(辞書)のリスト
 
