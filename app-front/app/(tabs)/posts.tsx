@@ -12,11 +12,11 @@ import {
 } from "react-native";
 import axios from "axios";
 import { z } from "zod";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Post, PostPanel } from "@/components/PostPanel";
+import { PostPanel } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
 import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 import { petSchema } from "@/components/PetPanel";
@@ -96,22 +96,7 @@ export default function PostsScreen() {
   const scrollYRef = useRef(0);
   const listRef = useRef<FlatList>(null);
   const HEADER_HEIGHT = 90;
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [cursor, setCursor] = useState<string | undefined>(undefined);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const { user: currentUser } = useAuth();
-
-  const fetchPosts = async (userId: string) => {
-    const res = await axios.post(`${API_URL}/posts`, {
-      user_id: userId,
-      limit: 10,
-    });
-    const result = getPostResponseSchema.safeParse(res.data);
-    if (!result.success) throw new Error("Failed to parse");
-    return result.data;
-  };
-
-  const queryClient = useQueryClient();
 
   const {
     data,
@@ -125,11 +110,11 @@ export default function PostsScreen() {
   } = useInfiniteQuery<
     GetPostsResponse,
     Error,
-    GetPostsResponse,
+    InfiniteData<GetPostsResponse>,
     [string, string?],
     number | undefined
   >({
-    queryKey: ["timeline", currentUser?.id],
+    queryKey: ["posts"],
     queryFn: async ({ pageParam = 0 }) => {
       const response = await axios.post(`${API_URL}/posts/timeline`, {
         user_id: currentUser?.id,
@@ -232,7 +217,7 @@ export default function PostsScreen() {
         contentInset={{ top: HEADER_HEIGHT + 20 }}
         contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 20) }}
         contentContainerStyle={{ paddingBottom: 75 }}
-        data={posts}
+        data={data?.pages.flatMap((page) => page.posts) ?? []}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PostPanel post={item} />}
         refreshControl={
