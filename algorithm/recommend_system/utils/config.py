@@ -63,7 +63,7 @@ prod_config = {
 # ----------------------------------
 existing_user_query = """
                       SELECT 
-                          P.index AS post_id,
+                          P."index" AS post_id,
                           P.created_at AS created_at,
                           P.image_feature AS image_feature, -- JSON文字列
                           P.text_feature AS text_feature, -- JSON文字列
@@ -76,7 +76,9 @@ existing_user_query = """
                           U.icon_image_key AS icon_image_key
                       FROM posts P
                       LEFT JOIN users U ON P.user_posts = U.id
-                      WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL;
+                      WHERE image_feature IS NOT NULL AND text_feature IS NOT NULL
+                      ORDER BY P.created_at DESC
+                      LIMIT %s;
                       """
 existing_user_threshold = 0.45
 
@@ -85,7 +87,7 @@ existing_user_threshold = 0.45
 # ----------------------------------
 new_user_query = """
                  SELECT
-                     P.index AS post_id,
+                     P."index" AS post_id,
                      P.created_at AS created_at,
                      P.image_feature AS image_feature,
                      P.text_feature AS text_feature,
@@ -96,7 +98,9 @@ new_user_query = """
                  LEFT JOIN likes L ON L.post_likes = P.id
                  LEFT JOIN comments C ON C.post_comments = P.id
                  WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL
-                 GROUP BY P.id, P.created_at, P.image_feature, P.text_feature;
+                 GROUP BY P.id, P.created_at, P.image_feature, P.text_feature
+                 ORDER BY P.created_at DESC
+                 LIMIT %s;
                  """
 new_user_threshold = 2
 
