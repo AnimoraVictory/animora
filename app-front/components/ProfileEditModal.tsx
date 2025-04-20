@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Modal,
   Animated,
@@ -15,34 +15,13 @@ import {
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
-import { useMutation } from '@tanstack/react-query';
-import axios from 'axios';
-import Constants from 'expo-constants';
-import { z } from 'zod';
-import { User } from '@/features/user/schema';
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-export const profileEditSchema = z.object({
-  imageUri: z.string().nullable(),
-  name: z.string().min(1, { message: '名前は必須です' }),
-  bio: z.string().min(0),
-});
-export type ProfileEditForm = z.infer<typeof profileEditSchema>;
-
-const getInitialProfileState = (user: User): ProfileEditForm => ({
-  imageUri: user.iconImageUrl || null,
-  name: user.name || '',
-  bio: user.bio || '',
-});
+import useProfileEditModal from '@/features/user/useProfileEditModal';
 
 type ProfileEditModalProps = {
   visible: boolean;
   onClose: () => void;
   slideAnim: Animated.Value;
   colorScheme: ColorSchemeName;
-  refetchUser: () => Promise<void>;
-  user: User;
 };
 
 export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
@@ -50,17 +29,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   onClose,
   slideAnim,
   colorScheme,
-  refetchUser,
-  user,
 }) => {
   const colors = colorScheme === 'light' ? Colors.light : Colors.dark;
-  const [formData, setFormData] = useState<ProfileEditForm>(
-    getInitialProfileState(user)
-  );
 
-  useEffect(() => {
-    setFormData(getInitialProfileState(user));
-  }, [user]);
+  const { formData, onChangeForm, handleSubmit, isPending } =
+    useProfileEditModal({
+      onClose,
+    });
 
   // 画像選択処理
   const pickProfileImage = async () => {
@@ -74,53 +49,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
       quality: 0.7,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setFormData({ ...formData, imageUri: result.assets[0].uri });
-    }
-  };
-
-  // API でプロフィール更新を行うための Mutation
-  const updateProfileMutation = useMutation({
-    mutationFn: (data: FormData) => {
-      return axios.put(`${API_URL}/users/update?id=${user.id}`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-    },
-  });
-
-  const handleSubmit = async () => {
-    const parseResult = profileEditSchema.safeParse(formData);
-    if (!parseResult.success) {
-      const errorMessages = Object.values(
-        parseResult.error.flatten().fieldErrors
-      )
-        .flat()
-        .join('\n');
-      Alert.alert('入力エラー', errorMessages);
-      return;
-    }
-
-    const fd = new FormData();
-    fd.append('name', formData.name);
-    fd.append('bio', formData.bio);
-
-    if (formData.imageUri && formData.imageUri !== user.iconImageUrl) {
-      const filename = formData.imageUri.split('/').pop();
-      const match = /\.(\w+)$/.exec(filename || '');
-      const mimeType = match ? `image/${match[1]}` : 'image';
-      fd.append('image', {
-        uri: formData.imageUri,
-        name: filename,
-        type: mimeType,
-      } as any);
-    }
-    try {
-      await updateProfileMutation.mutateAsync(fd);
-      Alert.alert('成功', 'プロフィールが更新されました');
-      await refetchUser();
-      onClose();
-    } catch (error) {
-      console.error(error);
-      Alert.alert('更新エラー', 'プロフィール更新に失敗しました');
+      onChangeForm({ key: 'imageUri', value: result.assets[0].uri });
     }
   };
 
@@ -172,9 +101,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               placeholder="名前"
               placeholderTextColor={colors.icon}
               value={formData.name}
-              onChangeText={(value) =>
-                setFormData({ ...formData, name: value })
-              }
+              onChangeText={(value) => onChangeForm({ key: 'name', value })}
             />
             <Text style={styles.inputTitle}>自己紹介</Text>
             <TextInput
@@ -185,13 +112,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               placeholder="自己紹介"
               placeholderTextColor={colors.icon}
               value={formData.bio}
-              onChangeText={(value) => setFormData({ ...formData, bio: value })}
+              onChangeText={(value) => onChangeForm({ key: 'bio', value })}
               multiline
             />
             <TouchableOpacity
               onPress={handleSubmit}
               style={[styles.submitButton, { backgroundColor: colors.tint }]}
-              disabled={updateProfileMutation.isPending}
+              disabled={isPending}
             >
               <Text style={{ color: colors.background, fontWeight: 'bold' }}>
                 更新する

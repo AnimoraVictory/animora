@@ -16,7 +16,6 @@ import {
 import { z } from 'zod';
 import CommentInput from '@/components/CommentInput';
 import { commentSchema } from '@/features/comment/schema';
-import { User } from '@/features/user/schema';
 
 export type Comment = z.infer<typeof commentSchema>;
 
@@ -25,7 +24,6 @@ type CommentsModalProps = {
   visible: boolean;
   comments: Comment[];
   onClose: () => void;
-  currentUser: User | null | undefined;
   slideAnim: Animated.Value;
   queryKey: unknown[];
   onNewComment: (comment: Comment) => void;
@@ -36,7 +34,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
   visible,
   comments,
   onClose,
-  currentUser,
   slideAnim,
   queryKey,
   onNewComment,
@@ -111,7 +108,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
                 renderItem={({ item }) => (
                   <View style={styles.commentItem}>
                     <Image
-                      source={{ uri: item.user.iconImageUrl }}
+                      source={{ uri: item.user.iconImageUrl ?? '' }}
                       style={styles.avatar}
                     />
                     <View style={styles.commentContent}>
@@ -127,7 +124,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
 
             <View style={styles.inputContainer}>
               <CommentInput
-                currentUser={currentUser}
                 postId={postId}
                 queryKey={queryKey}
                 onNewComment={onNewComment}

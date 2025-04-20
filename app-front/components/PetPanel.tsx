@@ -11,23 +11,15 @@ import {
   Dimensions,
   ColorSchemeName,
 } from 'react-native';
-import { useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import Constants from 'expo-constants';
 import PetEditModal from './PetEditModal';
 import { Colors } from '@/constants/Colors';
 import { Pet } from '@/features/pet/schema';
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
+import { dateISOToJapanese } from '@/utils/date';
+import usePetPanel from '@/features/pet/usePetPanel';
 
 type PetPanelProps = {
   pet: Pet;
   colorScheme: ColorSchemeName;
-};
-
-const birthDayParser = (birthDay: string) => {
-  const [year, month, day] = birthDay.split('-');
-  return `${year}年${month}月${day}日`;
 };
 
 const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
@@ -41,7 +33,8 @@ const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnimEditPet = useRef(new Animated.Value(imageHeight)).current;
-  const queryClient = useQueryClient();
+
+  const { handleDelete } = usePetPanel({ pet });
 
   const openEditPetModal = () => {
     setIsEditModalVisible(true);
@@ -62,7 +55,7 @@ const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
     });
   };
 
-  const handleDelete = () => {
+  const handleDeleteButton = () => {
     Alert.alert(
       '削除の確認',
       '本当に削除してよろしいですか？',
@@ -74,23 +67,7 @@ const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
         },
         {
           text: '削除',
-          onPress: async () => {
-            try {
-              // axiosを使用してDELETEリクエストを送信
-              const response = await axios.delete(`${API_URL}/pets/delete`, {
-                params: { petId: pet.id },
-              });
-              if (response.status === 200) {
-                // queryKey: ["pets"] のキャッシュを無効化して最新状態に更新
-                queryClient.invalidateQueries({ queryKey: ['pets'] });
-              } else {
-                throw new Error('削除に失敗しました');
-              }
-            } catch (error) {
-              console.error(error);
-              Alert.alert('エラー', '削除に失敗しました');
-            }
-          },
+          onPress: handleDelete,
         },
       ],
       { cancelable: true }
@@ -128,7 +105,10 @@ const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
           >
             <Text>編集</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={handleDeleteButton}
+          >
             <Text>削除</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -145,7 +125,7 @@ const _PetPanel: React.FC<PetPanelProps> = ({ pet, colorScheme }) => {
           {reverseSpeciesMap[pet.type][pet.species]}
         </Text>
         <Text style={[styles.subText, { color: colors.tint }]}>
-          {birthDayParser(pet.birthDay)}
+          {dateISOToJapanese(pet.birthDay)}
         </Text>
       </View>
 

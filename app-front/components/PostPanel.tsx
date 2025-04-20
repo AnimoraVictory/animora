@@ -21,10 +21,10 @@ import UserProfileModal from './UserProfileModal';
 import { useModalStack } from '@/providers/ModalStackContext';
 import { TaskType, taskTypeMap } from '@/app/(tabs)/camera';
 import useToggleLike from '@/hooks/useToggleLike';
-import { Post } from '@/features/post/schema';
+import { PostResponse } from '@/features/post/schema/response';
 
 type Props = {
-  post: Post;
+  post: PostResponse;
 };
 
 export const PostPanel = ({ post }: Props) => {
@@ -259,7 +259,6 @@ export const PostPanel = ({ post }: Props) => {
       <CommentsModal
         slideAnim={slideAnim}
         postId={post.id}
-        currentUser={currentUser}
         visible={isModalVisible}
         comments={post.comments}
         onClose={closeModal}
@@ -269,13 +268,6 @@ export const PostPanel = ({ post }: Props) => {
       <UserProfileModal
         prevModalIdx={0}
         key={post.user.id}
-        currentUser={{
-          id: currentUser?.id ?? '',
-          iconImageUrl: currentUser?.iconImageUrl ?? '',
-          bio: currentUser?.bio ?? '',
-          name: currentUser?.name ?? '',
-          email: currentUser?.email ?? '',
-        }}
         email={post.user.email}
         visible={isUserModalVisible}
         onClose={closeUserProfile}

@@ -7,3 +7,5 @@ export const commentSchema = z.object({
   content: z.string(),
   createdAt: z.string().datetime(),
 });
+
+export type Comment = z.infer<typeof commentSchema>;

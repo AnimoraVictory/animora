@@ -246,8 +246,6 @@ const ProfileScreen: React.FC = () => {
         onClose={closeEditProfileModal}
         slideAnim={slideAnimProfile}
         colorScheme={colorScheme}
-        refetchUser={refetchUser}
-        user={user}
       />
       <PetRegiserModal
         visible={isRegisterPetModalVisible}
@@ -260,7 +258,6 @@ const ProfileScreen: React.FC = () => {
         prevModalIdx={0}
         slideAnim={slideAnimFollow}
         user={user}
-        currentUser={user}
         visible={isFollowModalVisible}
         onClose={() => closeFollowModal()}
         follows={user.follows}

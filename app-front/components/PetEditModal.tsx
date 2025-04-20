@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   Animated,
@@ -14,32 +14,14 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Easing,
-} from "react-native";
-import { Colors } from "@/constants/Colors";
-import {
-  reverseSpeciesMap,
-  speciesMap,
-  speciesOptions,
-} from "@/constants/petSpecies";
-import * as ImagePicker from "expo-image-picker";
-import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import { useAuth } from "@/providers/AuthContext";
-import Constants from "expo-constants";
-import { PetForm, petInputSchema } from "./PetRegisterModal";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { Pet } from "@/features/pet/schema";
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-const getInitialFormState = (pet: Pet): PetForm => ({
-  name: pet.name || "",
-  petType: pet.type || "dog",
-  species: reverseSpeciesMap[pet.type][pet.species] || "",
-  birthDay: pet.birthDay || "",
-  iconImageUri: pet.imageUrl || null,
-});
+} from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { speciesOptions } from '@/constants/petSpecies';
+import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { Pet } from '@/features/pet/schema';
+import usePetEditModal from '@/features/pet/usePetEditModal';
 
 type PetEditModalProps = {
   visible: boolean;
@@ -56,107 +38,48 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
   colorScheme,
   pet,
 }) => {
-  const { user } = useAuth();
-  const colors = colorScheme === "light" ? Colors.light : Colors.dark;
+  const colors = colorScheme === 'light' ? Colors.light : Colors.dark;
 
-  const [formData, setFormData] = useState<PetForm>(getInitialFormState(pet));
-
-  useEffect(() => {
-    setFormData(getInitialFormState(pet));
-  }, [pet]);
-
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showPetTypeSelector, setShowPetTypeSelector] = useState(false);
   const [showSpeciesSelector, setShowSpeciesSelector] = useState(false);
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [date, setDate] = useState<Date | null>(null);
+  const onCloseDatePicker = () => {
+    setShowDatePicker(false);
+  };
+
+  const {
+    isPending,
+    formData,
+    onChangeForm,
+    date,
+    handleDateChange,
+    handleSubmit,
+  } = usePetEditModal({
+    pet,
+    onClose,
+    onCloseDatePicker,
+  });
 
   const pickIconImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("権限エラー", "メディアライブラリへのアクセス許可が必要です");
+    if (status !== 'granted') {
+      Alert.alert('権限エラー', 'メディアライブラリへのアクセス許可が必要です');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
+      mediaTypes: 'images',
       quality: 0.7,
     });
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setFormData({ ...formData, iconImageUri: result.assets[0].uri });
-    }
-  };
-
-  // 編集用の更新API（PUT や PATCH を使用してください）
-  const updatePetMutation = useMutation({
-    mutationFn: (data: FormData) => {
-      return axios.put(`${API_URL}/pets/update?petId=${pet.id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-    },
-  });
-
-  const handleSubmit = async () => {
-    const backendSpecies = speciesMap[formData.petType][formData.species];
-    const dataToValidate = { ...formData, species: backendSpecies };
-
-    const result = petInputSchema.safeParse(dataToValidate);
-    if (!result.success) {
-      const errorMessage = Object.values(result.error.flatten().fieldErrors)
-        .flat()
-        .join("\n");
-      Alert.alert("入力エラー", errorMessage);
-      return;
-    }
-
-    // FormData の作成
-    const fd = new FormData();
-    if (!user?.id) {
-      Alert.alert("エラー", "ユーザー情報が取得できませんでした");
-      return;
-    }
-    // 編集対象のペットIDを送信するためのフィールド（例: petId）
-    fd.append("petId", pet.id);
-    fd.append("name", formData.name);
-    fd.append("type", formData.petType);
-    fd.append("species", backendSpecies);
-    fd.append("birthDay", formData.birthDay);
-    // アイコン画像が選択されている場合
-    if (formData.iconImageUri) {
-      const filename = formData.iconImageUri.split("/").pop();
-      const match = /\.(\w+)$/.exec(filename || "");
-      const mimeType = match ? `image/${match[1]}` : "image";
-      fd.append("image", {
-        uri: formData.iconImageUri,
-        name: filename,
-        type: mimeType,
-      } as any);
-    }
-
-    try {
-      await updatePetMutation.mutateAsync(fd);
-      Alert.alert("成功", "ペット情報が更新されました");
-      onClose();
-    } catch (error) {
-      console.error(error);
-      Alert.alert("更新エラー", "ペット情報の更新に失敗しました");
-    }
-  };
-
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (event.type === "set" && selectedDate) {
-      // ユーザーが「決定」ボタンを押したときだけ閉じる
-      setDate(selectedDate);
-      const formatted = selectedDate.toISOString().split("T")[0];
-      setFormData({ ...formData, birthDay: formatted });
-    } else {
-      setShowDatePicker(false);
+      onChangeForm({ key: 'iconImageUri', value: result.assets[0].uri });
     }
   };
 
   const spinAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (updatePetMutation.isPending) {
+    if (isPending) {
       Animated.loop(
         Animated.timing(spinAnim, {
           toValue: 1,
@@ -169,11 +92,11 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
       spinAnim.stopAnimation();
       spinAnim.setValue(0);
     }
-  }, [spinAnim, updatePetMutation.isPending]);
+  }, [isPending, spinAnim]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
+    outputRange: ['0deg', '360deg'],
   });
 
   return (
@@ -194,7 +117,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
               },
             ]}
           >
-            {updatePetMutation.isPending && (
+            {isPending && (
               <View style={styles.loadingOverlay}>
                 <Animated.View style={{ transform: [{ rotate: spin }] }}>
                   <FontAwesome5 name="paw" size={48} color="#fff" />
@@ -231,9 +154,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
               placeholder="名前"
               placeholderTextColor={colors.icon}
               value={formData.name}
-              onChangeText={(value) =>
-                setFormData({ ...formData, name: value })
-              }
+              onChangeText={(value) => onChangeForm({ key: 'name', value })}
             />
             <Text style={styles.inputTitle}>動物種</Text>
             <TouchableOpacity
@@ -241,7 +162,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
               style={[styles.selectorInput, { borderColor: colors.icon }]}
             >
               <Text style={{ color: colors.text }}>
-                {formData.petType === "dog" ? "犬" : "猫"}
+                {formData.petType === 'dog' ? '犬' : '猫'}
               </Text>
             </TouchableOpacity>
             <Text style={styles.inputTitle}>品種</Text>
@@ -260,15 +181,13 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
               placeholder="誕生日 (YYYY-MM-DD)"
               placeholderTextColor={colors.icon}
               value={formData.birthDay}
-              onChangeText={(value) =>
-                setFormData({ ...formData, birthDay: value })
-              }
+              onChangeText={(value) => onChangeForm({ key: 'birthDay', value })}
             />
             <TouchableOpacity
               onPress={handleSubmit}
               style={[styles.submitButton, { backgroundColor: colors.tint }]}
             >
-              <Text style={{ color: colors.background, fontWeight: "bold" }}>
+              <Text style={{ color: colors.background, fontWeight: 'bold' }}>
                 更新する
               </Text>
             </TouchableOpacity>
@@ -291,7 +210,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
-                    setFormData({ ...formData, petType: "dog", species: "" });
+                    onChangeForm({ key: 'petType', value: 'dog' });
                     setShowPetTypeSelector(false);
                   }}
                 >
@@ -301,7 +220,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    setFormData({ ...formData, petType: "cat", species: "" });
+                    onChangeForm({ updates: { petType: 'cat', species: '' } });
                     setShowPetTypeSelector(false);
                   }}
                 >
@@ -333,7 +252,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
                     <TouchableOpacity
                       key={s}
                       onPress={() => {
-                        setFormData({ ...formData, species: s });
+                        onChangeForm({ key: 'species', value: s });
                         setShowSpeciesSelector(false);
                       }}
                     >
@@ -350,9 +269,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
           </Modal>
           {showDatePicker && (
             <Modal transparent animationType="fade">
-              <TouchableWithoutFeedback
-                onPress={() => setShowDatePicker(false)}
-              >
+              <TouchableWithoutFeedback onPress={onCloseDatePicker}>
                 <View style={styles.selectorOverlay}>
                   <View style={styles.datePickerContainer}>
                     <DateTimePicker
@@ -377,31 +294,31 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     borderRadius: 10,
     padding: 20,
   },
   cancelButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 50,
     left: 10,
     padding: 10,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 60,
     marginBottom: 20,
-    textAlign: "center",
+    textAlign: 'center',
   },
   inputTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     paddingBottom: 4,
   },
   input: {
@@ -419,77 +336,77 @@ const styles = StyleSheet.create({
   submitButton: {
     padding: 12,
     borderRadius: 4,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 10,
   },
   selectorOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   selectorContainer: {
-    width: "80%",
+    width: '80%',
     borderRadius: 10,
     padding: 20,
   },
   selectorContainerFixed: {
-    width: "80%",
+    width: '80%',
     height: 300,
     borderRadius: 10,
     padding: 20,
   },
   selectorTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 10,
-    textAlign: "center",
+    textAlign: 'center',
   },
   selectorItem: {
     fontSize: 16,
     paddingVertical: 10,
-    textAlign: "center",
+    textAlign: 'center',
   },
   iconContainer: {
-    alignSelf: "center",
+    alignSelf: 'center',
     marginBottom: 20,
     width: 100,
     height: 100,
     borderRadius: 50,
     borderWidth: 1,
-    borderColor: "#ccc",
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#eee",
+    borderColor: '#ccc',
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#eee',
   },
   iconImage: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   iconPlaceholder: {
     fontSize: 14,
   },
   datePickerContainer: {
-    position: "absolute",
-    backgroundColor: "#fff",
+    position: 'absolute',
+    backgroundColor: '#fff',
     borderRadius: 10,
     padding: 10,
-    width: "80%",
-    alignItems: "center",
+    width: '80%',
+    alignItems: 'center',
   },
   datePicker: {
-    width: "100%",
+    width: '100%',
   },
   loadingOverlay: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 999, // 他要素より前面
   },
 });

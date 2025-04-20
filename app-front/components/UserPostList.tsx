@@ -1,22 +1,22 @@
-import React, { useState } from "react";
-import { FlatList, Text, useColorScheme } from "react-native";
-import ProfilePostPanel from "@/components/ProfilePostPanel";
-import { Colors } from "@/constants/Colors";
-import PostModal from "./PostModal";
-import { useModalStack } from "@/providers/ModalStackContext";
-import { Post } from "@/features/post/schema";
+import React, { useState } from 'react';
+import { FlatList, Text, useColorScheme } from 'react-native';
+import ProfilePostPanel from '@/components/ProfilePostPanel';
+import { Colors } from '@/constants/Colors';
+import PostModal from './PostModal';
+import { useModalStack } from '@/providers/ModalStackContext';
+import { PostResponse } from '@/features/post/schema/response';
 
 type Props = {
-  posts: Post[];
+  posts: PostResponse[];
   colorScheme: ReturnType<typeof useColorScheme>;
 };
 
 export const UserPostList: React.FC<Props> = ({ posts, colorScheme }) => {
   const { push, pop } = useModalStack();
-  const colors = Colors[colorScheme ?? "light"];
-  const backgroundColor = colorScheme === "light" ? "white" : "black";
+  const colors = Colors[colorScheme ?? 'light'];
+  const backgroundColor = colorScheme === 'light' ? 'white' : 'black';
 
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedPost, setSelectedPost] = useState<PostResponse | null>(null);
 
   return (
     <>
@@ -28,7 +28,7 @@ export const UserPostList: React.FC<Props> = ({ posts, colorScheme }) => {
           <ProfilePostPanel
             imageUrl={item.imageUrl}
             onPress={() => {
-              push("post");
+              push('post');
               setSelectedPost(item);
             }}
           />
@@ -42,7 +42,7 @@ export const UserPostList: React.FC<Props> = ({ posts, colorScheme }) => {
         }}
         ListEmptyComponent={
           <Text
-            style={{ color: colors.text, textAlign: "center", marginTop: 32 }}
+            style={{ color: colors.text, textAlign: 'center', marginTop: 32 }}
           >
             投稿しましょう！
           </Text>

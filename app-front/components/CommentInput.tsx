@@ -16,22 +16,19 @@ import { fetchApi } from '@/utils/api';
 import { commentSchema } from '@/features/comment/schema';
 import { useAuth } from '@/providers/AuthContext';
 import { z } from 'zod';
-import { User } from '@/features/user/schema';
 
 type CommentInputProps = {
-  currentUser: User | null | undefined;
   postId: string;
   queryKey: unknown[];
   onNewComment: (comment: Comment) => void;
 };
 
 const CommentInput: React.FC<CommentInputProps> = ({
-  currentUser,
   postId,
   queryKey,
   onNewComment,
 }) => {
-  const { token } = useAuth();
+  const { user: currentUser, token } = useAuth();
   const [content, setContent] = useState('');
   const colorScheme = useColorScheme();
   const colors = colorScheme === 'light' ? Colors.light : Colors.dark;
