@@ -45,11 +45,12 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 	// reqBody は TimelineRequest 構造体
 	if reqBody.Cursor != nil {
 		all := h.cacheUsecase.GetPostResponses(reqBody.UserID)
-
-		started := false
-		limit := reqBody.Limit
+		log.Infof("Retrieved %d posts from cache for user %s", len(all), reqBody.UserID)
 
 		var filtered []models.PostResponse
+		limit := reqBody.Limit
+
+		started := reqBody.Cursor == nil
 		for _, p := range all {
 			if !started {
 				if p.ID.String() == *reqBody.Cursor {
@@ -182,8 +183,16 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 	h.cacheUsecase.ClearPostResponses(reqBody.UserID)
 	h.cacheUsecase.StorePostResponses(reqBody.UserID, postResponses)
 
+	// limit件だけ返すようにスライス
+	var firstPage []models.PostResponse
+	if reqBody.Limit < len(postResponses) {
+		firstPage = postResponses[:reqBody.Limit]
+	} else {
+		firstPage = postResponses
+	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"posts": postResponses,
+		"posts": firstPage,
 	})
 }
 
