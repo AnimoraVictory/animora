@@ -135,5 +135,18 @@ export class BackendStack extends cdk.Stack {
     // const queue = new sqs.Queue(this, 'AwsQueue', {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
+
+    const healthCheckFn = new lambda.Function(this, "HealthCheckFunction", {
+      runtime: lambda.Runtime.PROVIDED_AL2023,
+      handler: "bootstrap",
+      code: lambda.Code.fromAsset(path.join(__dirname, "../../bin/health-check")),
+      description: "Render上のFastAPIのヘルスチェックを行う関数",
+      timeout: cdk.Duration.seconds(10),
+    });
+
+    new events.Rule(this, "HealthCheckRule", {
+      schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
+      targets: [new targets.LambdaFunction(healthCheckFn)],
+    });
   }
 }
