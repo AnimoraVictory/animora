@@ -14,7 +14,7 @@ from common.src.multimodal_feature_extractor import update_post_features
 app = FastAPI()
 
 # ----------------------------------
-# /(ルート)エンドポイント
+# / エンドポイント
 # ----------------------------------
 @app.get("/")
 def embed_vector_and_retrain_model():
