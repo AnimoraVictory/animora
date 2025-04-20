@@ -12,6 +12,10 @@ jobs:
   quality:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: app-front
+
     steps:
       - uses: actions/checkout@v4
 
