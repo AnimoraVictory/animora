@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
+  Alert,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "react-native";
@@ -17,6 +18,9 @@ import { useAuth } from "@/providers/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import LikedUserModal from "./LikedUsesModal";
 import { useModalStack } from "@/providers/ModalStackContext";
+import Constants from "expo-constants";
+import axios from "axios";
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 type Props = {
   post: Post;
@@ -29,13 +33,15 @@ const { height, width } = Dimensions.get("window");
 const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
   const [isLikedUserModalVisible, setIsLikedUserModalVisible] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const slideAnimComment = useRef(new Animated.Value(height)).current;
   const slideAnimLike = useRef(new Animated.Value(height)).current;
 
   const [comments, setComments] = useState(post.comments);
   const { push, pop } = useModalStack();
 
-  const { user } = useAuth();
+  const { user, refetch } = useAuth();
+  const isMyPost = post.user.id === user?.id ? true : false;
 
   const scheme = useColorScheme();
   const colors = Colors[scheme ?? "light"];
@@ -77,14 +83,75 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
     });
   };
 
+  const handleDelete = () => {
+    Alert.alert(
+      "削除の確認",
+      "本当に削除してよろしいですか？",
+      [
+        {
+          text: "キャンセル",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "削除",
+          onPress: async () => {
+            try {
+              // axiosを使用してDELETEリクエストを送信
+              const response = await axios.delete(
+                `${API_URL}/posts/delete?id=${post.id}`
+              );
+              if (response.status === 200) {
+                Alert.alert("完了", "ポストを削除しました");
+                refetch();
+                onClose();
+              } else {
+                throw new Error("削除に失敗しました");
+              }
+            } catch (error) {
+              console.error(error);
+              Alert.alert("エラー", "削除に失敗しました");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+    setMenuVisible(false);
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View
         style={[styles.modal, { backgroundColor: colors.middleBackground }]}
       >
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={[styles.closeText, { color: colors.tint }]}>×</Text>
-        </TouchableOpacity>
+        <View style={styles.topBar}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={[styles.closeText, { color: colors.tint }]}>×</Text>
+          </TouchableOpacity>
+          {isMyPost && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setMenuVisible(true)}
+            >
+              <Text style={[styles.menuText, { color: colors.tint }]}>⋯</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {menuVisible && (
+          <View style={styles.menuOverlay}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+              <Text>削除</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => setMenuVisible(false)}
+            >
+              <Text>閉じる</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.header}>
           <Image
@@ -172,9 +239,37 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
   },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    paddingBottom: 20,
+  },
   closeButton: {
     paddingTop: 40,
+    alignSelf: "flex-start",
+  },
+  menuButton: {
+    paddingTop: 40,
     alignSelf: "flex-end",
+  },
+  menuText: {
+    fontSize: 24,
+  },
+  menuOverlay: {
+    position: "absolute",
+    top: 80,
+    right: 16,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    elevation: 4,
+    zIndex: 100,
+  },
+  menuItem: {
+    paddingVertical: 8,
   },
   closeText: {
     fontSize: 24,

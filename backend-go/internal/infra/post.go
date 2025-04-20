@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"time"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
@@ -126,5 +127,7 @@ func (r *PostRepository) DeletePost(postID string) error {
 		return err
 	}
 
-	return r.db.Post.DeleteOneID(postUUID).Exec(context.Background())
+	return r.db.Post.UpdateOneID(postUUID).
+		SetDeletedAt(time.Now()).
+		Exec(context.Background())
 }
