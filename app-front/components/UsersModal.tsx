@@ -86,20 +86,11 @@ const UsersModal: React.FC<Props> = ({
 
   const scrollRef = useRef<ScrollView | null>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollX = useRef(
-    new Animated.Value(selectedTab === "followers" ? width : 0)
-  ).current;
 
   const scrollToTab = (tab: "follows" | "followers") => {
-    const toValue = tab === "follows" ? 0 : width;
-
-    Animated.timing(scrollX, {
-      toValue,
-      duration: 100, // ← ここで速度調整（小さいほど速い）
-      useNativeDriver: false,
-    }).start(() => {
-      setSelectedTab(tab);
-    });
+    const pageIndex = tab === "follows" ? 0 : 1;
+    scrollRef.current?.scrollTo({ x: pageIndex * width, animated: true });
+    setSelectedTab(tab);
   };
 
   const panResponder = useMemo(
