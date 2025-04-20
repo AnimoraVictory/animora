@@ -9,6 +9,7 @@ from PIL import Image
 from transformers import AutoModel, AutoTokenizer, AutoImageProcessor, BatchFeature
 import psycopg2
 from psycopg2.extras import DictCursor
+from streamlit.runtime.uploaded_file_manager import UploadedFile
 from dotenv import load_dotenv, find_dotenv
 
 _ = load_dotenv(find_dotenv())
@@ -277,6 +278,8 @@ def search_images(query, search_method):
         # 理由: データベースにはJSON形式で保存されているから
         
     elif search_method == "画像検索":
+        if isinstance(query, UploadedFile):
+            query = Image.open(query)
         query_embedding = json.dumps(compute_image_embeddings(query).tolist()[0])
     else:
         raise ValueError("無効な検索方法です")
