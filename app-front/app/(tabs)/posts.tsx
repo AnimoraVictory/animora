@@ -27,9 +27,9 @@ import DailyTaskPopUp from '@/components/DailyTaskPopUp';
 import * as Haptics from 'expo-haptics';
 import { FontAwesome5 } from '@expo/vector-icons';
 import {
-  getPostResponseSchema,
+  getPostsResponseSchema,
   GetPostsResponse,
-} from '@/features/post/schema';
+} from '@/features/post/schema/response';
 import { fetchApi } from '@/utils/api';
 
 export default function PostsScreen() {
@@ -62,7 +62,7 @@ export default function PostsScreen() {
       return await fetchApi({
         method: 'POST',
         path: '/posts/timeline',
-        schema: getPostResponseSchema,
+        schema: getPostsResponseSchema,
         options: {
           data: {
             user_id: currentUser?.id,

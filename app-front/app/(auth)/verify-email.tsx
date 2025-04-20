@@ -3,60 +3,34 @@ import {
   Text,
   Button,
   StyleSheet,
-  Alert,
   Keyboard,
   TouchableWithoutFeedback,
   ImageBackground,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
-import { useVerifyEmail } from '@/constants/api';
 import { FormInput } from '@/components/FormInput';
-
-const VerifyEmailInputSchema = z.object({
-  email: z.string().email({ message: '無効なメールアドレス' }),
-  code: z.string().min(1, { message: '確認コードを入力してください' }),
-});
-
-type VerifyEmailInput = z.infer<typeof VerifyEmailInputSchema>;
+import { VerifyEmailForm, verifyEmailFormSchema } from '@/features/auth/schema';
+import { useVerifyEmailScreen } from '@/features/auth/useVerifyEmailScreen';
 
 export default function VerifyEmailScreen() {
   const { email } = useLocalSearchParams<{ email?: string }>();
-  const router = useRouter();
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<VerifyEmailInput>({
-    resolver: zodResolver(VerifyEmailInputSchema),
+  } = useForm<VerifyEmailForm>({
+    resolver: zodResolver(verifyEmailFormSchema),
     defaultValues: { email: email || '', code: '' },
   });
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'light'];
   const colors = Colors[colorScheme ?? 'light'];
-  const { mutate: verifyEmail } = useVerifyEmail();
 
-  const onSubmit = (data: VerifyEmailInput) => {
-    verifyEmail(
-      { email: data.email, code: data.code },
-      {
-        onSuccess: () => {
-          Alert.alert('認証成功', 'メール認証が完了しました');
-          router.push('/(auth)/signin');
-        },
-        onError: (error: Error) => {
-          Alert.alert(
-            '認証エラー',
-            error.message || 'メール認証に失敗しました'
-          );
-        },
-      }
-    );
-  };
+  const { onSubmit } = useVerifyEmailScreen();
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>

@@ -8,7 +8,7 @@ export const dailyTaskBaseSchema = z.object({
 });
 
 export const dailyTaskSchema = dailyTaskBaseSchema.extend({
-  post: postBaseSchema,
+  post: postBaseSchema.optional().nullable(),
 });
 
 export type DailyTask = z.infer<typeof dailyTaskSchema>;

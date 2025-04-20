@@ -1,10 +1,4 @@
-import React, {
-  useRef,
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-} from 'react';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -21,9 +15,6 @@ import {
 } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
-import Constants from 'expo-constants';
 import { UserPostList } from './UserPostList';
 import { UserPetList } from './UserPetsList';
 import { ProfileTabSelector } from './ProfileTabSelector';
@@ -32,17 +23,15 @@ import UsersModal from './UsersModal';
 import { useModalStack } from '@/providers/ModalStackContext';
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { User, UserBase } from '@/features/user/schema';
+import useUserProfileModal from '@/features/user/useUserProfileModal';
 
 const { width } = Dimensions.get('window');
-const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 type Props = {
   email: string;
   visible: boolean;
   onClose: () => void;
   slideAnim: Animated.Value;
-  currentUser: UserBase;
   prevModalIdx: number;
 };
 
@@ -54,7 +43,6 @@ const UserProfileModal: React.FC<Props> = ({
   visible,
   onClose,
   slideAnim,
-  currentUser,
   prevModalIdx,
 }) => {
   const [selectedFollowTab, setSelectedFollowTab] = useState<
@@ -71,82 +59,23 @@ const UserProfileModal: React.FC<Props> = ({
   const colors = Colors[colorScheme ?? 'light'];
   const backgroundColor = colorScheme === 'light' ? 'white' : 'black';
 
-  const queryClient = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
   const selectedTab = scrollX < windowWidth / 2 ? 'posts' : 'mypet';
   const postListWidth = useRef(0);
 
   const {
-    data: user,
+    user,
     isLoading,
     refetch,
     isRefetching,
-  } = useQuery<User>({
-    queryKey: ['userProfile', email],
-    queryFn: async () => {
-      const res = await axios.get(`${API_URL}/users/?email=${email}`);
-      return res.data.user;
-    },
-    enabled: !!email && visible,
+    handlePressFollowButton,
+    isMe,
+    isFollowing,
+  } = useUserProfileModal({
+    email,
+    visible,
   });
-
-  const isMe = useMemo(() => {
-    return !!user?.id && user.id === currentUser.id;
-  }, [currentUser.id, user?.id]);
-
-  const isFollowing = useMemo(() => {
-    if (!user) return false;
-    return user.followers.some((f) => f.id === currentUser.id);
-  }, [user, currentUser.id]);
-
-  const followMutation = useMutation({
-    mutationFn: () =>
-      axios.post(
-        `${API_URL}/users/follow?toId=${user?.id}&fromId=${currentUser.id}`
-      ),
-    onSuccess: () => {
-      queryClient.setQueryData(
-        ['userProfile', email],
-        (prev: User | undefined) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            followers: [...prev.followers, currentUser],
-            followersCount: prev.followersCount + 1,
-          };
-        }
-      );
-    },
-  });
-
-  const unfollowMutation = useMutation({
-    mutationFn: () =>
-      axios.delete(
-        `${API_URL}/users/unfollow?toId=${user?.id}&fromId=${currentUser.id}`
-      ),
-    onSuccess: () => {
-      queryClient.setQueryData(
-        ['userProfile', email],
-        (prev: User | undefined) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            followers: prev.followers.filter((f) => f.id !== currentUser.id),
-            followersCount: prev.followersCount - 1,
-          };
-        }
-      );
-    },
-  });
-
-  const handlePressFollowButton = useCallback(() => {
-    if (isFollowing) {
-      unfollowMutation.mutate();
-    } else {
-      followMutation.mutate();
-    }
-  }, [followMutation, isFollowing, unfollowMutation]);
 
   const onOpenFollowModal = () => {
     setIsFollowModalVisible(true);
@@ -387,7 +316,6 @@ const UserProfileModal: React.FC<Props> = ({
           prevModalIdx={prevModalIdx + 1}
           visible={isFollowModalVisible}
           user={user}
-          currentUser={currentUser}
           onClose={onCloseFollowModal}
           follows={user.follows}
           followers={user.followers}

@@ -30,7 +30,6 @@ type Props = {
   setSelectedTab: (tab: 'follows' | 'followers') => void;
   slideAnim: Animated.Value;
   prevModalIdx: number;
-  currentUser: UserBase;
 };
 
 const UsersModal: React.FC<Props> = ({
@@ -43,7 +42,6 @@ const UsersModal: React.FC<Props> = ({
   setSelectedTab,
   slideAnim,
   prevModalIdx,
-  currentUser,
 }) => {
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(
@@ -239,7 +237,6 @@ const UsersModal: React.FC<Props> = ({
       <UserProfileModal
         prevModalIdx={prevModalIdx + 1}
         key={prevModalIdx + 1}
-        currentUser={currentUser}
         email={selectedUserEmail ?? ''}
         visible={isProfileModalVisible && !!selectedUserEmail}
         onClose={closeUserProfile}

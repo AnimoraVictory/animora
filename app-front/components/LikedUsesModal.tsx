@@ -16,7 +16,6 @@ import { Colors } from '@/constants/Colors';
 import UserProfileModal from './UserProfileModal';
 import { useModalStack } from '@/providers/ModalStackContext';
 import { Like } from '@/features/like/schema';
-import { UserBase } from '@/features/user/schema';
 
 const { width, height } = Dimensions.get('window');
 
@@ -26,7 +25,6 @@ type Props = {
   likes: Like[];
   slideAnim: Animated.Value;
   prevModalIdx: number;
-  currentUser: UserBase;
 };
 
 const LikedUserModal: React.FC<Props> = ({
@@ -35,7 +33,6 @@ const LikedUserModal: React.FC<Props> = ({
   likes,
   slideAnim,
   prevModalIdx,
-  currentUser,
 }) => {
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(
@@ -154,7 +151,6 @@ const LikedUserModal: React.FC<Props> = ({
         <UserProfileModal
           prevModalIdx={prevModalIdx + 1}
           key={selectedUserEmail}
-          currentUser={currentUser}
           email={selectedUserEmail}
           visible={isProfileModalVisible}
           onClose={closeUserProfile}

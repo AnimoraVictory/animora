@@ -1,21 +1,27 @@
-import { useQueryClient, useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import Constants from "expo-constants";
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
+import { useAuth } from '@/providers/AuthContext';
+import { fetchApi } from '@/utils/api';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { z } from 'zod';
 
 const useToggleLike = (postId: string, userId: string) => {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
 
   const createLikeMutation = useMutation({
     mutationFn: () =>
-      axios.post(`${API_URL}/likes/new?userId=${userId}&postId=${postId}`),
+      fetchApi({
+        method: 'POST',
+        path: `/likes/new?userId=${userId}&postId=${postId}`,
+        schema: z.void(),
+        options: {},
+        token,
+      }),
     onMutate: async () => {
       // 対象のpostsクエリをキャンセルしてスナップショットを取る
-      await queryClient.cancelQueries({ queryKey: ["posts"] });
-      const previousPosts = queryClient.getQueryData<any[]>(["posts"]);
+      await queryClient.cancelQueries({ queryKey: ['posts'] });
+      const previousPosts = queryClient.getQueryData<any[]>(['posts']);
       // 楽観的更新：対象の投稿の likesCount を +1、かつ likedByCurrentUser を true に更新
-      queryClient.setQueryData<any[]>(["posts"], (oldPosts) => {
+      queryClient.setQueryData<any[]>(['posts'], (oldPosts) => {
         if (!oldPosts) return oldPosts;
         return oldPosts.map((p) => {
           if (p.id === postId) {
@@ -31,21 +37,27 @@ const useToggleLike = (postId: string, userId: string) => {
     },
     onError: (_, __, context) => {
       // エラー発生時はキャッシュを元に戻す
-      queryClient.setQueryData(["posts"], context?.previousPosts);
+      queryClient.setQueryData(['posts'], context?.previousPosts);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
 
   // Like解除の楽観的更新付きミューテーション
   const deleteLikeMutation = useMutation({
     mutationFn: () =>
-      axios.delete(`${API_URL}/likes/delete?userId=${userId}&postId=${postId}`),
+      fetchApi({
+        method: 'DELETE',
+        path: `/likes/delete?userId=${userId}&postId=${postId}`,
+        schema: z.void(),
+        options: {},
+        token,
+      }),
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ["posts"] });
-      const previousPosts = queryClient.getQueryData<any[]>(["posts"]);
-      queryClient.setQueryData<any[]>(["posts"], (oldPosts) => {
+      await queryClient.cancelQueries({ queryKey: ['posts'] });
+      const previousPosts = queryClient.getQueryData<any[]>(['posts']);
+      queryClient.setQueryData<any[]>(['posts'], (oldPosts) => {
         if (!oldPosts) return oldPosts;
         return oldPosts.map((p) => {
           if (p.id === postId) {
@@ -60,10 +72,10 @@ const useToggleLike = (postId: string, userId: string) => {
       return { previousPosts };
     },
     onError: (_, __, context) => {
-      queryClient.setQueryData(["posts"], context?.previousPosts);
+      queryClient.setQueryData(['posts'], context?.previousPosts);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
 
