@@ -92,7 +92,6 @@ export const userSchema = userBaseSchema.extend({
 
 export const getPostResponseSchema = z.object({
   posts: z.array(postSchema),
-  next_cursor: z.string().nullable(),
 });
 
 type GetPostsResponse = z.infer<typeof getPostResponseSchema>;
@@ -123,7 +122,7 @@ export default function PostsScreen() {
     string | null
   >({
     queryKey: ["posts"],
-    queryFn: async ({ pageParam = 0 }) => {
+    queryFn: async ({ pageParam }) => {
       const response = await axios.post(`${API_URL}/posts/timeline`, {
         user_id: currentUser?.id,
         limit: 10,
@@ -135,7 +134,10 @@ export default function PostsScreen() {
       return result.data;
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.posts.length < 10) return undefined;
+      return lastPage.posts[lastPage.posts.length - 1]?.id;
+    },
     enabled: !!currentUser?.id,
   });
   const icon =
@@ -188,8 +190,6 @@ export default function PostsScreen() {
     outputRange: ["0deg", "360deg"],
   });
 
-  console.log(hasNextPage);
-
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
@@ -228,7 +228,7 @@ export default function PostsScreen() {
           contentOffset={{ x: 0, y: -HEADER_HEIGHT }}
         />
       </ThemedView>
-    );
+         );
   }
 
   return (

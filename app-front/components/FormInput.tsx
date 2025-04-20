@@ -52,7 +52,7 @@ export const FormInput: React.FC<FormInputProps> = ({
       setFocused(false);
     }
   };
-  
+
   useEffect(() => {
     if (value) {
       Animated.timing(animRef, {
