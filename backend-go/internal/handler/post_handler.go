@@ -27,10 +27,11 @@ type TimelineRequest struct {
 	Limit  int       `json:"limit"`
 }
 
-func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase) *PostHandler {
+func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase, cacheUsecase usecase.CacheUsecase) *PostHandler {
 	return &PostHandler{
 		postUsecase:    postUsecase,
 		storageUsecase: storageUsecase,
+		cacheUsecase:   cacheUsecase,
 	}
 }
 
