@@ -1,46 +1,64 @@
-import React from "react";
-import { FlatList, RefreshControl, Text, StyleSheet, useColorScheme } from "react-native";
+import React, { useState } from "react";
+import { FlatList, Text, useColorScheme } from "react-native";
 import ProfilePostPanel from "@/components/ProfilePostPanel";
 import { Post } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
+import PostModal from "./PostModal";
+import { useModalStack } from "@/providers/ModalStackContext";
 
 type Props = {
   posts: Post[];
-  refreshing: boolean;
-  onRefresh: () => void;
   colorScheme: ReturnType<typeof useColorScheme>;
-  headerComponent: React.JSX.Element;
 };
 
-export const UserPostList: React.FC<Props> = ({ posts, refreshing, onRefresh, colorScheme, headerComponent }) => {
+export const UserPostList: React.FC<Props> = ({ posts, colorScheme }) => {
+  const { push, pop } = useModalStack();
   const colors = Colors[colorScheme ?? "light"];
-  const backgroundColor = colorScheme == "light" ? "white" : "black"
+  const backgroundColor = colorScheme === "light" ? "white" : "black";
+
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
   return (
-    <FlatList
-      data={posts}
-      keyExtractor={(item) => item.id}
-      numColumns={3}
-      renderItem={({ item }) => (
-        <ProfilePostPanel
-          imageUrl={item.imageUrl}
-          onPress={() => console.log("Tapped post:", item.id)}
+    <>
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.id}
+        numColumns={3}
+        renderItem={({ item }) => (
+          <ProfilePostPanel
+            imageUrl={item.imageUrl}
+            onPress={() => {
+              push("post");
+              setSelectedPost(item);
+            }}
+          />
+        )}
+        scrollEnabled={false}
+        scrollEventThrottle={16}
+        contentContainerStyle={{
+          flexGrow: 1,
+          backgroundColor,
+          paddingBottom: 200,
+        }}
+        ListEmptyComponent={
+          <Text
+            style={{ color: colors.text, textAlign: "center", marginTop: 32 }}
+          >
+            投稿しましょう！
+          </Text>
+        }
+      />
+
+      {selectedPost && (
+        <PostModal
+          post={selectedPost}
+          visible={true}
+          onClose={() => {
+            pop();
+            setSelectedPost(null);
+          }}
         />
       )}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colorScheme === "light" ? "black" : "white"}
-        />
-      }
-      ListHeaderComponent={headerComponent}
-      contentContainerStyle={{ flexGrow: 1, paddingBottom: 20, backgroundColor }}
-      ListEmptyComponent={
-        <Text style={{ color: colors.text, textAlign: "center", marginTop: 32 }}>
-          投稿しましょう！
-        </Text>
-      }
-    />
+    </>
   );
 };

@@ -18,6 +18,8 @@ import { Colors } from "@/constants/Colors";
 import Constants from "expo-constants";
 import { registerForPushNotificationsAsync } from "@/utils/notifications";
 import * as Notifications from "expo-notifications";
+import { HomeTabScrollProvider } from "@/providers/HomeTabScrollContext";
+import { ModalStackProvider } from "@/providers/ModalStackContext";
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
@@ -45,6 +47,7 @@ function AuthSwitch() {
         router.replace("/(auth)");
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user, router]);
 
   if (loading) {
@@ -113,12 +116,16 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <AuthSwitch />
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <HomeTabScrollProvider>
+          <ModalStackProvider>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <AuthSwitch />
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </ModalStackProvider>
+        </HomeTabScrollProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

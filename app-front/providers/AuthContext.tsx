@@ -1,11 +1,7 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import * as SecureStore from "expo-secure-store";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  api,
-  User,
-  LoginResponse,
-} from "../constants/api";
+import { api, User, LoginResponse } from "../constants/api";
 
 interface AuthContextType {
   user: User | undefined | null;
@@ -13,6 +9,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   loading: boolean;
   refetch: () => Promise<void>;
+  isRefetching: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   loading: true,
   refetch: async () => {},
+  isRefetching: true,
 });
 
 // SecureStore のキー
@@ -46,11 +44,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   // ユーザー情報の取得
   const {
     data: user,
+    isRefetching,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ['user', token],
-    queryFn: () => token ? api.getUser(token) : null,
+    queryKey: ["user", token],
+    queryFn: () => (token ? api.getUser(token) : null),
     enabled: !!token,
   });
 
@@ -59,13 +58,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   // login 用の mutation
-  const loginMutation = useMutation<LoginResponse, Error, { email: string; password: string }>({
+  const loginMutation = useMutation<
+    LoginResponse,
+    Error,
+    { email: string; password: string }
+  >({
     mutationFn: ({ email, password }) => api.login(email, password),
     onSuccess: async (response) => {
       if (response.accessToken) {
         await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, response.accessToken);
         await SecureStore.setItemAsync(ID_TOKEN_KEY, response.idToken);
-        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, response.refreshToken);
+        await SecureStore.setItemAsync(
+          REFRESH_TOKEN_KEY,
+          response.refreshToken
+        );
         setToken(response.accessToken);
         queryClient.setQueryData(["user", response.accessToken], response.user);
       }
@@ -81,7 +87,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   // logout 用の mutation
   const logoutMutation = useMutation<void, Error, void>({
-    mutationFn: () => token ? api.signOut(token) : Promise.resolve(),
+    mutationFn: () => (token ? api.signOut(token) : Promise.resolve()),
     onSuccess: async () => {
       // ログアウト時は全トークン削除
       await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
@@ -117,6 +123,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         logout,
         loading: isLoading,
         refetch: refetchUser,
+        isRefetching,
       }}
     >
       {children}

@@ -98,6 +98,8 @@ func main() {
 	routes.SetupPetRoutes(app)
 	routes.SetupPostRoutes(app)
 	routes.SetupUserRoutes(app)
+	routes.SetupLikeRoutes(app)
+	routes.SetupCommentRoutes(app)
 	log.Println("API routes setup completed")
 
 	// Get port from environment variable or use default

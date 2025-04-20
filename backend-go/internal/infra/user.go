@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
+	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
 )
@@ -58,7 +60,24 @@ func (r *UserRepository) ExistsEmail(email string) (bool, error) {
 }
 
 func (r *UserRepository) FindByEmail(email string) (*ent.User, error) {
-	user, err := r.db.User.Query().Where(user.Email(email)).First(context.Background())
+	user, err := r.db.User.Query().Where(user.Email(email)).
+		WithFollowing(func(q *ent.FollowRelationQuery) {
+			q.WithTo()
+		}).
+		WithFollowers(
+			func(q *ent.FollowRelationQuery) {
+				q.WithFrom()
+			}).
+		WithDailyTasks(func(q *ent.DailyTaskQuery) {
+			q.WithPost(func(pq *ent.PostQuery) {
+				pq.Where(post.DeletedAtIsNil()).
+					Select(
+						post.FieldID,
+					)
+			})
+			q.Order(ent.Desc("created_at")).Limit(1)
+		}).
+		First(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -92,13 +111,13 @@ func (r *UserRepository) Update(id string, name string, description string, newI
 	return err
 }
 
-func (r *UserRepository) Follow(fromID string, toID string) error {
-	fromUUID, err := uuid.Parse(fromID)
+func (r *UserRepository) Follow(toId string, fromId string) error {
+	fromUUID, err := uuid.Parse(fromId)
 	if err != nil {
 		return err
 	}
 
-	toUUID, err := uuid.Parse(toID)
+	toUUID, err := uuid.Parse(toId)
 	if err != nil {
 		return err
 	}
@@ -109,6 +128,32 @@ func (r *UserRepository) Follow(fromID string, toID string) error {
 		Save(context.Background())
 	if err != nil {
 		return fmt.Errorf("failed to create follow relation in database: %w", err)
+	}
+
+	return nil
+}
+
+func (r *UserRepository) Unfollow(toId string, fromId string) error {
+	fromUUID, err := uuid.Parse(fromId)
+	if err != nil {
+		return err
+	}
+
+	toUUID, err := uuid.Parse(toId)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.FollowRelation.
+		Delete().
+		Where(
+			followrelation.HasFromWith(user.ID(fromUUID)),
+			followrelation.HasToWith(user.ID(toUUID)),
+		).
+		Exec(context.Background())
+
+	if err != nil {
+		return fmt.Errorf("failed to unfollow: %w", err)
 	}
 
 	return nil

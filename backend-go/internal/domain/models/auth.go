@@ -14,36 +14,59 @@ type UserBaseResponse struct {
 	ID           uuid.UUID `json:"id"`
 	Email        string    `json:"email"`
 	Name         string    `json:"name"`
-	IconImageUrl string    `json:"iconImageUrl"`
+	Bio          string    `json:"bio"`
+	IconImageUrl *string   `json:"iconImageUrl"`
 }
 
 type UserResponse struct {
-	ID           uuid.UUID      `json:"id"`
-	Email        string         `json:"email"`
-	Name         string         `json:"name"`
-	Bio          string         `json:"bio"`
-	IconImageUrl string         `json:"iconImageUrl"`
-	Posts        []PostResponse `json:"posts"`
-	Pets         []PetResponse  `json:"pets"`
+	ID             uuid.UUID          `json:"id"`
+	Email          string             `json:"email"`
+	Name           string             `json:"name"`
+	Bio            string             `json:"bio"`
+	IconImageUrl   string             `json:"iconImageUrl"`
+	Posts          []PostResponse     `json:"posts"`
+	Pets           []PetResponse      `json:"pets"`
+	Followers      []UserBaseResponse `json:"followers"`
+	Follows        []UserBaseResponse `json:"follows"`
+	FollowersCount int                `json:"followersCount"`
+	FollowsCount   int                `json:"followsCount"`
+	DailyTask      DailyTaskResponse  `json:"dailyTask"`
 }
 
 // NewPetResponse converts a Pet to a PetResponse
-func NewUserResponse(user *ent.User, imageURL string, posts []PostResponse, pets []PetResponse) UserResponse {
+func NewUserResponse(
+	user *ent.User,
+	imageURL string,
+	posts []PostResponse,
+	pets []PetResponse,
+	followers []UserBaseResponse,
+	follows []UserBaseResponse,
+	dailyTask DailyTaskResponse) UserResponse {
 	return UserResponse{
-		ID:           user.ID,
-		Name:         user.Name,
-		Bio:          user.Bio,
-		IconImageUrl: imageURL,
-		Posts:        posts,
-		Pets:         pets,
+		ID:             user.ID,
+		Name:           user.Name,
+		Bio:            user.Bio,
+		IconImageUrl:   imageURL,
+		Posts:          posts,
+		Pets:           pets,
+		Followers:      followers,
+		Follows:        follows,
+		FollowersCount: len(followers),
+		FollowsCount:   len(follows),
+		DailyTask:      dailyTask,
 	}
 }
 
 func NewUserBaseResponse(user *ent.User, imageURL string) UserBaseResponse {
+	var iconURL *string
+	if imageURL != "" {
+		iconURL = &imageURL
+	}
 	return UserBaseResponse{
 		ID:           user.ID,
 		Email:        user.Email,
 		Name:         user.Name,
-		IconImageUrl: imageURL,
+		Bio:          user.Bio,
+		IconImageUrl: iconURL,
 	}
 }

@@ -36,19 +36,19 @@ describe("WelcomeScreen", () => {
     expect(getByText("新規ユーザー登録")).toBeTruthy();
   });
 
-  it("ログインボタンを押すとsigninに遷移する", async() => {
+  it("ログインボタンを押すとsigninに遷移する", async () => {
     const { getByText } = render(<WelcomeScreen />);
     await act(async () => {
       fireEvent.press(getByText("ログイン"));
-    })
+    });
     expect(pushMock).toHaveBeenCalledWith("/(auth)/signin");
   });
 
   it("新規ユーザー登録ボタンを押すとsignupに遷移する", async () => {
     const { getByText } = render(<WelcomeScreen />);
-    await act(async() => {
+    await act(async () => {
       fireEvent.press(getByText("新規ユーザー登録"));
-    })
+    });
     expect(pushMock).toHaveBeenCalledWith("/(auth)/signup");
   });
 });

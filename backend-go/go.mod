@@ -4,11 +4,10 @@ go 1.24.1
 
 require (
 	entgo.io/ent v0.14.4
-	github.com/aws/aws-cdk-go/awscdk/v2 v2.188.0
+	github.com/aws/aws-cdk-go/awscdk/v2 v2.189.0
 	github.com/aws/aws-lambda-go v1.46.0
 	github.com/aws/aws-sdk-go-v2 v1.25.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.0
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.0
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.35.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.50.0
 	github.com/aws/constructs-go/constructs/v10 v10.4.2
@@ -23,6 +22,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pgvector/pgvector-go v0.3.0
+	github.com/samber/lo v1.49.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 )
@@ -33,6 +33,7 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.0 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.15.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.1 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.1 // indirect
@@ -68,7 +69,6 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/samber/lo v1.49.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect

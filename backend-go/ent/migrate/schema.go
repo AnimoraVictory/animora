@@ -90,6 +90,13 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "followrelation_user_following_user_followers",
+				Unique:  true,
+				Columns: []*schema.Column{FollowRelationsColumns[2], FollowRelationsColumns[3]},
+			},
+		},
 	}
 	// LikesColumns holds the columns for the "likes" table.
 	LikesColumns = []*schema.Column{
@@ -115,6 +122,13 @@ var (
 				Columns:    []*schema.Column{LikesColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "like_user_likes_post_likes",
+				Unique:  true,
+				Columns: []*schema.Column{LikesColumns[3], LikesColumns[2]},
 			},
 		},
 	}

@@ -26,7 +26,7 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const profileEditSchema = z.object({
   imageUri: z.string().nullable(),
   name: z.string().min(1, { message: "名前は必須です" }),
-  bio: z.string().min(1, { message: "自己紹介を入力してください" }),
+  bio: z.string().min(0),
 });
 export type ProfileEditForm = z.infer<typeof profileEditSchema>;
 
@@ -81,7 +81,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
   // API でプロフィール更新を行うための Mutation
   const updateProfileMutation = useMutation({
     mutationFn: (data: FormData) => {
-      return axios.put(`${API_URL}/users/update/?id=${user.id}`, data, {
+      return axios.put(`${API_URL}/users/update?id=${user.id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     },
@@ -103,10 +103,7 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
     fd.append("name", formData.name);
     fd.append("bio", formData.bio);
 
-    if (
-      formData.imageUri &&
-      formData.imageUri !== user.iconImageUrl // 変更されているか確認
-    ) {
+    if (formData.imageUri && formData.imageUri !== user.iconImageUrl) {
       const filename = formData.imageUri.split("/").pop();
       const match = /\.(\w+)$/.exec(filename || "");
       const mimeType = match ? `image/${match[1]}` : "image";
@@ -188,14 +185,13 @@ export const ProfileEditModal: React.FC<ProfileEditModalProps> = ({
               placeholder="自己紹介"
               placeholderTextColor={colors.icon}
               value={formData.bio}
-              onChangeText={(value) =>
-                setFormData({ ...formData, bio: value })
-              }
+              onChangeText={(value) => setFormData({ ...formData, bio: value })}
               multiline
             />
             <TouchableOpacity
               onPress={handleSubmit}
               style={[styles.submitButton, { backgroundColor: colors.tint }]}
+              disabled={updateProfileMutation.isPending}
             >
               <Text style={{ color: colors.background, fontWeight: "bold" }}>
                 更新する

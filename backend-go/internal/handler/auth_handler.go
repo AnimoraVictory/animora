@@ -12,16 +12,18 @@ import (
 )
 
 type AuthHandler struct {
-	authUsecase    usecase.AuthUsecase
-	userUsecase    usecase.UserUsecase
-	storageUsecase usecase.StorageUsecase
+	authUsecase      usecase.AuthUsecase
+	userUsecase      usecase.UserUsecase
+	dailyTaskUsecase usecase.DailyTaskUsecase
+	storageUsecase   usecase.StorageUsecase
 }
 
-func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase, storageUsecase usecase.StorageUsecase) *AuthHandler {
+func NewAuthHandler(authUsecase usecase.AuthUsecase, userUsecase usecase.UserUsecase, storageUsecase usecase.StorageUsecase, dailyTaskUsecase usecase.DailyTaskUsecase) *AuthHandler {
 	return &AuthHandler{
-		authUsecase:    authUsecase,
-		userUsecase:    userUsecase,
-		storageUsecase: storageUsecase,
+		authUsecase:      authUsecase,
+		userUsecase:      userUsecase,
+		storageUsecase:   storageUsecase,
+		dailyTaskUsecase: dailyTaskUsecase,
 	}
 }
 
@@ -171,10 +173,12 @@ func (h *AuthHandler) SignUp(c echo.Context) error {
 			"error": "ユーザーの作成に失敗しました",
 		})
 	}
+	if err := h.dailyTaskUsecase.Create(user.ID); err != nil {
+		log.Errorf("Failed to create daily task: %v", err)
+	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "ユーザーが作成されました",
-		"user":    user,
 	})
 }
 
