@@ -11,7 +11,7 @@ func SetupPostRoutes(app *echo.Echo) {
 	postGroup := app.Group("/posts")
 
 	// get posts for timeline
-	postGroup.POST("/timeline", postHandler.GetPostsFromFastAPI)
+	postGroup.POST("/timeline", postHandler.GetRecommended)
 
 	postGroup.GET("/all", postHandler.GetAllPosts)
 
