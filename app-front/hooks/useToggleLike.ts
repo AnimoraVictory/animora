@@ -79,19 +79,22 @@ const useToggleLike = (postId: string, userId: string) => {
     },
   });
 
-  const toggleLike = (liked: boolean) => {
-    if (createLikeMutation.isPending || deleteLikeMutation.isPending) return;
+  const setLiked = (liked: boolean) => {
+    /** likedの状態に更新する。*/
+    if (createLikeMutation.isPending || deleteLikeMutation.isPending) {
+      return;
+    }
     if (liked) {
-      deleteLikeMutation.mutate();
-    } else {
       createLikeMutation.mutate();
+    } else {
+      deleteLikeMutation.mutate();
     }
   };
 
   const isLoading =
     createLikeMutation.isPending || deleteLikeMutation.isPending;
 
-  return { toggleLike, isLoading };
+  return { setLiked, isLoading };
 };
 
 export default useToggleLike;

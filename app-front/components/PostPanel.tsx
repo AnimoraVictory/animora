@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,19 +9,16 @@ import {
   TouchableOpacity,
   Animated,
 } from 'react-native';
-import {
-  TapGestureHandler,
-} from 'react-native-gesture-handler';
+import { TapGestureHandler } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import CommentsModal from '@/components/CommentsModal';
-import { useAuth } from '@/providers/AuthContext';
 import UserProfileModal from './UserProfileModal';
 import { useModalStack } from '@/providers/ModalStackContext';
 import { TaskType, taskTypeMap } from '@/app/(tabs)/camera';
-import useToggleLike from '@/hooks/useToggleLike';
 import { PostResponse } from '@/features/post/schema/response';
+import usePostsScreen from '@/features/post/usePostsScreen';
 
 type Props = {
   post: PostResponse;
@@ -29,6 +26,9 @@ type Props = {
 
 export const PostPanel = ({ post }: Props) => {
   const { push, pop } = useModalStack();
+
+  const { likedByCurrentUser, handleToggleLike, isLoadingLike, handleLike } =
+    usePostsScreen({ post });
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isUserModalVisible, setIsUserModalVisible] = useState<boolean>(false);
@@ -40,7 +40,7 @@ export const PostPanel = ({ post }: Props) => {
 
   const glowAnim = useRef(new Animated.Value(0)).current;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (post.dailyTask) {
       Animated.loop(
         Animated.sequence([
@@ -76,18 +76,7 @@ export const PostPanel = ({ post }: Props) => {
     minute: '2-digit',
   });
 
-  const { user: currentUser } = useAuth();
-
   const windowHeight = Dimensions.get('window').height;
-
-  const [likedByCurrentUser, setLikedByCurrentUser] = useState<boolean>(
-    post.likes?.some((like) => like.user.id === currentUser?.id) ?? false
-  );
-
-  const { toggleLike, isLoading: isLoadingLike } = useToggleLike(
-    post.id,
-    currentUser?.id ?? ''
-  );
 
   const OpenModal = () => {
     setIsModalVisible(true);
@@ -131,18 +120,10 @@ export const PostPanel = ({ post }: Props) => {
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const handleToggleLike = async () => {
+  const handleToggleLikeButton = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (isLoadingLike) return;
 
-    if (!likedByCurrentUser) {
-      setLikedByCurrentUser(true);
-      toggleLike(false);
-    } else {
-      setLikedByCurrentUser(false);
-      toggleLike(true);
-      setLikedByCurrentUser(false);
-    }
+    handleToggleLike();
 
     Animated.sequence([
       Animated.timing(scaleAnim, {
@@ -171,12 +152,7 @@ export const PostPanel = ({ post }: Props) => {
         duration: 150,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      if (!likedByCurrentUser) {
-        setLikedByCurrentUser(true);
-        toggleLike(false);
-      }
-    });
+    ]).start(handleLike);
   };
 
   return (
@@ -227,7 +203,7 @@ export const PostPanel = ({ post }: Props) => {
 
             <TouchableOpacity
               style={styles.likeBox}
-              onPress={handleToggleLike}
+              onPress={handleToggleLikeButton}
               disabled={isLoadingLike}
             >
               <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
@@ -273,7 +249,7 @@ export const PostPanel = ({ post }: Props) => {
         onClose={closeUserProfile}
         slideAnim={slideAnimUser}
       />
-      </>
+    </>
   );
 };
 
