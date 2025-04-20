@@ -2,13 +2,12 @@ name: Go Tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'backend-go/**'
+      - "backend-go/**"
   pull_request:
-    branches: [ main ]
     paths:
-      - 'backend-go/**'
+      - "backend-go/**"
 
 jobs:
   test:
@@ -19,22 +18,22 @@ jobs:
         working-directory: ./backend-go
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.21'  # Adjust this to match your Go version
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.21" # Adjust this to match your Go version
 
-    - name: Get dependencies
-      run: go mod download
+      - name: Get dependencies
+        run: go mod download
 
-    - name: Run tests with coverage
-      run: make test-ci
+      - name: Run tests with coverage
+        run: make test-ci
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage-report
-        path: coverage.out
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.out
