@@ -31,7 +31,7 @@ MODEL_PATH = "recommend_system/models/latest.model"
 # ----------------------------------
 class TimelineRequest(BaseModel):
     user_id: str
-    cursor: Optional[int] = None  # どれだけスキップするか
+    cursor: Optional[str] = None  # どれだけスキップするか
     limit: int = 10  # 取得する投稿数
 
 
@@ -76,7 +76,7 @@ class Post(BaseModel):
 
 class TimelineResponse(BaseModel):
     posts: list[Post]
-    next_cursor: Optional[int]
+    next_cursor: Optional[str]
 
 
 # ----------------------------------
@@ -170,6 +170,8 @@ def recommend_timeline(request: TimelineRequest):
             print(
                 f"- post_id: {p['post_id']}, score: {p['score']}, created_at: {p['created_at']}"
             )
+            print(f"- comments: {p.get('comments', [])}, likes: {p.get('likes', [])}")
+            print(f"- comments: {p.get('comments', []) if p.get('comments', []) is not None else []}")
 
         posts = [
             Post(
@@ -185,8 +187,8 @@ def recommend_timeline(request: TimelineRequest):
                     bio=rc["bio"],
                     icon_image_key=rc.get("icon_image_key"),
                 ),
-                comments=rc.get("comments", []),  # コメント埋め込み済み前提
-                likes=rc.get("likes", []),  # いいね埋め込み済み前提
+                comments=rc.get("comments", []) if rc.get("comments", []) is not None else [],  # コメント埋め込み済み前提
+                likes=rc.get("likes", []) if rc.get("likes", []) is not None else [],  # いいね埋め込み済み前提
                 daily_task=rc.get("daily_task"),
             )
             for rc in posts_data
