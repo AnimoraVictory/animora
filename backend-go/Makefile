@@ -26,5 +26,6 @@ test-usecase:
 
 # CI-specific test target that includes coverage reporting
 test-ci:
-	go test -v -race -coverprofile=coverage.out -covermode=atomic ./internal/domain/middlewares ./internal/usecase
-	go tool cover -func=coverage.out
+	go test -v -race -coverprofile=./coverage.out -covermode=atomic ./internal/domain/middlewares ./internal/usecase
+	go tool cover -func=./coverage.out
+	ls -la ./coverage.out || echo "coverage.out file was not generated"
