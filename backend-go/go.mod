@@ -25,6 +25,7 @@ require (
 	github.com/samber/lo v1.49.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
@@ -51,6 +52,7 @@ require (
 	github.com/cdklabs/awscdk-asset-awscli-go/awscliv1/v2 v2.2.229 // indirect
 	github.com/cdklabs/awscdk-asset-node-proxy-agent-go/nodeproxyagentv6/v2 v2.1.0 // indirect
 	github.com/cdklabs/cloud-assembly-schema-go/awscdkcloudassemblyschema/v41 v41.0.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-openapi/inflect v0.21.0 // indirect
@@ -68,7 +70,9 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
@@ -83,4 +87,5 @@ require (
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
 	golang.org/x/tools v0.31.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

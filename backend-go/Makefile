@@ -1,4 +1,4 @@
-.PHONY: codegen create-model deploy
+.PHONY: codegen create-model deploy test
 
 codegen:
 # Usage: make codegen NAME=User
@@ -15,3 +15,16 @@ build-dailytask:
 
 deploy: build-api build-dailytask
 	cd aws && cdk deploy --profile animalia
+
+test: test-usecase test-middlewares
+
+test-middlewares:
+	go test -v ./internal/domain/middlewares
+
+test-usecase:
+	go test -v ./internal/usecase
+
+# CI-specific test target that includes coverage reporting
+test-ci:
+	go test -v -race -coverprofile=coverage.out -covermode=atomic ./internal/domain/middlewares ./internal/usecase
+	go tool cover -func=coverage.out
