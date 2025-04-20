@@ -85,6 +85,22 @@ def get_uuid_from_post_id(post_id):
 
 
 # ----------------------------------
+# uuidからpostのidxに変換するための関数
+# ----------------------------------
+def get_post_index_from_uuid(uuid):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT "index" FROM posts WHERE id = %s',
+        (uuid,),
+    )
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row[0] if row else None
+
+
+# ----------------------------------
 # 候補投稿からレコメンドタイムラインを生成する関数
 # ----------------------------------
 def get_recommended_timeline(user_id, candidates, model, device, is_existing_user):
