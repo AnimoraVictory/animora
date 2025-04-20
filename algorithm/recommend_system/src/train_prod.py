@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     # 推論APIの /reload を叩く
     try:
-        response = requests.post("http://localhost:8000/reload")
+        response = requests.post("https://animalia-lnzk.onrender.com/reload")
         if response.status_code == 200:
             print("Model reloaded successfully", response.json())
         else:
