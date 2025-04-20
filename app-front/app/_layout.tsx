@@ -18,6 +18,7 @@ import { Colors } from "@/constants/Colors";
 import Constants from "expo-constants";
 import { HomeTabScrollProvider } from "@/providers/HomeTabScrollContext";
 import { ModalStackProvider } from "@/providers/ModalStackContext";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
@@ -85,20 +86,22 @@ export default function RootLayout() {
 
   // QueryClientProvider を最上位に配置し、その中に AuthProvider を配置する
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <HomeTabScrollProvider>
-          <ModalStackProvider>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-              <AuthSwitch />
-              <StatusBar style="auto" />
-            </ThemeProvider>
-          </ModalStackProvider>
-        </HomeTabScrollProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <HomeTabScrollProvider>
+            <ModalStackProvider>
+              <ThemeProvider
+                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+              >
+                <AuthSwitch />
+                <StatusBar style="auto" />
+              </ThemeProvider>
+            </ModalStackProvider>
+          </HomeTabScrollProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
 

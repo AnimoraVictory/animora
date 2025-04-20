@@ -25,6 +25,7 @@ import UserProfileModal from "./UserProfileModal";
 import { useModalStack } from "@/providers/ModalStackContext";
 import { TaskType, taskTypeMap } from "@/app/(tabs)/camera";
 import useToggleLike from "@/hooks/useToggleLike";
+import FastImage from "react-native-fast-image";
 
 export type Post = z.infer<typeof postSchema>;
 
@@ -185,7 +186,7 @@ export const PostPanel = ({ post }: Props) => {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <>
       <TapGestureHandler numberOfTaps={2} onActivated={handleDoubleTap}>
         <View style={styles.wrapper}>
           {post.dailyTask && (
@@ -286,7 +287,7 @@ export const PostPanel = ({ post }: Props) => {
         onClose={closeUserProfile}
         slideAnim={slideAnimUser}
       />
-    </GestureHandlerRootView>
+      </>
   );
 };
 
