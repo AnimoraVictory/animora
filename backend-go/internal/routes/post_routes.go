@@ -8,7 +8,8 @@ import (
 // SetupPostRoutes sets up the post routes
 func SetupPostRoutes(app *echo.Echo) {
 	postHandler := injector.InjectPostHandler()
-	postGroup := app.Group("/posts")
+	authMiddleware := injector.InjectAuthMiddleware()
+	postGroup := app.Group("/posts", authMiddleware.Handler)
 
 	// get posts for timeline
 	postGroup.POST("/timeline", postHandler.GetRecommended)
