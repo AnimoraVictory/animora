@@ -17,12 +17,9 @@ jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: () => 'light',
 }));
 
-// useVerifyEmail モック
-const mockVerifyEmail = jest.fn();
-jest.mock('@/constants/api', () => ({
-  useVerifyEmail: () => ({
-    mutate: mockVerifyEmail,
-  }),
+const mockMutate = jest.fn();
+jest.mock('@tanstack/react-query', () => ({
+  useMutation: () => ({ mutate: mockMutate, isPending: false }),
 }));
 
 describe('VerifyEmailScreen', () => {
@@ -57,14 +54,18 @@ describe('VerifyEmailScreen', () => {
       fireEvent.press(getByText('認証する'));
     });
 
-    expect(await findByText('無効なメールアドレス')).toBeTruthy();
-    expect(await findByText('確認コードを入力してください')).toBeTruthy();
+    expect(
+      await findByText('有効なメールアドレスを入力してください')
+    ).toBeTruthy();
+    expect(await findByText('6桁のコードを入力してください')).toBeTruthy();
   });
 
-  it('正しい入力でverifyEmailが呼ばれ、成功時に画面遷移', async () => {
-    mockVerifyEmail.mockImplementation((_data, { onSuccess }) => onSuccess());
-
+  it('正しい入力で mutate が呼ばれ、成功時に画面遷移', async () => {
     const { getByLabelText, getByText } = render(<VerifyEmailScreen />);
+    mockMutate.mockImplementation((_data, { onSuccess, onError }) => {
+      onSuccess();
+      // onError(new Error('無効なコード'));
+    });
     await act(async () => {
       fireEvent.changeText(getByLabelText('Email'), 'test@example.com');
       fireEvent.changeText(getByLabelText('Code'), '123456');
@@ -72,15 +73,15 @@ describe('VerifyEmailScreen', () => {
     });
 
     await waitFor(() => {
-      expect(mockVerifyEmail).toHaveBeenCalledWith(
+      expect(mockMutate).toHaveBeenCalledWith(
         {
           email: 'test@example.com',
           code: '123456',
         },
-        expect.objectContaining({
+        {
           onSuccess: expect.any(Function),
           onError: expect.any(Function),
-        })
+        }
       );
       expect(Alert.alert).toHaveBeenCalledWith(
         '認証成功',
@@ -91,7 +92,7 @@ describe('VerifyEmailScreen', () => {
   });
 
   it('エラー時にアラートを表示する', async () => {
-    mockVerifyEmail.mockImplementation((_data, { onError }) =>
+    mockMutate.mockImplementation((_data, { onError }) =>
       onError(new Error('無効なコード'))
     );
 
