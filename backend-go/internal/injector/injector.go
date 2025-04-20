@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/internal/domain/middlewares"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
 	"github.com/aki-13627/animalia/backend-go/internal/handler"
 	"github.com/aki-13627/animalia/backend-go/internal/infra"
@@ -151,4 +152,9 @@ func InjectLikeHandler() handler.LikeHandler {
 func InjectCommentHandler() handler.CommentHandler {
 	commentHandler := handler.NewCommentHandler(InjectCommentUsecase())
 	return *commentHandler
+}
+
+func InjectAuthMiddleware() middlewares.AuthMiddleware {
+	authMiddleware := middlewares.NewAuthMiddleware(InjectAuthUsecase())
+	return *authMiddleware
 }

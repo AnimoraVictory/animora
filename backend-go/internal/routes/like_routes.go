@@ -7,7 +7,8 @@ import (
 
 func SetupLikeRoutes(app *echo.Echo) {
 	likeHandler := injector.InjectLikeHandler()
-	likeGroup := app.Group("/likes")
+	authMiddleware := injector.InjectAuthMiddleware()
+	likeGroup := app.Group("/likes", authMiddleware.Handler)
 
 	// Create a new like
 	likeGroup.POST("/new", likeHandler.Create)
