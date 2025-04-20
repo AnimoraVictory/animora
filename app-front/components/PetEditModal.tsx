@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
   Animated,
@@ -13,6 +13,7 @@ import {
   Image,
   Keyboard,
   TouchableWithoutFeedback,
+  Easing,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import {
@@ -27,6 +28,8 @@ import { useAuth } from "@/providers/AuthContext";
 import Constants from "expo-constants";
 import { PetForm, petInputSchema } from "./PetRegisterModal";
 import { Pet } from "@/constants/api";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -64,6 +67,9 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
 
   const [showPetTypeSelector, setShowPetTypeSelector] = useState(false);
   const [showSpeciesSelector, setShowSpeciesSelector] = useState(false);
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [date, setDate] = useState<Date | null>(null);
 
   const pickIconImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -136,6 +142,40 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
     }
   };
 
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (event.type === "set" && selectedDate) {
+      // ユーザーが「決定」ボタンを押したときだけ閉じる
+      setDate(selectedDate);
+      const formatted = selectedDate.toISOString().split("T")[0];
+      setFormData({ ...formData, birthDay: formatted });
+    } else {
+      setShowDatePicker(false);
+    }
+  };
+
+  const spinAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (updatePetMutation.isPending) {
+      Animated.loop(
+        Animated.timing(spinAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      ).start();
+    } else {
+      spinAnim.stopAnimation();
+      spinAnim.setValue(0);
+    }
+  }, [updatePetMutation.isPending]);
+
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
   return (
     <Modal
       animationType="none"
@@ -154,6 +194,13 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
               },
             ]}
           >
+            {updatePetMutation.isPending && (
+              <View style={styles.loadingOverlay}>
+                <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                  <FontAwesome5 name="paw" size={48} color="#fff" />
+                </Animated.View>
+              </View>
+            )}
             <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
               <Text style={{ color: colors.tint }}>キャンセル</Text>
             </TouchableOpacity>
@@ -301,6 +348,26 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
               </View>
             </TouchableOpacity>
           </Modal>
+          {showDatePicker && (
+            <Modal transparent animationType="fade">
+              <TouchableWithoutFeedback
+                onPress={() => setShowDatePicker(false)}
+              >
+                <View style={styles.selectorOverlay}>
+                  <View style={styles.datePickerContainer}>
+                    <DateTimePicker
+                      mode="date"
+                      value={date || new Date()}
+                      display="spinner"
+                      onChange={handleDateChange}
+                      maximumDate={new Date()}
+                      style={styles.datePicker}
+                    />
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+          )}
         </View>
       </TouchableWithoutFeedback>
     </Modal>
@@ -402,6 +469,28 @@ const styles = StyleSheet.create({
   },
   iconPlaceholder: {
     fontSize: 14,
+  },
+  datePickerContainer: {
+    position: "absolute",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  datePicker: {
+    width: "100%",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999, // 他要素より前面
   },
 });
 
