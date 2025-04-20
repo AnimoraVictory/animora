@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -52,6 +52,16 @@ export const FormInput: React.FC<FormInputProps> = ({
       setFocused(false);
     }
   };
+  
+  useEffect(() => {
+    if (value) {
+      Animated.timing(animRef, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [value]);
 
   const labelStyle = {
     position: "absolute" as const,
