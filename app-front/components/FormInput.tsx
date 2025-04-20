@@ -57,7 +57,10 @@ export const FormInput: React.FC<FormInputProps> = ({
     position: "absolute" as const,
     left: 12,
     top: animRef.interpolate({ inputRange: [0, 1], outputRange: [10, -10] }),
-    fontSize: animRef.interpolate({ inputRange: [0, 1], outputRange: [16, 12] }),
+    fontSize: animRef.interpolate({
+      inputRange: [0, 1],
+      outputRange: [16, 12],
+    }),
     color: animRef.interpolate({
       inputRange: [0, 1],
       outputRange: [theme.icon, "#2ecc71"],

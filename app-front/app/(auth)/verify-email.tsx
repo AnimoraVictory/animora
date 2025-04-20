@@ -1,5 +1,14 @@
 import React from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ImageBackground,
+} from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,13 +28,18 @@ type VerifyEmailInput = z.infer<typeof VerifyEmailInputSchema>;
 export default function VerifyEmailScreen() {
   const { email } = useLocalSearchParams<{ email?: string }>();
   const router = useRouter();
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<VerifyEmailInput>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<VerifyEmailInput>({
     resolver: zodResolver(VerifyEmailInputSchema),
     defaultValues: { email: email || "", code: "" },
   });
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const {mutate: verifyEmail} = useVerifyEmail()
+  const colors = Colors[colorScheme ?? "light"];
+  const { mutate: verifyEmail } = useVerifyEmail();
 
   const onSubmit = (data: VerifyEmailInput) => {
     verifyEmail(
@@ -36,54 +50,58 @@ export default function VerifyEmailScreen() {
           router.push("/(auth)/signin");
         },
         onError: (error: Error) => {
-          Alert.alert("認証エラー", error.message || "メール認証に失敗しました");
-        }
+          Alert.alert(
+            "認証エラー",
+            error.message || "メール認証に失敗しました"
+          );
+        },
       }
     );
   };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}>
-        メール認証
-      </Text>
-      <Controller
-        control={control}
-        name="email"
-        render={({ field: { onChange, value } }) => (
-          <FormInput
-                label="Email"
-                value={value}
-                onChangeText={onChange}
-                theme={theme}
-                secureTextEntry
-                autoCapitalize="none"
-                error={errors.email?.message}
-              />
-        )}
-      />
-      <Controller
-        control={control}
-        name="code"
-        render={({ field: { onChange, value } }) => (
-          <FormInput
-                label="Code"
-                value={value}
-                onChangeText={onChange}
-                theme={theme}
-                autoCapitalize="none"
-                error={errors.code?.message}
-              />
-        )}
-      />
-      <Button
-        title={isSubmitting ? "処理中..." : "認証する"}
-        onPress={handleSubmit(onSubmit)}
-        disabled={isSubmitting}
-        color={Colors[colorScheme ?? "light"].tint}
-      />
-    </View>
+      <ImageBackground
+        source={require("../../assets/images/noise2.png")}
+        resizeMode="repeat"
+        style={[styles.container, { backgroundColor: theme.background }]}
+      >
+        <Text style={[styles.title, { color: colors.text }]}>メール認証</Text>
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onChange, value } }) => (
+            <FormInput
+              label="Email"
+              value={value}
+              onChangeText={onChange}
+              theme={theme}
+              autoCapitalize="none"
+              error={errors.email?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="code"
+          render={({ field: { onChange, value } }) => (
+            <FormInput
+              label="Code"
+              value={value}
+              onChangeText={onChange}
+              theme={theme}
+              autoCapitalize="none"
+              error={errors.code?.message}
+            />
+          )}
+        />
+        <Button
+          title={isSubmitting ? "処理中..." : "認証する"}
+          onPress={handleSubmit(onSubmit)}
+          disabled={isSubmitting}
+          color={Colors[colorScheme ?? "light"].tint}
+        />
+      </ImageBackground>
     </TouchableWithoutFeedback>
   );
 }

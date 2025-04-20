@@ -1,3 +1,5 @@
+// The above code sets up an AWS Lambda function using Echo framework to handle API requests for an
+// application called Animalia.
 package main
 
 import (
@@ -98,6 +100,8 @@ func init() {
 	routes.SetupPetRoutes(app)
 	routes.SetupPostRoutes(app)
 	routes.SetupUserRoutes(app)
+	routes.SetupLikeRoutes(app)
+	routes.SetupCommentRoutes(app)
 	log.Println("API routes setup completed")
 
 	// Initialize the Lambda adapter

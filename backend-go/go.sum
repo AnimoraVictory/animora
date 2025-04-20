@@ -10,8 +10,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/apparentlymart/go-textseg/v15 v15.0.0 h1:uYvfpb3DyLSCGWnctWKGj857c6ew1u1fNQOlOtuGxQY=
 github.com/apparentlymart/go-textseg/v15 v15.0.0/go.mod h1:K8XmNZdhEBkdlyDdvbmmsvpAG721bKi0joRfFdHIWJ4=
-github.com/aws/aws-cdk-go/awscdk/v2 v2.188.0 h1:xI1vFGAamwW5f9bXL5D1JByU55U9RQ3M0zLruly+5Xw=
-github.com/aws/aws-cdk-go/awscdk/v2 v2.188.0/go.mod h1:9ENCp/SkuTkIrAxG0cEdAD1QCC+QfpN82ukwrbwzwGE=
+github.com/aws/aws-cdk-go/awscdk/v2 v2.189.0 h1:2OvdAbsslefC/vPrIphPwF2n3UFhSkCOnWBFPPKd7oQ=
+github.com/aws/aws-cdk-go/awscdk/v2 v2.189.0/go.mod h1:9ENCp/SkuTkIrAxG0cEdAD1QCC+QfpN82ukwrbwzwGE=
 github.com/aws/aws-lambda-go v1.46.0 h1:UWVnvh2h2gecOlFhHQfIPQcD8pL/f7pVCutmFl+oXU8=
 github.com/aws/aws-lambda-go v1.46.0/go.mod h1:dpMpZgvWx5vuQJfBt0zqBha60q7Dd7RfgJv23DymV8A=
 github.com/aws/aws-sdk-go-v2 v1.25.1 h1:P7hU6A5qEdmajGwvae/zDkOq+ULLC9tQBTwqqiwFGpI=

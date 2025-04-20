@@ -10,7 +10,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/internal/handler"
 	"github.com/aki-13627/animalia/backend-go/internal/infra"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
-	_ "github.com/lib/pq" // PostgreSQLドライバー
+	_ "github.com/lib/pq"
 )
 
 var client *ent.Client
@@ -61,6 +61,21 @@ func InjectStorageRepository() repository.StorageRepository {
 	return storageRepository
 }
 
+func InjectLikeRepository() repository.LikeRepository {
+	likeRepository := infra.NewLikeRepository(InjectDB())
+	return likeRepository
+}
+
+func InjectCommentRepository() repository.CommentRepository {
+	commentRepository := infra.NewCommentRepository(InjectDB())
+	return commentRepository
+}
+
+func InjectDailyTaskRepository() repository.DailyTaskRepository {
+	dailyTaskRepository := infra.NewDailyTaskRepository(InjectDB())
+	return dailyTaskRepository
+}
+
 func InjectAuthUsecase() usecase.AuthUsecase {
 	authUsecase := usecase.NewAuthUsecase(InjectCognitoRepository(), InjectUserRepository())
 	return *authUsecase
@@ -86,8 +101,23 @@ func InjectUserUsecase() usecase.UserUsecase {
 	return *userUsecase
 }
 
+func InjectLikeUsecase() usecase.LikeUsecase {
+	likeUsecase := usecase.NewLikeUsecase(InjectLikeRepository())
+	return *likeUsecase
+}
+
+func InjectCommentUsecase() usecase.CommentUsecase {
+	commentUsecase := usecase.NewCommentUsecase(InjectCommentRepository(), InjectStorageRepository())
+	return *commentUsecase
+}
+
+func InjectDailyTaskUsecase() usecase.DailyTaskUsecase {
+	dailytaskUsecase := usecase.NewDailyTaskUsecase(InjectDailyTaskRepository())
+	return *dailytaskUsecase
+}
+
 func InjectAuthHandler() handler.AuthHandler {
-	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase(), InjectStorageUsecase())
+	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase(), InjectStorageUsecase(), InjectDailyTaskUsecase())
 	return *authHandler
 }
 
@@ -104,4 +134,14 @@ func InjectPetHandler() handler.PetHandler {
 func InjectUserHandler() handler.UserHandler {
 	userHandler := handler.NewUserHandler(InjectUserUsecase(), InjectStorageUsecase())
 	return *userHandler
+}
+
+func InjectLikeHandler() handler.LikeHandler {
+	likeHandler := handler.NewLikeHandler(InjectLikeUsecase())
+	return *likeHandler
+}
+
+func InjectCommentHandler() handler.CommentHandler {
+	commentHandler := handler.NewCommentHandler(InjectCommentUsecase())
+	return *commentHandler
 }

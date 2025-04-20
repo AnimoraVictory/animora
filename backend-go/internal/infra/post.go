@@ -2,8 +2,10 @@ package infra
 
 import (
 	"context"
+	"time"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
@@ -23,6 +25,13 @@ func NewPostRepository(db *ent.Client) *PostRepository {
 func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 	posts, err := r.db.Post.Query().
 		WithUser().
+		WithComments(func(q *ent.CommentQuery) {
+			q.WithUser()
+		}).
+		WithLikes(func(q *ent.LikeQuery) {
+			q.WithUser()
+		}).
+		WithDailyTask().
 		Where(post.DeletedAtIsNil()).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
@@ -36,8 +45,16 @@ func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 func (r *PostRepository) GetPostsByUser(userID uuid.UUID) ([]*ent.Post, error) {
 	posts, err := r.db.Post.Query().
 		WithUser().
+		WithComments(func(q *ent.CommentQuery) {
+			q.WithUser()
+		}).
+		WithLikes(func(q *ent.LikeQuery) {
+			q.WithUser()
+		}).
+		WithDailyTask().
 		Where(post.HasUserWith(user.ID(userID))).
 		Where(post.DeletedAtIsNil()).
+		Order(ent.Desc(post.FieldCreatedAt)).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
 	if err != nil {
@@ -69,6 +86,18 @@ func (r *PostRepository) CreatePost(caption, userID, fileKey string, dailyTaskId
 		if err != nil {
 			return nil, err
 		}
+		err = r.db.Post.
+			Update().
+			Where(
+				post.HasDailyTaskWith(dailytask.ID(dailyTaskUUID)),
+				post.DeletedAtNotNil(), // 論理削除済みのみ対象
+			).
+			ClearDailyTask().
+			Exec(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
 		postCreate = postCreate.SetDailyTaskID(dailyTaskUUID)
 	}
 
@@ -98,5 +127,7 @@ func (r *PostRepository) DeletePost(postID string) error {
 		return err
 	}
 
-	return r.db.Post.DeleteOneID(postUUID).Exec(context.Background())
+	return r.db.Post.UpdateOneID(postUUID).
+		SetDeletedAt(time.Now()).
+		Exec(context.Background())
 }

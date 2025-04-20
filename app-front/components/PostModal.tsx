@@ -1,0 +1,323 @@
+import React, { useRef, useState } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  Animated,
+  Alert,
+} from "react-native";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "react-native";
+import { Post } from "./PostPanel";
+import CommentsModal from "./CommentsModal";
+import { useAuth } from "@/providers/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import LikedUserModal from "./LikedUsesModal";
+import { useModalStack } from "@/providers/ModalStackContext";
+import Constants from "expo-constants";
+import axios from "axios";
+const API_URL = Constants.expoConfig?.extra?.API_URL;
+
+type Props = {
+  post: Post;
+  visible: boolean;
+  onClose: () => void;
+};
+
+const { height, width } = Dimensions.get("window");
+
+const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
+  const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
+  const [isLikedUserModalVisible, setIsLikedUserModalVisible] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const slideAnimComment = useRef(new Animated.Value(height)).current;
+  const slideAnimLike = useRef(new Animated.Value(height)).current;
+
+  const [comments, setComments] = useState(post.comments);
+  const { push, pop } = useModalStack();
+
+  const { user, refetch } = useAuth();
+  const isMyPost = post.user.id === user?.id ? true : false;
+
+  const scheme = useColorScheme();
+  const colors = Colors[scheme ?? "light"];
+  const onOpenCommentModal = () => {
+    setIsCommentModalVisible(true);
+    Animated.timing(slideAnimComment, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const onCloseCommentModal = () => {
+    Animated.timing(slideAnimComment, {
+      toValue: height * 0.8,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => setIsCommentModalVisible(false));
+  };
+
+  const onOpenLikeModal = () => {
+    setIsLikedUserModalVisible(true);
+    push("1");
+    Animated.timing(slideAnimLike, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const onCloseLikeModal = () => {
+    Animated.timing(slideAnimLike, {
+      toValue: height,
+      duration: 100,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsLikedUserModalVisible(false);
+      pop();
+    });
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      "削除の確認",
+      "本当に削除してよろしいですか？",
+      [
+        {
+          text: "キャンセル",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "削除",
+          onPress: async () => {
+            try {
+              // axiosを使用してDELETEリクエストを送信
+              const response = await axios.delete(
+                `${API_URL}/posts/delete?id=${post.id}`
+              );
+              if (response.status === 200) {
+                Alert.alert("完了", "ポストを削除しました");
+                refetch();
+                onClose();
+              } else {
+                throw new Error("削除に失敗しました");
+              }
+            } catch (error) {
+              console.error(error);
+              Alert.alert("エラー", "削除に失敗しました");
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+    setMenuVisible(false);
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View
+        style={[styles.modal, { backgroundColor: colors.middleBackground }]}
+      >
+        <View style={styles.topBar}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={[styles.closeText, { color: colors.tint }]}>×</Text>
+          </TouchableOpacity>
+          {isMyPost && (
+            <TouchableOpacity
+              style={styles.menuButton}
+              onPress={() => setMenuVisible(true)}
+            >
+              <Text style={[styles.menuText, { color: colors.tint }]}>⋯</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {menuVisible && (
+          <View style={styles.menuOverlay}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+              <Text>削除</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => setMenuVisible(false)}
+            >
+              <Text>閉じる</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.header}>
+          <Image
+            source={
+              post.user.iconImageUrl
+                ? { uri: post.user.iconImageUrl }
+                : require("@/assets/images/profile.png")
+            }
+            style={styles.avatar}
+          />
+          <Text style={[styles.userName, { color: colors.text }]}>
+            {post.user.name}
+          </Text>
+        </View>
+
+        <Image source={{ uri: post.imageUrl }} style={styles.image} />
+
+        <View style={styles.reactionRow}>
+          <TouchableOpacity
+            style={styles.reactionItem}
+            onPress={onOpenLikeModal}
+          >
+            <Ionicons name="heart" size={20} color={colors.text} />
+            <Text style={[styles.reactionText, { color: colors.text }]}>
+              {post.likes.length}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.reactionItem, { marginLeft: 16 }]}
+            onPress={onOpenCommentModal}
+          >
+            <Ionicons
+              name="chatbox-ellipses-outline"
+              size={20}
+              color={colors.text}
+            />
+            <Text style={[styles.reactionText, { color: colors.text }]}>
+              {post.comments.length}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={[styles.caption, { color: colors.text }]}>
+          {post.caption}
+        </Text>
+      </View>
+      {isCommentModalVisible && (
+        <CommentsModal
+          comments={comments}
+          slideAnim={slideAnimComment}
+          visible={isCommentModalVisible}
+          postId={post.id}
+          currentUser={user}
+          onClose={onCloseCommentModal}
+          queryKey={["userProfile", post.user.email]}
+          onNewComment={(newComment) =>
+            setComments((prev) => [...prev, newComment])
+          }
+        />
+      )}
+
+      <LikedUserModal
+        visible={isLikedUserModalVisible}
+        onClose={onCloseLikeModal}
+        likes={post.likes}
+        currentUser={{
+          id: user?.id ?? "",
+          email: user?.email ?? "",
+          name: user?.name ?? "",
+          iconImageUrl: user?.iconImageUrl ?? "",
+          bio: user?.bio ?? "",
+        }}
+        slideAnim={slideAnimLike}
+        prevModalIdx={0}
+      />
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  modal: {
+    width,
+    height,
+    borderRadius: 12,
+    padding: 16,
+  },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    paddingBottom: 20,
+  },
+  closeButton: {
+    paddingTop: 40,
+    alignSelf: "flex-start",
+  },
+  menuButton: {
+    paddingTop: 40,
+    alignSelf: "flex-end",
+  },
+  menuText: {
+    fontSize: 24,
+  },
+  menuOverlay: {
+    position: "absolute",
+    top: 80,
+    right: 16,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    elevation: 4,
+    zIndex: 100,
+  },
+  menuItem: {
+    paddingVertical: 8,
+  },
+  closeText: {
+    fontSize: 24,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 8,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  image: {
+    width: "100%",
+    height: width * 1.4,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  caption: {
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontWeight: "bold",
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  reactionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  reactionText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  reactionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+});
+
+export default PostModal;

@@ -7,6 +7,9 @@ import {
   Animated,
   Dimensions,
   useColorScheme,
+  ScrollView,
+  RefreshControl,
+  Image,
 } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/providers/AuthContext";
@@ -22,21 +25,32 @@ import { PetRegiserModal } from "@/components/PetRegisterModal";
 import { UserPetList } from "@/components/UserPetsList";
 import { UserPostList } from "@/components/UserPostList";
 import { registerForPushNotificationsAsync } from "@/utils/notifications";
+import UsersModal from "@/components/UsersModal";
+import { useModalStack } from "@/providers/ModalStackContext";
+import * as Haptics from "expo-haptics";
 
 const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
 const ProfileScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const styles = getStyles(colors);
+  const { push, pop } = useModalStack();
 
   const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
+  const [selectedFollowTab, setSelectedFollowTab] = useState<
+    "follows" | "followers"
+  >("follows");
   const {
     user,
+    isRefetching,
     loading: authLoading,
     logout,
     refetch: refetchUser,
   } = useAuth();
+
+  const [isFollowModalVisible, setIsFollowModalVisible] = useState(false);
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] =
@@ -44,7 +58,21 @@ const ProfileScreen: React.FC = () => {
 
   const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
-  const backgroundColor = colorScheme == "light" ? "white" : "black"
+  const slideAnimFollow = useRef(new Animated.Value(windowWidth)).current;
+  const backgroundColor = colorScheme === "light" ? "white" : "black";
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, -150],
+    extrapolate: "clamp",
+  });
+
+  const icon =
+    colorScheme === "light"
+      ? require("../../assets/images/icon-green.png")
+      : require("../../assets/images/icon-dark.png");
 
   const handleLogout = async () => {
     try {
@@ -67,9 +95,11 @@ const ProfileScreen: React.FC = () => {
   const closeEditProfileModal = () => {
     Animated.timing(slideAnimProfile, {
       toValue: windowWidth,
-      duration: 300,
+      duration: 100,
       useNativeDriver: true,
-    }).start(() => setIsEditModalVisible(false));
+    }).start(() => {
+      setIsEditModalVisible(false);
+    });
   };
 
   const openRegisterPetModal = () => {
@@ -84,9 +114,32 @@ const ProfileScreen: React.FC = () => {
   const closeRegisterPetModal = () => {
     Animated.timing(slideAnimPet, {
       toValue: windowWidth,
+      duration: 100,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsRegisterPetModalVisible(false);
+    });
+  };
+
+  const openFollowModal = () => {
+    setIsFollowModalVisible(true);
+    push("1");
+    Animated.timing(slideAnimFollow, {
+      toValue: 0,
       duration: 300,
       useNativeDriver: true,
-    }).start(() => setIsRegisterPetModalVisible(false));
+    }).start();
+  };
+
+  const closeFollowModal = () => {
+    Animated.timing(slideAnimFollow, {
+      toValue: windowWidth,
+      duration: 100,
+      useNativeDriver: true,
+    }).start(() => {
+      setIsFollowModalVisible(false);
+      pop();
+    });
   };
 
   if (authLoading || !user) {
@@ -97,10 +150,23 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
+  const scrollRef = useRef<ScrollView>(null);
+
+  const onScrollEnd = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / windowWidth);
+    setSelectedTab(newIndex === 0 ? "posts" : "mypet");
+  };
+
   const headerContent = (
-    <>
-      <ProfileHeader user={user} onLogout={handleLogout} />
-      <View style={styles.editButtonsContainer}>
+    <View style={{ backgroundColor }}>
+      <ProfileHeader
+        user={user}
+        onLogout={handleLogout}
+        onOpenFollowModal={openFollowModal}
+        setSelectedTab={setSelectedFollowTab}
+      />
+      <View style={[styles.editButtonsContainer]}>
         <TouchableOpacity
           style={styles.editButton}
           onPress={openEditProfileModal}
@@ -125,34 +191,65 @@ const ProfileScreen: React.FC = () => {
       <ProfileTabSelector
         selectedTab={selectedTab}
         onSelectTab={setSelectedTab}
+        scrollRef={scrollRef}
       />
-    </>
+    </View>
   );
 
-  const contentList =
-    selectedTab === "mypet" ? (
-      <UserPetList
-        pets={user.pets}
-        onRefresh={refetchUser}
-        refreshing={authLoading}
-        colorScheme={colorScheme}
-        headerComponent={headerContent}
-      />
-    ) : (
-      <UserPostList
-        posts={user.posts}
-        onRefresh={refetchUser}
-        refreshing={authLoading}
-        colorScheme={colorScheme}
-        headerComponent={headerContent}
-      />
-    );
-
-  return (
-    <ThemedView style={[styles.container, {backgroundColor}]}>
-      <View style={styles.topHeader}>
-        <Text style={styles.userName}>{user.name}</Text>
+  const contentList = (
+    <Animated.ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefetching}
+          onRefresh={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            refetchUser();
+          }}
+          tintColor={colorScheme === "light" ? "black" : "white"}
+        />
+      }
+      scrollEventThrottle={16}
+      showsVerticalScrollIndicator={false}
+      onScroll={Animated.event(
+        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+        { useNativeDriver: false }
+      )}
+      contentInset={{ top: 90 }}
+      contentOffset={{ x: 0, y: -90 }}
+    >
+      <View>
+        {headerContent}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          ref={scrollRef}
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={onScrollEnd}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ minHeight: windowHeight * 0.8 }}
+        >
+          <View style={{ width: windowWidth }}>
+            <UserPostList posts={user.posts} colorScheme={colorScheme} />
+          </View>
+          <View style={{ width: windowWidth }}>
+            <UserPetList pets={user.pets} colorScheme={colorScheme} />
+          </View>
+        </ScrollView>
       </View>
+    </Animated.ScrollView>
+  );
+  return (
+    <ThemedView style={styles.container}>
+      <Animated.View
+        style={[
+          styles.topHeader,
+          {
+            transform: [{ translateY: headerTranslateY }],
+          },
+        ]}
+      >
+        <Image source={icon} style={styles.logo} />
+      </Animated.View>
       {contentList}
       <ProfileEditModal
         visible={isEditModalVisible}
@@ -169,6 +266,18 @@ const ProfileScreen: React.FC = () => {
         colorScheme={colorScheme}
         refetchPets={refetchUser}
       />
+      <UsersModal
+        prevModalIdx={0}
+        slideAnim={slideAnimFollow}
+        user={user}
+        currentUser={user}
+        visible={isFollowModalVisible}
+        onClose={() => closeFollowModal()}
+        follows={user.follows}
+        followers={user.followers}
+        selectedTab={selectedFollowTab}
+        setSelectedTab={setSelectedFollowTab}
+      />
     </ThemedView>
   );
 };
@@ -177,19 +286,29 @@ const getStyles = (colors: typeof Colors.light) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: colors.middleBackground,
     },
     topHeader: {
-      paddingTop: 50,
-      paddingBottom: 12,
-      backgroundColor: colors.background,
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 90,
+      zIndex: 10,
+      justifyContent: "flex-start",
       alignItems: "center",
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.icon,
+      backgroundColor: colors.background,
     },
     userName: {
       fontSize: 20,
       fontWeight: "bold",
-      color: colors.text,
+      color: colors.tint,
+    },
+    logo: {
+      width: 32,
+      height: 32,
+      marginTop: 50,
+      resizeMode: "contain",
     },
     loadingContainer: {
       flex: 1,

@@ -10,5 +10,6 @@ type UserRepository interface {
 	FindByEmail(email string) (*ent.User, error)
 	GetById(id string) (*ent.User, error)
 	Update(id string, name string, description string, newImageKey string) error
-	Follow(fromId string, toId string) error
+	Follow(toId string, fromId string) error
+	Unfollow(toId string, fromId string) error
 }
