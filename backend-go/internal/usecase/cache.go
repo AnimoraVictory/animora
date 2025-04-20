@@ -7,16 +7,15 @@ import (
 	"github.com/google/uuid"
 )
 
-// CacheUsecase はキャッシュのインターフェース
+type cacheUsecase struct {
+	mu    sync.RWMutex
+	cache map[uuid.UUID][]models.PostResponse
+}
+
 type CacheUsecase interface {
 	StorePostResponses(userID uuid.UUID, posts []models.PostResponse)
 	GetPostResponses(userID uuid.UUID) []models.PostResponse
 	ClearPostResponses(userID uuid.UUID)
-}
-
-type cacheUsecase struct {
-	mu    sync.RWMutex
-	cache map[uuid.UUID][]models.PostResponse
 }
 
 func NewCacheUsecase() CacheUsecase {

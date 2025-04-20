@@ -116,14 +116,21 @@ func InjectDailyTaskUsecase() usecase.DailyTaskUsecase {
 	return *dailytaskUsecase
 }
 
+func InjectCacheUsecase() usecase.CacheUsecase {
+	return usecase.NewCacheUsecase()
+}
+
 func InjectAuthHandler() handler.AuthHandler {
 	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase(), InjectStorageUsecase(), InjectDailyTaskUsecase())
 	return *authHandler
 }
 
-func InjectPostHandler() handler.PostHandler {
-	postHandler := handler.NewPostHandler(InjectPostUsecase(), InjectStorageUsecase())
-	return *postHandler
+func InjectPostHandler() *handler.PostHandler {
+	return handler.NewPostHandler(
+		InjectPostUsecase(),
+		InjectStorageUsecase(),
+		InjectCacheUsecase(),
+	)
 }
 
 func InjectPetHandler() handler.PetHandler {
