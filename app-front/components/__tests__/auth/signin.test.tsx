@@ -7,6 +7,11 @@ import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 jest.spyOn(Alert, 'alert');
 
+// console.errorのモック
+const mockConsoleError = jest
+  .spyOn(console, 'error')
+  .mockImplementation(() => {});
+
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
@@ -51,12 +56,14 @@ describe('SignInScreen', () => {
 
   it('未入力でログインを押すとバリデーションエラーが表示される', async () => {
     const { getByText, findByText } = render(<SignInScreen />);
-    fireEvent.press(getByText('ログイン'));
+    await act(async () => {
+      fireEvent.press(getByText('ログイン'));
+    });
 
     expect(
       await findByText('有効なメールアドレスを入力してください')
     ).toBeTruthy();
-    expect(await findByText('パスワードを入力してください')).toBeTruthy();
+    expect(await findByText('パスワードは8文字以上必要です')).toBeTruthy();
   });
 
   it('正しい入力でログイン処理が呼ばれ、ルーティングされる', async () => {
