@@ -22,7 +22,6 @@ import {
 import Constants from "expo-constants";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { PostPanel } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
 import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
 import { petSchema } from "@/components/PetPanel";
@@ -30,6 +29,7 @@ import { useAuth } from "@/providers/AuthContext";
 import DailyTaskPopUp from "@/components/DailyTaskPopUp";
 import * as Haptics from "expo-haptics";
 import { FontAwesome5 } from "@expo/vector-icons";
+import PostPanel from "@/components/PostPanel";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 export const postBaseSchema = z.object({
@@ -122,7 +122,7 @@ export default function PostsScreen() {
     string | null
   >({
     queryKey: ["posts"],
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam = null }) => {
       const response = await axios.post(`${API_URL}/posts/timeline`, {
         user_id: currentUser?.id,
         limit: 10,
@@ -228,7 +228,7 @@ export default function PostsScreen() {
           contentOffset={{ x: 0, y: -HEADER_HEIGHT }}
         />
       </ThemedView>
-         );
+    );
   }
 
   return (
@@ -260,10 +260,9 @@ export default function PostsScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
-            onRefresh={() => {
+            onRefresh={async () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              queryClient.removeQueries({ queryKey: ["posts"] });
-              fetchNextPage();
+              await queryClient.invalidateQueries({ queryKey: ["posts"] });
             }}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
@@ -281,6 +280,12 @@ export default function PostsScreen() {
             fetchNextPage();
           }
         }}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        updateCellsBatchingPeriod={100}
+        removeClippedSubviews={true}
+        onEndReachedThreshold={0.5}
         ListFooterComponent={
           isFetchingNextPage ? (
             <View style={{ paddingVertical: 20 }}>
