@@ -130,7 +130,7 @@ existing_user_query = """
                     LIMIT %s
 
                     """
-existing_user_threshold = 0.45
+existing_user_threshold = 0.2
 
 # ----------------------------------
 # 新規ユーザーに対する投稿を取得するクエリと閾値
