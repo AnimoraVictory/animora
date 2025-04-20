@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useContext, useRef } from 'react';
 
 type HomeTabScrollContextType = {
   setHandler: (handler: () => void) => void;
@@ -33,7 +33,7 @@ export const useHomeTabHandler = () => {
   const context = useContext(HomeTabScrollContext);
   if (!context) {
     throw new Error(
-      "useHomeTabHandler must be used within HomeTabScrollProvider"
+      'useHomeTabHandler must be used within HomeTabScrollProvider'
     );
   }
   return context;

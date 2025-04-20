@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { postBaseSchema } from "../post/schema";
+import { z } from 'zod';
+import { postBaseSchema } from '../post/schema';
 
 export const dailyTaskBaseSchema = z.object({
   id: z.string().uuid(),

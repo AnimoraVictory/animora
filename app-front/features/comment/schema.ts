@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { userBaseSchema } from "../user/schema";
+import { z } from 'zod';
+import { userBaseSchema } from '../user/schema';
 
 export const commentSchema = z.object({
   id: z.string(),
