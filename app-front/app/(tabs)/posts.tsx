@@ -14,7 +14,11 @@ import {
 } from "react-native";
 import axios from "axios";
 import { z } from "zod";
-import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -100,6 +104,7 @@ export default function PostsScreen() {
   const listRef = useRef<FlatList>(null);
   const HEADER_HEIGHT = 90;
   const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
 
   const {
     data,
@@ -183,6 +188,8 @@ export default function PostsScreen() {
     outputRange: ["0deg", "360deg"],
   });
 
+  console.log(hasNextPage);
+
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
@@ -255,7 +262,8 @@ export default function PostsScreen() {
             refreshing={isRefetching}
             onRefresh={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              refetch();
+              queryClient.removeQueries({ queryKey: ["posts"] });
+              fetchNextPage();
             }}
             tintColor={colorScheme === "light" ? "black" : "white"}
           />
@@ -273,6 +281,16 @@ export default function PostsScreen() {
             fetchNextPage();
           }
         }}
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <View style={{ paddingVertical: 20 }}>
+              <ActivityIndicator
+                size="small"
+                color={colorScheme === "light" ? "#000" : "#fff"}
+              />
+            </View>
+          ) : null
+        }
       />
       {!isDailyTaskDone && (
         <DailyTaskPopUp dailyTask={currentUser?.dailyTask} />

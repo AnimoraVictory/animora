@@ -32,8 +32,6 @@ MODEL_PATH = "recommend_system/models/latest.model"
 # ----------------------------------
 class TimelineRequest(BaseModel):
     user_id: str
-    cursor: Optional[str] = None  # どれだけスキップするか
-    limit: int = 10  # 取得する投稿数
 
 
 class FastAPIUser(BaseModel):
@@ -77,7 +75,6 @@ class Post(BaseModel):
 
 class TimelineResponse(BaseModel):
     posts: list[Post]
-    next_cursor: Optional[str]
 
 
 # ----------------------------------
@@ -152,34 +149,9 @@ def recommend_timeline(request: TimelineRequest):
         )
         # recommended: candidate(辞書)のリスト
 
-        # カーソルによるフィルタリング（post_idがcursorより後ろ）
-        if request.cursor is not None:  
-            cursor = get_post_index_from_uuid(request.cursor)
-            cursor_index = next(
-                (
-                    i
-                    for i, r in enumerate(recommended)
-                    if r["post_id"] == cursor
-                ),
-                -1,
-            )
-            recommended = recommended[cursor_index + 1 :]
-
-        posts_data = recommended[: request.limit]
-
-        for p in posts_data:
-            p["post_id"] = get_uuid_from_post_id(p["post_id"])
-            print(
-                f"- post_id: {p['post_id']}, score: {p['score']}, created_at: {p['created_at']}"
-            )
-            print(f"- comments: {p.get('comments', [])}, likes: {p.get('likes', [])}")
-            print(f"- comments: {p.get('comments', []) if p.get('comments', []) is not None else []}")
-            
-        
-
         posts = [
             Post(
-                id=rc["post_id"],
+                id=rc["post_uuid"],
                 caption=rc["caption"],
                 image_key=rc["image_key"],
                 created_at=rc["created_at"].isoformat(),
@@ -195,15 +167,9 @@ def recommend_timeline(request: TimelineRequest):
                 likes=rc.get("likes", []) if rc.get("likes", []) is not None else [],  # いいね埋め込み済み前提
                 daily_task=rc.get("daily_task"),
             )
-            for rc in posts_data
+            for rc in recommended
         ]
-
-        next_cursor = (
-            posts_data[-1]["post_id"]
-            if posts_data and len(posts_data) == request.limit
-            else None
-        )
-        return TimelineResponse(posts=posts, next_cursor=next_cursor)
+        return TimelineResponse(posts=posts)
     except Exception as e:
         traceback.print_exc()  # ← 追加！ターミナルにスタックトレースを表示
         raise HTTPException(status_code=500, detail=str(e))

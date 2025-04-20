@@ -64,6 +64,7 @@ prod_config = {
 existing_user_query = """
                       SELECT 
                         P."index" AS post_id,
+                        P."id" AS post_uuid,
                         P.created_at AS created_at,
                         P.image_feature AS image_feature,
                         P.text_feature AS text_feature,
@@ -138,6 +139,7 @@ existing_user_threshold = 0.2
 new_user_query = """
                  SELECT
                      P."index" AS post_id,
+                     P."id" AS post_uuid,
                      P.created_at AS created_at,
                      P.image_feature AS image_feature,
                      P.text_feature AS text_feature,

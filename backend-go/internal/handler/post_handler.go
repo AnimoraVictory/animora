@@ -19,6 +19,7 @@ import (
 type PostHandler struct {
 	postUsecase    usecase.PostUsecase
 	storageUsecase usecase.StorageUsecase
+	cacheUsecase   usecase.CacheUsecase
 }
 type TimelineRequest struct {
 	UserID uuid.UUID `json:"user_id"`
@@ -26,14 +27,15 @@ type TimelineRequest struct {
 	Limit  int       `json:"limit"`
 }
 
-func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase) *PostHandler {
+func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase, cacheUsecase usecase.CacheUsecase) *PostHandler {
 	return &PostHandler{
 		postUsecase:    postUsecase,
 		storageUsecase: storageUsecase,
+		cacheUsecase:   cacheUsecase,
 	}
 }
 
-func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
+func (h *PostHandler) GetRecommended(c echo.Context) error {
 	var reqBody TimelineRequest
 	if err := c.Bind(&reqBody); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
@@ -41,7 +43,39 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 		})
 	}
 	// reqBody は TimelineRequest 構造体
-	jsonBody, err := json.Marshal(reqBody)
+	if reqBody.Cursor != nil {
+		all := h.cacheUsecase.GetPostResponses(reqBody.UserID)
+
+		started := false
+		limit := reqBody.Limit
+
+		var filtered []models.PostResponse
+		for _, p := range all {
+			if !started {
+				if p.ID.String() == *reqBody.Cursor {
+					started = true
+				}
+				continue
+			}
+			if len(filtered) >= limit {
+				break
+			}
+			filtered = append(filtered, p)
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"posts": filtered,
+		})
+	}
+
+	// FastAPI に送る body は user_id のみ
+	fastapiReqBody := struct {
+		UserID string `json:"user_id"`
+	}{
+		UserID: reqBody.UserID.String(),
+	}
+
+	jsonBodyForFastAPI, err := json.Marshal(fastapiReqBody)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "failed to marshal request body",
@@ -52,11 +86,11 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 	req, err := http.NewRequest(
 		"POST",
 		"https://animalia-lnzk.onrender.com/timeline",
-		bytes.NewBuffer(jsonBody),
+		bytes.NewBuffer(jsonBodyForFastAPI),
 	)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "failed to create request",
+			"error": "failed to create HTTP request",
 		})
 	}
 
@@ -76,11 +110,8 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 	respBody, _ := io.ReadAll(resp.Body)
 
 	var result struct {
-		Posts      []fastapi.FastAPIPost `json:"posts"`
-		NextCursor *string               `json:"next_cursor"`
+		Posts []fastapi.FastAPIPost `json:"posts"`
 	}
-
-	fmt.Printf("%+v\n", result)
 
 	if err := json.Unmarshal(respBody, &result); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -148,9 +179,11 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 		postResponses[i] = fastapi.NewPostResponseFromFastAPI(post, imageURL, userIconURL, commentResponses, likeResponses)
 	}
 
+	h.cacheUsecase.ClearPostResponses(reqBody.UserID)
+	h.cacheUsecase.StorePostResponses(reqBody.UserID, postResponses)
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"posts":       postResponses,
-		"next_cursor": result.NextCursor,
+		"posts": postResponses,
 	})
 }
 
