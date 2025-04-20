@@ -6,6 +6,7 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
@@ -53,6 +54,28 @@ func (r *PostRepository) GetPostsByUser(userID uuid.UUID) ([]*ent.Post, error) {
 		}).
 		WithDailyTask().
 		Where(post.HasUserWith(user.ID(userID))).
+		Where(post.DeletedAtIsNil()).
+		Order(ent.Desc(post.FieldCreatedAt)).
+		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
+		All(context.Background())
+	if err != nil {
+		log.Errorf("Failed to get posts by user: %v", err)
+		return nil, err
+	}
+	return posts, nil
+}
+
+func (r *PostRepository) GetLikedPosts(userID uuid.UUID) ([]*ent.Post, error) {
+	posts, err := r.db.Post.Query().
+		WithUser().
+		WithComments(func(q *ent.CommentQuery) {
+			q.WithUser()
+		}).
+		WithLikes(func(q *ent.LikeQuery) {
+			q.WithUser()
+		}).
+		WithDailyTask().
+		Where(post.HasLikesWith(like.HasUserWith(user.ID(userID)))).
 		Where(post.DeletedAtIsNil()).
 		Order(ent.Desc(post.FieldCreatedAt)).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
