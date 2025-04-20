@@ -22,7 +22,7 @@ type PostHandler struct {
 }
 type TimelineRequest struct {
 	UserID uuid.UUID `json:"user_id"`
-	Cursor *int      `json:"cursor,omitempty"`
+	Cursor *string   `json:"cursor,omitempty"`
 	Limit  int       `json:"limit"`
 }
 
@@ -77,7 +77,7 @@ func (h *PostHandler) GetPostsFromFastAPI(c echo.Context) error {
 
 	var result struct {
 		Posts      []fastapi.FastAPIPost `json:"posts"`
-		NextCursor *int                  `json:"next_cursor"`
+		NextCursor *string               `json:"next_cursor"`
 	}
 
 	fmt.Printf("%+v\n", result)
@@ -287,4 +287,18 @@ func (h *PostHandler) CreatePost(c echo.Context) error {
 		"message": "投稿が作成されました",
 		"post":    post,
 	})
+}
+
+func (h *PostHandler) DeletePost(c echo.Context) error {
+	postID := c.QueryParam("id")
+	if postID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Post ID is required"})
+	}
+
+	err := h.postUsecase.DeletePost(postID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Post deleted successfully"})
 }

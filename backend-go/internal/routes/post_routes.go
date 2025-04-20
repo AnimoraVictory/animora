@@ -13,7 +13,11 @@ func SetupPostRoutes(app *echo.Echo) {
 	// get posts for timeline
 	postGroup.POST("/timeline", postHandler.GetPostsFromFastAPI)
 
+	postGroup.GET("/all", postHandler.GetAllPosts)
+
 	// Create a new post
 	postGroup.POST("/", postHandler.CreatePost)
 
+	// Delete　a post
+	postGroup.DELETE("/delete", postHandler.DeletePost)
 }
