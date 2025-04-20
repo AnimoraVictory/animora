@@ -1,4 +1,10 @@
-import React, { useRef, useState, useMemo, useEffect } from "react";
+import React, {
+  useRef,
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+} from 'react';
 import {
   Modal,
   View,
@@ -12,23 +18,23 @@ import {
   RefreshControl,
   Easing,
   Pressable,
-} from "react-native";
-import { useColorScheme } from "react-native";
-import { Colors } from "@/constants/Colors";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import Constants from "expo-constants";
-import { User, UserBase } from "@/constants/api";
-import { UserPostList } from "./UserPostList";
-import { UserPetList } from "./UserPetsList";
-import { ProfileTabSelector } from "./ProfileTabSelector";
-import UserProfileHeader from "./UserProfileHeader";
-import UsersModal from "./UsersModal";
-import { useModalStack } from "@/providers/ModalStackContext";
-import { FontAwesome5 } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
+} from 'react-native';
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import Constants from 'expo-constants';
+import { UserPostList } from './UserPostList';
+import { UserPetList } from './UserPetsList';
+import { ProfileTabSelector } from './ProfileTabSelector';
+import UserProfileHeader from './UserProfileHeader';
+import UsersModal from './UsersModal';
+import { useModalStack } from '@/providers/ModalStackContext';
+import { FontAwesome5 } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { User, UserBase } from '@/features/user/schema';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 type Props = {
@@ -40,8 +46,8 @@ type Props = {
   prevModalIdx: number;
 };
 
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const UserProfileModal: React.FC<Props> = ({
   email,
@@ -52,8 +58,8 @@ const UserProfileModal: React.FC<Props> = ({
   prevModalIdx,
 }) => {
   const [selectedFollowTab, setSelectedFollowTab] = useState<
-    "follows" | "followers"
-  >("follows");
+    'follows' | 'followers'
+  >('follows');
   const [isFollowModalVisible, setIsFollowModalVisible] = useState(false);
   const slideAnimFollow = useRef(new Animated.Value(width)).current;
   const [scrollX, setScrollX] = useState(0);
@@ -62,13 +68,13 @@ const UserProfileModal: React.FC<Props> = ({
   const modalKey = `${prevModalIdx + 1}`;
 
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
-  const backgroundColor = colorScheme === "light" ? "white" : "black";
+  const colors = Colors[colorScheme ?? 'light'];
+  const backgroundColor = colorScheme === 'light' ? 'white' : 'black';
 
   const queryClient = useQueryClient();
   const scrollRef = useRef<ScrollView>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
-  const selectedTab = scrollX < windowWidth / 2 ? "posts" : "mypet";
+  const selectedTab = scrollX < windowWidth / 2 ? 'posts' : 'mypet';
   const postListWidth = useRef(0);
 
   const {
@@ -77,7 +83,7 @@ const UserProfileModal: React.FC<Props> = ({
     refetch,
     isRefetching,
   } = useQuery<User>({
-    queryKey: ["userProfile", email],
+    queryKey: ['userProfile', email],
     queryFn: async () => {
       const res = await axios.get(`${API_URL}/users/?email=${email}`);
       return res.data.user;
@@ -87,7 +93,7 @@ const UserProfileModal: React.FC<Props> = ({
 
   const isMe = useMemo(() => {
     return !!user?.id && user.id === currentUser.id;
-  }, [user?.id]);
+  }, [currentUser.id, user?.id]);
 
   const isFollowing = useMemo(() => {
     if (!user) return false;
@@ -101,7 +107,7 @@ const UserProfileModal: React.FC<Props> = ({
       ),
     onSuccess: () => {
       queryClient.setQueryData(
-        ["userProfile", email],
+        ['userProfile', email],
         (prev: User | undefined) => {
           if (!prev) return prev;
           return {
@@ -121,7 +127,7 @@ const UserProfileModal: React.FC<Props> = ({
       ),
     onSuccess: () => {
       queryClient.setQueryData(
-        ["userProfile", email],
+        ['userProfile', email],
         (prev: User | undefined) => {
           if (!prev) return prev;
           return {
@@ -134,9 +140,13 @@ const UserProfileModal: React.FC<Props> = ({
     },
   });
 
-  const handlePressFollowButton = () => {
-    isFollowing ? unfollowMutation.mutate() : followMutation.mutate();
-  };
+  const handlePressFollowButton = useCallback(() => {
+    if (isFollowing) {
+      unfollowMutation.mutate();
+    } else {
+      followMutation.mutate();
+    }
+  }, [followMutation, isFollowing, unfollowMutation]);
 
   const onOpenFollowModal = () => {
     setIsFollowModalVisible(true);
@@ -175,7 +185,7 @@ const UserProfileModal: React.FC<Props> = ({
           if (!isTop(modalKey)) {
             return;
           }
-          if (selectedTab === "posts") {
+          if (selectedTab === 'posts') {
             if (dx < -30) {
               scrollRef.current?.scrollTo({ x: windowWidth, animated: true });
             } else if (dx > 30) {
@@ -186,7 +196,7 @@ const UserProfileModal: React.FC<Props> = ({
                 useNativeDriver: true,
               }).start(() => onClose());
             }
-          } else if (selectedTab === "mypet") {
+          } else if (selectedTab === 'mypet') {
             const leftEdgeThreshold = windowWidth / 2 + 50;
             const adjustedStartX = startX;
             if (dx > 30) {
@@ -207,7 +217,7 @@ const UserProfileModal: React.FC<Props> = ({
           // 上記に該当しないときは何もしない
         },
       }),
-    [selectedTab, scrollRef, slideAnim, onClose]
+    [isTop, modalKey, selectedTab, slideAnim, onClose]
   );
 
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -226,11 +236,11 @@ const UserProfileModal: React.FC<Props> = ({
       spinAnim.stopAnimation();
       spinAnim.setValue(0);
     }
-  }, [isLoading, visible]);
+  }, [isLoading, spinAnim, visible]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
+    outputRange: ['0deg', '360deg'],
   });
 
   useEffect(() => {
@@ -243,7 +253,7 @@ const UserProfileModal: React.FC<Props> = ({
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 80],
     outputRange: [0, 1],
-    extrapolate: "clamp",
+    extrapolate: 'clamp',
   });
 
   if (!user || isLoading) {
@@ -255,8 +265,8 @@ const UserProfileModal: React.FC<Props> = ({
             {
               transform: [{ translateX: slideAnim }],
               backgroundColor: colors.middleBackground,
-              justifyContent: "center",
-              alignItems: "center",
+              justifyContent: 'center',
+              alignItems: 'center',
             },
           ]}
         >
@@ -305,7 +315,7 @@ const UserProfileModal: React.FC<Props> = ({
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 refetch();
               }}
-              tintColor={colorScheme === "light" ? "black" : "white"}
+              tintColor={colorScheme === 'light' ? 'black' : 'white'}
             />
           }
           contentInset={{ top: 90 }}
@@ -331,10 +341,10 @@ const UserProfileModal: React.FC<Props> = ({
               selectedTab={selectedTab}
               onSelectTab={(tab) => {
                 scrollRef.current?.scrollTo({
-                  x: tab === "posts" ? 0 : windowWidth,
+                  x: tab === 'posts' ? 0 : windowWidth,
                   animated: true,
                 });
-                setScrollX(tab === "posts" ? 0 : windowWidth);
+                setScrollX(tab === 'posts' ? 0 : windowWidth);
               }}
               scrollRef={scrollRef}
             />
@@ -397,19 +407,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topHeader: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     height: 90,
     width: width,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingTop: 42,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
+    borderBottomColor: '#ccc',
     zIndex: 2,
   },
   backButton: {
-    position: "absolute",
+    position: 'absolute',
     left: 16,
     top: 44,
   },
@@ -418,6 +428,6 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

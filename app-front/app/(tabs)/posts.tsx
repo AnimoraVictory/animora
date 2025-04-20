@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Animated,
@@ -11,90 +11,26 @@ import {
   FlatList,
   Easing,
   View,
-} from "react-native";
-import axios from "axios";
-import { z } from "zod";
+} from 'react-native';
 import {
   InfiniteData,
   useInfiniteQuery,
   useQueryClient,
-} from "@tanstack/react-query";
-import Constants from "expo-constants";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Colors } from "@/constants/Colors";
-import { useHomeTabHandler } from "@/providers/HomeTabScrollContext";
-import { petSchema } from "@/components/PetPanel";
-import { useAuth } from "@/providers/AuthContext";
-import DailyTaskPopUp from "@/components/DailyTaskPopUp";
-import * as Haptics from "expo-haptics";
-import { FontAwesome5 } from "@expo/vector-icons";
-import PostPanel from "@/components/PostPanel";
-
-const API_URL = Constants.expoConfig?.extra?.API_URL;
-export const postBaseSchema = z.object({
-  id: z.string().uuid(),
-});
-
-export const userBaseSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string(),
-  name: z.string(),
-  bio: z.string(),
-  iconImageUrl: z.string().nullable(),
-});
-
-export const dailyTaskBaseSchema = z.object({
-  id: z.string().uuid(),
-  createdAt: z.string().datetime(),
-  type: z.string(),
-});
-
-export const dailyTaskSchema = dailyTaskBaseSchema.extend({
-  post: postBaseSchema,
-});
-
-export const commentSchema = z.object({
-  id: z.string(),
-  user: userBaseSchema,
-  content: z.string(),
-  createdAt: z.string().datetime(),
-});
-
-export const likeSchema = z.object({
-  id: z.string(),
-  user: userBaseSchema,
-  createdAt: z.string().datetime(),
-});
-
-export const postSchema = z.object({
-  id: z.string().uuid(),
-  caption: z.string().min(0),
-  imageUrl: z.string().min(1),
-  user: userBaseSchema,
-  comments: z.array(commentSchema),
-  commentsCount: z.number(),
-  likes: z.array(likeSchema),
-  likesCount: z.number(),
-  createdAt: z.string().datetime(),
-  dailyTask: dailyTaskBaseSchema.optional().nullable(),
-});
-
-export const userSchema = userBaseSchema.extend({
-  followers: z.array(userBaseSchema),
-  follows: z.array(userBaseSchema),
-  followersCount: z.number(),
-  followsCount: z.number(),
-  posts: z.array(postSchema),
-  pets: z.array(petSchema),
-  dailyTask: dailyTaskSchema,
-});
-
-export const getPostResponseSchema = z.object({
-  posts: z.array(postSchema),
-});
-
-type GetPostsResponse = z.infer<typeof getPostResponseSchema>;
+} from '@tanstack/react-query';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { PostPanel } from '@/components/PostPanel';
+import { Colors } from '@/constants/Colors';
+import { useHomeTabHandler } from '@/providers/HomeTabScrollContext';
+import { useAuth } from '@/providers/AuthContext';
+import DailyTaskPopUp from '@/components/DailyTaskPopUp';
+import * as Haptics from 'expo-haptics';
+import { FontAwesome5 } from '@expo/vector-icons';
+import {
+  getPostResponseSchema,
+  GetPostsResponse,
+} from '@/features/post/schema';
+import { fetchApi } from '@/utils/api';
 
 export default function PostsScreen() {
   const colorScheme = useColorScheme();
@@ -102,7 +38,7 @@ export default function PostsScreen() {
   const scrollYRef = useRef(0);
   const listRef = useRef<FlatList>(null);
   const HEADER_HEIGHT = 90;
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, token } = useAuth();
   const queryClient = useQueryClient();
 
   const {
@@ -121,17 +57,21 @@ export default function PostsScreen() {
     [string, string?],
     string | null
   >({
-    queryKey: ["posts"],
+    queryKey: ['posts'],
     queryFn: async ({ pageParam = null }) => {
-      const response = await axios.post(`${API_URL}/posts/timeline`, {
-        user_id: currentUser?.id,
-        limit: 10,
-        cursor: pageParam,
+      return await fetchApi({
+        method: 'POST',
+        path: '/posts/timeline',
+        schema: getPostResponseSchema,
+        options: {
+          data: {
+            user_id: currentUser?.id,
+            limit: 10,
+            cursor: pageParam,
+          },
+        },
+        token,
       });
-
-      const result = getPostResponseSchema.safeParse(response.data);
-      if (!result.success) throw new Error("parse failed");
-      return result.data;
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => {
@@ -141,9 +81,9 @@ export default function PostsScreen() {
     enabled: !!currentUser?.id,
   });
   const icon =
-    colorScheme === "light"
-      ? require("../../assets/images/icon-green.png")
-      : require("../../assets/images/icon-dark.png");
+    colorScheme === 'light'
+      ? require('../../assets/images/icon-green.png')
+      : require('../../assets/images/icon-dark.png');
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollYRef.current = event.nativeEvent.contentOffset.y;
@@ -152,7 +92,7 @@ export default function PostsScreen() {
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, HEADER_HEIGHT],
     outputRange: [0, -HEADER_HEIGHT],
-    extrapolate: "clamp",
+    extrapolate: 'clamp',
   });
 
   const { setHandler } = useHomeTabHandler();
@@ -183,11 +123,11 @@ export default function PostsScreen() {
       spinAnim.stopAnimation();
       spinAnim.setValue(0);
     }
-  }, [isLoading]);
+  }, [isLoading, spinAnim]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
+    outputRange: ['0deg', '360deg'],
   });
 
   if (isLoading) {
@@ -221,7 +161,7 @@ export default function PostsScreen() {
                 refetch();
               }}
               progressViewOffset={HEADER_HEIGHT}
-              tintColor={colorScheme === "light" ? "black" : "white"}
+              tintColor={colorScheme === 'light' ? 'black' : 'white'}
             />
           }
           contentInset={{ top: HEADER_HEIGHT }}
@@ -238,7 +178,7 @@ export default function PostsScreen() {
           styles.header,
           {
             transform: [{ translateY: headerTranslateY }],
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: Colors[colorScheme ?? 'light'].background,
           },
         ]}
       >
@@ -249,7 +189,7 @@ export default function PostsScreen() {
         keyboardShouldPersistTaps="handled"
         ref={listRef}
         style={{
-          backgroundColor: colorScheme === "light" ? "white" : "black",
+          backgroundColor: colorScheme === 'light' ? 'white' : 'black',
         }}
         contentInset={{ top: HEADER_HEIGHT + 20 }}
         contentOffset={{ x: 0, y: -(HEADER_HEIGHT + 20) }}
@@ -262,9 +202,9 @@ export default function PostsScreen() {
             refreshing={isRefetching}
             onRefresh={async () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              await queryClient.invalidateQueries({ queryKey: ["posts"] });
+              await queryClient.invalidateQueries({ queryKey: ['posts'] });
             }}
-            tintColor={colorScheme === "light" ? "black" : "white"}
+            tintColor={colorScheme === 'light' ? 'black' : 'white'}
           />
         }
         onScroll={Animated.event(
@@ -291,7 +231,7 @@ export default function PostsScreen() {
             <View style={{ paddingVertical: 20 }}>
               <ActivityIndicator
                 size="small"
-                color={colorScheme === "light" ? "#000" : "#fff"}
+                color={colorScheme === 'light' ? '#000' : '#fff'}
               />
             </View>
           ) : null
@@ -310,29 +250,29 @@ const styles = StyleSheet.create({
   },
   loadingOverlay: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     height: 90,
     zIndex: 10,
-    justifyContent: "flex-start",
-    alignItems: "center",
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   logo: {
     width: 32,
     height: 32,
     marginTop: 50,
-    resizeMode: "contain",
+    resizeMode: 'contain',
   },
   errorText: {
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 150,
     fontSize: 16,
-    color: "gray",
+    color: 'gray',
   },
 });

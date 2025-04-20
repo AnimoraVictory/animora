@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "react-native";
-import { Post } from "./PostPanel";
 import CommentsModal from "./CommentsModal";
 import { useAuth } from "@/providers/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +19,7 @@ import LikedUserModal from "./LikedUsesModal";
 import { useModalStack } from "@/providers/ModalStackContext";
 import Constants from "expo-constants";
 import axios from "axios";
+import { Post } from "@/features/post/schema";
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 type Props = {

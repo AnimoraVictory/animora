@@ -27,9 +27,9 @@ import axios from "axios";
 import { useAuth } from "@/providers/AuthContext";
 import Constants from "expo-constants";
 import { PetForm, petInputSchema } from "./PetRegisterModal";
-import { Pet } from "@/constants/api";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { Pet } from "@/features/pet/schema";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -169,7 +169,7 @@ export const PetEditModal: React.FC<PetEditModalProps> = ({
       spinAnim.stopAnimation();
       spinAnim.setValue(0);
     }
-  }, [updatePetMutation.isPending]);
+  }, [spinAnim, updatePetMutation.isPending]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],

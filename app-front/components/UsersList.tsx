@@ -1,3 +1,4 @@
+import { UserBase } from "@/features/user/schema";
 import React from "react";
 import {
   FlatList,
@@ -7,7 +8,6 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import { UserBase } from "@/constants/api";
 
 const { width } = Dimensions.get("window");
 

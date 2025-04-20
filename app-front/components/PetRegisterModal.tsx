@@ -187,7 +187,7 @@ export const PetRegiserModal: React.FC<PetRegiserModalProps> = ({
       spinAnim.stopAnimation();
       spinAnim.setValue(0);
     }
-  }, [registerPetMutation.isPending]);
+  }, [registerPetMutation.isPending, spinAnim]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],

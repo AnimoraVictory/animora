@@ -114,7 +114,7 @@ export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
       spinAnim.stopAnimation();
       spinAnim.setValue(0);
     }
-  }, [isSubmitting]);
+  }, [isSubmitting, spinAnim]);
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
