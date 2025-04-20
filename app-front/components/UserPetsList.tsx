@@ -1,9 +1,8 @@
-import React from "react";
-import { FlatList, Text, View, useColorScheme } from "react-native";
-import PetPanel from "@/components/PetPanel";
-import { Pet } from "@/constants/api";
-import { Colors } from "@/constants/Colors";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import React from 'react';
+import { FlatList, Text, View, useColorScheme } from 'react-native';
+import PetPanel from '@/components/PetPanel';
+import { Colors } from '@/constants/Colors';
+import { Pet } from '@/features/pet/schema';
 
 type Props = {
   pets: Pet[];
@@ -11,8 +10,8 @@ type Props = {
 };
 
 export const UserPetList: React.FC<Props> = ({ pets, colorScheme }) => {
-  const colors = Colors[colorScheme ?? "light"];
-  const backgroundColor = colorScheme === "dark" ? "black" : "white";
+  const colors = Colors[colorScheme ?? 'light'];
+  const backgroundColor = colorScheme === 'dark' ? 'black' : 'white';
 
   return (
     <FlatList
@@ -33,7 +32,7 @@ export const UserPetList: React.FC<Props> = ({ pets, colorScheme }) => {
       }}
       ListEmptyComponent={
         <Text
-          style={{ color: colors.text, textAlign: "center", marginTop: 32 }}
+          style={{ color: colors.text, textAlign: 'center', marginTop: 32 }}
         >
           マイペットを登録しましょう！
         </Text>

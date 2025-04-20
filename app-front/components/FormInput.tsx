@@ -61,7 +61,7 @@ export const FormInput: React.FC<FormInputProps> = ({
         useNativeDriver: false,
       }).start();
     }
-  }, [value]);
+  }, [animRef, value]);
 
   const labelStyle = {
     position: "absolute" as const,

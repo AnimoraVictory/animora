@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { FlatList, Text, useColorScheme } from "react-native";
 import ProfilePostPanel from "@/components/ProfilePostPanel";
-import { Post } from "@/components/PostPanel";
 import { Colors } from "@/constants/Colors";
 import PostModal from "./PostModal";
 import { useModalStack } from "@/providers/ModalStackContext";
+import { Post } from "@/features/post/schema";
 
 type Props = {
   posts: Post[];

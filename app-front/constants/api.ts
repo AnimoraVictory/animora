@@ -1,16 +1,8 @@
-import axios from "axios";
-import Constants from "expo-constants";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { petSchema } from "@/components/PetPanel";
-import { z } from "zod";
-import { userBaseSchema, userSchema } from "@/app/(tabs)/posts";
+import axios from 'axios';
+import Constants from 'expo-constants';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { User } from '@/features/user/schema';
 const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-export type Pet = z.infer<typeof petSchema>;
-
-export type UserBase = z.infer<typeof userBaseSchema>;
-
-export type User = z.infer<typeof userSchema>;
 
 export interface LoginResponse {
   message: string;
@@ -27,7 +19,7 @@ export const api = {
       `${API_URL}/auth/signin`,
       { email, password },
       {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
     return response.data;
@@ -42,7 +34,7 @@ export const api = {
       `${API_URL}/auth/signup`,
       { email, password, name },
       {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   },
@@ -50,7 +42,7 @@ export const api = {
   signOut: async (accessToken: string): Promise<void> => {
     await axios.post(`${API_URL}/auth/signout`, null, {
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
     });
@@ -70,7 +62,7 @@ export const api = {
       `${API_URL}/auth/verify-email`,
       { email, code },
       {
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   },
@@ -106,7 +98,7 @@ export const useSignOut = () => {
 
 export const useGetUser = (accessToken: string | null) => {
   return useQuery({
-    queryKey: ["user", accessToken],
+    queryKey: ['user', accessToken],
     queryFn: () => (accessToken ? api.getUser(accessToken) : null),
     enabled: !!accessToken,
   });

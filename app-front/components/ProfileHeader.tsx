@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/Colors";
-import { User } from "@/constants/api";
+import { User } from "@/features/user/schema";
 
 type ProfileHeaderProps = {
   user: User;

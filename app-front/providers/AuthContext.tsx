@@ -1,7 +1,8 @@
-import React, { createContext, useContext, ReactNode } from "react";
-import * as SecureStore from "expo-secure-store";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, User, LoginResponse } from "../constants/api";
+import React, { createContext, useContext, ReactNode } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api, LoginResponse } from '../constants/api';
+import { User } from '@/features/user/schema';
 
 interface AuthContextType {
   user: User | undefined | null;
@@ -10,6 +11,7 @@ interface AuthContextType {
   loading: boolean;
   refetch: () => Promise<void>;
   isRefetching: boolean;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,12 +21,13 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   refetch: async () => {},
   isRefetching: true,
+  token: null,
 });
 
 // SecureStore のキー
-const ACCESS_TOKEN_KEY = "accessToken";
-const ID_TOKEN_KEY = "idToken";
-const REFRESH_TOKEN_KEY = "refreshToken";
+const ACCESS_TOKEN_KEY = 'accessToken';
+const ID_TOKEN_KEY = 'idToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -48,7 +51,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["user", token],
+    queryKey: ['user', token],
     queryFn: () => (token ? api.getUser(token) : null),
     enabled: !!token,
   });
@@ -73,7 +76,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           response.refreshToken
         );
         setToken(response.accessToken);
-        queryClient.setQueryData(["user", response.accessToken], response.user);
+        queryClient.setQueryData(['user', response.accessToken], response.user);
       }
     },
     onError: async () => {
@@ -81,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       await SecureStore.deleteItemAsync(ID_TOKEN_KEY);
       await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
       setToken(null);
-      queryClient.setQueryData(["user", null], null);
+      queryClient.setQueryData(['user', null], null);
     },
   });
 
@@ -94,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       await SecureStore.deleteItemAsync(ID_TOKEN_KEY);
       await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
       setToken(null);
-      queryClient.setQueryData(["user", null], null);
+      queryClient.setQueryData(['user', null], null);
     },
     onError: async (error) => {
       // エラー時も全トークンを削除（セッションが無効な可能性があるため）
@@ -102,7 +105,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       await SecureStore.deleteItemAsync(ID_TOKEN_KEY);
       await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
       setToken(null);
-      queryClient.setQueryData(["user", null], null);
+      queryClient.setQueryData(['user', null], null);
       throw error; // エラーを上位に伝播させる
     },
   });
@@ -124,6 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         loading: isLoading,
         refetch: refetchUser,
         isRefetching,
+        token,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -10,18 +10,15 @@ import {
   Dimensions,
   Animated,
   PanResponder,
-} from "react-native";
-import { useColorScheme } from "react-native";
-import { Colors } from "@/constants/Colors";
-import { UserBase } from "@/constants/api";
-import UserProfileModal from "./UserProfileModal";
-import { useModalStack } from "@/providers/ModalStackContext";
-import { likeSchema } from "@/app/(tabs)/posts";
-import { z } from "zod";
+} from 'react-native';
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import UserProfileModal from './UserProfileModal';
+import { useModalStack } from '@/providers/ModalStackContext';
+import { Like } from '@/features/like/schema';
+import { UserBase } from '@/features/user/schema';
 
-const { width, height } = Dimensions.get("window");
-
-type Like = z.infer<typeof likeSchema>;
+const { width, height } = Dimensions.get('window');
 
 type Props = {
   visible: boolean;
@@ -103,7 +100,7 @@ const LikedUserModal: React.FC<Props> = ({
     [modalKey, isTop, slideAnim, onClose]
   );
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? 'light'];
 
   return (
     <Modal visible={visible} transparent animationType="none">
@@ -141,7 +138,7 @@ const LikedUserModal: React.FC<Props> = ({
                 source={
                   item.user.iconImageUrl
                     ? { uri: item.user.iconImageUrl }
-                    : require("@/assets/images/profile.png")
+                    : require('@/assets/images/profile.png')
                 }
                 style={styles.avatar}
               />
@@ -175,20 +172,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     height: 80,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
+    borderBottomColor: '#ccc',
     paddingTop: 40,
     zIndex: 2,
   },
   backButton: {
-    position: "absolute",
+    position: 'absolute',
     left: 16,
     top: 44,
     zIndex: 1,
@@ -198,12 +195,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   userItem: {
     padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
   },
   avatar: {
@@ -214,6 +211,6 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });
