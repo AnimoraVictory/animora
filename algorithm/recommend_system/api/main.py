@@ -12,6 +12,7 @@ import uvicorn
 from recommend_system.components.mmneumf import MultiModalNeuMF
 from recommend_system.src.download_model import download_latest_model
 from recommend_system.api.recommend_timeline import (
+    get_post_index_from_uuid,
     get_user_id,
     get_candidate_posts,
     get_uuid_from_post_id,
@@ -152,12 +153,13 @@ def recommend_timeline(request: TimelineRequest):
         # recommended: candidate(辞書)のリスト
 
         # カーソルによるフィルタリング（post_idがcursorより後ろ）
-        if request.cursor is not None:
+        if request.cursor is not None:  
+            cursor = get_post_index_from_uuid(request.cursor)
             cursor_index = next(
                 (
                     i
                     for i, r in enumerate(recommended)
-                    if r["post_id"] == request.cursor
+                    if r["post_id"] == cursor
                 ),
                 -1,
             )
@@ -172,6 +174,8 @@ def recommend_timeline(request: TimelineRequest):
             )
             print(f"- comments: {p.get('comments', [])}, likes: {p.get('likes', [])}")
             print(f"- comments: {p.get('comments', []) if p.get('comments', []) is not None else []}")
+            
+        
 
         posts = [
             Post(
