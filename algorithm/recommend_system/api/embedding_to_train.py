@@ -2,16 +2,36 @@
 #                      レコメンドタイムラインを生成するオンライン推論API                  　 #
 # ---------------------------------------------------------------------------------  #
 # ライブラリのインポート
+import os
 from fastapi import FastAPI, HTTPException
 import traceback
 import subprocess
 import uvicorn
+from contextlib import asynccontextmanager
+from huggingface_hub import login
 from common.src.multimodal_feature_extractor import update_post_features
+from dotenv import load_dotenv, find_dotenv
+
+_ = load_dotenv(find_dotenv())
+
+# ----------------------------------
+# Hugging Face Hubのログイン
+# ----------------------------------
+@asynccontextmanager
+async def login_huggingface(app: FastAPI):
+    hf_token = os.getenv("HUGGINGFACE_TOKEN")
+    if hf_token:
+        login(token=hf_token)
+        print("Logged in to Hugging Face Hub.")
+    else:
+        print("Hugging Face Hub token not found. Please set the HUGGINGFACE_TOKEN environment variable.")
+    yield # アプリのライフサイクルの本体がここ
+
 
 # ----------------------------------
 # FastAPIアプリの構築
 # ----------------------------------
-app = FastAPI()
+app = FastAPI(lifespan=login_huggingface)
 
 # ----------------------------------
 # / エンドポイント
