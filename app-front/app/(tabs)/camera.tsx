@@ -1,15 +1,15 @@
-import { CreatePostModal } from "@/components/CreatePostModal";
-import { useAuth } from "@/providers/AuthContext";
-import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from "@react-navigation/native";
+import { CreatePostModal } from '@/components/CreatePostModal';
+import { useAuth } from '@/providers/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   CameraView,
   CameraType,
   useCameraPermissions,
   FlashMode,
-} from "expo-camera";
-import { useRouter } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+} from 'expo-camera';
+import { useRouter } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
 import {
   Animated,
   Button,
@@ -19,22 +19,22 @@ import {
   TouchableOpacity,
   View,
   Linking,
-} from "react-native";
+} from 'react-native';
 
-const { height } = Dimensions.get("window");
-export type TaskType = "eating" | "sleeping" | "playing";
+const { height } = Dimensions.get('window');
+export type TaskType = 'eating' | 'sleeping' | 'playing';
 
 export const taskTypeMap: Record<TaskType, string> = {
-  eating: "ご飯を食べているところを撮影しよう！",
-  sleeping: "寝ているところを撮影しよう！",
-  playing: "遊んでいるところを撮影しよう！",
+  eating: 'ご飯を食べているところを撮影しよう！',
+  sleeping: '寝ているところを撮影しよう！',
+  playing: '遊んでいるところを撮影しよう！',
 };
 
 export default function CameraScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
-  const [facing, setFacing] = useState<CameraType>("back");
-  const [flashMode, setFlashMode] = useState<FlashMode>("off");
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [flashMode, setFlashMode] = useState<FlashMode>('off');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [showTaskMessage, setShowTaskMessage] = useState(false);
   const cameraRef = useRef<any>(null);
@@ -57,11 +57,11 @@ export default function CameraScreen() {
       duration: 100,
       useNativeDriver: true,
     }).start(() => {
-      router.replace("/(tabs)/posts");
+      router.replace('/(tabs)/posts');
     });
   };
 
-  const taskButtonColor = showTaskMessage ? "green" : "white";
+  const taskButtonColor = showTaskMessage ? 'green' : 'white';
 
   const dailyTaskDone = currentUser?.dailyTask.post ? true : false;
 
@@ -120,13 +120,13 @@ export default function CameraScreen() {
             <TouchableOpacity
               style={styles.flashButton}
               onPress={() =>
-                setFlashMode((prev) => (prev === "off" ? "on" : "off"))
+                setFlashMode((prev) => (prev === 'off' ? 'on' : 'off'))
               }
             >
               <Ionicons
-                name={flashMode === "off" ? "flash-off" : "flash"}
+                name={flashMode === 'off' ? 'flash-off' : 'flash'}
                 size={30}
-                color={flashMode === "off" ? "#888" : "#facc15"}
+                color={flashMode === 'off' ? '#888' : '#facc15'}
               />
             </TouchableOpacity>
 
@@ -143,7 +143,7 @@ export default function CameraScreen() {
             <TouchableOpacity
               style={styles.flipButton}
               onPress={() =>
-                setFacing((prev) => (prev === "back" ? "front" : "back"))
+                setFacing((prev) => (prev === 'back' ? 'front' : 'back'))
               }
             >
               <Text style={styles.flipText}>↺</Text>
@@ -159,107 +159,107 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   permissionOverlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 16,
   },
   permissionText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 18,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 20,
   },
   camera: { flex: 1 },
   bottomControls: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 40,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   flashButton: {
     marginRight: 50,
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   flashText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
-    textAlign: "center",
+    textAlign: 'center',
   },
   shutterButton: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderWidth: 4,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
   },
   flipButton: {
     marginLeft: 50,
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   flipText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 24,
-    textAlign: "center",
+    textAlign: 'center',
   },
   closeButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 60,
     left: 20,
     width: 50,
     borderRadius: 12,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 1,
   },
   closeText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 24,
-    textAlign: "center",
+    textAlign: 'center',
   },
   taskButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 60,
     right: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
     zIndex: 3,
   },
   taskButtonText: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 14,
-    color: "#333",
+    color: '#333',
   },
   taskMessageContainer: {
-    position: "absolute",
-    top: "40%",
+    position: 'absolute',
+    top: '40%',
     left: 0,
     right: 0,
-    alignItems: "center",
+    alignItems: 'center',
     zIndex: 5,
   },
   taskMessageText: {
-    color: "#000",
+    color: '#000',
     fontSize: 20,
     opacity: 0.4,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
     paddingHorizontal: 20,
   },
 });
