@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: cimg/go:1.21  # Adjust this to match your Go version
+      - image: cimg/go:1.24
     working_directory: ~/project/backend-go
     steps:
       - checkout:
