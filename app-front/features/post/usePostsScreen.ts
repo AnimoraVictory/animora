@@ -28,7 +28,6 @@ export default function usePostsScreen({ post }: Props) {
     } else {
       setLikedByCurrentUser(false);
       setLiked(false);
-      setLikedByCurrentUser(false);
     }
   }, [isLoadingLike, likedByCurrentUser, setLiked]);
 

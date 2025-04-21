@@ -6,6 +6,7 @@ import {
   useMutation,
   InfiniteData,
 } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { z } from 'zod';
 
 const useToggleLike = (postId: string, userId: string) => {
@@ -29,7 +30,9 @@ const useToggleLike = (postId: string, userId: string) => {
       queryClient.setQueryData(
         ['posts'],
         (oldData: InfiniteData<GetPostsResponse> | undefined) => {
-          if (!oldData) return oldData;
+          if (!oldData) {
+            return oldData;
+          }
 
           return {
             ...oldData,
@@ -72,18 +75,30 @@ const useToggleLike = (postId: string, userId: string) => {
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ['posts'] });
       const previousPosts = queryClient.getQueryData<any[]>(['posts']);
-      queryClient.setQueryData<any[]>(['posts'], (oldPosts) => {
-        if (!oldPosts) return oldPosts;
-        return oldPosts.map((p) => {
-          if (p.id === postId) {
-            return {
-              ...p,
-              likedByCurrentUser: false,
-            };
+      queryClient.setQueryData(
+        ['posts'],
+        (oldData: InfiniteData<GetPostsResponse> | undefined) => {
+          if (!oldData) {
+            return oldData;
           }
-          return p;
-        });
-      });
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              posts: page.posts.map((p) =>
+                p.id === postId
+                  ? {
+                      ...p,
+                      likedByCurrentUser: true,
+                      likesCount: p.likesCount - 1,
+                    }
+                  : p
+              ),
+            })),
+          };
+        }
+      );
       return { previousPosts };
     },
     onError: (_, __, context) => {
@@ -106,8 +121,10 @@ const useToggleLike = (postId: string, userId: string) => {
     }
   };
 
-  const isLoading =
-    createLikeMutation.isPending || deleteLikeMutation.isPending;
+  const isLoading = useMemo(
+    () => createLikeMutation.isPending || deleteLikeMutation.isPending,
+    [createLikeMutation.isPending, deleteLikeMutation.isPending]
+  );
 
   return { setLiked, isLoading };
 };
