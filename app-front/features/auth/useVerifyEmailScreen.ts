@@ -1,6 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { verifyEmailFormSchema, VerifyEmailForm, VerifyEmailResponse, verifyEmailResponseSchema } from './schema';
-import { z } from 'zod';
+import {
+  verifyEmailFormSchema,
+  VerifyEmailForm,
+  VerifyEmailResponse,
+  verifyEmailResponseSchema,
+} from './schema';
 import { fetchApi } from '@/utils/api';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -8,7 +12,11 @@ import { useRouter } from 'expo-router';
 export const useVerifyEmailScreen = () => {
   const router = useRouter();
 
-  const { mutate, isPending } = useMutation<VerifyEmailResponse, Error, VerifyEmailForm>({
+  const { mutate, isPending } = useMutation<
+    VerifyEmailResponse,
+    Error,
+    VerifyEmailForm
+  >({
     mutationFn: (data: VerifyEmailForm) => {
       const parsedData = verifyEmailFormSchema.parse(data);
       return fetchApi({
