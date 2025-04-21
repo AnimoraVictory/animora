@@ -50,3 +50,14 @@ export const verifyEmailFormSchema = z.object({
 });
 
 export type VerifyEmailForm = z.infer<typeof verifyEmailFormSchema>;
+
+export const verifyEmailResponseSchema = z.union([
+  z.object({
+    error: z.string(),
+  }),
+  z.object({
+    message: z.string(),
+  }),
+]);
+
+export type VerifyEmailResponse = z.infer<typeof verifyEmailResponseSchema>;

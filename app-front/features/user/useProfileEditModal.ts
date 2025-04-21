@@ -32,7 +32,7 @@ export default function useProfileEditModal({ onClose }: Props) {
       return fetchApi({
         method: 'PUT',
         path: `/users/update?id=${user?.id}`,
-        schema: z.void(),
+        schema: z.any(),
         options: {
           data,
           headers: { 'Content-Type': 'multipart/form-data' },

@@ -36,7 +36,7 @@ export const useCreatePostModal = ({
       return fetchApi({
         method: 'POST',
         path: 'posts',
-        schema: z.void(),
+        schema: z.any(),
         options: {
           data,
           headers: {

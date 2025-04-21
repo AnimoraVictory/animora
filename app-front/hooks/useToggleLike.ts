@@ -12,7 +12,7 @@ const useToggleLike = (postId: string, userId: string) => {
       fetchApi({
         method: 'POST',
         path: `/likes/new?userId=${userId}&postId=${postId}`,
-        schema: z.void(),
+        schema: z.any(),
         options: {},
         token,
       }),
@@ -50,7 +50,7 @@ const useToggleLike = (postId: string, userId: string) => {
       fetchApi({
         method: 'DELETE',
         path: `/likes/delete?userId=${userId}&postId=${postId}`,
-        schema: z.void(),
+        schema: z.any(),
         options: {},
         token,
       }),

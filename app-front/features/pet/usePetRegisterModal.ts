@@ -1,6 +1,6 @@
 import { useAuth } from '@/providers/AuthContext';
 import { useMutation } from '@tanstack/react-query';
-import { PetForm, petFormSchema } from './schema';
+import { petCreateResponseSchema, PetForm, petFormSchema } from './schema';
 import { useCallback, useState } from 'react';
 import { onChangeFunction } from '@/utils/form';
 import { Alert } from 'react-native';
@@ -53,7 +53,7 @@ export default function usePetRegisterModal({
       return fetchApi({
         method: 'POST',
         path: '/pets/new',
-        schema: z.void(),
+        schema: petCreateResponseSchema,
         options: {
           data,
           headers: { 'Content-Type': 'multipart/form-data' },

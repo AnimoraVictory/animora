@@ -28,3 +28,36 @@ export const petFormSchema = z.object({
 });
 
 export type PetForm = z.infer<typeof petFormSchema>;
+
+export const petEditResponseSchema = z.union([
+  z.object({
+    error: z.string(),
+  }),
+  z.object({
+    message: z.string(),
+  }),
+]);
+
+export type PetEditResponse = z.infer<typeof petEditResponseSchema>;
+
+export const petDeleteResponseSchema = z.union([
+  z.object({
+    error: z.string(),
+  }),
+  z.object({
+    message: z.string(),
+  }),
+]);
+
+export type PetDeleteResponse = z.infer<typeof petDeleteResponseSchema>;
+
+export const petCreateResponseSchema = z.union([
+  z.object({
+    error: z.string(),
+  }),
+  z.object({
+    message: z.string(),
+  }),
+]);
+
+export type PetCreateResponse = z.infer<typeof petCreateResponseSchema>;

@@ -48,7 +48,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
       fetchApi({
         method: 'POST',
         path: `/users/follow?toId=${user?.id}&fromId=${currentUser?.id}`,
-        schema: z.void(),
+        schema: z.any(),
         options: {},
         token,
       }),
@@ -72,7 +72,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
       fetchApi({
         method: 'DELETE',
         path: `/users/unfollow?toId=${user?.id}&fromId=${currentUser?.id}`,
-        schema: z.void(),
+        schema: z.any(),
         options: {},
         token,
       }),

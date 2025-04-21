@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Alert } from 'react-native';
 import { z } from 'zod';
-import { Pet } from './schema';
+import { Pet, petDeleteResponseSchema } from './schema';
 
 type Props = {
   pet: Pet;
@@ -19,7 +19,7 @@ export default function usePetPanel({ pet }: Props) {
       await fetchApi({
         method: 'DELETE',
         path: '/pets/delete',
-        schema: z.void(),
+        schema: petDeleteResponseSchema,
         options: {
           params: { petId: pet.id },
         },
