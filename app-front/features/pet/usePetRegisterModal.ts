@@ -6,7 +6,6 @@ import { onChangeFunction } from '@/utils/form';
 import { Alert } from 'react-native';
 import { speciesMap } from '@/constants/petSpecies';
 import { fetchApi } from '@/utils/api';
-import { z } from 'zod';
 
 const INITIAL_FORM_STATE: PetForm = {
   name: '',

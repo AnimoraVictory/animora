@@ -3,7 +3,6 @@ import { fetchApi } from '@/utils/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Alert } from 'react-native';
-import { z } from 'zod';
 import { Pet, petDeleteResponseSchema } from './schema';
 
 type Props = {

@@ -7,9 +7,7 @@ import { Alert } from 'react-native';
 jest.spyOn(Alert, 'alert');
 
 // console.errorのモック
-const mockConsoleError = jest
-  .spyOn(console, 'error')
-  .mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => {});
 
 // Routerのモック
 jest.mock('expo-router', () => ({
