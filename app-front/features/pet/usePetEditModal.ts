@@ -2,9 +2,8 @@ import { useAuth } from '@/providers/AuthContext';
 import { fetchApi } from '@/utils/api';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { Pet, PetForm, petFormSchema } from './schema';
+import { Pet, petEditResponseSchema, PetForm, petFormSchema } from './schema';
 import { reverseSpeciesMap, speciesMap } from '@/constants/petSpecies';
-import { z } from 'zod';
 import { Alert } from 'react-native';
 import { onChangeFunction } from '@/utils/form';
 
@@ -43,7 +42,7 @@ export default function usePetEditModal({
           data,
           headers: { 'Content-Type': 'multipart/form-data' },
         },
-        schema: z.void(),
+        schema: petEditResponseSchema,
         token: token,
       });
     },

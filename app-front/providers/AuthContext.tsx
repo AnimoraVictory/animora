@@ -124,7 +124,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
                 'Content-Type': 'application/json',
               },
             },
-            schema: z.void(),
+            schema: z.any(),
             token,
           })
         : Promise.resolve(),
