@@ -91,14 +91,28 @@ func TestCommentUsecase_Create(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create mock repositories
+			// UUID を先に生成してから tc に代入
+			userUUID := uuid.New()
+			postUUID := uuid.New()
+			tc.userID = userUUID.String()
+			tc.postID = postUUID.String()
+
 			mockCommentRepo := &mock.MockCommentRepository{
-				CreateFunc: func(userId, postId, content string) (*ent.Comment, error) {
-					// Verify input parameters
-					assert.Equal(t, tc.userID, userId)
-					assert.Equal(t, tc.postID, postId)
+				CreateFunc: func(userId uuid.UUID, postId uuid.UUID, content string) (*ent.Comment, error) {
+					expectedUserID, _ := uuid.Parse(tc.userID)
+					expectedPostID, _ := uuid.Parse(tc.postID)
+
+					assert.Equal(t, expectedUserID, userId)
+					assert.Equal(t, expectedPostID, postId)
 					assert.Equal(t, tc.content, content)
+
 					return tc.mockComment, tc.mockError
+				},
+			}
+
+			mockPostRepo := &mock.MockPostRepository{
+				GetByIdFunc: func(postId uuid.UUID) (*ent.Post, error) {
+					return &ent.Post{ID: postId}, nil
 				},
 			}
 
@@ -111,21 +125,16 @@ func TestCommentUsecase_Create(t *testing.T) {
 				},
 			}
 
-			// Create usecase with mock repositories
-			usecase := NewCommentUsecase(mockCommentRepo, mockStorageRepo)
+			usecase := NewCommentUsecase(mockCommentRepo, mockPostRepo, mockStorageRepo)
 
-			// Call the method
-			result, err := usecase.Create(tc.userID, tc.postID, tc.content)
+			result, err := usecase.Create(userUUID, postUUID, tc.content)
 
-			// Check error
 			if tc.expectedError {
 				assert.Error(t, err)
 				assert.Nil(t, result)
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
-				// We can't directly compare the entire struct because of time.Time and UUID fields
-				// So we check individual fields
 				assert.Equal(t, tc.mockComment.Content, result.Content)
 				assert.Equal(t, tc.mockUser.Email, result.User.Email)
 				assert.Equal(t, tc.mockUser.Name, result.User.Name)
@@ -169,10 +178,12 @@ func TestCommentUsecase_Delete(t *testing.T) {
 				},
 			}
 
+			mockPostRepo := &mock.MockPostRepository{}
+
 			mockStorageRepo := &mock.MockStorageRepository{}
 
 			// Create usecase with mock repositories
-			usecase := NewCommentUsecase(mockCommentRepo, mockStorageRepo)
+			usecase := NewCommentUsecase(mockCommentRepo, mockPostRepo, mockStorageRepo)
 
 			// Call the method
 			err := usecase.Delete(tc.commentID)
