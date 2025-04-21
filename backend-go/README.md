@@ -44,7 +44,7 @@ backend-go/
 
 ## Prerequisites
 
-- Go 1.21 or higher
+- Go 1.24 or higher
 - PostgreSQL
 - AWS account with Cognito and S3 configured
 
