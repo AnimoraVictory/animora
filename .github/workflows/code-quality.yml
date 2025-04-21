@@ -1,0 +1,39 @@
+name: Code Quality
+
+on:
+  push:
+    paths:
+      - "app-front/**"
+  pull_request:
+    paths:
+      - "app-front/**"
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: app-front
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: "npm"
+          cache-dependency-path: app-front/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run formatting
+        run: npm run format:check
+
+      - name: Run type checking
+        run: npm run type-check

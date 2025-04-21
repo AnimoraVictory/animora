@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   TextInput,
@@ -8,62 +8,68 @@ import {
   StyleSheet,
   useColorScheme,
   Alert,
-} from "react-native";
-import { User } from "@/constants/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import Constants from "expo-constants";
-import { Colors } from "@/constants/Colors";
-import { Comment } from "./CommentsModal";
+} from 'react-native';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Colors } from '@/constants/Colors';
+import { Comment } from './CommentsModal';
+import { fetchApi } from '@/utils/api';
+import { commentSchema } from '@/features/comment/schema';
+import { useAuth } from '@/providers/AuthContext';
+import { z } from 'zod';
 
 type CommentInputProps = {
-  currentUser: User | null | undefined;
   postId: string;
   queryKey: unknown[];
   onNewComment: (comment: Comment) => void;
 };
 
-const API_URL = Constants.expoConfig?.extra?.API_URL;
-
 const CommentInput: React.FC<CommentInputProps> = ({
-  currentUser,
   postId,
   queryKey,
   onNewComment,
 }) => {
-  const [content, setContent] = useState("");
+  const { user: currentUser, token } = useAuth();
+  const [content, setContent] = useState('');
   const colorScheme = useColorScheme();
-  const colors = colorScheme === "light" ? Colors.light : Colors.dark;
+  const colors = colorScheme === 'light' ? Colors.light : Colors.dark;
 
   const queryClient = useQueryClient();
 
   const createCommentMutation = useMutation({
     mutationFn: async (data: { content: string }) => {
       const formData = new FormData();
-      formData.append("content", data.content);
-      formData.append("userId", currentUser?.id ?? "");
-      formData.append("postId", postId);
+      formData.append('content', data.content);
+      formData.append('userId', currentUser?.id ?? '');
+      formData.append('postId', postId);
 
-      const res = await axios.post(`${API_URL}/comments/new`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await fetchApi({
+        method: 'POST',
+        path: '/comments',
+        schema: z.object({ comment: commentSchema }),
+        options: {
+          data: formData,
+          headers: { 'Content-Type': 'multipart/form-data' },
+        },
+        token: token,
       });
 
-      return res.data.comment; // ← ここで新しいコメントを返す
+      return response.comment; // ← ここで新しいコメントを返す
     },
     onSuccess: (createdComment) => {
       queryClient.invalidateQueries({ queryKey: queryKey });
-      Alert.alert("コメント完了", "コメントを追加しました！");
+      Alert.alert('コメント完了', 'コメントを追加しました！');
       onNewComment(createdComment);
-      setContent("");
+      setContent('');
     },
     onError: () => {
-      Alert.alert("エラー", "コメントに失敗しました");
+      Alert.alert('エラー', 'コメントに失敗しました');
+      console.log(`[debug] postId: ${postId}`);
     },
   });
 
   const handleSubmit = () => {
     if (!content || content.trim().length < 1) {
-      Alert.alert("エラー", "コメントは1文字以上必要です。");
+      Alert.alert('エラー', 'コメントは1文字以上必要です。');
       return;
     }
     createCommentMutation.mutate({ content: content.trim() });
@@ -76,7 +82,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
           source={
             currentUser.iconImageUrl
               ? { uri: currentUser.iconImageUrl }
-              : require("@/assets/images/profile.png")
+              : require('@/assets/images/profile.png')
           }
           style={styles.avatar}
         />
@@ -101,8 +107,8 @@ const CommentInput: React.FC<CommentInputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   avatar: {
     width: 40,
@@ -113,11 +119,11 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: '#ccc',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    textAlignVertical: "top",
+    textAlignVertical: 'top',
   },
   button: {
     marginLeft: 8,
@@ -126,7 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   buttonText: {
-    color: "#fff",
+    color: '#fff',
   },
 });
 

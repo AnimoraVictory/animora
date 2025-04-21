@@ -8,6 +8,7 @@ import (
 // SetupAuthRoutes sets up the auth routes
 func SetupAuthRoutes(app *echo.Echo) {
 	authHandler := injector.InjectAuthHandler()
+	authMiddleware := injector.InjectAuthMiddleware()
 	authGroup := app.Group("/auth")
 
 	// Verify email
@@ -23,7 +24,7 @@ func SetupAuthRoutes(app *echo.Echo) {
 	authGroup.POST("/refresh", authHandler.RefreshToken)
 
 	// Get current user
-	authGroup.GET("/me", authHandler.GetMe)
+	authGroup.GET("/me", authHandler.GetMe, authMiddleware.Handler)
 
 	// Sign out
 	authGroup.POST("/signout", authHandler.SignOut)

@@ -7,9 +7,10 @@ import (
 
 func SetupUserRoutes(app *echo.Echo) {
 	userHandler := injector.InjectUserHandler()
-	userGroup := app.Group("/users")
+	authMiddleware := injector.InjectAuthMiddleware()
+	userGroup := app.Group("/users", authMiddleware.Handler)
 
-	userGroup.GET("/", userHandler.GetUser)
+	userGroup.GET("", userHandler.GetUser)
 
 	userGroup.PUT("/update", userHandler.UpdateUser)
 

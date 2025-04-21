@@ -7,11 +7,12 @@ import (
 
 func SetupCommentRoutes(app *echo.Echo) {
 	commentHandler := injector.InjectCommentHandler()
-	commentGroup := app.Group("/comments")
+	authMiddleware := injector.InjectAuthMiddleware()
+	commentGroup := app.Group("/comments", authMiddleware.Handler)
 
 	// Create a new comment
-	commentGroup.POST("/new", commentHandler.Create)
+	commentGroup.POST("", commentHandler.Create)
 
 	// Delete a comment
-	commentGroup.DELETE("/delete", commentHandler.Delete)
+	commentGroup.DELETE("", commentHandler.Delete)
 }

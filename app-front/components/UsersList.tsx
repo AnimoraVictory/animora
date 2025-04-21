@@ -1,4 +1,5 @@
-import React from "react";
+import { UserBase } from '@/features/user/schema';
+import React from 'react';
 import {
   FlatList,
   Text,
@@ -6,10 +7,9 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-} from "react-native";
-import { UserBase } from "@/constants/api";
+} from 'react-native';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 type Props = {
   users: UserBase[];
@@ -37,7 +37,7 @@ export default function UsersList({
             source={
               item.iconImageUrl
                 ? { uri: item.iconImageUrl }
-                : require("@/assets/images/profile.png")
+                : require('@/assets/images/profile.png')
             }
             style={styles.avatar}
           />
@@ -51,8 +51,8 @@ export default function UsersList({
 const styles = StyleSheet.create({
   userItem: {
     padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
   },
   avatar: {
@@ -63,6 +63,6 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

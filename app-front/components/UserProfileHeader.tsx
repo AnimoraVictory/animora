@@ -1,15 +1,15 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { useColorScheme } from "react-native";
-import { Colors } from "@/constants/Colors";
-import { User } from "@/constants/api";
+import React from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { UserResponse } from '@/features/user/schema/response';
 
 type UserProfileHeaderProps = {
   isMe: boolean;
-  user: User;
+  user: UserResponse;
   onPressFollow: () => void;
   onOpenFollowModal: () => void;
-  setSelectedTab: (tab: "follows" | "followers") => void;
+  setSelectedTab: (tab: 'follows' | 'followers') => void;
   isFollowing: boolean;
 };
 
@@ -22,10 +22,10 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
   isFollowing,
 }) => {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
-  const backgroundColor = colorScheme === "light" ? "white" : "black";
+  const colors = Colors[colorScheme ?? 'light'];
+  const backgroundColor = colorScheme === 'light' ? 'white' : 'black';
 
-  const handleOpenFollowModal = (tab: "follows" | "followers") => {
+  const handleOpenFollowModal = (tab: 'follows' | 'followers') => {
     setSelectedTab(tab);
     onOpenFollowModal();
   };
@@ -44,7 +44,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           source={
             user.iconImageUrl
               ? { uri: user.iconImageUrl }
-              : require("@/assets/images/profile.png")
+              : require('@/assets/images/profile.png')
           }
           style={styles.profileImage}
         />
@@ -53,7 +53,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           <View style={styles.followRow}>
             <TouchableOpacity
               style={styles.followBox}
-              onPress={() => handleOpenFollowModal("follows")}
+              onPress={() => handleOpenFollowModal('follows')}
             >
               <Text style={[styles.followCount, { color: colors.tint }]}>
                 {user.followsCount}
@@ -64,7 +64,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.followBox}
-              onPress={() => handleOpenFollowModal("followers")}
+              onPress={() => handleOpenFollowModal('followers')}
             >
               <Text style={[styles.followCount, { color: colors.tint }]}>
                 {user.followersCount}
@@ -79,7 +79,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
                 onPress={onPressFollow}
               >
                 <Text style={[styles.followButtonText, { color: colors.tint }]}>
-                  {isFollowing ? "フォロー解除" : "フォローする"}
+                  {isFollowing ? 'フォロー解除' : 'フォローする'}
                 </Text>
               </TouchableOpacity>
             )}
@@ -95,20 +95,20 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 16,
     paddingHorizontal: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   profileName: {
     fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   profileBio: {
     fontSize: 14,
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 12,
   },
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: 16,
   },
   profileImage: {
@@ -119,19 +119,19 @@ const styles = StyleSheet.create({
   },
   rightBox: {
     flex: 1,
-    justifyContent: "center",
-    flexDirection: "column",
+    justifyContent: 'center',
+    flexDirection: 'column',
   },
   followRow: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginBottom: 8,
   },
   followBox: {
     marginRight: 16,
-    alignItems: "center",
+    alignItems: 'center',
   },
   followCount: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 16,
   },
   followLabel: {
@@ -142,11 +142,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 24,
     paddingVertical: 6,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   followButtonText: {
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });
 

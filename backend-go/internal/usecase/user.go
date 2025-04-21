@@ -37,6 +37,10 @@ func (u *UserUsecase) GetById(id string) (*ent.User, error) {
 	return u.userRepository.GetById(id)
 }
 
+func (u *UserUsecase) FindByEmail(email string) (*ent.User, error) {
+	return u.userRepository.FindByEmail(email)
+}
+
 func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	user, err := u.userRepository.FindByEmail(email)
 	if err != nil {

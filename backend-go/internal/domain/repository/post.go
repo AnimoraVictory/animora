@@ -11,4 +11,5 @@ type PostRepository interface {
 	CreatePost(caption, userId, fileKey string, dailyTaskId *string) (*ent.Post, error)
 	UpdatePost(postId, caption string) error
 	DeletePost(postId string) error
+	GetById(postId uuid.UUID) (*ent.Post, error)
 }

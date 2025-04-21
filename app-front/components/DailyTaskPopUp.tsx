@@ -1,19 +1,16 @@
-import { TaskType, taskTypeMap } from "@/app/(tabs)/camera";
-import { dailyTaskSchema } from "@/app/(tabs)/posts";
-import React, { useEffect, useRef } from "react";
+import { TaskType, taskTypeMap } from '@/app/(tabs)/camera';
+import React, { useEffect, useRef } from 'react';
 import {
   StyleSheet,
-  View,
   Text,
   useColorScheme,
   Animated,
   TouchableOpacity,
-} from "react-native";
-import { z } from "zod";
-import { Colors } from "@/constants/Colors";
-import { useRouter } from "expo-router";
+} from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { useRouter } from 'expo-router';
+import { DailyTask } from '@/features/dailytask/schema';
 
-type DailyTask = z.infer<typeof dailyTaskSchema>;
 type DailyTaskPopUpProps = {
   dailyTask: DailyTask | undefined;
 };
@@ -21,7 +18,7 @@ type DailyTaskPopUpProps = {
 const _DailyTaskPopUp: React.FC<DailyTaskPopUpProps> = ({ dailyTask }) => {
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? 'light'];
   const glowAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
@@ -38,11 +35,11 @@ const _DailyTaskPopUp: React.FC<DailyTaskPopUpProps> = ({ dailyTask }) => {
         }),
       ])
     ).start();
-  }, []);
+  }, [glowAnim]);
 
   const bgColor = glowAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [colors.card, "rgba(255, 255, 255, 0.6)"], // 例えば暗→明
+    outputRange: [colors.card, 'rgba(255, 255, 255, 0.6)'], // 例えば暗→明
   });
   return (
     <Animated.View
@@ -57,7 +54,7 @@ const _DailyTaskPopUp: React.FC<DailyTaskPopUpProps> = ({ dailyTask }) => {
     >
       <TouchableOpacity
         onPress={() => {
-          router.replace("/camera");
+          router.replace('/camera');
         }}
       >
         <Text style={[styles.title, { color: colors.text }]}>
@@ -76,7 +73,7 @@ export default DailyTaskPopUp;
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 100,
     left: 20,
     width: 240,
@@ -90,11 +87,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 4,
   },
   content: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: '500',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef } from 'react';
 import {
   Modal,
   View,
@@ -12,11 +12,10 @@ import {
   PanResponder,
   Dimensions,
   TouchableWithoutFeedback,
-} from "react-native";
-import { commentSchema } from "@/app/(tabs)/posts";
-import { z } from "zod";
-import CommentInput from "@/components/CommentInput";
-import { User } from "@/constants/api";
+} from 'react-native';
+import { z } from 'zod';
+import CommentInput from '@/components/CommentInput';
+import { commentSchema } from '@/features/comment/schema';
 
 export type Comment = z.infer<typeof commentSchema>;
 
@@ -25,7 +24,6 @@ type CommentsModalProps = {
   visible: boolean;
   comments: Comment[];
   onClose: () => void;
-  currentUser: User | null | undefined;
   slideAnim: Animated.Value;
   queryKey: unknown[];
   onNewComment: (comment: Comment) => void;
@@ -36,12 +34,11 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
   visible,
   comments,
   onClose,
-  currentUser,
   slideAnim,
   queryKey,
   onNewComment,
 }) => {
-  const windowHeight = Dimensions.get("window").height;
+  const windowHeight = Dimensions.get('window').height;
   const modalHeight = windowHeight * 0.6;
 
   const panResponder = useRef(
@@ -94,7 +91,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
       </TouchableWithoutFeedback>
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Animated.View
           style={[styles.modal, { transform: [{ translateY: slideAnim }] }]}
@@ -111,7 +108,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
                 renderItem={({ item }) => (
                   <View style={styles.commentItem}>
                     <Image
-                      source={{ uri: item.user.iconImageUrl }}
+                      source={{ uri: item.user.iconImageUrl ?? '' }}
                       style={styles.avatar}
                     />
                     <View style={styles.commentContent}>
@@ -127,7 +124,6 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
 
             <View style={styles.inputContainer}>
               <CommentInput
-                currentUser={currentUser}
                 postId={postId}
                 queryKey={queryKey}
                 onNewComment={onNewComment}
@@ -143,24 +139,24 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    justifyContent: "flex-end",
+    justifyContent: 'flex-end',
   },
   staticOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   gripBar: {
-    alignSelf: "center",
+    alignSelf: 'center',
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#ccc",
+    backgroundColor: '#ccc',
     marginBottom: 8,
   },
   modal: {
-    backgroundColor: "#fff",
-    width: "100%",
-    height: "60%",
+    backgroundColor: '#fff',
+    width: '100%',
+    height: '60%',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     paddingTop: 10,
@@ -168,9 +164,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerContainer: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
   },
   commentsContainer: {
@@ -180,8 +176,8 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   commentItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     marginBottom: 20,
   },
   avatar: {
@@ -194,20 +190,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 2,
   },
   commentText: {
-    color: "#333",
+    color: '#333',
   },
   noCommentsContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   noCommentsText: {
     fontSize: 16,
-    color: "#999",
+    color: '#999',
   },
 });
 

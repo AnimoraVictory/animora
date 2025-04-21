@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -10,15 +10,15 @@ import {
   PanResponder,
   Pressable,
   ScrollView,
-} from "react-native";
-import { useColorScheme } from "react-native";
-import { Colors } from "@/constants/Colors";
-import { UserBase } from "@/constants/api";
-import UserProfileModal from "./UserProfileModal";
-import { useModalStack } from "@/providers/ModalStackContext";
-import UsersList from "./UsersList";
+} from 'react-native';
+import { useColorScheme } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import UserProfileModal from './UserProfileModal';
+import { useModalStack } from '@/providers/ModalStackContext';
+import UsersList from './UsersList';
+import { UserBase } from '@/features/user/schema';
 
-const { width, height } = Dimensions.get("window");
+const { width, height } = Dimensions.get('window');
 
 type Props = {
   user: UserBase;
@@ -26,11 +26,10 @@ type Props = {
   onClose: () => void;
   follows: UserBase[];
   followers: UserBase[];
-  selectedTab: "follows" | "followers";
-  setSelectedTab: (tab: "follows" | "followers") => void;
+  selectedTab: 'follows' | 'followers';
+  setSelectedTab: (tab: 'follows' | 'followers') => void;
   slideAnim: Animated.Value;
   prevModalIdx: number;
-  currentUser: UserBase;
 };
 
 const UsersModal: React.FC<Props> = ({
@@ -43,7 +42,6 @@ const UsersModal: React.FC<Props> = ({
   setSelectedTab,
   slideAnim,
   prevModalIdx,
-  currentUser,
 }) => {
   const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
   const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(
@@ -55,12 +53,13 @@ const UsersModal: React.FC<Props> = ({
 
   useEffect(() => {
     if (visible) {
-      if (selectedTab === "followers") {
+      if (selectedTab === 'followers') {
         requestAnimationFrame(() => {
           scrollRef.current?.scrollTo({ x: width, animated: false });
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
   const openUserProfile = (email: string) => {
     setSelectedUserEmail(email);
@@ -87,8 +86,8 @@ const UsersModal: React.FC<Props> = ({
   const scrollRef = useRef<ScrollView | null>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const scrollToTab = (tab: "follows" | "followers") => {
-    const pageIndex = tab === "follows" ? 0 : 1;
+  const scrollToTab = (tab: 'follows' | 'followers') => {
+    const pageIndex = tab === 'follows' ? 0 : 1;
     scrollRef.current?.scrollTo({ x: pageIndex * width, animated: true });
     setSelectedTab(tab);
   };
@@ -106,7 +105,7 @@ const UsersModal: React.FC<Props> = ({
 
           if (!isTop(modalKey)) return;
 
-          if (selectedTab === "follows") {
+          if (selectedTab === 'follows') {
             if (dx > 30) {
               Animated.timing(slideAnim, {
                 toValue: width,
@@ -115,9 +114,9 @@ const UsersModal: React.FC<Props> = ({
               }).start(() => onClose());
             } else if (dx < -30) {
               scrollRef.current?.scrollTo({ x: width, animated: true });
-              setSelectedTab("followers");
+              setSelectedTab('followers');
             }
-          } else if (selectedTab === "followers") {
+          } else if (selectedTab === 'followers') {
             if (dx > 30 && evt.nativeEvent.pageX < width / 2 + 50) {
               Animated.timing(slideAnim, {
                 toValue: width,
@@ -126,16 +125,16 @@ const UsersModal: React.FC<Props> = ({
               }).start(() => onClose());
             } else if (dx > 30) {
               scrollRef.current?.scrollTo({ x: 0, animated: true });
-              setSelectedTab("follows");
+              setSelectedTab('follows');
             }
           }
         },
       }),
-    [isTop, slideAnim, onClose]
+    [isTop, modalKey, selectedTab, slideAnim, onClose, setSelectedTab]
   );
 
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? 'light'];
 
   return (
     <Modal
@@ -175,16 +174,16 @@ const UsersModal: React.FC<Props> = ({
         >
           <View style={styles.tabHeader}>
             <TouchableOpacity
-              onPress={() => scrollToTab("follows")}
+              onPress={() => scrollToTab('follows')}
               style={[
                 styles.tabButton,
-                selectedTab === "follows" && { borderBottomColor: colors.tint },
+                selectedTab === 'follows' && { borderBottomColor: colors.tint },
               ]}
             >
               <Text
                 style={[
                   styles.tabText,
-                  selectedTab === "follows" && styles.activeTabText,
+                  selectedTab === 'follows' && styles.activeTabText,
                   { color: colors.tint },
                 ]}
               >
@@ -192,10 +191,10 @@ const UsersModal: React.FC<Props> = ({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => scrollToTab("followers")}
+              onPress={() => scrollToTab('followers')}
               style={[
                 styles.tabButton,
-                selectedTab === "followers" && {
+                selectedTab === 'followers' && {
                   borderBottomColor: colors.tint,
                 },
               ]}
@@ -203,7 +202,7 @@ const UsersModal: React.FC<Props> = ({
               <Text
                 style={[
                   styles.tabText,
-                  selectedTab === "followers" && styles.activeTabText,
+                  selectedTab === 'followers' && styles.activeTabText,
                   { color: colors.tint },
                 ]}
               >
@@ -239,8 +238,7 @@ const UsersModal: React.FC<Props> = ({
       <UserProfileModal
         prevModalIdx={prevModalIdx + 1}
         key={prevModalIdx + 1}
-        currentUser={currentUser}
-        email={selectedUserEmail ?? ""}
+        email={selectedUserEmail ?? ''}
         visible={isProfileModalVisible && !!selectedUserEmail}
         onClose={closeUserProfile}
         slideAnim={slideAnimProfile}
@@ -257,23 +255,23 @@ const styles = StyleSheet.create({
   },
   headerUserName: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   topHeader: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     height: 90,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ccc",
+    borderBottomColor: '#ccc',
     paddingTop: 40,
     zIndex: 2,
   },
   backButton: {
-    position: "absolute",
+    position: 'absolute',
     left: 16,
     top: 44,
     zIndex: 1,
@@ -282,25 +280,25 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   tabHeader: {
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   tabButton: {
     paddingVertical: 10,
     paddingHorizontal: 30,
     marginHorizontal: 8,
     borderBottomWidth: 2,
-    borderBottomColor: "transparent",
+    borderBottomColor: 'transparent',
   },
   tabText: {
     fontSize: 16,
-    color: "#666",
+    color: '#666',
   },
   activeTabText: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   modalContainer: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     right: 0,
     width: width,
@@ -308,8 +306,8 @@ const styles = StyleSheet.create({
   },
   userItem: {
     padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
   },
   avatar: {
@@ -320,6 +318,6 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
 });

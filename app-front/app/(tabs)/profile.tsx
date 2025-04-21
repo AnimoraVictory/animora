@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,37 +10,37 @@ import {
   ScrollView,
   RefreshControl,
   Image,
-} from "react-native";
-import { ThemedView } from "@/components/ThemedView";
-import { useAuth } from "@/providers/AuthContext";
-import { Colors } from "@/constants/Colors";
-import { ProfileHeader } from "@/components/ProfileHeader";
+} from 'react-native';
+import { ThemedView } from '@/components/ThemedView';
+import { useAuth } from '@/providers/AuthContext';
+import { Colors } from '@/constants/Colors';
+import { ProfileHeader } from '@/components/ProfileHeader';
 import {
   ProfileTabSelector,
   ProfileTabType,
-} from "@/components/ProfileTabSelector";
-import { router } from "expo-router";
-import { ProfileEditModal } from "@/components/ProfileEditModal";
-import { PetRegiserModal } from "@/components/PetRegisterModal";
-import { UserPetList } from "@/components/UserPetsList";
-import { UserPostList } from "@/components/UserPostList";
-import UsersModal from "@/components/UsersModal";
-import { useModalStack } from "@/providers/ModalStackContext";
-import * as Haptics from "expo-haptics";
+} from '@/components/ProfileTabSelector';
+import { router } from 'expo-router';
+import { ProfileEditModal } from '@/components/ProfileEditModal';
+import { PetRegiserModal } from '@/components/PetRegisterModal';
+import { UserPetList } from '@/components/UserPetsList';
+import { UserPostList } from '@/components/UserPostList';
+import UsersModal from '@/components/UsersModal';
+import { useModalStack } from '@/providers/ModalStackContext';
+import * as Haptics from 'expo-haptics';
 
-const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const ProfileScreen: React.FC = () => {
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const colors = Colors[colorScheme ?? 'light'];
   const styles = getStyles(colors);
   const { push, pop } = useModalStack();
 
-  const [selectedTab, setSelectedTab] = useState<ProfileTabType>("posts");
+  const [selectedTab, setSelectedTab] = useState<ProfileTabType>('posts');
   const [selectedFollowTab, setSelectedFollowTab] = useState<
-    "follows" | "followers"
-  >("follows");
+    'follows' | 'followers'
+  >('follows');
   const {
     user,
     isRefetching,
@@ -58,20 +58,21 @@ const ProfileScreen: React.FC = () => {
   const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimFollow = useRef(new Animated.Value(windowWidth)).current;
-  const backgroundColor = colorScheme === "light" ? "white" : "black";
+  const backgroundColor = colorScheme === 'light' ? 'white' : 'black';
+  const scrollRef = useRef<ScrollView>(null);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, 150],
     outputRange: [0, -150],
-    extrapolate: "clamp",
+    extrapolate: 'clamp',
   });
 
   const icon =
-    colorScheme === "light"
-      ? require("../../assets/images/icon-green.png")
-      : require("../../assets/images/icon-dark.png");
+    colorScheme === 'light'
+      ? require('../../assets/images/icon-green.png')
+      : require('../../assets/images/icon-dark.png');
 
   const handleLogout = async () => {
     try {
@@ -79,7 +80,7 @@ const ProfileScreen: React.FC = () => {
     } catch (error) {
       console.error(error);
     }
-    router.replace("/(auth)");
+    router.replace('/(auth)');
   };
 
   const openEditProfileModal = () => {
@@ -122,7 +123,7 @@ const ProfileScreen: React.FC = () => {
 
   const openFollowModal = () => {
     setIsFollowModalVisible(true);
-    push("1");
+    push('1');
     Animated.timing(slideAnimFollow, {
       toValue: 0,
       duration: 300,
@@ -149,12 +150,10 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
-  const scrollRef = useRef<ScrollView>(null);
-
   const onScrollEnd = (event: any) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const newIndex = Math.round(offsetX / windowWidth);
-    setSelectedTab(newIndex === 0 ? "posts" : "mypet");
+    setSelectedTab(newIndex === 0 ? 'posts' : 'mypet');
   };
 
   const headerContent = (
@@ -196,7 +195,7 @@ const ProfileScreen: React.FC = () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             refetchUser();
           }}
-          tintColor={colorScheme === "light" ? "black" : "white"}
+          tintColor={colorScheme === 'light' ? 'black' : 'white'}
         />
       }
       scrollEventThrottle={16}
@@ -247,8 +246,6 @@ const ProfileScreen: React.FC = () => {
         onClose={closeEditProfileModal}
         slideAnim={slideAnimProfile}
         colorScheme={colorScheme}
-        refetchUser={refetchUser}
-        user={user}
       />
       <PetRegiserModal
         visible={isRegisterPetModalVisible}
@@ -261,7 +258,6 @@ const ProfileScreen: React.FC = () => {
         prevModalIdx={0}
         slideAnim={slideAnimFollow}
         user={user}
-        currentUser={user}
         visible={isFollowModalVisible}
         onClose={() => closeFollowModal()}
         follows={user.follows}
@@ -280,35 +276,35 @@ const getStyles = (colors: typeof Colors.light) =>
       backgroundColor: colors.middleBackground,
     },
     topHeader: {
-      position: "absolute",
+      position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       height: 90,
       zIndex: 10,
-      justifyContent: "flex-start",
-      alignItems: "center",
+      justifyContent: 'flex-start',
+      alignItems: 'center',
       backgroundColor: colors.background,
     },
     userName: {
       fontSize: 20,
-      fontWeight: "bold",
+      fontWeight: 'bold',
       color: colors.tint,
     },
     logo: {
       width: 32,
       height: 32,
       marginTop: 50,
-      resizeMode: "contain",
+      resizeMode: 'contain',
     },
     loadingContainer: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     editButtonsContainer: {
-      flexDirection: "row",
-      justifyContent: "space-evenly",
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
       marginTop: 10,
       marginBottom: 10,
     },
@@ -319,11 +315,11 @@ const getStyles = (colors: typeof Colors.light) =>
       paddingVertical: 8,
       paddingHorizontal: 16,
       width: 160,
-      alignItems: "center",
+      alignItems: 'center',
     },
     buttonText: {
       color: colors.text,
-      fontWeight: "bold",
+      fontWeight: 'bold',
     },
   });
 
