@@ -8,7 +8,8 @@ import (
 // SetupPetRoutes sets up the pet routes
 func SetupPetRoutes(app *echo.Echo) {
 	petHandler := injector.InjectPetHandler()
-	petGroup := app.Group("/pets")
+	authMiddleware := injector.InjectAuthMiddleware()
+	petGroup := app.Group("/pets", authMiddleware.Handler)
 
 	// Get pets by owner ID
 	petGroup.GET("/owner", petHandler.GetByOwner)

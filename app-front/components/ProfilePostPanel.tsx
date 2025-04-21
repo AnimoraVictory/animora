@@ -1,18 +1,18 @@
-import React, { useRef } from "react";
+import React, { useRef } from 'react';
 import {
   Image,
   StyleSheet,
   Dimensions,
   GestureResponderEvent,
   Pressable,
-} from "react-native";
+} from 'react-native';
 
 export type ProfilePostPanelProps = {
   imageUrl: string;
   onPress: () => void;
 };
 
-const windowWidth = Dimensions.get("window").width;
+const windowWidth = Dimensions.get('window').width;
 const imageWidth = windowWidth / 3;
 const imageHeight = (imageWidth * 4) / 3;
 
@@ -57,8 +57,8 @@ const styles = StyleSheet.create({
     padding: 1,
   },
   image: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     borderRadius: 2,
   },
 });

@@ -1,90 +1,41 @@
-import React from "react";
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  Alert,
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
   TouchableOpacity,
   ImageBackground,
-} from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { Colors } from "@/constants/Colors";
-import { useSignUp } from "@/constants/api";
-import { FormInput } from "@/components/FormInput";
-
-const SignUpInputSchema = z.object({
-  name: z.string(),
-  email: z
-    .string()
-    .email({ message: "有効なメールアドレスを入力してください" }),
-  password: z
-    .string()
-    .min(8, { message: "パスワードは8文字以上必要です" })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, {
-      message: "パスワードには大文字、小文字、数字を含める必要があります",
-    }),
-});
-
-type SignUpInput = z.infer<typeof SignUpInputSchema>;
+} from 'react-native';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
+import { FormInput } from '@/components/FormInput';
+import { useSignUpScreen } from '@/features/auth/useSignUpScreen';
+import { SignUpForm, signUpFormSchema } from '@/features/auth/schema';
 
 export default function SignUpScreen() {
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<SignUpInput>({
-    resolver: zodResolver(SignUpInputSchema),
-    defaultValues: { email: "", password: "" },
+  } = useForm<SignUpForm>({
+    resolver: zodResolver(signUpFormSchema),
+    defaultValues: { email: '', password: '' },
   });
   const router = useRouter();
   const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const theme = Colors[colorScheme ?? 'light'];
 
-  const { mutate: signUp, isPending } = useSignUp();
-
-  const onSubmit = async (data: SignUpInput) => {
-    try {
-      await signUp(
-        { email: data.email, password: data.password, name: data.name },
-        {
-          onSuccess: () => {
-            Alert.alert("ユーザー登録が完了しました");
-            router.push({
-              pathname: "/(auth)/verify-email",
-              params: { email: data.email },
-            });
-          },
-          onError: (error: Error) => {
-            Alert.alert(
-              "サインアップエラー",
-              error.message || "ユーザーの登録に失敗しました"
-            );
-          },
-        }
-      );
-      // サインアップ成功後、verify-email 画面へ email をパラメータとして渡して遷移
-      router.push({
-        pathname: "/(auth)/verify-email",
-        params: { email: data.email },
-      });
-    } catch (error: any) {
-      Alert.alert(
-        "サインアップエラー",
-        error.message || "サインアップに失敗しました"
-      );
-    }
-  };
+  const { onSubmit, isPending } = useSignUpScreen();
 
   return (
     <ImageBackground
-      source={require("../../assets/images/noise2.png")}
+      source={require('../../assets/images/noise2.png')}
       resizeMode="repeat"
       style={[styles.container, { backgroundColor: theme.background }]}
     >
@@ -147,13 +98,13 @@ export default function SignUpScreen() {
                 disabled={isSubmitting}
               >
                 <Text style={[styles.buttonText, { color: theme.tint }]}>
-                  {isSubmitting ? "処理中..." : "サインアップ"}
+                  {isSubmitting ? '処理中...' : 'サインアップ'}
                 </Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
               style={[styles.button, { backgroundColor: theme.tint }]}
-              onPress={() => router.push("/")}
+              onPress={() => router.push('/')}
             >
               <Text style={[styles.buttonText, { color: theme.background }]}>
                 戻る
@@ -173,16 +124,16 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     padding: 16,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 24,
   },
   input: {
-    width: "100%",
+    width: '100%',
     height: 40,
     borderWidth: 2,
     borderRadius: 8,
@@ -190,26 +141,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   error: {
-    color: "red",
+    color: 'red',
     marginBottom: 8,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   buttonContainer: {
-    width: "100%",
-    alignItems: "center",
+    width: '100%',
+    alignItems: 'center',
     gap: 16,
   },
   button: {
-    width: "60%",
+    width: '60%',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderWidth: 2,
     borderRadius: 8,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 16,
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
   },
 });
