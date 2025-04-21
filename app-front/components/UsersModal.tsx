@@ -59,7 +59,8 @@ const UsersModal: React.FC<Props> = ({
         });
       }
     }
-  }, [selectedTab, visible]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
   const openUserProfile = (email: string) => {
     setSelectedUserEmail(email);
     setIsProfileModalVisible(true);
