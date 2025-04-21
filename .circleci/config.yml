@@ -1,0 +1,32 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/go:1.24
+    working_directory: ~/project/backend-go
+    steps:
+      - checkout:
+          path: ~/project
+      - restore_cache:
+          keys:
+            - go-mod-v1-{{ checksum "go.sum" }}
+      - run:
+          name: Download Dependencies
+          command: go mod download
+      - save_cache:
+          key: go-mod-v1-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run:
+          name: Run Tests
+          command: make test-ci
+      - store_artifacts:
+          path: coverage.out
+          destination: coverage-report
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - test
