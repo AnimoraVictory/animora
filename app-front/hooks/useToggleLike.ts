@@ -1,6 +1,11 @@
+import { GetPostsResponse } from '@/features/post/schema/response';
 import { useAuth } from '@/providers/AuthContext';
 import { fetchApi } from '@/utils/api';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import {
+  useQueryClient,
+  useMutation,
+  InfiniteData,
+} from '@tanstack/react-query';
 import { z } from 'zod';
 
 const useToggleLike = (postId: string, userId: string) => {
@@ -21,18 +26,28 @@ const useToggleLike = (postId: string, userId: string) => {
       await queryClient.cancelQueries({ queryKey: ['posts'] });
       const previousPosts = queryClient.getQueryData<any[]>(['posts']);
       // 楽観的更新：対象の投稿の likesCount を +1、かつ likedByCurrentUser を true に更新
-      queryClient.setQueryData<any[]>(['posts'], (oldPosts) => {
-        if (!oldPosts) return oldPosts;
-        return oldPosts.map((p) => {
-          if (p.id === postId) {
-            return {
-              ...p,
-              likedByCurrentUser: true,
-            };
-          }
-          return p;
-        });
-      });
+      queryClient.setQueryData(
+        ['posts'],
+        (oldData: InfiniteData<GetPostsResponse> | undefined) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              posts: page.posts.map((p) =>
+                p.id === postId
+                  ? {
+                      ...p,
+                      likedByCurrentUser: true,
+                      likesCount: p.likesCount + 1,
+                    }
+                  : p
+              ),
+            })),
+          };
+        }
+      );
       return { previousPosts };
     },
     onError: (_, __, context) => {

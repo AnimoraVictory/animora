@@ -1,8 +1,11 @@
 package repository
 
-import "github.com/aki-13627/animalia/backend-go/ent"
+import (
+	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/google/uuid"
+)
 
 type CommentRepository interface {
-	Create(userId string, postId string, content string) (*ent.Comment, error)
+	Create(userId uuid.UUID, postId uuid.UUID, content string) (*ent.Comment, error)
 	Delete(commentId string) error
 }

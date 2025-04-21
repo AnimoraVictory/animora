@@ -154,3 +154,12 @@ func (r *PostRepository) DeletePost(postID string) error {
 		SetDeletedAt(time.Now()).
 		Exec(context.Background())
 }
+
+func (r *PostRepository) GetById(postId uuid.UUID) (*ent.Post, error) {
+	post, err := r.db.Post.Get(context.Background(), postId)
+	if err != nil {
+		log.Errorf("Failed to get post with id %s: %v", postId, err)
+		return nil, err
+	}
+	return post, nil
+}
