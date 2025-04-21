@@ -108,7 +108,7 @@ func InjectLikeUsecase() usecase.LikeUsecase {
 }
 
 func InjectCommentUsecase() usecase.CommentUsecase {
-	commentUsecase := usecase.NewCommentUsecase(InjectCommentRepository(), InjectStorageRepository())
+	commentUsecase := usecase.NewCommentUsecase(InjectCommentRepository(), InjectPostRepository(), InjectStorageRepository())
 	return *commentUsecase
 }
 
@@ -150,7 +150,7 @@ func InjectLikeHandler() handler.LikeHandler {
 }
 
 func InjectCommentHandler() handler.CommentHandler {
-	commentHandler := handler.NewCommentHandler(InjectCommentUsecase())
+	commentHandler := handler.NewCommentHandler(InjectCommentUsecase(), InjectUserUsecase())
 	return *commentHandler
 }
 

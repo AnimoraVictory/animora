@@ -18,20 +18,11 @@ func NewCommentRepository(db *ent.Client) *CommentRepository {
 	}
 }
 
-func (r *CommentRepository) Create(userId, postId, content string) (*ent.Comment, error) {
-	parsedUserID, err := uuid.Parse(userId)
-	if err != nil {
-		return nil, err
-	}
-	parsedPostId, err := uuid.Parse(postId)
-	if err != nil {
-		return nil, err
-	}
-
+func (r *CommentRepository) Create(userId uuid.UUID, postId uuid.UUID, content string) (*ent.Comment, error) {
 	// ① コメント作成
 	created, err := r.db.Comment.Create().
-		SetUserID(parsedUserID).
-		SetPostID(parsedPostId).
+		SetUserID(userId).
+		SetPostID(postId).
 		SetContent(content).
 		Save(context.Background())
 	if err != nil {

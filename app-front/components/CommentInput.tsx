@@ -44,7 +44,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 
       const response = await fetchApi({
         method: 'POST',
-        path: '/comments/new',
+        path: '/comments',
         schema: z.object({ comment: commentSchema }),
         options: {
           data: formData,
@@ -63,6 +63,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
     },
     onError: () => {
       Alert.alert('エラー', 'コメントに失敗しました');
+      console.log(`[debug] postId: ${postId}`);
     },
   });
 
