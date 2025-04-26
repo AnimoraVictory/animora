@@ -41,6 +41,20 @@ func (dtc *DailyTaskCreate) SetNillableCreatedAt(t *time.Time) *DailyTaskCreate 
 	return dtc
 }
 
+// SetTargetDate sets the "target_date" field.
+func (dtc *DailyTaskCreate) SetTargetDate(t time.Time) *DailyTaskCreate {
+	dtc.mutation.SetTargetDate(t)
+	return dtc
+}
+
+// SetNillableTargetDate sets the "target_date" field if the given value is not nil.
+func (dtc *DailyTaskCreate) SetNillableTargetDate(t *time.Time) *DailyTaskCreate {
+	if t != nil {
+		dtc.SetTargetDate(*t)
+	}
+	return dtc
+}
+
 // SetType sets the "type" field.
 func (dtc *DailyTaskCreate) SetType(et enum.TaskType) *DailyTaskCreate {
 	dtc.mutation.SetType(et)
@@ -130,6 +144,10 @@ func (dtc *DailyTaskCreate) defaults() {
 		v := dailytask.DefaultCreatedAt()
 		dtc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := dtc.mutation.TargetDate(); !ok {
+		v := dailytask.DefaultTargetDate()
+		dtc.mutation.SetTargetDate(v)
+	}
 	if _, ok := dtc.mutation.ID(); !ok {
 		v := dailytask.DefaultID()
 		dtc.mutation.SetID(v)
@@ -140,6 +158,9 @@ func (dtc *DailyTaskCreate) defaults() {
 func (dtc *DailyTaskCreate) check() error {
 	if _, ok := dtc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "DailyTask.created_at"`)}
+	}
+	if _, ok := dtc.mutation.TargetDate(); !ok {
+		return &ValidationError{Name: "target_date", err: errors.New(`ent: missing required field "DailyTask.target_date"`)}
 	}
 	if _, ok := dtc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "DailyTask.type"`)}
@@ -186,6 +207,10 @@ func (dtc *DailyTaskCreate) createSpec() (*DailyTask, *sqlgraph.CreateSpec) {
 	if value, ok := dtc.mutation.CreatedAt(); ok {
 		_spec.SetField(dailytask.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := dtc.mutation.TargetDate(); ok {
+		_spec.SetField(dailytask.FieldTargetDate, field.TypeTime, value)
+		_node.TargetDate = value
 	}
 	if value, ok := dtc.mutation.GetType(); ok {
 		_spec.SetField(dailytask.FieldType, field.TypeString, value)
@@ -289,6 +314,18 @@ func (u *DailyTaskUpsert) UpdateCreatedAt() *DailyTaskUpsert {
 	return u
 }
 
+// SetTargetDate sets the "target_date" field.
+func (u *DailyTaskUpsert) SetTargetDate(v time.Time) *DailyTaskUpsert {
+	u.Set(dailytask.FieldTargetDate, v)
+	return u
+}
+
+// UpdateTargetDate sets the "target_date" field to the value that was provided on create.
+func (u *DailyTaskUpsert) UpdateTargetDate() *DailyTaskUpsert {
+	u.SetExcluded(dailytask.FieldTargetDate)
+	return u
+}
+
 // SetType sets the "type" field.
 func (u *DailyTaskUpsert) SetType(v enum.TaskType) *DailyTaskUpsert {
 	u.Set(dailytask.FieldType, v)
@@ -360,6 +397,20 @@ func (u *DailyTaskUpsertOne) SetCreatedAt(v time.Time) *DailyTaskUpsertOne {
 func (u *DailyTaskUpsertOne) UpdateCreatedAt() *DailyTaskUpsertOne {
 	return u.Update(func(s *DailyTaskUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetTargetDate sets the "target_date" field.
+func (u *DailyTaskUpsertOne) SetTargetDate(v time.Time) *DailyTaskUpsertOne {
+	return u.Update(func(s *DailyTaskUpsert) {
+		s.SetTargetDate(v)
+	})
+}
+
+// UpdateTargetDate sets the "target_date" field to the value that was provided on create.
+func (u *DailyTaskUpsertOne) UpdateTargetDate() *DailyTaskUpsertOne {
+	return u.Update(func(s *DailyTaskUpsert) {
+		s.UpdateTargetDate()
 	})
 }
 
@@ -603,6 +654,20 @@ func (u *DailyTaskUpsertBulk) SetCreatedAt(v time.Time) *DailyTaskUpsertBulk {
 func (u *DailyTaskUpsertBulk) UpdateCreatedAt() *DailyTaskUpsertBulk {
 	return u.Update(func(s *DailyTaskUpsert) {
 		s.UpdateCreatedAt()
+	})
+}
+
+// SetTargetDate sets the "target_date" field.
+func (u *DailyTaskUpsertBulk) SetTargetDate(v time.Time) *DailyTaskUpsertBulk {
+	return u.Update(func(s *DailyTaskUpsert) {
+		s.SetTargetDate(v)
+	})
+}
+
+// UpdateTargetDate sets the "target_date" field to the value that was provided on create.
+func (u *DailyTaskUpsertBulk) UpdateTargetDate() *DailyTaskUpsertBulk {
+	return u.Update(func(s *DailyTaskUpsert) {
+		s.UpdateTargetDate()
 	})
 }
 

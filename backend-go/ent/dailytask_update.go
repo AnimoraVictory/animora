@@ -46,6 +46,20 @@ func (dtu *DailyTaskUpdate) SetNillableCreatedAt(t *time.Time) *DailyTaskUpdate 
 	return dtu
 }
 
+// SetTargetDate sets the "target_date" field.
+func (dtu *DailyTaskUpdate) SetTargetDate(t time.Time) *DailyTaskUpdate {
+	dtu.mutation.SetTargetDate(t)
+	return dtu
+}
+
+// SetNillableTargetDate sets the "target_date" field if the given value is not nil.
+func (dtu *DailyTaskUpdate) SetNillableTargetDate(t *time.Time) *DailyTaskUpdate {
+	if t != nil {
+		dtu.SetTargetDate(*t)
+	}
+	return dtu
+}
+
 // SetType sets the "type" field.
 func (dtu *DailyTaskUpdate) SetType(et enum.TaskType) *DailyTaskUpdate {
 	dtu.mutation.SetType(et)
@@ -157,6 +171,9 @@ func (dtu *DailyTaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := dtu.mutation.CreatedAt(); ok {
 		_spec.SetField(dailytask.FieldCreatedAt, field.TypeTime, value)
 	}
+	if value, ok := dtu.mutation.TargetDate(); ok {
+		_spec.SetField(dailytask.FieldTargetDate, field.TypeTime, value)
+	}
 	if value, ok := dtu.mutation.GetType(); ok {
 		_spec.SetField(dailytask.FieldType, field.TypeString, value)
 	}
@@ -248,6 +265,20 @@ func (dtuo *DailyTaskUpdateOne) SetCreatedAt(t time.Time) *DailyTaskUpdateOne {
 func (dtuo *DailyTaskUpdateOne) SetNillableCreatedAt(t *time.Time) *DailyTaskUpdateOne {
 	if t != nil {
 		dtuo.SetCreatedAt(*t)
+	}
+	return dtuo
+}
+
+// SetTargetDate sets the "target_date" field.
+func (dtuo *DailyTaskUpdateOne) SetTargetDate(t time.Time) *DailyTaskUpdateOne {
+	dtuo.mutation.SetTargetDate(t)
+	return dtuo
+}
+
+// SetNillableTargetDate sets the "target_date" field if the given value is not nil.
+func (dtuo *DailyTaskUpdateOne) SetNillableTargetDate(t *time.Time) *DailyTaskUpdateOne {
+	if t != nil {
+		dtuo.SetTargetDate(*t)
 	}
 	return dtuo
 }
@@ -392,6 +423,9 @@ func (dtuo *DailyTaskUpdateOne) sqlSave(ctx context.Context) (_node *DailyTask, 
 	}
 	if value, ok := dtuo.mutation.CreatedAt(); ok {
 		_spec.SetField(dailytask.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := dtuo.mutation.TargetDate(); ok {
+		_spec.SetField(dailytask.FieldTargetDate, field.TypeTime, value)
 	}
 	if value, ok := dtuo.mutation.GetType(); ok {
 		_spec.SetField(dailytask.FieldType, field.TypeString, value)
