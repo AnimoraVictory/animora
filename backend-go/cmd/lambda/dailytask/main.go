@@ -31,13 +31,10 @@ func Handler(ctx context.Context) error {
 	}
 
 	lambdaHandler := injector.InjectLambdaHandler()
-	lambdaHandler.UpdateStreakCounts()
-
-	// streakCountを更新する
-	lambdaHandler.UpdateStreakCounts()
-
-	// 新しいタスクを割り当てる
-	lambdaHandler.CreateDailyTasks()
+	err = lambdaHandler.HandleEveryDay()
+	if err != nil {
+		log.Fatalf("failed to handle daily task: %v", err)
+	}
 
 	return nil
 }

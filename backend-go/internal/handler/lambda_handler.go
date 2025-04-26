@@ -12,12 +12,14 @@ func NewLambdaHandler(dailyTaskUsecase usecase.DailyTaskUsecase) *LambdaHandler 
 	}
 }
 
-// 本日DailyTaskを行わなかったユーザーのstreakCountをリセットする
-func (h *LambdaHandler) UpdateStreakCounts() error {
-	return h.dailyTaskUsecase.UpdateStreakCounts()
-}
-
-// 全てのユーザーに新しいDailyTaskを割り当てる
-func (h *LambdaHandler) CreateDailyTasks() error {
-	return h.dailyTaskUsecase.CreateDailyTasksForAllUsers()
+func (h *LambdaHandler) HandleEveryDay() error {
+	err := h.dailyTaskUsecase.UpdateStreakCounts()
+	if err != nil {
+		return err
+	}
+	err = h.dailyTaskUsecase.CreateDailyTasksForAllUsers()
+	if err != nil {
+		return err
+	}
+	return nil
 }
