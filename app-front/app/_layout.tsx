@@ -6,7 +6,13 @@ import {
 import { useFonts } from 'expo-font';
 import { Slot, usePathname, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import {
+  ActivityIndicator,
+  View,
+  StyleSheet,
+  Alert,
+  Platform,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
@@ -19,12 +25,36 @@ import Constants from 'expo-constants';
 import { HomeTabScrollProvider } from '@/providers/HomeTabScrollContext';
 import { ModalStackProvider } from '@/providers/ModalStackContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as Notifications from 'expo-notifications';
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 export const API_URL = Constants.expoConfig?.extra?.API_URL;
+
+async function registerForPushNotificationsAsync() {
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+
+  if (existingStatus !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== 'granted') {
+    alert('Failed to get push token for push notification!');
+    return;
+  }
+
+  if (Platform.OS === 'ios') {
+    const devicePushToken = await Notifications.getDevicePushTokenAsync();
+    console.log('Device Push Token (APNs):', devicePushToken.data);
+  } else {
+    const expoPushToken = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log('Expo Push Token (Android):', expoPushToken);
+  }
+}
 
 // ユーザーの有無に応じてリダイレクトする
 function AuthSwitch() {
@@ -66,6 +96,10 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
 
   useEffect(() => {
     if (loaded) {
