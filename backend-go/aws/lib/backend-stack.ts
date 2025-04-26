@@ -41,21 +41,23 @@ export class BackendStack extends cdk.Stack {
     const apiFnRole = new Role(this, "ApiFunctionRole", {
       assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
       managedPolicies: [
-        ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
+        ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AWSLambdaBasicExecutionRole"
+        ),
       ],
     });
-    
+
     apiFnRole.addToPolicy(
       new cdk.aws_iam.PolicyStatement({
         actions: [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
         ],
         resources: [
           `arn:aws:s3:::${AWS_S3_BUCKET_NAME}`,
-          `arn:aws:s3:::${AWS_S3_BUCKET_NAME}/*`
+          `arn:aws:s3:::${AWS_S3_BUCKET_NAME}/*`,
         ],
       })
     );
@@ -75,15 +77,12 @@ export class BackendStack extends cdk.Stack {
         // AWS_SECRET_ACCESS_KEY,
         AWS_S3_BUCKET_NAME,
       },
-      role: apiFnRole
+      role: apiFnRole,
     });
 
     const api = new apigw.LambdaRestApi(this, "AnimaliaAPI", {
       handler: apiFn,
-      binaryMediaTypes: [
-        "multipart/form-data",
-        "image/*"
-      ],
+      binaryMediaTypes: ["multipart/form-data", "image/*"],
       defaultMethodOptions: {
         apiKeyRequired: false,
       },
@@ -97,7 +96,7 @@ export class BackendStack extends cdk.Stack {
           "X-Api-Key",
           "X-Amz-Security-Token",
           "Access-Control-Allow-Origin",
-          "Access-Control-Allow-Headers"
+          "Access-Control-Allow-Headers",
         ],
       },
     });
@@ -105,7 +104,7 @@ export class BackendStack extends cdk.Stack {
     // API Gatewayのステージ設定を調整
     const stage = api.deploymentStage.node.defaultChild as apigw.CfnStage;
     stage.addPropertyOverride("TracingEnabled", true);
-    
+
     const dailyTaskFn = new lambda.Function(this, "DailyTaskCreator", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
       handler: "bootstrap",
@@ -115,12 +114,14 @@ export class BackendStack extends cdk.Stack {
         // ... 他の環境変数 ...
       },
       // IAMロールを明示的に設定
-      role: new Role(this, 'DailyTaskCreatorRole', {
-        assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-        description: 'Role for DailyTaskCreator Lambda function',
+      role: new Role(this, "DailyTaskCreatorRole", {
+        assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+        description: "Role for DailyTaskCreator Lambda function",
         managedPolicies: [
           // CloudWatchLogsへのアクセス権限
-          ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+          ManagedPolicy.fromAwsManagedPolicyName(
+            "service-role/AWSLambdaBasicExecutionRole"
+          ),
         ],
       }),
     });
@@ -136,6 +137,7 @@ export class BackendStack extends cdk.Stack {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
 
+    /* 一時的にコメントアウト
     const healthCheckFn = new lambda.Function(this, "HealthCheckFunction", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
       handler: "bootstrap",
@@ -148,5 +150,6 @@ export class BackendStack extends cdk.Stack {
       schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
       targets: [new targets.LambdaFunction(healthCheckFn)],
     });
+    */
   }
 }
