@@ -6,7 +6,7 @@ import {
 import { useFonts } from 'expo-font';
 import { Slot, usePathname, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
@@ -94,6 +94,8 @@ function AuthSwitch() {
 }
 
 export default function RootLayout() {
+  // UserProfileModalとUSersModalのループが避けられないのでWarningを出さないようにする
+  LogBox.ignoreLogs(['Require cycle:']);
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
