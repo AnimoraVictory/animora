@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -215,6 +216,21 @@ func (uc *UserCreate) AddDailyTasks(d ...*DailyTask) *UserCreate {
 		ids[i] = d[i].ID
 	}
 	return uc.AddDailyTaskIDs(ids...)
+}
+
+// AddDeviceTokenIDs adds the "device_tokens" edge to the DeviceToken entity by IDs.
+func (uc *UserCreate) AddDeviceTokenIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddDeviceTokenIDs(ids...)
+	return uc
+}
+
+// AddDeviceTokens adds the "device_tokens" edges to the DeviceToken entity.
+func (uc *UserCreate) AddDeviceTokens(d ...*DeviceToken) *UserCreate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uc.AddDeviceTokenIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -460,6 +476,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.DeviceTokensIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DeviceTokensTable,
+			Columns: []string{user.DeviceTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(devicetoken.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

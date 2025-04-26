@@ -77,6 +77,11 @@ func InjectDailyTaskRepository() repository.DailyTaskRepository {
 	return dailyTaskRepository
 }
 
+func InjectDeviceTokenRepository() repository.DeviceTokenRepository {
+	deviceTokenRepostory := infra.NewDeviceTokenRepository(InjectDB())
+	return deviceTokenRepostory
+}
+
 func InjectAuthUsecase() usecase.AuthUsecase {
 	authUsecase := usecase.NewAuthUsecase(InjectCognitoRepository(), InjectUserRepository())
 	return *authUsecase
@@ -121,6 +126,11 @@ func InjectCacheUsecase() usecase.CacheUsecase {
 	return usecase.NewCacheUsecase()
 }
 
+func InjectDeviceTokenUsecase() usecase.DeviceTokenUsecase {
+	deviceTokenUsecase := usecase.NewDeviceTokenUsecase(InjectDeviceTokenRepository())
+	return *deviceTokenUsecase
+}
+
 func InjectAuthHandler() handler.AuthHandler {
 	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase(), InjectStorageUsecase(), InjectDailyTaskUsecase())
 	return *authHandler
@@ -152,6 +162,11 @@ func InjectLikeHandler() handler.LikeHandler {
 func InjectCommentHandler() handler.CommentHandler {
 	commentHandler := handler.NewCommentHandler(InjectCommentUsecase(), InjectUserUsecase())
 	return *commentHandler
+}
+
+func InjectDeviceTokenHandler() handler.DeviceTokenHandler {
+	deviceTokenHandler := handler.NewDeviceTokenHandler(InjectDeviceTokenUsecase())
+	return *deviceTokenHandler
 }
 
 func InjectAuthMiddleware() middlewares.AuthMiddleware {
