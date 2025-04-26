@@ -31,25 +31,7 @@ func (h *DeviceTokenHandler) Create(c echo.Context) error {
 		})
 	}
 
-	err := h.deviceTokenUsecase.Create(userID, deviceID, token, platform)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	}
-	return c.JSON(http.StatusOK, map[string]string{"message": "deviceToken created"})
-}
-
-func (h *DeviceTokenHandler) Update(c echo.Context) error {
-	userID := c.QueryParam("userId")
-	deviceID := c.QueryParam("deviceId")
-	token := c.QueryParam("token")
-	if userID == "" || deviceID == "" || token == "" {
-		log.Errorf("Params not enough: %v")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "Params not enough",
-		})
-	}
-	err := h.deviceTokenUsecase.Update(userID, deviceID, token)
+	err := h.deviceTokenUsecase.Upsert(userID, deviceID, token, platform)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})

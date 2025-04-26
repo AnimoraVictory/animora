@@ -31,6 +31,8 @@ import {
   GetPostsResponse,
 } from '@/features/post/schema/response';
 import { fetchApi } from '@/utils/api';
+import useDeviceToken from '@/features/devicetoken/useDeviceToken';
+import * as Device from 'expo-device';
 
 export default function PostsScreen() {
   const colorScheme = useColorScheme();
@@ -40,6 +42,14 @@ export default function PostsScreen() {
   const HEADER_HEIGHT = 90;
   const { user: currentUser, token } = useAuth();
   const queryClient = useQueryClient();
+  const {upsertDeviceToken} = useDeviceToken();
+  const deviceId = Device.osInternalBuildId ?? Device.modelId ?? Device.deviceName ?? "unknown";
+
+  useEffect(() => {
+    upsertDeviceToken(deviceId)
+  // アプリ起動時に一度だけDeviceTokenを更新もしくは作成する
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const {
     data,

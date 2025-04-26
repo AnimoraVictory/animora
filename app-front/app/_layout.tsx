@@ -6,7 +6,7 @@ import {
 import { useFonts } from 'expo-font';
 import { Slot, usePathname, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
@@ -20,6 +20,7 @@ import { HomeTabScrollProvider } from '@/providers/HomeTabScrollContext';
 import { ModalStackProvider } from '@/providers/ModalStackContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Notifications from 'expo-notifications';
+import * as SecureStore from 'expo-secure-store';
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
@@ -27,28 +28,35 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 export const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-async function registerForPushNotificationsAsync() {
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+// ログインしてたら、作成したトークンをバックエンドに送る、してなかったら、ローカルのストレージに保存
 
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
+async function saveDeviceTokenToStorage() {
+  try {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-  if (finalStatus !== 'granted') {
-    alert('Failed to get push token for push notification!');
-    return;
-  }
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
 
-  if (Platform.OS === 'ios') {
-    const devicePushToken = await Notifications.getDevicePushTokenAsync();
-    console.log('Device Push Token (APNs):', devicePushToken.data);
-  } else {
-    const expoPushToken = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log('Expo Push Token (Android):', expoPushToken);
+    if (finalStatus !== 'granted') {
+      console.log('Push通知の許可が得られなかったため、トークンは保存しません');
+      return;
+    }
+
+    const { data: expoPushToken } = await Notifications.getExpoPushTokenAsync({
+      projectId: 'dbd30010-12ff-42de-befb-e1f2ae8ce27a',
+    });
+
+    if (expoPushToken) {
+      await SecureStore.setItemAsync('notificationToken', expoPushToken);
+    }
+  } catch (error) {
+    console.error('トークン取得中にエラー発生:', error);
   }
 }
+
 
 // ユーザーの有無に応じてリダイレクトする
 function AuthSwitch() {
@@ -92,7 +100,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    registerForPushNotificationsAsync();
+    saveDeviceTokenToStorage();
   }, []);
 
   useEffect(() => {
