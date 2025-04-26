@@ -155,6 +155,11 @@ func InjectCommentHandler() handler.CommentHandler {
 	return *commentHandler
 }
 
+func InjectLambdaHandler() handler.LambdaHandler {
+	lambdaHandler := handler.NewLambdaHandler(InjectDailyTaskUsecase())
+	return *lambdaHandler
+}
+
 func InjectAuthMiddleware() middlewares.AuthMiddleware {
 	authMiddleware := middlewares.NewAuthMiddleware(InjectAuthUsecase())
 	return *authMiddleware

@@ -159,3 +159,160 @@ func TestDailyTaskUsecase_GetNextStreakCount(t *testing.T) {
 		})
 	}
 }
+
+func TestDailyTaskUsecase_CreateDailyTasksForAllUsers(t *testing.T) {
+	mockUsers := []*ent.User{
+		{
+			ID: uuid.New(),
+		},
+		{
+			ID: uuid.New(),
+		},
+		{
+			ID: uuid.New(),
+		},
+	}
+	testCases := []struct {
+		name          string
+		users         []*ent.User
+		expectedIds   []uuid.UUID
+		mockError     error
+		expectedError error
+	}{
+		{
+			name:          "[成功]全てのユーザーに新しいタスクを割り当てた場合",
+			users:         mockUsers,
+			expectedIds:   []uuid.UUID{mockUsers[0].ID, mockUsers[1].ID, mockUsers[2].ID},
+			mockError:     nil,
+			expectedError: nil,
+		},
+		{
+			name:          "[失敗]リポジトリでエラーが発生する場合",
+			users:         mockUsers,
+			expectedIds:   make([]uuid.UUID, 0),
+			mockError:     assert.AnError,
+			expectedError: assert.AnError,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			createdUserIds := make([]uuid.UUID, 0)
+
+			mockUserRepo := &mock.MockUserRepository{
+				GetAllFunc: func() ([]*ent.User, error) {
+					return tc.users, nil
+				},
+			}
+
+			mockDailyTaskRepo := &mock.MockDailyTaskRepository{
+				CreateFunc: func(userId uuid.UUID) error {
+					if tc.mockError != nil {
+						return tc.mockError
+					}
+					createdUserIds = append(createdUserIds, userId)
+					return nil
+				},
+			}
+
+			usecase := NewDailyTaskUsecase(mockDailyTaskRepo, mockUserRepo)
+			err := usecase.CreateDailyTasksForAllUsers()
+			assert.Equal(t, tc.expectedError, err)
+			assert.ElementsMatch(t, tc.expectedIds, createdUserIds)
+		})
+	}
+}
+
+func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
+	mockUsers := []*ent.User{
+		{
+			ID: uuid.New(),
+		},
+		{
+			ID: uuid.New(),
+		},
+		{
+			ID: uuid.New(),
+		},
+	}
+
+	testCases := []struct {
+		name          string
+		users         []*ent.User
+		lastTasks     map[uuid.UUID]*models.DailyTaskWithEdges
+		expectedCalls map[uuid.UUID]int
+		mockError     error
+		expectedError error
+	}{
+		{
+			name:  "[成功]投稿していないユーザーのストリークカウントをリセットする場合",
+			users: mockUsers,
+			lastTasks: map[uuid.UUID]*models.DailyTaskWithEdges{
+				mockUsers[0].ID: {
+					DailyTask: &ent.DailyTask{ID: uuid.New()},
+					User:      ent.User{ID: mockUsers[0].ID, StreakCount: 5},
+					Post:      &ent.Post{ID: uuid.New()}, // 投稿あり
+				},
+				mockUsers[1].ID: {
+					DailyTask: &ent.DailyTask{ID: uuid.New()},
+					User:      ent.User{ID: mockUsers[1].ID, StreakCount: 3},
+					// 投稿なし
+				},
+				mockUsers[2].ID: nil, // タスクなし
+			},
+			expectedCalls: map[uuid.UUID]int{
+				mockUsers[1].ID: 0, // ストリークリセット
+			},
+			mockError:     nil,
+			expectedError: nil,
+		},
+		{
+			name:          "[失敗]ユーザー取得でエラーが発生する場合",
+			users:         nil,
+			lastTasks:     map[uuid.UUID]*models.DailyTaskWithEdges{},
+			expectedCalls: map[uuid.UUID]int{},
+			mockError:     assert.AnError,
+			expectedError: assert.AnError,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			updatedUsers := make(map[uuid.UUID]int)
+
+			mockUserRepo := &mock.MockUserRepository{
+				GetAllFunc: func() ([]*ent.User, error) {
+					if tc.mockError != nil {
+						return nil, tc.mockError
+					}
+					return tc.users, nil
+				},
+				UpdateStreakCountFunc: func(userId uuid.UUID, count int) error {
+					updatedUsers[userId] = count
+					return nil
+				},
+			}
+
+			mockDailyTaskRepo := &mock.MockDailyTaskRepository{
+				GetLastDailyTaskFunc: func(userId uuid.UUID) (*models.DailyTaskWithEdges, error) {
+					if tc.mockError != nil {
+						return nil, tc.mockError
+					}
+					return tc.lastTasks[userId], nil
+				},
+			}
+
+			usecase := NewDailyTaskUsecase(mockDailyTaskRepo, mockUserRepo)
+			err := usecase.UpdateStreakCounts()
+			assert.Equal(t, tc.expectedError, err)
+
+			// 期待されるユーザーのストリークカウント更新が行われたか確認
+			assert.Equal(t, len(tc.expectedCalls), len(updatedUsers), "期待される更新回数と実際の更新回数が一致しません")
+			for userId, expectedCount := range tc.expectedCalls {
+				actualCount, ok := updatedUsers[userId]
+				assert.True(t, ok, "ユーザーID %s のストリークカウントが更新されていません", userId)
+				assert.Equal(t, expectedCount, actualCount, "ユーザーID %s のストリークカウントが期待値と異なります", userId)
+			}
+		})
+	}
+}

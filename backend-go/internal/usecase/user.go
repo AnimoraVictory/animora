@@ -38,6 +38,18 @@ func (u *UserUsecase) Update(id string, name string, description string, newImag
 	return u.userRepository.Update(userUUID, name, description, newImageKey)
 }
 
+func (u *UserUsecase) UpdateStreakCount(id string, streakCount int) error {
+	userUUID, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	return u.userRepository.UpdateStreakCount(userUUID, streakCount)
+}
+
+func (u *UserUsecase) GetAll() ([]*ent.User, error) {
+	return u.userRepository.GetAll()
+}
+
 func (u *UserUsecase) GetById(id string) (*ent.User, error) {
 	userUUID, err := uuid.Parse(id)
 	if err != nil {

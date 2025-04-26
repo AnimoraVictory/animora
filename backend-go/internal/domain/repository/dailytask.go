@@ -8,4 +8,5 @@ import (
 type DailyTaskRepository interface {
 	Create(userId uuid.UUID) error
 	GetPreviousDailyTask(userId uuid.UUID) (*models.DailyTaskWithEdges, error)
+	GetLastDailyTask(userId uuid.UUID) (*models.DailyTaskWithEdges, error)
 }
