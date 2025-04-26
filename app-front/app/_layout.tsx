@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   View,
   StyleSheet,
-  Alert,
   Platform,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
