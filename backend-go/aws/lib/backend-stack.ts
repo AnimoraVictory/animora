@@ -126,32 +126,6 @@ export class BackendStack extends cdk.Stack {
       }),
     });
 
-    new events.Rule(this, "DailyTaskRule", {
-      schedule: events.Schedule.cron({ minute: "0", hour: "15", day: "*" }),
-      targets: [new targets.LambdaFunction(dailyTaskFn)],
-    });
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'AwsQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
-
-    const healthCheckFn = new lambda.Function(this, "HealthCheckFunction", {
-      runtime: lambda.Runtime.PROVIDED_AL2023,
-      handler: "bootstrap",
-      code: lambda.Code.fromAsset(
-        path.join(__dirname, "../../bin/health-check")
-      ),
-      description: "Render上のFastAPIのヘルスチェックを行う関数",
-      timeout: cdk.Duration.seconds(10),
-    });
-
-    new events.Rule(this, "HealthCheckRule", {
-      schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
-      targets: [new targets.LambdaFunction(healthCheckFn)],
-    });
-
     const dailyTaskPushNotificationFn = new lambda.Function(
       this,
       "DailyTaskPushNotification",
@@ -181,5 +155,33 @@ export class BackendStack extends cdk.Stack {
       schedule: events.Schedule.cron({ minute: "0", hour: "3", day: "*" }),
       targets: [new targets.LambdaFunction(dailyTaskPushNotificationFn)],
     });
+
+    new events.Rule(this, "DailyTaskRule", {
+      schedule: events.Schedule.cron({ minute: "0", hour: "15", day: "*" }),
+      targets: [new targets.LambdaFunction(dailyTaskFn)],
+    });
+    // The code that defines your stack goes here
+
+    // example resource
+    // const queue = new sqs.Queue(this, 'AwsQueue', {
+    //   visibilityTimeout: cdk.Duration.seconds(300)
+    // });
+
+    /* 一時的にコメントアウト
+    const healthCheckFn = new lambda.Function(this, "HealthCheckFunction", {
+      runtime: lambda.Runtime.PROVIDED_AL2023,
+      handler: "bootstrap",
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "../../bin/health-check")
+      ),
+      description: "Render上のFastAPIのヘルスチェックを行う関数",
+      timeout: cdk.Duration.seconds(10),
+    });
+
+    new events.Rule(this, "HealthCheckRule", {
+      schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
+      targets: [new targets.LambdaFunction(healthCheckFn)],
+    });
+    */
   }
 }
