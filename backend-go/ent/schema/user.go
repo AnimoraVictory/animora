@@ -22,6 +22,7 @@ func (User) Fields() []ent.Field {
 		field.String("email").NotEmpty().Unique(),
 		field.String("name").NotEmpty(),
 		field.String("bio").Default(""),
+		field.Int("streak_count").Default(0),
 		field.String("icon_image_key").Optional(),
 		field.Time("created_at").Default(time.Now),
 	}
