@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
@@ -19,6 +20,12 @@ type DailyTaskResponse struct {
 	CreatedAt time.Time         `json:"createdAt"`
 	Type      enum.TaskType     `json:"type"`
 	Post      *PostBaseResponse `json:"post"`
+}
+
+type DailyTaskWithEdges struct {
+	*ent.DailyTask
+	Post *ent.Post
+	User ent.User
 }
 
 func NewDailyTaskBaseResponse(dailyTask *ent.DailyTask) DailyTaskBaseResponse {
@@ -41,4 +48,19 @@ func NewDailyTaskResponse(dailyTask *ent.DailyTask) DailyTaskResponse {
 		Type:      dailyTask.Type,
 		Post:      postResp,
 	}
+}
+
+func NewDailyTaskWithEdges(task *ent.DailyTask) (*DailyTaskWithEdges, error) {
+	if task == nil {
+		return nil, nil
+	}
+	// required field
+	if task.Edges.User == nil {
+		return nil, fmt.Errorf("user cannot be nil")
+	}
+	return &DailyTaskWithEdges{
+		DailyTask: task,
+		User:      *task.Edges.User,
+		Post:      task.Edges.Post,
+	}, nil
 }

@@ -30,12 +30,12 @@ func (u *UserUsecase) CreateUser(name, email string) (*ent.User, error) {
 	return u.userRepository.Create(name, email)
 }
 
-func (u *UserUsecase) Update(id string, name string, description string, newImageKey string, streakCount int) error {
+func (u *UserUsecase) Update(id string, name string, description string, newImageKey string) error {
 	userUUID, err := uuid.Parse(id)
 	if err != nil {
 		return err
 	}
-	return u.userRepository.Update(userUUID, name, description, newImageKey, streakCount)
+	return u.userRepository.Update(userUUID, name, description, newImageKey)
 }
 
 func (u *UserUsecase) GetById(id string) (*ent.User, error) {
