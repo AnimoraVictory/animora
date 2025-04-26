@@ -42,14 +42,18 @@ export default function PostsScreen() {
   const HEADER_HEIGHT = 90;
   const { user: currentUser, token } = useAuth();
   const queryClient = useQueryClient();
-  const {upsertDeviceToken} = useDeviceToken();
-  const deviceId = Device.osInternalBuildId ?? Device.modelId ?? Device.deviceName ?? "unknown";
+  const { upsertDeviceToken } = useDeviceToken();
+  const deviceId =
+    Device.osInternalBuildId ??
+    Device.modelId ??
+    Device.deviceName ??
+    'unknown';
 
   useEffect(() => {
-    upsertDeviceToken(deviceId)
-  // アプリ起動時に一度だけDeviceTokenを更新もしくは作成する
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    upsertDeviceToken(deviceId);
+    // アプリ起動時に一度だけDeviceTokenを更新もしくは作成する
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     data,

@@ -32,7 +32,8 @@ export const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 async function saveDeviceTokenToStorage() {
   try {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
     if (existingStatus !== 'granted') {
@@ -56,7 +57,6 @@ async function saveDeviceTokenToStorage() {
     console.error('トークン取得中にエラー発生:', error);
   }
 }
-
 
 // ユーザーの有無に応じてリダイレクトする
 function AuthSwitch() {
