@@ -607,6 +607,29 @@ func HasDailyTasksWith(preds ...predicate.DailyTask) predicate.User {
 	})
 }
 
+// HasDeviceTokens applies the HasEdge predicate on the "device_tokens" edge.
+func HasDeviceTokens() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DeviceTokensTable, DeviceTokensColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDeviceTokensWith applies the HasEdge predicate on the "device_tokens" edge with a given conditions (other predicates).
+func HasDeviceTokensWith(preds ...predicate.DeviceToken) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newDeviceTokensStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))
