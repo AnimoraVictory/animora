@@ -330,7 +330,7 @@ func (h *PostHandler) CreatePost(c echo.Context) error {
 
 	// DailyTaskIdがセットされていればストリークの更新
 	if req.DailyTaskId != nil {
-		err := h.dailyTaskUsecase.UpdateStreak(req.UserId)
+		err := h.dailyTaskUsecase.UpdateStreakCount(req.UserId)
 		if err != nil {
 			log.Errorf("Failed to update streak: %v", err)
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{

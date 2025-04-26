@@ -22,7 +22,7 @@ func (u *DailyTaskUsecase) Create(userId uuid.UUID) error {
 	return u.dailyTaskRepository.Create(userId)
 }
 
-func (u *DailyTaskUsecase) UpdateStreak(userId string) error {
+func (u *DailyTaskUsecase) UpdateStreakCount(userId string) error {
 	userUUID, err := uuid.Parse(userId)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (u *DailyTaskUsecase) UpdateStreak(userId string) error {
 		return err
 	}
 
-	err = u.userRepository.UpdateStreak(userUUID, newStreak)
+	err = u.userRepository.UpdateStreakCount(userUUID, newStreak)
 	if err != nil {
 		return err
 	}
@@ -60,4 +60,46 @@ func (u *DailyTaskUsecase) GetNextStreakCount(prevTask *models.DailyTaskWithEdge
 
 	// 前回のタスクで投稿しているので、streakCountを1増やす
 	return prevTask.User.StreakCount + 1, nil
+}
+
+// 全てのユーザーに新しいDailyTaskを割り当てる
+func (u *DailyTaskUsecase) CreateDailyTasksForAllUsers() error {
+	users, err := u.userRepository.GetAll()
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		err := u.dailyTaskRepository.Create(user.ID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// 本日のDailyTaskを行わなかったユーザーのstreakCountをリセットする
+func (u *DailyTaskUsecase) UpdateStreakCounts() error {
+	users, err := u.userRepository.GetAll()
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		lastTask, err := u.dailyTaskRepository.GetLastDailyTask(user.ID)
+		if err != nil {
+			return err
+		}
+
+		if lastTask == nil {
+			// 前回のタスクがないので、スキップ
+			continue
+		}
+
+		// 最後のタスクで投稿していなければ、streakCountをリセット
+		if lastTask.Post == nil {
+			u.userRepository.UpdateStreakCount(user.ID, 0)
+		}
+	}
+	return nil
 }

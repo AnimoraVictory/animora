@@ -41,6 +41,23 @@ func (r *DailyTaskRepository) Create(userID uuid.UUID) error {
 	return err
 }
 
+func (r *DailyTaskRepository) GetLastDailyTask(userId uuid.UUID) (*models.DailyTaskWithEdges, error) {
+	lastTask, err := r.db.DailyTask.Query().
+		Where(dailytask.HasUserWith(user.ID(userId))).
+		Order(ent.Desc(dailytask.FieldCreatedAt)).
+		Limit(1).
+		WithPost().
+		WithUser().
+		Only(context.Background())
+	if ent.IsNotFound(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return models.NewDailyTaskWithEdges(lastTask)
+}
+
 // 前回のタスクを取得する。
 // 前日にアサインされたタスクを取得する。
 func (r *DailyTaskRepository) GetPreviousDailyTask(userId uuid.UUID) (*models.DailyTaskWithEdges, error) {

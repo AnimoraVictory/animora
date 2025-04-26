@@ -84,6 +84,14 @@ func (r *UserRepository) FindByEmail(email string) (*ent.User, error) {
 	return user, nil
 }
 
+func (r *UserRepository) GetAll() ([]*ent.User, error) {
+	users, err := r.db.User.Query().All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (r *UserRepository) GetById(id uuid.UUID) (*ent.User, error) {
 	user, err := r.db.User.Get(context.Background(), id)
 	if err != nil {
@@ -101,7 +109,7 @@ func (r *UserRepository) Update(id uuid.UUID, name string, description string, i
 	return err
 }
 
-func (r *UserRepository) UpdateStreak(id uuid.UUID, streak int) error {
+func (r *UserRepository) UpdateStreakCount(id uuid.UUID, streak int) error {
 	_, err := r.db.User.UpdateOneID(id).
 		SetStreakCount(streak).
 		Save(context.Background())

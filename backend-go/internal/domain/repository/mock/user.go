@@ -8,14 +8,15 @@ import (
 
 // MockUserRepository is a mock implementation of the UserRepository interface
 type MockUserRepository struct {
-	CreateFunc       func(name, email string) (*ent.User, error)
-	ExistsEmailFunc  func(email string) (bool, error)
-	FindByEmailFunc  func(email string) (*ent.User, error)
-	GetByIdFunc      func(id uuid.UUID) (*ent.User, error)
-	UpdateFunc       func(id uuid.UUID, name string, description string, iconImageKey string) error
-	UpdateStreakFunc func(id uuid.UUID, streak int) error
-	FollowFunc       func(toId string, fromId string) error
-	UnfollowFunc     func(toId string, fromId string) error
+	CreateFunc            func(name, email string) (*ent.User, error)
+	ExistsEmailFunc       func(email string) (bool, error)
+	FindByEmailFunc       func(email string) (*ent.User, error)
+	GetAllFunc            func() ([]*ent.User, error)
+	GetByIdFunc           func(id uuid.UUID) (*ent.User, error)
+	UpdateFunc            func(id uuid.UUID, name string, description string, iconImageKey string) error
+	UpdateStreakCountFunc func(id uuid.UUID, streak int) error
+	FollowFunc            func(toId string, fromId string) error
+	UnfollowFunc          func(toId string, fromId string) error
 }
 
 // Ensure MockUserRepository implements UserRepository interface
@@ -36,6 +37,11 @@ func (m *MockUserRepository) FindByEmail(email string) (*ent.User, error) {
 	return m.FindByEmailFunc(email)
 }
 
+// GetAll calls the mocked GetAllFunc
+func (m *MockUserRepository) GetAll() ([]*ent.User, error) {
+	return m.GetAllFunc()
+}
+
 // GetById calls the mocked GetByIdFunc
 func (m *MockUserRepository) GetById(id uuid.UUID) (*ent.User, error) {
 	return m.GetByIdFunc(id)
@@ -46,9 +52,9 @@ func (m *MockUserRepository) Update(id uuid.UUID, name string, description strin
 	return m.UpdateFunc(id, name, description, iconImageKey)
 }
 
-// UpdateStreak calls the mocked UpdateStreakFunc
-func (m *MockUserRepository) UpdateStreak(id uuid.UUID, streak int) error {
-	return m.UpdateStreakFunc(id, streak)
+// UpdateStreakCount calls the mocked UpdateStreakCountFunc
+func (m *MockUserRepository) UpdateStreakCount(id uuid.UUID, streak int) error {
+	return m.UpdateStreakCountFunc(id, streak)
 }
 
 // Follow calls the mocked FollowFunc

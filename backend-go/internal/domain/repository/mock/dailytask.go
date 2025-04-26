@@ -9,6 +9,7 @@ import (
 type MockDailyTaskRepository struct {
 	CreateFunc               func(userId uuid.UUID) error
 	GetPreviousDailyTaskFunc func(userId uuid.UUID) (*models.DailyTaskWithEdges, error)
+	GetLastDailyTaskFunc     func(userId uuid.UUID) (*models.DailyTaskWithEdges, error)
 }
 
 // Ensure MockDailyTaskRepository implements DailyTaskRepository interface
@@ -20,4 +21,8 @@ func (m *MockDailyTaskRepository) Create(userId uuid.UUID) error {
 
 func (m *MockDailyTaskRepository) GetPreviousDailyTask(userId uuid.UUID) (*models.DailyTaskWithEdges, error) {
 	return m.GetPreviousDailyTaskFunc(userId)
+}
+
+func (m *MockDailyTaskRepository) GetLastDailyTask(userId uuid.UUID) (*models.DailyTaskWithEdges, error) {
+	return m.GetLastDailyTaskFunc(userId)
 }
