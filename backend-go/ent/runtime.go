@@ -126,8 +126,12 @@ func init() {
 	userDescBio := userFields[4].Descriptor()
 	// user.DefaultBio holds the default value on creation for the bio field.
 	user.DefaultBio = userDescBio.Default.(string)
+	// userDescStreakCount is the schema descriptor for streak_count field.
+	userDescStreakCount := userFields[5].Descriptor()
+	// user.DefaultStreakCount holds the default value on creation for the streak_count field.
+	user.DefaultStreakCount = userDescStreakCount.Default.(int)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[6].Descriptor()
+	userDescCreatedAt := userFields[7].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescID is the schema descriptor for id field.

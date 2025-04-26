@@ -4135,6 +4135,8 @@ type UserMutation struct {
 	email              *string
 	name               *string
 	bio                *string
+	streak_count       *int
+	addstreak_count    *int
 	icon_image_key     *string
 	created_at         *time.Time
 	clearedFields      map[string]struct{}
@@ -4444,6 +4446,62 @@ func (m *UserMutation) OldBio(ctx context.Context) (v string, err error) {
 // ResetBio resets all changes to the "bio" field.
 func (m *UserMutation) ResetBio() {
 	m.bio = nil
+}
+
+// SetStreakCount sets the "streak_count" field.
+func (m *UserMutation) SetStreakCount(i int) {
+	m.streak_count = &i
+	m.addstreak_count = nil
+}
+
+// StreakCount returns the value of the "streak_count" field in the mutation.
+func (m *UserMutation) StreakCount() (r int, exists bool) {
+	v := m.streak_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreakCount returns the old "streak_count" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldStreakCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreakCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreakCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreakCount: %w", err)
+	}
+	return oldValue.StreakCount, nil
+}
+
+// AddStreakCount adds i to the "streak_count" field.
+func (m *UserMutation) AddStreakCount(i int) {
+	if m.addstreak_count != nil {
+		*m.addstreak_count += i
+	} else {
+		m.addstreak_count = &i
+	}
+}
+
+// AddedStreakCount returns the value that was added to the "streak_count" field in this mutation.
+func (m *UserMutation) AddedStreakCount() (r int, exists bool) {
+	v := m.addstreak_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStreakCount resets all changes to the "streak_count" field.
+func (m *UserMutation) ResetStreakCount() {
+	m.streak_count = nil
+	m.addstreak_count = nil
 }
 
 // SetIconImageKey sets the "icon_image_key" field.
@@ -4943,7 +5001,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.index != nil {
 		fields = append(fields, user.FieldIndex)
 	}
@@ -4955,6 +5013,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.bio != nil {
 		fields = append(fields, user.FieldBio)
+	}
+	if m.streak_count != nil {
+		fields = append(fields, user.FieldStreakCount)
 	}
 	if m.icon_image_key != nil {
 		fields = append(fields, user.FieldIconImageKey)
@@ -4978,6 +5039,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case user.FieldBio:
 		return m.Bio()
+	case user.FieldStreakCount:
+		return m.StreakCount()
 	case user.FieldIconImageKey:
 		return m.IconImageKey()
 	case user.FieldCreatedAt:
@@ -4999,6 +5062,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	case user.FieldBio:
 		return m.OldBio(ctx)
+	case user.FieldStreakCount:
+		return m.OldStreakCount(ctx)
 	case user.FieldIconImageKey:
 		return m.OldIconImageKey(ctx)
 	case user.FieldCreatedAt:
@@ -5040,6 +5105,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetBio(v)
 		return nil
+	case user.FieldStreakCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreakCount(v)
+		return nil
 	case user.FieldIconImageKey:
 		v, ok := value.(string)
 		if !ok {
@@ -5065,6 +5137,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addindex != nil {
 		fields = append(fields, user.FieldIndex)
 	}
+	if m.addstreak_count != nil {
+		fields = append(fields, user.FieldStreakCount)
+	}
 	return fields
 }
 
@@ -5075,6 +5150,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldIndex:
 		return m.AddedIndex()
+	case user.FieldStreakCount:
+		return m.AddedStreakCount()
 	}
 	return nil, false
 }
@@ -5090,6 +5167,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddIndex(v)
+		return nil
+	case user.FieldStreakCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStreakCount(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -5144,6 +5228,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldBio:
 		m.ResetBio()
+		return nil
+	case user.FieldStreakCount:
+		m.ResetStreakCount()
 		return nil
 	case user.FieldIconImageKey:
 		m.ResetIconImageKey()
