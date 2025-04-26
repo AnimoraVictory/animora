@@ -12,6 +12,9 @@ type Comment func(*sql.Selector)
 // DailyTask is the predicate function for dailytask builders.
 type DailyTask func(*sql.Selector)
 
+// DeviceToken is the predicate function for devicetoken builders.
+type DeviceToken func(*sql.Selector)
+
 // FollowRelation is the predicate function for followrelation builders.
 type FollowRelation func(*sql.Selector)
 
