@@ -84,29 +84,26 @@ func (r *UserRepository) FindByEmail(email string) (*ent.User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) GetById(id string) (*ent.User, error) {
-	userUUID, err := uuid.Parse(id)
-	if err != nil {
-		return nil, err
-	}
-
-	user, err := r.db.User.Get(context.Background(), userUUID)
+func (r *UserRepository) GetById(id uuid.UUID) (*ent.User, error) {
+	user, err := r.db.User.Get(context.Background(), id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (r *UserRepository) Update(id string, name string, description string, newImageKey string) error {
-	userUUID, err := uuid.Parse(id)
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.User.UpdateOneID(userUUID).
+func (r *UserRepository) Update(id uuid.UUID, name string, description string, iconImageKey string) error {
+	_, err := r.db.User.UpdateOneID(id).
 		SetName(name).
 		SetBio(description).
-		SetIconImageKey(newImageKey).
+		SetIconImageKey(iconImageKey).
+		Save(context.Background())
+	return err
+}
+
+func (r *UserRepository) UpdateStreak(id uuid.UUID, streak int) error {
+	_, err := r.db.User.UpdateOneID(id).
+		SetStreakCount(streak).
 		Save(context.Background())
 	return err
 }
