@@ -53,15 +53,11 @@ func (u *DailyTaskUsecase) GetNextStreakCount(prevTask *models.DailyTaskWithEdge
 		return 1, nil
 	}
 
-	if prevTask.DailyTask == nil {
+	if prevTask.Post == nil {
 		// 前回のタスクで投稿してないのでリセット
 		return 1, nil
 	}
 
 	// 前回のタスクで投稿しているので、streakCountを1増やす
-	user, err := u.userRepository.GetById(prevTask.User.ID)
-	if err != nil {
-		return -1, err
-	}
-	return user.StreakCount + 1, nil
+	return prevTask.User.StreakCount + 1, nil
 }
