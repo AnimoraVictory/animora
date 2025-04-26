@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -26,17 +27,18 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx            *QueryContext
-	order          []user.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.User
-	withPosts      *PostQuery
-	withComments   *CommentQuery
-	withLikes      *LikeQuery
-	withPets       *PetQuery
-	withFollowing  *FollowRelationQuery
-	withFollowers  *FollowRelationQuery
-	withDailyTasks *DailyTaskQuery
+	ctx              *QueryContext
+	order            []user.OrderOption
+	inters           []Interceptor
+	predicates       []predicate.User
+	withPosts        *PostQuery
+	withComments     *CommentQuery
+	withLikes        *LikeQuery
+	withPets         *PetQuery
+	withFollowing    *FollowRelationQuery
+	withFollowers    *FollowRelationQuery
+	withDailyTasks   *DailyTaskQuery
+	withDeviceTokens *DeviceTokenQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -220,6 +222,28 @@ func (uq *UserQuery) QueryDailyTasks() *DailyTaskQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(dailytask.Table, dailytask.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.DailyTasksTable, user.DailyTasksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDeviceTokens chains the current query on the "device_tokens" edge.
+func (uq *UserQuery) QueryDeviceTokens() *DeviceTokenQuery {
+	query := (&DeviceTokenClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(devicetoken.Table, devicetoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DeviceTokensTable, user.DeviceTokensColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -414,18 +438,19 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:         uq.config,
-		ctx:            uq.ctx.Clone(),
-		order:          append([]user.OrderOption{}, uq.order...),
-		inters:         append([]Interceptor{}, uq.inters...),
-		predicates:     append([]predicate.User{}, uq.predicates...),
-		withPosts:      uq.withPosts.Clone(),
-		withComments:   uq.withComments.Clone(),
-		withLikes:      uq.withLikes.Clone(),
-		withPets:       uq.withPets.Clone(),
-		withFollowing:  uq.withFollowing.Clone(),
-		withFollowers:  uq.withFollowers.Clone(),
-		withDailyTasks: uq.withDailyTasks.Clone(),
+		config:           uq.config,
+		ctx:              uq.ctx.Clone(),
+		order:            append([]user.OrderOption{}, uq.order...),
+		inters:           append([]Interceptor{}, uq.inters...),
+		predicates:       append([]predicate.User{}, uq.predicates...),
+		withPosts:        uq.withPosts.Clone(),
+		withComments:     uq.withComments.Clone(),
+		withLikes:        uq.withLikes.Clone(),
+		withPets:         uq.withPets.Clone(),
+		withFollowing:    uq.withFollowing.Clone(),
+		withFollowers:    uq.withFollowers.Clone(),
+		withDailyTasks:   uq.withDailyTasks.Clone(),
+		withDeviceTokens: uq.withDeviceTokens.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -509,6 +534,17 @@ func (uq *UserQuery) WithDailyTasks(opts ...func(*DailyTaskQuery)) *UserQuery {
 	return uq
 }
 
+// WithDeviceTokens tells the query-builder to eager-load the nodes that are connected to
+// the "device_tokens" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithDeviceTokens(opts ...func(*DeviceTokenQuery)) *UserQuery {
+	query := (&DeviceTokenClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withDeviceTokens = query
+	return uq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -587,7 +623,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [8]bool{
 			uq.withPosts != nil,
 			uq.withComments != nil,
 			uq.withLikes != nil,
@@ -595,6 +631,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			uq.withFollowing != nil,
 			uq.withFollowers != nil,
 			uq.withDailyTasks != nil,
+			uq.withDeviceTokens != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -661,6 +698,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadDailyTasks(ctx, query, nodes,
 			func(n *User) { n.Edges.DailyTasks = []*DailyTask{} },
 			func(n *User, e *DailyTask) { n.Edges.DailyTasks = append(n.Edges.DailyTasks, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withDeviceTokens; query != nil {
+		if err := uq.loadDeviceTokens(ctx, query, nodes,
+			func(n *User) { n.Edges.DeviceTokens = []*DeviceToken{} },
+			func(n *User, e *DeviceToken) { n.Edges.DeviceTokens = append(n.Edges.DeviceTokens, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -879,6 +923,36 @@ func (uq *UserQuery) loadDailyTasks(ctx context.Context, query *DailyTaskQuery, 
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_daily_tasks" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadDeviceTokens(ctx context.Context, query *DeviceTokenQuery, nodes []*User, init func(*User), assign func(*User, *DeviceToken)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(devicetoken.FieldUserID)
+	}
+	query.Where(predicate.DeviceToken(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.DeviceTokensColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

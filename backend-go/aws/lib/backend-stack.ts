@@ -126,6 +126,36 @@ export class BackendStack extends cdk.Stack {
       }),
     });
 
+    const dailyTaskPushNotificationFn = new lambda.Function(
+      this,
+      "DailyTaskPushNotification",
+      {
+        runtime: lambda.Runtime.PROVIDED_AL2023,
+        handler: "bootstrap",
+        timeout: cdk.Duration.seconds(10),
+        environment: {
+        },
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "../../bin/dailytask-push-notification")
+        ),
+        role: new Role(this, "DailyTaskPushNotificationRole", {
+          assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+          description: "Role for DailyTaskPushNotification Lambda function",
+          managedPolicies: [
+            ManagedPolicy.fromAwsManagedPolicyName(
+              "service-role/AWSLambdaBasicExecutionRole"
+            ),
+          ],
+        }),
+      }
+    );
+
+    // 毎日同じ時間に通知を送るための EventBridge ルール
+    new events.Rule(this, "DailyTaskPushNotificationRule", {
+      schedule: events.Schedule.cron({ minute: "0", hour: "3", day: "*" }),
+      targets: [new targets.LambdaFunction(dailyTaskPushNotificationFn)],
+    });
+
     new events.Rule(this, "DailyTaskRule", {
       schedule: events.Schedule.cron({ minute: "0", hour: "15", day: "*" }),
       targets: [new targets.LambdaFunction(dailyTaskFn)],
@@ -141,7 +171,9 @@ export class BackendStack extends cdk.Stack {
     const healthCheckFn = new lambda.Function(this, "HealthCheckFunction", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
       handler: "bootstrap",
-      code: lambda.Code.fromAsset(path.join(__dirname, "../../bin/health-check")),
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "../../bin/health-check")
+      ),
       description: "Render上のFastAPIのヘルスチェックを行う関数",
       timeout: cdk.Duration.seconds(10),
     });

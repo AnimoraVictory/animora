@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -35,6 +36,8 @@ type Client struct {
 	Comment *CommentClient
 	// DailyTask is the client for interacting with the DailyTask builders.
 	DailyTask *DailyTaskClient
+	// DeviceToken is the client for interacting with the DeviceToken builders.
+	DeviceToken *DeviceTokenClient
 	// FollowRelation is the client for interacting with the FollowRelation builders.
 	FollowRelation *FollowRelationClient
 	// Like is the client for interacting with the Like builders.
@@ -60,6 +63,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Comment = NewCommentClient(c.config)
 	c.DailyTask = NewDailyTaskClient(c.config)
+	c.DeviceToken = NewDeviceTokenClient(c.config)
 	c.FollowRelation = NewFollowRelationClient(c.config)
 	c.Like = NewLikeClient(c.config)
 	c.Pet = NewPetClient(c.config)
@@ -160,6 +164,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:         cfg,
 		Comment:        NewCommentClient(cfg),
 		DailyTask:      NewDailyTaskClient(cfg),
+		DeviceToken:    NewDeviceTokenClient(cfg),
 		FollowRelation: NewFollowRelationClient(cfg),
 		Like:           NewLikeClient(cfg),
 		Pet:            NewPetClient(cfg),
@@ -187,6 +192,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:         cfg,
 		Comment:        NewCommentClient(cfg),
 		DailyTask:      NewDailyTaskClient(cfg),
+		DeviceToken:    NewDeviceTokenClient(cfg),
 		FollowRelation: NewFollowRelationClient(cfg),
 		Like:           NewLikeClient(cfg),
 		Pet:            NewPetClient(cfg),
@@ -222,8 +228,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.TaskType,
-		c.User,
+		c.Comment, c.DailyTask, c.DeviceToken, c.FollowRelation, c.Like, c.Pet, c.Post,
+		c.TaskType, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -233,8 +239,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Comment, c.DailyTask, c.FollowRelation, c.Like, c.Pet, c.Post, c.TaskType,
-		c.User,
+		c.Comment, c.DailyTask, c.DeviceToken, c.FollowRelation, c.Like, c.Pet, c.Post,
+		c.TaskType, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -247,6 +253,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Comment.mutate(ctx, m)
 	case *DailyTaskMutation:
 		return c.DailyTask.mutate(ctx, m)
+	case *DeviceTokenMutation:
+		return c.DeviceToken.mutate(ctx, m)
 	case *FollowRelationMutation:
 		return c.FollowRelation.mutate(ctx, m)
 	case *LikeMutation:
@@ -591,6 +599,155 @@ func (c *DailyTaskClient) mutate(ctx context.Context, m *DailyTaskMutation) (Val
 		return (&DailyTaskDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown DailyTask mutation op: %q", m.Op())
+	}
+}
+
+// DeviceTokenClient is a client for the DeviceToken schema.
+type DeviceTokenClient struct {
+	config
+}
+
+// NewDeviceTokenClient returns a client for the DeviceToken from the given config.
+func NewDeviceTokenClient(c config) *DeviceTokenClient {
+	return &DeviceTokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `devicetoken.Hooks(f(g(h())))`.
+func (c *DeviceTokenClient) Use(hooks ...Hook) {
+	c.hooks.DeviceToken = append(c.hooks.DeviceToken, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `devicetoken.Intercept(f(g(h())))`.
+func (c *DeviceTokenClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DeviceToken = append(c.inters.DeviceToken, interceptors...)
+}
+
+// Create returns a builder for creating a DeviceToken entity.
+func (c *DeviceTokenClient) Create() *DeviceTokenCreate {
+	mutation := newDeviceTokenMutation(c.config, OpCreate)
+	return &DeviceTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DeviceToken entities.
+func (c *DeviceTokenClient) CreateBulk(builders ...*DeviceTokenCreate) *DeviceTokenCreateBulk {
+	return &DeviceTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DeviceTokenClient) MapCreateBulk(slice any, setFunc func(*DeviceTokenCreate, int)) *DeviceTokenCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DeviceTokenCreateBulk{err: fmt.Errorf("calling to DeviceTokenClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DeviceTokenCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DeviceTokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DeviceToken.
+func (c *DeviceTokenClient) Update() *DeviceTokenUpdate {
+	mutation := newDeviceTokenMutation(c.config, OpUpdate)
+	return &DeviceTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DeviceTokenClient) UpdateOne(dt *DeviceToken) *DeviceTokenUpdateOne {
+	mutation := newDeviceTokenMutation(c.config, OpUpdateOne, withDeviceToken(dt))
+	return &DeviceTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DeviceTokenClient) UpdateOneID(id uuid.UUID) *DeviceTokenUpdateOne {
+	mutation := newDeviceTokenMutation(c.config, OpUpdateOne, withDeviceTokenID(id))
+	return &DeviceTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DeviceToken.
+func (c *DeviceTokenClient) Delete() *DeviceTokenDelete {
+	mutation := newDeviceTokenMutation(c.config, OpDelete)
+	return &DeviceTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DeviceTokenClient) DeleteOne(dt *DeviceToken) *DeviceTokenDeleteOne {
+	return c.DeleteOneID(dt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DeviceTokenClient) DeleteOneID(id uuid.UUID) *DeviceTokenDeleteOne {
+	builder := c.Delete().Where(devicetoken.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DeviceTokenDeleteOne{builder}
+}
+
+// Query returns a query builder for DeviceToken.
+func (c *DeviceTokenClient) Query() *DeviceTokenQuery {
+	return &DeviceTokenQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDeviceToken},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DeviceToken entity by its id.
+func (c *DeviceTokenClient) Get(ctx context.Context, id uuid.UUID) (*DeviceToken, error) {
+	return c.Query().Where(devicetoken.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DeviceTokenClient) GetX(ctx context.Context, id uuid.UUID) *DeviceToken {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a DeviceToken.
+func (c *DeviceTokenClient) QueryUser(dt *DeviceToken) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(devicetoken.Table, devicetoken.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, devicetoken.UserTable, devicetoken.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(dt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DeviceTokenClient) Hooks() []Hook {
+	return c.hooks.DeviceToken
+}
+
+// Interceptors returns the client interceptors.
+func (c *DeviceTokenClient) Interceptors() []Interceptor {
+	return c.inters.DeviceToken
+}
+
+func (c *DeviceTokenClient) mutate(ctx context.Context, m *DeviceTokenMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DeviceTokenCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DeviceTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DeviceTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DeviceTokenDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DeviceToken mutation op: %q", m.Op())
 	}
 }
 
@@ -1623,6 +1780,22 @@ func (c *UserClient) QueryDailyTasks(u *User) *DailyTaskQuery {
 	return query
 }
 
+// QueryDeviceTokens queries the device_tokens edge of a User.
+func (c *UserClient) QueryDeviceTokens(u *User) *DeviceTokenQuery {
+	query := (&DeviceTokenClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(devicetoken.Table, devicetoken.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DeviceTokensTable, user.DeviceTokensColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -1651,10 +1824,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Comment, DailyTask, FollowRelation, Like, Pet, Post, TaskType, User []ent.Hook
+		Comment, DailyTask, DeviceToken, FollowRelation, Like, Pet, Post, TaskType,
+		User []ent.Hook
 	}
 	inters struct {
-		Comment, DailyTask, FollowRelation, Like, Pet, Post, TaskType,
+		Comment, DailyTask, DeviceToken, FollowRelation, Like, Pet, Post, TaskType,
 		User []ent.Interceptor
 	}
 )
