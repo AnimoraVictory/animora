@@ -12,10 +12,6 @@ func NewDeviceTokenUsecase(deviceTokenRepository repository.DeviceTokenRepositor
 	}
 }
 
-func (u *DeviceTokenUsecase) Create(userID, deviceID, token, platform string) error {
-	return u.deviceTokenRepository.Create(userID, deviceID, token, platform)
-}
-
-func (u *DeviceTokenUsecase) Update(userID, deviceID, token string) error {
-	return u.deviceTokenRepository.Update(userID, deviceID, token)
+func (u *DeviceTokenUsecase) Upsert(userID, deviceID, token, platform string) error {
+	return u.deviceTokenRepository.Upsert(userID, deviceID, token, platform)
 }

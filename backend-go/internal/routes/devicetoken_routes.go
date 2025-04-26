@@ -11,6 +11,5 @@ func SetupDeviceTokenRoutes(app *echo.Echo) {
 
 	deviceTokenGroup := app.Group("/devicetokens")
 
-	deviceTokenGroup.POST("/new", deviceTokenHandler.Create)
-	deviceTokenGroup.POST("/update", deviceTokenHandler.Update, authMiddleware.Handler)
+	deviceTokenGroup.POST("/upsert", deviceTokenHandler.Create, authMiddleware.Handler)
 }

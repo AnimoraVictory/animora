@@ -13,7 +13,13 @@ build-api:
 build-dailytask:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/dailytask/bootstrap ./cmd/lambda/dailytask
 
-deploy: build-api build-dailytask
+build-dailytask-push-notification:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/dailytask-push-notification/bootstrap ./cmd/lambda/dailytask-push-notification
+
+build-health-check:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/health-check/bootstrap ./cmd/lambda/health-check
+
+deploy: build-api build-dailytask build-dailytask-push-notification build-health-check
 	cd aws && cdk deploy --profile animalia
 
 test: test-usecase test-middlewares

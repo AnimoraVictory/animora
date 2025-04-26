@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/aki-13627/animalia/backend-go/internal/domain/repository/mock"
@@ -9,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeviceTokenUsecase_Create(t *testing.T) {
+func TestDeviceTokenUsecase_Upsert(t *testing.T) {
 	testCase := struct {
 		userID   uuid.UUID
 		deviceID string
@@ -22,57 +21,45 @@ func TestDeviceTokenUsecase_Create(t *testing.T) {
 		platform: "ios",
 	}
 
-	mockDeviceTokenRepo := &mock.MockDeviceTokenRepository{
-		CreateFunc: func(userId string, deviceId string, token string, platform string) error {
-			if deviceId == "already-exists" {
-				return errors.New("duplicate entry")
-			}
-			return nil
-		},
-	}
+	t.Run("存在しなければCreateが呼ばれる", func(t *testing.T) {
+		createCalled := false
+		updateCalled := false
 
-	usecase := NewDeviceTokenUsecase(mockDeviceTokenRepo)
+		mockDeviceTokenRepo := &mock.MockDeviceTokenRepository{
+			UpsertFunc: func(userId string, deviceId string, token string, platform string) error {
+				if deviceId == "device-001" {
+					createCalled = true
+				}
+				return nil
+			},
+		}
 
-	t.Run("正常に作成できる", func(t *testing.T) {
-		err := usecase.Create(testCase.userID.String(), testCase.deviceID, testCase.token, testCase.platform)
+		usecase := NewDeviceTokenUsecase(mockDeviceTokenRepo)
+
+		err := usecase.Upsert(testCase.userID.String(), testCase.deviceID, testCase.token, testCase.platform)
 		assert.NoError(t, err)
+		assert.True(t, createCalled)
+		assert.False(t, updateCalled)
 	})
 
-	t.Run("同じdeviceIDで2回目Createするとエラーになる", func(t *testing.T) {
-		err := usecase.Create(testCase.userID.String(), "already-exists", testCase.token, testCase.platform)
-		assert.Error(t, err)
-		assert.Equal(t, "duplicate entry", err.Error())
+	t.Run("存在すればUpdateが呼ばれる", func(t *testing.T) {
+		createCalled := false
+		updateCalled := false
+
+		mockDeviceTokenRepo := &mock.MockDeviceTokenRepository{
+			UpsertFunc: func(userId string, deviceId string, token string, platform string) error {
+				if deviceId == "already-exists" {
+					updateCalled = true
+				}
+				return nil
+			},
+		}
+
+		usecase := NewDeviceTokenUsecase(mockDeviceTokenRepo)
+
+		err := usecase.Upsert(testCase.userID.String(), "already-exists", testCase.token, testCase.platform)
+		assert.NoError(t, err)
+		assert.False(t, createCalled)
+		assert.True(t, updateCalled)
 	})
-}
-
-func TestDeviceTokenUsecase_Update(t *testing.T) {
-	testCases := []struct {
-		userID        uuid.UUID
-		deviceID      string
-		token         string
-		mockError     error
-		expectedError error
-	}{
-		{
-			userID:        uuid.New(),
-			deviceID:      "device-001",
-			token:         "token-abc",
-			mockError:     nil,
-			expectedError: nil,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run("正常に更新できる", func(t *testing.T) {
-			mockDeviceTokenRepo := &mock.MockDeviceTokenRepository{
-				UpdateFunc: func(userId string, deviceId string, token string) error {
-					return tc.mockError
-				},
-			}
-			usecase := NewDeviceTokenUsecase(mockDeviceTokenRepo)
-			err := usecase.Update(tc.userID.String(), tc.deviceID, tc.token)
-			assert.Equal(t, tc.expectedError, err)
-
-		})
-	}
-
 }
