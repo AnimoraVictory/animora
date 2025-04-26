@@ -563,6 +563,7 @@ type DailyTaskMutation struct {
 	typ           string
 	id            *uuid.UUID
 	created_at    *time.Time
+	target_date   *time.Time
 	_type         *enum.TaskType
 	clearedFields map[string]struct{}
 	user          *uuid.UUID
@@ -714,6 +715,42 @@ func (m *DailyTaskMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetTargetDate sets the "target_date" field.
+func (m *DailyTaskMutation) SetTargetDate(t time.Time) {
+	m.target_date = &t
+}
+
+// TargetDate returns the value of the "target_date" field in the mutation.
+func (m *DailyTaskMutation) TargetDate() (r time.Time, exists bool) {
+	v := m.target_date
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTargetDate returns the old "target_date" field's value of the DailyTask entity.
+// If the DailyTask object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DailyTaskMutation) OldTargetDate(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTargetDate is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTargetDate requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTargetDate: %w", err)
+	}
+	return oldValue.TargetDate, nil
+}
+
+// ResetTargetDate resets all changes to the "target_date" field.
+func (m *DailyTaskMutation) ResetTargetDate() {
+	m.target_date = nil
+}
+
 // SetType sets the "type" field.
 func (m *DailyTaskMutation) SetType(et enum.TaskType) {
 	m._type = &et
@@ -862,9 +899,12 @@ func (m *DailyTaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DailyTaskMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.created_at != nil {
 		fields = append(fields, dailytask.FieldCreatedAt)
+	}
+	if m.target_date != nil {
+		fields = append(fields, dailytask.FieldTargetDate)
 	}
 	if m._type != nil {
 		fields = append(fields, dailytask.FieldType)
@@ -879,6 +919,8 @@ func (m *DailyTaskMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case dailytask.FieldCreatedAt:
 		return m.CreatedAt()
+	case dailytask.FieldTargetDate:
+		return m.TargetDate()
 	case dailytask.FieldType:
 		return m.GetType()
 	}
@@ -892,6 +934,8 @@ func (m *DailyTaskMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case dailytask.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case dailytask.FieldTargetDate:
+		return m.OldTargetDate(ctx)
 	case dailytask.FieldType:
 		return m.OldType(ctx)
 	}
@@ -909,6 +953,13 @@ func (m *DailyTaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case dailytask.FieldTargetDate:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTargetDate(v)
 		return nil
 	case dailytask.FieldType:
 		v, ok := value.(enum.TaskType)
@@ -968,6 +1019,9 @@ func (m *DailyTaskMutation) ResetField(name string) error {
 	switch name {
 	case dailytask.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case dailytask.FieldTargetDate:
+		m.ResetTargetDate()
 		return nil
 	case dailytask.FieldType:
 		m.ResetType()
