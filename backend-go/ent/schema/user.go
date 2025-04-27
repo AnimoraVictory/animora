@@ -38,5 +38,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("following", FollowRelation.Type),
 		edge.To("followers", FollowRelation.Type),
 		edge.To("daily_tasks", DailyTask.Type),
+		edge.To("device_tokens", DeviceToken.Type),
 	}
 }

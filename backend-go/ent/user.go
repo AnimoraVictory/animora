@@ -54,9 +54,11 @@ type UserEdges struct {
 	Followers []*FollowRelation `json:"followers,omitempty"`
 	// DailyTasks holds the value of the daily_tasks edge.
 	DailyTasks []*DailyTask `json:"daily_tasks,omitempty"`
+	// DeviceTokens holds the value of the device_tokens edge.
+	DeviceTokens []*DeviceToken `json:"device_tokens,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [8]bool
 }
 
 // PostsOrErr returns the Posts value or an error if the edge
@@ -120,6 +122,15 @@ func (e UserEdges) DailyTasksOrErr() ([]*DailyTask, error) {
 		return e.DailyTasks, nil
 	}
 	return nil, &NotLoadedError{edge: "daily_tasks"}
+}
+
+// DeviceTokensOrErr returns the DeviceTokens value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DeviceTokensOrErr() ([]*DeviceToken, error) {
+	if e.loadedTypes[7] {
+		return e.DeviceTokens, nil
+	}
+	return nil, &NotLoadedError{edge: "device_tokens"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -244,6 +255,11 @@ func (u *User) QueryFollowers() *FollowRelationQuery {
 // QueryDailyTasks queries the "daily_tasks" edge of the User entity.
 func (u *User) QueryDailyTasks() *DailyTaskQuery {
 	return NewUserClient(u.config).QueryDailyTasks(u)
+}
+
+// QueryDeviceTokens queries the "device_tokens" edge of the User entity.
+func (u *User) QueryDeviceTokens() *DeviceTokenQuery {
+	return NewUserClient(u.config).QueryDeviceTokens(u)
 }
 
 // Update returns a builder for updating this User.

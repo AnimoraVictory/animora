@@ -16,6 +16,8 @@ type Tx struct {
 	Comment *CommentClient
 	// DailyTask is the client for interacting with the DailyTask builders.
 	DailyTask *DailyTaskClient
+	// DeviceToken is the client for interacting with the DeviceToken builders.
+	DeviceToken *DeviceTokenClient
 	// FollowRelation is the client for interacting with the FollowRelation builders.
 	FollowRelation *FollowRelationClient
 	// Like is the client for interacting with the Like builders.
@@ -161,6 +163,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Comment = NewCommentClient(tx.config)
 	tx.DailyTask = NewDailyTaskClient(tx.config)
+	tx.DeviceToken = NewDeviceTokenClient(tx.config)
 	tx.FollowRelation = NewFollowRelationClient(tx.config)
 	tx.Like = NewLikeClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
