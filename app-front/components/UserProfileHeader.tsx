@@ -4,7 +4,13 @@ import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { UserResponse } from '@/features/user/schema/response';
 import MaskedView from '@react-native-masked-view/masked-view';
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type UserProfileHeaderProps = {
@@ -86,35 +92,35 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({
           style={styles.profileImage}
         />
         {user.streakCount > 0 && (
-            <View style={styles.streakBadge}>
-              <MaskedView
-                style={{ width: 34, height: 34 }}
-                maskElement={
-                    <Icon
-                      name="fire"
-                      size={36}
-                      color="black"
-                      style={{ transform: [{ scaleX: 1.2 }] }}
-                    />
-                }
-              >
+          <View style={styles.streakBadge}>
+            <MaskedView
+              style={{ width: 34, height: 34 }}
+              maskElement={
                 <Icon
                   name="fire"
-                  size={40}
-                  color="orange"
+                  size={36}
+                  color="black"
                   style={{ transform: [{ scaleX: 1.2 }] }}
                 />
-                <Animated.View
-                  style={[
-                    StyleSheet.absoluteFill,
-                    styles.reflection,
-                    reflectionStyle,
-                  ]}
-                />
-              </MaskedView>
-              <Text style={styles.streakNumber}>{user.streakCount}</Text>
-            </View>
-          )}
+              }
+            >
+              <Icon
+                name="fire"
+                size={40}
+                color="orange"
+                style={{ transform: [{ scaleX: 1.2 }] }}
+              />
+              <Animated.View
+                style={[
+                  StyleSheet.absoluteFill,
+                  styles.reflection,
+                  reflectionStyle,
+                ]}
+              />
+            </MaskedView>
+            <Text style={styles.streakNumber}>{user.streakCount}</Text>
+          </View>
+        )}
 
         <View style={styles.rightBox}>
           <View style={styles.followRow}>

@@ -113,12 +113,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <MaskedView
                 style={{ width: 34, height: 34 }}
                 maskElement={
-                    <Icon
-                      name="fire"
-                      size={36}
-                      color="black"
-                      style={{ transform: [{ scaleX: 1.2 }] }}
-                    />
+                  <Icon
+                    name="fire"
+                    size={36}
+                    color="black"
+                    style={{ transform: [{ scaleX: 1.2 }] }}
+                  />
                 }
               >
                 <Icon
