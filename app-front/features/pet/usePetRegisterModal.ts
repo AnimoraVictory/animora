@@ -51,7 +51,7 @@ export default function usePetRegisterModal({
     mutationFn: (data: FormData) => {
       return fetchApi({
         method: 'POST',
-        path: '/pets/new',
+        path: 'pets/new',
         schema: petCreateResponseSchema,
         options: {
           data,
