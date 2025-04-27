@@ -94,8 +94,7 @@ function AuthSwitch() {
 }
 
 export default function RootLayout() {
-  // UserProfileModalとUSersModalのループが避けられないのでWarningを出さないようにする
-  LogBox.ignoreLogs(['Require cycle:']);
+  
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
