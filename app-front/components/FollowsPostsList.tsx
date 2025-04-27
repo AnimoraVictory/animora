@@ -99,9 +99,6 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
       </View>
     );
   }
-
-  console.log(data?.pages.flatMap((page) => page.posts));
-
   return (
     <Animated.FlatList
       keyboardShouldPersistTaps="handled"
