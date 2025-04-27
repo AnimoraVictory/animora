@@ -7,11 +7,18 @@ import {
   View,
   FlatList,
 } from 'react-native';
-import { useInfiniteQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  InfiniteData,
+} from '@tanstack/react-query';
 import { ThemedText } from '@/components/ThemedText';
 import { PostPanel } from '@/components/PostPanel';
 import { fetchApi } from '@/utils/api';
-import { getPostsResponseSchema, GetPostsResponse } from '@/features/post/schema/response';
+import {
+  getPostsResponseSchema,
+  GetPostsResponse,
+} from '@/features/post/schema/response';
 import { useAuth } from '@/providers/AuthContext';
 import * as Haptics from 'expo-haptics';
 import { useColorScheme } from 'react-native';
@@ -28,7 +35,7 @@ export default function RecommendedPostsList({ scrollY, listRef }: Props) {
   const { user: currentUser, token } = useAuth();
   const colorScheme = useColorScheme();
   const queryClient = useQueryClient();
-  const colors = Colors[colorScheme ?? "light"]
+  const colors = Colors[colorScheme ?? 'light'];
 
   const {
     data,
@@ -80,7 +87,9 @@ export default function RecommendedPostsList({ scrollY, listRef }: Props) {
   if (isError) {
     return (
       <View style={styles.loadingContainer}>
-        <ThemedText style={styles.errorText}>ポストが取得できませんでした</ThemedText>
+        <ThemedText style={styles.errorText}>
+          ポストが取得できませんでした
+        </ThemedText>
       </View>
     );
   }
@@ -91,7 +100,7 @@ export default function RecommendedPostsList({ scrollY, listRef }: Props) {
       ref={listRef}
       data={data?.pages.flatMap((page) => page.posts) ?? []}
       keyExtractor={(item) => item.id}
-      style= {{backgroundColor: colors.middleBackground}}
+      style={{ backgroundColor: colors.middleBackground }}
       renderItem={({ item }) => <PostPanel post={item} />}
       refreshControl={
         <RefreshControl
@@ -123,7 +132,10 @@ export default function RecommendedPostsList({ scrollY, listRef }: Props) {
       ListFooterComponent={
         isFetchingNextPage ? (
           <View style={{ paddingVertical: 20 }}>
-            <ActivityIndicator size="small" color={colorScheme === 'light' ? '#000' : '#fff'} />
+            <ActivityIndicator
+              size="small"
+              color={colorScheme === 'light' ? '#000' : '#fff'}
+            />
           </View>
         ) : null
       }
