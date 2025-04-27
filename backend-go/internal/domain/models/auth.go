@@ -31,6 +31,7 @@ type UserResponse struct {
 	FollowersCount int                `json:"followersCount"`
 	FollowsCount   int                `json:"followsCount"`
 	DailyTask      DailyTaskResponse  `json:"dailyTask"`
+	StreakCount    int                `json:"streakCount"`
 }
 
 // NewPetResponse converts a Pet to a PetResponse
@@ -54,6 +55,7 @@ func NewUserResponse(
 		FollowersCount: len(followers),
 		FollowsCount:   len(follows),
 		DailyTask:      dailyTask,
+		StreakCount:    user.StreakCount,
 	}
 }
 
