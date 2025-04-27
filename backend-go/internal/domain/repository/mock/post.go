@@ -8,13 +8,14 @@ import (
 
 // MockPostRepository is a mock implementation of the PostRepository interface
 type MockPostRepository struct {
-	GetAllPostsFunc    func() ([]*ent.Post, error)
-	GetPostsByUserFunc func(userId uuid.UUID) ([]*ent.Post, error)
-	GetLikedPostsFunc  func(userId uuid.UUID) ([]*ent.Post, error)
-	CreatePostFunc     func(caption string, userId string, fileKey string, dailyTaskId *string) (*ent.Post, error)
-	UpdatePostFunc     func(postId, caption string) error
-	DeletePostFunc     func(postId string) error
-	GetByIdFunc        func(postId uuid.UUID) (*ent.Post, error)
+	GetAllPostsFunc     func() ([]*ent.Post, error)
+	GetFollowsPostsFunc func(userID uuid.UUID, cursor *uuid.UUID, limit int) ([]*ent.Post, error)
+	GetPostsByUserFunc  func(userId uuid.UUID) ([]*ent.Post, error)
+	GetLikedPostsFunc   func(userId uuid.UUID) ([]*ent.Post, error)
+	CreatePostFunc      func(caption string, userId string, fileKey string, dailyTaskId *string) (*ent.Post, error)
+	UpdatePostFunc      func(postId, caption string) error
+	DeletePostFunc      func(postId string) error
+	GetByIdFunc         func(postId uuid.UUID) (*ent.Post, error)
 }
 
 // Ensure MockPostRepository implements the PostRepository interface
@@ -22,6 +23,10 @@ var _ repository.PostRepository = (*MockPostRepository)(nil)
 
 func (m *MockPostRepository) GetAllPosts() ([]*ent.Post, error) {
 	return m.GetAllPostsFunc()
+}
+
+func (m *MockPostRepository) GetFollowsPosts(userId uuid.UUID, cursor *uuid.UUID, limit int) ([]*ent.Post, error) {
+	return m.GetFollowsPostsFunc(userId, cursor, limit)
 }
 
 func (m *MockPostRepository) GetPostsByUser(userId uuid.UUID) ([]*ent.Post, error) {
