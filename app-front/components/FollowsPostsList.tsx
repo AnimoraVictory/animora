@@ -7,11 +7,18 @@ import {
   View,
   FlatList,
 } from 'react-native';
-import { useInfiniteQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  InfiniteData,
+} from '@tanstack/react-query';
 import { PostPanel } from '@/components/PostPanel';
 import { useAuth } from '@/providers/AuthContext';
 import { fetchApi } from '@/utils/api';
-import { getPostsResponseSchema, GetPostsResponse } from '@/features/post/schema/response';
+import {
+  getPostsResponseSchema,
+  GetPostsResponse,
+} from '@/features/post/schema/response';
 import { useColorScheme } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { ThemedText } from './ThemedText';
@@ -49,7 +56,9 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
     queryFn: async ({ pageParam = null }) => {
       return await fetchApi({
         method: 'GET',
-        path: `/posts/follows?userId=${currentUser?.id}&limit=10${pageParam ? `&cursor=${pageParam}` : ''}`,
+        path: `/posts/follows?userId=${currentUser?.id}&limit=10${
+          pageParam ? `&cursor=${pageParam}` : ''
+        }`,
         schema: getPostsResponseSchema,
         options: {},
         token,
@@ -65,7 +74,12 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
 
   if (isLoading) {
     return (
-      <View style={[styles.loadingContainer,{ backgroundColor: colors.middleBackground }]}>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: colors.middleBackground },
+        ]}
+      >
         <ActivityIndicator size="large" color="#999" />
       </View>
     );
@@ -73,13 +87,20 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
 
   if (isError) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.middleBackground }]}>
-        <ThemedText style={{ color: 'gray' }}>投稿を取得できませんでした</ThemedText>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: colors.middleBackground },
+        ]}
+      >
+        <ThemedText style={{ color: 'gray' }}>
+          投稿を取得できませんでした
+        </ThemedText>
       </View>
     );
   }
 
-  console.log(data?.pages.flatMap((page) => page.posts))
+  console.log(data?.pages.flatMap((page) => page.posts));
 
   return (
     <Animated.FlatList
@@ -94,7 +115,9 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
           refreshing={isRefetching}
           onRefresh={async () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            await queryClient.invalidateQueries({ queryKey: ['follows-posts'] });
+            await queryClient.invalidateQueries({
+              queryKey: ['follows-posts'],
+            });
           }}
           tintColor={colorScheme === 'light' ? 'black' : 'white'}
         />

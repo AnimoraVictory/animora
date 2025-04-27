@@ -38,9 +38,10 @@ export default function PostsScreen() {
     extrapolate: 'clamp',
   });
 
-  const icon = colorScheme === 'light'
-    ? require('../../assets/images/icon-green.png')
-    : require('../../assets/images/icon-dark.png');
+  const icon =
+    colorScheme === 'light'
+      ? require('../../assets/images/icon-green.png')
+      : require('../../assets/images/icon-dark.png');
 
   const scrollToTab = (tab: PostTabType) => {
     setSelectedTab(tab);
@@ -58,9 +59,15 @@ export default function PostsScreen() {
   useState(() => {
     setHandler(() => {
       if (selectedTab === 'recommended') {
-        listRefRecommended.current?.scrollToOffset({ offset: -(HEADER_HEIGHT + 12), animated: true });
+        listRefRecommended.current?.scrollToOffset({
+          offset: -(HEADER_HEIGHT + 12),
+          animated: true,
+        });
       } else {
-        listRefFollows.current?.scrollToOffset({ offset: -(HEADER_HEIGHT + 12), animated: true });
+        listRefFollows.current?.scrollToOffset({
+          offset: -(HEADER_HEIGHT + 12),
+          animated: true,
+        });
       }
     });
   });
@@ -77,10 +84,7 @@ export default function PostsScreen() {
         ]}
       >
         <Image source={icon} style={styles(colors).logo} />
-        <PostTabSelector
-          selectedTab={selectedTab}
-          onSelectTab={scrollToTab}
-        />
+        <PostTabSelector selectedTab={selectedTab} onSelectTab={scrollToTab} />
       </Animated.View>
 
       <Animated.ScrollView
@@ -93,7 +97,10 @@ export default function PostsScreen() {
         contentContainerStyle={{ minHeight: '100%' }}
       >
         <View style={{ width: windowWidth }}>
-          <RecommendedPostsList listRef={listRefRecommended} scrollY={scrollY} />
+          <RecommendedPostsList
+            listRef={listRefRecommended}
+            scrollY={scrollY}
+          />
         </View>
         <View style={{ width: windowWidth }}>
           <FollowsPostsList listRef={listRefFollows} scrollY={scrollY} />
