@@ -6,9 +6,9 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
-	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
@@ -46,9 +46,13 @@ func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 
 func (r *PostRepository) GetFollowsPosts(userID uuid.UUID, cursor *uuid.UUID, limit int) ([]*ent.Post, error) {
 	query := r.db.Post.Query().
-		Where(post.HasUserWith(user.HasFollowersWith(
-			predicate.FollowRelation(user.IDEQ(userID)),
-		))).
+		Where(
+			post.HasUserWith(
+				user.HasFollowersWith(
+					followrelation.HasFromWith(user.ID(userID)),
+				),
+			),
+		).
 		WithUser().
 		WithComments(func(q *ent.CommentQuery) {
 			q.WithUser()

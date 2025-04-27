@@ -270,16 +270,23 @@ func (h *PostHandler) GetFollowsPosts(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Invalid userID")
 	}
-	cursor, err := uuid.Parse(c.QueryParam("cursor"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid cursor")
+
+	var cursor *uuid.UUID
+	cursorParam := c.QueryParam("cursor")
+	if cursorParam != "" {
+		cur, err := uuid.Parse(cursorParam)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, "Invalid cursor")
+		}
+		cursor = &cur
 	}
+
 	limitStr := c.QueryParam("limit")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Failed to parse limit")
 	}
-	posts, err := h.postUsecase.GetFollowsPosts(userId, &cursor, limit)
+	posts, err := h.postUsecase.GetFollowsPosts(userId, cursor, limit)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, "failed to fetch Posts")
 	}
