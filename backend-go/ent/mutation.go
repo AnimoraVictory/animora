@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
 	"github.com/aki-13627/animalia/backend-go/ent/enum"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
@@ -36,6 +37,7 @@ const (
 	// Node types.
 	TypeComment        = "Comment"
 	TypeDailyTask      = "DailyTask"
+	TypeDeviceToken    = "DeviceToken"
 	TypeFollowRelation = "FollowRelation"
 	TypeLike           = "Like"
 	TypePet            = "Pet"
@@ -1120,6 +1122,662 @@ func (m *DailyTaskMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown DailyTask edge %s", name)
+}
+
+// DeviceTokenMutation represents an operation that mutates the DeviceToken nodes in the graph.
+type DeviceTokenMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	device_id     *string
+	token         *string
+	platform      *string
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	user          *uuid.UUID
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*DeviceToken, error)
+	predicates    []predicate.DeviceToken
+}
+
+var _ ent.Mutation = (*DeviceTokenMutation)(nil)
+
+// devicetokenOption allows management of the mutation configuration using functional options.
+type devicetokenOption func(*DeviceTokenMutation)
+
+// newDeviceTokenMutation creates new mutation for the DeviceToken entity.
+func newDeviceTokenMutation(c config, op Op, opts ...devicetokenOption) *DeviceTokenMutation {
+	m := &DeviceTokenMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDeviceToken,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDeviceTokenID sets the ID field of the mutation.
+func withDeviceTokenID(id uuid.UUID) devicetokenOption {
+	return func(m *DeviceTokenMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *DeviceToken
+		)
+		m.oldValue = func(ctx context.Context) (*DeviceToken, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().DeviceToken.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDeviceToken sets the old DeviceToken of the mutation.
+func withDeviceToken(node *DeviceToken) devicetokenOption {
+	return func(m *DeviceTokenMutation) {
+		m.oldValue = func(context.Context) (*DeviceToken, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DeviceTokenMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DeviceTokenMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of DeviceToken entities.
+func (m *DeviceTokenMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DeviceTokenMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DeviceTokenMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().DeviceToken.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *DeviceTokenMutation) SetUserID(u uuid.UUID) {
+	m.user = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *DeviceTokenMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the DeviceToken entity.
+// If the DeviceToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceTokenMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *DeviceTokenMutation) ResetUserID() {
+	m.user = nil
+}
+
+// SetDeviceID sets the "device_id" field.
+func (m *DeviceTokenMutation) SetDeviceID(s string) {
+	m.device_id = &s
+}
+
+// DeviceID returns the value of the "device_id" field in the mutation.
+func (m *DeviceTokenMutation) DeviceID() (r string, exists bool) {
+	v := m.device_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeviceID returns the old "device_id" field's value of the DeviceToken entity.
+// If the DeviceToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceTokenMutation) OldDeviceID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeviceID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeviceID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeviceID: %w", err)
+	}
+	return oldValue.DeviceID, nil
+}
+
+// ResetDeviceID resets all changes to the "device_id" field.
+func (m *DeviceTokenMutation) ResetDeviceID() {
+	m.device_id = nil
+}
+
+// SetToken sets the "token" field.
+func (m *DeviceTokenMutation) SetToken(s string) {
+	m.token = &s
+}
+
+// Token returns the value of the "token" field in the mutation.
+func (m *DeviceTokenMutation) Token() (r string, exists bool) {
+	v := m.token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldToken returns the old "token" field's value of the DeviceToken entity.
+// If the DeviceToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceTokenMutation) OldToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldToken: %w", err)
+	}
+	return oldValue.Token, nil
+}
+
+// ResetToken resets all changes to the "token" field.
+func (m *DeviceTokenMutation) ResetToken() {
+	m.token = nil
+}
+
+// SetPlatform sets the "platform" field.
+func (m *DeviceTokenMutation) SetPlatform(s string) {
+	m.platform = &s
+}
+
+// Platform returns the value of the "platform" field in the mutation.
+func (m *DeviceTokenMutation) Platform() (r string, exists bool) {
+	v := m.platform
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlatform returns the old "platform" field's value of the DeviceToken entity.
+// If the DeviceToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceTokenMutation) OldPlatform(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlatform is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlatform requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlatform: %w", err)
+	}
+	return oldValue.Platform, nil
+}
+
+// ResetPlatform resets all changes to the "platform" field.
+func (m *DeviceTokenMutation) ResetPlatform() {
+	m.platform = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *DeviceTokenMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *DeviceTokenMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the DeviceToken entity.
+// If the DeviceToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceTokenMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *DeviceTokenMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *DeviceTokenMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *DeviceTokenMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the DeviceToken entity.
+// If the DeviceToken object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DeviceTokenMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *DeviceTokenMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *DeviceTokenMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[devicetoken.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *DeviceTokenMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *DeviceTokenMutation) UserIDs() (ids []uuid.UUID) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *DeviceTokenMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Where appends a list predicates to the DeviceTokenMutation builder.
+func (m *DeviceTokenMutation) Where(ps ...predicate.DeviceToken) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the DeviceTokenMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DeviceTokenMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DeviceToken, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *DeviceTokenMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DeviceTokenMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (DeviceToken).
+func (m *DeviceTokenMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DeviceTokenMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.user != nil {
+		fields = append(fields, devicetoken.FieldUserID)
+	}
+	if m.device_id != nil {
+		fields = append(fields, devicetoken.FieldDeviceID)
+	}
+	if m.token != nil {
+		fields = append(fields, devicetoken.FieldToken)
+	}
+	if m.platform != nil {
+		fields = append(fields, devicetoken.FieldPlatform)
+	}
+	if m.created_at != nil {
+		fields = append(fields, devicetoken.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, devicetoken.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DeviceTokenMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case devicetoken.FieldUserID:
+		return m.UserID()
+	case devicetoken.FieldDeviceID:
+		return m.DeviceID()
+	case devicetoken.FieldToken:
+		return m.Token()
+	case devicetoken.FieldPlatform:
+		return m.Platform()
+	case devicetoken.FieldCreatedAt:
+		return m.CreatedAt()
+	case devicetoken.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DeviceTokenMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case devicetoken.FieldUserID:
+		return m.OldUserID(ctx)
+	case devicetoken.FieldDeviceID:
+		return m.OldDeviceID(ctx)
+	case devicetoken.FieldToken:
+		return m.OldToken(ctx)
+	case devicetoken.FieldPlatform:
+		return m.OldPlatform(ctx)
+	case devicetoken.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case devicetoken.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown DeviceToken field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceTokenMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case devicetoken.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case devicetoken.FieldDeviceID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeviceID(v)
+		return nil
+	case devicetoken.FieldToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetToken(v)
+		return nil
+	case devicetoken.FieldPlatform:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlatform(v)
+		return nil
+	case devicetoken.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case devicetoken.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown DeviceToken field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DeviceTokenMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DeviceTokenMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceTokenMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown DeviceToken numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DeviceTokenMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DeviceTokenMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DeviceTokenMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown DeviceToken nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DeviceTokenMutation) ResetField(name string) error {
+	switch name {
+	case devicetoken.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case devicetoken.FieldDeviceID:
+		m.ResetDeviceID()
+		return nil
+	case devicetoken.FieldToken:
+		m.ResetToken()
+		return nil
+	case devicetoken.FieldPlatform:
+		m.ResetPlatform()
+		return nil
+	case devicetoken.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case devicetoken.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown DeviceToken field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DeviceTokenMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, devicetoken.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DeviceTokenMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case devicetoken.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DeviceTokenMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DeviceTokenMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DeviceTokenMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, devicetoken.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DeviceTokenMutation) EdgeCleared(name string) bool {
+	switch name {
+	case devicetoken.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DeviceTokenMutation) ClearEdge(name string) error {
+	switch name {
+	case devicetoken.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown DeviceToken unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DeviceTokenMutation) ResetEdge(name string) error {
+	switch name {
+	case devicetoken.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown DeviceToken edge %s", name)
 }
 
 // FollowRelationMutation represents an operation that mutates the FollowRelation nodes in the graph.
@@ -4181,43 +4839,46 @@ func (m *TaskTypeMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *uuid.UUID
-	index              *int
-	addindex           *int
-	email              *string
-	name               *string
-	bio                *string
-	streak_count       *int
-	addstreak_count    *int
-	icon_image_key     *string
-	created_at         *time.Time
-	clearedFields      map[string]struct{}
-	posts              map[uuid.UUID]struct{}
-	removedposts       map[uuid.UUID]struct{}
-	clearedposts       bool
-	comments           map[uuid.UUID]struct{}
-	removedcomments    map[uuid.UUID]struct{}
-	clearedcomments    bool
-	likes              map[uuid.UUID]struct{}
-	removedlikes       map[uuid.UUID]struct{}
-	clearedlikes       bool
-	pets               map[uuid.UUID]struct{}
-	removedpets        map[uuid.UUID]struct{}
-	clearedpets        bool
-	following          map[uuid.UUID]struct{}
-	removedfollowing   map[uuid.UUID]struct{}
-	clearedfollowing   bool
-	followers          map[uuid.UUID]struct{}
-	removedfollowers   map[uuid.UUID]struct{}
-	clearedfollowers   bool
-	daily_tasks        map[uuid.UUID]struct{}
-	removeddaily_tasks map[uuid.UUID]struct{}
-	cleareddaily_tasks bool
-	done               bool
-	oldValue           func(context.Context) (*User, error)
-	predicates         []predicate.User
+	op                   Op
+	typ                  string
+	id                   *uuid.UUID
+	index                *int
+	addindex             *int
+	email                *string
+	name                 *string
+	bio                  *string
+	streak_count         *int
+	addstreak_count      *int
+	icon_image_key       *string
+	created_at           *time.Time
+	clearedFields        map[string]struct{}
+	posts                map[uuid.UUID]struct{}
+	removedposts         map[uuid.UUID]struct{}
+	clearedposts         bool
+	comments             map[uuid.UUID]struct{}
+	removedcomments      map[uuid.UUID]struct{}
+	clearedcomments      bool
+	likes                map[uuid.UUID]struct{}
+	removedlikes         map[uuid.UUID]struct{}
+	clearedlikes         bool
+	pets                 map[uuid.UUID]struct{}
+	removedpets          map[uuid.UUID]struct{}
+	clearedpets          bool
+	following            map[uuid.UUID]struct{}
+	removedfollowing     map[uuid.UUID]struct{}
+	clearedfollowing     bool
+	followers            map[uuid.UUID]struct{}
+	removedfollowers     map[uuid.UUID]struct{}
+	clearedfollowers     bool
+	daily_tasks          map[uuid.UUID]struct{}
+	removeddaily_tasks   map[uuid.UUID]struct{}
+	cleareddaily_tasks   bool
+	device_tokens        map[uuid.UUID]struct{}
+	removeddevice_tokens map[uuid.UUID]struct{}
+	cleareddevice_tokens bool
+	done                 bool
+	oldValue             func(context.Context) (*User, error)
+	predicates           []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -5021,6 +5682,60 @@ func (m *UserMutation) ResetDailyTasks() {
 	m.removeddaily_tasks = nil
 }
 
+// AddDeviceTokenIDs adds the "device_tokens" edge to the DeviceToken entity by ids.
+func (m *UserMutation) AddDeviceTokenIDs(ids ...uuid.UUID) {
+	if m.device_tokens == nil {
+		m.device_tokens = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.device_tokens[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDeviceTokens clears the "device_tokens" edge to the DeviceToken entity.
+func (m *UserMutation) ClearDeviceTokens() {
+	m.cleareddevice_tokens = true
+}
+
+// DeviceTokensCleared reports if the "device_tokens" edge to the DeviceToken entity was cleared.
+func (m *UserMutation) DeviceTokensCleared() bool {
+	return m.cleareddevice_tokens
+}
+
+// RemoveDeviceTokenIDs removes the "device_tokens" edge to the DeviceToken entity by IDs.
+func (m *UserMutation) RemoveDeviceTokenIDs(ids ...uuid.UUID) {
+	if m.removeddevice_tokens == nil {
+		m.removeddevice_tokens = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.device_tokens, ids[i])
+		m.removeddevice_tokens[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDeviceTokens returns the removed IDs of the "device_tokens" edge to the DeviceToken entity.
+func (m *UserMutation) RemovedDeviceTokensIDs() (ids []uuid.UUID) {
+	for id := range m.removeddevice_tokens {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DeviceTokensIDs returns the "device_tokens" edge IDs in the mutation.
+func (m *UserMutation) DeviceTokensIDs() (ids []uuid.UUID) {
+	for id := range m.device_tokens {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDeviceTokens resets all changes to the "device_tokens" edge.
+func (m *UserMutation) ResetDeviceTokens() {
+	m.device_tokens = nil
+	m.cleareddevice_tokens = false
+	m.removeddevice_tokens = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -5298,7 +6013,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.posts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -5319,6 +6034,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.daily_tasks != nil {
 		edges = append(edges, user.EdgeDailyTasks)
+	}
+	if m.device_tokens != nil {
+		edges = append(edges, user.EdgeDeviceTokens)
 	}
 	return edges
 }
@@ -5369,13 +6087,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeDeviceTokens:
+		ids := make([]ent.Value, 0, len(m.device_tokens))
+		for id := range m.device_tokens {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.removedposts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -5396,6 +6120,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removeddaily_tasks != nil {
 		edges = append(edges, user.EdgeDailyTasks)
+	}
+	if m.removeddevice_tokens != nil {
+		edges = append(edges, user.EdgeDeviceTokens)
 	}
 	return edges
 }
@@ -5446,13 +6173,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeDeviceTokens:
+		ids := make([]ent.Value, 0, len(m.removeddevice_tokens))
+		for id := range m.removeddevice_tokens {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 7)
+	edges := make([]string, 0, 8)
 	if m.clearedposts {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -5473,6 +6206,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.cleareddaily_tasks {
 		edges = append(edges, user.EdgeDailyTasks)
+	}
+	if m.cleareddevice_tokens {
+		edges = append(edges, user.EdgeDeviceTokens)
 	}
 	return edges
 }
@@ -5495,6 +6231,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedfollowers
 	case user.EdgeDailyTasks:
 		return m.cleareddaily_tasks
+	case user.EdgeDeviceTokens:
+		return m.cleareddevice_tokens
 	}
 	return false
 }
@@ -5531,6 +6269,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeDailyTasks:
 		m.ResetDailyTasks()
+		return nil
+	case user.EdgeDeviceTokens:
+		m.ResetDeviceTokens()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

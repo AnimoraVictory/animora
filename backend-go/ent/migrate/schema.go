@@ -77,6 +77,37 @@ var (
 			},
 		},
 	}
+	// DeviceTokensColumns holds the columns for the "device_tokens" table.
+	DeviceTokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "device_id", Type: field.TypeString},
+		{Name: "token", Type: field.TypeString},
+		{Name: "platform", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeUUID},
+	}
+	// DeviceTokensTable holds the schema information for the "device_tokens" table.
+	DeviceTokensTable = &schema.Table{
+		Name:       "device_tokens",
+		Columns:    DeviceTokensColumns,
+		PrimaryKey: []*schema.Column{DeviceTokensColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "device_tokens_users_device_tokens",
+				Columns:    []*schema.Column{DeviceTokensColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "devicetoken_user_id_device_id",
+				Unique:  true,
+				Columns: []*schema.Column{DeviceTokensColumns[6], DeviceTokensColumns[1]},
+			},
+		},
+	}
 	// FollowRelationsColumns holds the columns for the "follow_relations" table.
 	FollowRelationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -229,6 +260,7 @@ var (
 	Tables = []*schema.Table{
 		CommentsTable,
 		DailyTasksTable,
+		DeviceTokensTable,
 		FollowRelationsTable,
 		LikesTable,
 		PetsTable,
@@ -243,6 +275,7 @@ func init() {
 	CommentsTable.ForeignKeys[1].RefTable = UsersTable
 	DailyTasksTable.ForeignKeys[0].RefTable = PostsTable
 	DailyTasksTable.ForeignKeys[1].RefTable = UsersTable
+	DeviceTokensTable.ForeignKeys[0].RefTable = UsersTable
 	FollowRelationsTable.ForeignKeys[0].RefTable = UsersTable
 	FollowRelationsTable.ForeignKeys[1].RefTable = UsersTable
 	LikesTable.ForeignKeys[0].RefTable = PostsTable

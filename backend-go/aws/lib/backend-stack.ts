@@ -41,21 +41,23 @@ export class BackendStack extends cdk.Stack {
     const apiFnRole = new Role(this, "ApiFunctionRole", {
       assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
       managedPolicies: [
-        ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSLambdaBasicExecutionRole"),
+        ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AWSLambdaBasicExecutionRole"
+        ),
       ],
     });
-    
+
     apiFnRole.addToPolicy(
       new cdk.aws_iam.PolicyStatement({
         actions: [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
         ],
         resources: [
           `arn:aws:s3:::${AWS_S3_BUCKET_NAME}`,
-          `arn:aws:s3:::${AWS_S3_BUCKET_NAME}/*`
+          `arn:aws:s3:::${AWS_S3_BUCKET_NAME}/*`,
         ],
       })
     );
@@ -75,15 +77,12 @@ export class BackendStack extends cdk.Stack {
         // AWS_SECRET_ACCESS_KEY,
         AWS_S3_BUCKET_NAME,
       },
-      role: apiFnRole
+      role: apiFnRole,
     });
 
     const api = new apigw.LambdaRestApi(this, "AnimaliaAPI", {
       handler: apiFn,
-      binaryMediaTypes: [
-        "multipart/form-data",
-        "image/*"
-      ],
+      binaryMediaTypes: ["multipart/form-data", "image/*"],
       defaultMethodOptions: {
         apiKeyRequired: false,
       },
@@ -97,7 +96,7 @@ export class BackendStack extends cdk.Stack {
           "X-Api-Key",
           "X-Amz-Security-Token",
           "Access-Control-Allow-Origin",
-          "Access-Control-Allow-Headers"
+          "Access-Control-Allow-Headers",
         ],
       },
     });
@@ -105,7 +104,7 @@ export class BackendStack extends cdk.Stack {
     // API Gatewayのステージ設定を調整
     const stage = api.deploymentStage.node.defaultChild as apigw.CfnStage;
     stage.addPropertyOverride("TracingEnabled", true);
-    
+
     const dailyTaskFn = new lambda.Function(this, "DailyTaskCreator", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
       handler: "bootstrap",
@@ -115,14 +114,46 @@ export class BackendStack extends cdk.Stack {
         // ... 他の環境変数 ...
       },
       // IAMロールを明示的に設定
-      role: new Role(this, 'DailyTaskCreatorRole', {
-        assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-        description: 'Role for DailyTaskCreator Lambda function',
+      role: new Role(this, "DailyTaskCreatorRole", {
+        assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+        description: "Role for DailyTaskCreator Lambda function",
         managedPolicies: [
           // CloudWatchLogsへのアクセス権限
-          ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+          ManagedPolicy.fromAwsManagedPolicyName(
+            "service-role/AWSLambdaBasicExecutionRole"
+          ),
         ],
       }),
+    });
+
+    const dailyTaskPushNotificationFn = new lambda.Function(
+      this,
+      "DailyTaskPushNotification",
+      {
+        runtime: lambda.Runtime.PROVIDED_AL2023,
+        handler: "bootstrap",
+        timeout: cdk.Duration.seconds(10),
+        environment: {
+        },
+        code: lambda.Code.fromAsset(
+          path.join(__dirname, "../../bin/dailytask-push-notification")
+        ),
+        role: new Role(this, "DailyTaskPushNotificationRole", {
+          assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+          description: "Role for DailyTaskPushNotification Lambda function",
+          managedPolicies: [
+            ManagedPolicy.fromAwsManagedPolicyName(
+              "service-role/AWSLambdaBasicExecutionRole"
+            ),
+          ],
+        }),
+      }
+    );
+
+    // 毎日同じ時間に通知を送るための EventBridge ルール
+    new events.Rule(this, "DailyTaskPushNotificationRule", {
+      schedule: events.Schedule.cron({ minute: "0", hour: "3", day: "*" }),
+      targets: [new targets.LambdaFunction(dailyTaskPushNotificationFn)],
     });
 
     new events.Rule(this, "DailyTaskRule", {
@@ -136,10 +167,13 @@ export class BackendStack extends cdk.Stack {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
 
+    /* 一時的にコメントアウト
     const healthCheckFn = new lambda.Function(this, "HealthCheckFunction", {
       runtime: lambda.Runtime.PROVIDED_AL2023,
       handler: "bootstrap",
-      code: lambda.Code.fromAsset(path.join(__dirname, "../../bin/health-check")),
+      code: lambda.Code.fromAsset(
+        path.join(__dirname, "../../bin/health-check")
+      ),
       description: "Render上のFastAPIのヘルスチェックを行う関数",
       timeout: cdk.Duration.seconds(10),
     });
@@ -148,5 +182,6 @@ export class BackendStack extends cdk.Stack {
       schedule: events.Schedule.rate(cdk.Duration.minutes(10)),
       targets: [new targets.LambdaFunction(healthCheckFn)],
     });
+    */
   }
 }

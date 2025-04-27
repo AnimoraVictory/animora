@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -237,6 +238,21 @@ func (uu *UserUpdate) AddDailyTasks(d ...*DailyTask) *UserUpdate {
 	return uu.AddDailyTaskIDs(ids...)
 }
 
+// AddDeviceTokenIDs adds the "device_tokens" edge to the DeviceToken entity by IDs.
+func (uu *UserUpdate) AddDeviceTokenIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddDeviceTokenIDs(ids...)
+	return uu
+}
+
+// AddDeviceTokens adds the "device_tokens" edges to the DeviceToken entity.
+func (uu *UserUpdate) AddDeviceTokens(d ...*DeviceToken) *UserUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.AddDeviceTokenIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -387,6 +403,27 @@ func (uu *UserUpdate) RemoveDailyTasks(d ...*DailyTask) *UserUpdate {
 		ids[i] = d[i].ID
 	}
 	return uu.RemoveDailyTaskIDs(ids...)
+}
+
+// ClearDeviceTokens clears all "device_tokens" edges to the DeviceToken entity.
+func (uu *UserUpdate) ClearDeviceTokens() *UserUpdate {
+	uu.mutation.ClearDeviceTokens()
+	return uu
+}
+
+// RemoveDeviceTokenIDs removes the "device_tokens" edge to DeviceToken entities by IDs.
+func (uu *UserUpdate) RemoveDeviceTokenIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveDeviceTokenIDs(ids...)
+	return uu
+}
+
+// RemoveDeviceTokens removes "device_tokens" edges to DeviceToken entities.
+func (uu *UserUpdate) RemoveDeviceTokens(d ...*DeviceToken) *UserUpdate {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.RemoveDeviceTokenIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -785,6 +822,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.DeviceTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DeviceTokensTable,
+			Columns: []string{user.DeviceTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(devicetoken.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedDeviceTokensIDs(); len(nodes) > 0 && !uu.mutation.DeviceTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DeviceTokensTable,
+			Columns: []string{user.DeviceTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(devicetoken.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.DeviceTokensIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DeviceTokensTable,
+			Columns: []string{user.DeviceTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(devicetoken.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -1007,6 +1089,21 @@ func (uuo *UserUpdateOne) AddDailyTasks(d ...*DailyTask) *UserUpdateOne {
 	return uuo.AddDailyTaskIDs(ids...)
 }
 
+// AddDeviceTokenIDs adds the "device_tokens" edge to the DeviceToken entity by IDs.
+func (uuo *UserUpdateOne) AddDeviceTokenIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddDeviceTokenIDs(ids...)
+	return uuo
+}
+
+// AddDeviceTokens adds the "device_tokens" edges to the DeviceToken entity.
+func (uuo *UserUpdateOne) AddDeviceTokens(d ...*DeviceToken) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.AddDeviceTokenIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -1157,6 +1254,27 @@ func (uuo *UserUpdateOne) RemoveDailyTasks(d ...*DailyTask) *UserUpdateOne {
 		ids[i] = d[i].ID
 	}
 	return uuo.RemoveDailyTaskIDs(ids...)
+}
+
+// ClearDeviceTokens clears all "device_tokens" edges to the DeviceToken entity.
+func (uuo *UserUpdateOne) ClearDeviceTokens() *UserUpdateOne {
+	uuo.mutation.ClearDeviceTokens()
+	return uuo
+}
+
+// RemoveDeviceTokenIDs removes the "device_tokens" edge to DeviceToken entities by IDs.
+func (uuo *UserUpdateOne) RemoveDeviceTokenIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveDeviceTokenIDs(ids...)
+	return uuo
+}
+
+// RemoveDeviceTokens removes "device_tokens" edges to DeviceToken entities.
+func (uuo *UserUpdateOne) RemoveDeviceTokens(d ...*DeviceToken) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.RemoveDeviceTokenIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1578,6 +1696,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(dailytask.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.DeviceTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DeviceTokensTable,
+			Columns: []string{user.DeviceTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(devicetoken.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedDeviceTokensIDs(); len(nodes) > 0 && !uuo.mutation.DeviceTokensCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DeviceTokensTable,
+			Columns: []string{user.DeviceTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(devicetoken.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.DeviceTokensIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DeviceTokensTable,
+			Columns: []string{user.DeviceTokensColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(devicetoken.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

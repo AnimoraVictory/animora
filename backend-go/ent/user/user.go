@@ -43,6 +43,8 @@ const (
 	EdgeFollowers = "followers"
 	// EdgeDailyTasks holds the string denoting the daily_tasks edge name in mutations.
 	EdgeDailyTasks = "daily_tasks"
+	// EdgeDeviceTokens holds the string denoting the device_tokens edge name in mutations.
+	EdgeDeviceTokens = "device_tokens"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// PostsTable is the table that holds the posts relation/edge.
@@ -94,6 +96,13 @@ const (
 	DailyTasksInverseTable = "daily_tasks"
 	// DailyTasksColumn is the table column denoting the daily_tasks relation/edge.
 	DailyTasksColumn = "user_daily_tasks"
+	// DeviceTokensTable is the table that holds the device_tokens relation/edge.
+	DeviceTokensTable = "device_tokens"
+	// DeviceTokensInverseTable is the table name for the DeviceToken entity.
+	// It exists in this package in order to avoid circular dependency with the "devicetoken" package.
+	DeviceTokensInverseTable = "device_tokens"
+	// DeviceTokensColumn is the table column denoting the device_tokens relation/edge.
+	DeviceTokensColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -275,6 +284,20 @@ func ByDailyTasks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newDailyTasksStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByDeviceTokensCount orders the results by device_tokens count.
+func ByDeviceTokensCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newDeviceTokensStep(), opts...)
+	}
+}
+
+// ByDeviceTokens orders the results by device_tokens terms.
+func ByDeviceTokens(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newDeviceTokensStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPostsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -322,5 +345,12 @@ func newDailyTasksStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(DailyTasksInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, DailyTasksTable, DailyTasksColumn),
+	)
+}
+func newDeviceTokensStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(DeviceTokensInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, DeviceTokensTable, DeviceTokensColumn),
 	)
 }

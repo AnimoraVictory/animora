@@ -7,6 +7,7 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
+	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
@@ -48,6 +49,34 @@ func init() {
 	dailytaskDescID := dailytaskFields[0].Descriptor()
 	// dailytask.DefaultID holds the default value on creation for the id field.
 	dailytask.DefaultID = dailytaskDescID.Default.(func() uuid.UUID)
+	devicetokenFields := schema.DeviceToken{}.Fields()
+	_ = devicetokenFields
+	// devicetokenDescDeviceID is the schema descriptor for device_id field.
+	devicetokenDescDeviceID := devicetokenFields[2].Descriptor()
+	// devicetoken.DeviceIDValidator is a validator for the "device_id" field. It is called by the builders before save.
+	devicetoken.DeviceIDValidator = devicetokenDescDeviceID.Validators[0].(func(string) error)
+	// devicetokenDescToken is the schema descriptor for token field.
+	devicetokenDescToken := devicetokenFields[3].Descriptor()
+	// devicetoken.TokenValidator is a validator for the "token" field. It is called by the builders before save.
+	devicetoken.TokenValidator = devicetokenDescToken.Validators[0].(func(string) error)
+	// devicetokenDescPlatform is the schema descriptor for platform field.
+	devicetokenDescPlatform := devicetokenFields[4].Descriptor()
+	// devicetoken.PlatformValidator is a validator for the "platform" field. It is called by the builders before save.
+	devicetoken.PlatformValidator = devicetokenDescPlatform.Validators[0].(func(string) error)
+	// devicetokenDescCreatedAt is the schema descriptor for created_at field.
+	devicetokenDescCreatedAt := devicetokenFields[5].Descriptor()
+	// devicetoken.DefaultCreatedAt holds the default value on creation for the created_at field.
+	devicetoken.DefaultCreatedAt = devicetokenDescCreatedAt.Default.(func() time.Time)
+	// devicetokenDescUpdatedAt is the schema descriptor for updated_at field.
+	devicetokenDescUpdatedAt := devicetokenFields[6].Descriptor()
+	// devicetoken.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	devicetoken.DefaultUpdatedAt = devicetokenDescUpdatedAt.Default.(func() time.Time)
+	// devicetoken.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	devicetoken.UpdateDefaultUpdatedAt = devicetokenDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// devicetokenDescID is the schema descriptor for id field.
+	devicetokenDescID := devicetokenFields[0].Descriptor()
+	// devicetoken.DefaultID holds the default value on creation for the id field.
+	devicetoken.DefaultID = devicetokenDescID.Default.(func() uuid.UUID)
 	followrelationFields := schema.FollowRelation{}.Fields()
 	_ = followrelationFields
 	// followrelationDescCreatedAt is the schema descriptor for created_at field.
