@@ -118,7 +118,7 @@ func InjectCommentUsecase() usecase.CommentUsecase {
 }
 
 func InjectDailyTaskUsecase() usecase.DailyTaskUsecase {
-	dailytaskUsecase := usecase.NewDailyTaskUsecase(InjectDailyTaskRepository())
+	dailytaskUsecase := usecase.NewDailyTaskUsecase(InjectDailyTaskRepository(), InjectUserRepository())
 	return *dailytaskUsecase
 }
 
@@ -140,6 +140,7 @@ func InjectPostHandler() *handler.PostHandler {
 	return handler.NewPostHandler(
 		InjectPostUsecase(),
 		InjectStorageUsecase(),
+		InjectDailyTaskUsecase(),
 		InjectCacheUsecase(),
 	)
 }
@@ -164,6 +165,10 @@ func InjectCommentHandler() handler.CommentHandler {
 	return *commentHandler
 }
 
+func InjectLambdaHandler() handler.LambdaHandler {
+	lambdaHandler := handler.NewLambdaHandler(InjectDailyTaskUsecase())
+	return *lambdaHandler
+}
 func InjectDeviceTokenHandler() handler.DeviceTokenHandler {
 	deviceTokenHandler := handler.NewDeviceTokenHandler(InjectDeviceTokenUsecase())
 	return *deviceTokenHandler

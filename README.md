@@ -33,3 +33,34 @@ DATABASE_URL="postgresql://myuser:mypass@db:5432/mydatabase?sslmode=disable"
 make run # detachして起動
 make run-attach # attachして起動
 ```
+
+### データベースにテーブルを作成する手順
+
+下記のコマンドにより、ent schemaの雛形を作成する。
+
+```sh
+make create-model NAME=[モデル名]
+```
+
+例えば下のようなコマンドでは`User`というモデルが作成され、`users`というテーブルがPostgresに作成される。
+
+```sh
+make create-model NAME=User
+```
+
+`backend-go/ent/schema/[modelName].go`ファイルを編集し、テーブルのカラムを定義する。
+具体的な記法は[公式ドキュメント](https://entgo.io/ja/docs/schema-fields/)を参照。
+
+次に、下記のコマンドにより、ent schemaを生成する。
+
+```sh
+make codegen
+```
+
+これにより、`backend-go/ent/...`ディレクトリに諸々のファイルが作成される。
+
+最後に、下記のコマンドによりapiを起動することで、自動でmigrationが走りテーブルが作成される。
+
+```sh
+make run
+```

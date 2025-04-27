@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,15 @@ import {
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { UserResponse } from '@/features/user/schema/response';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+  withSequence,
+} from 'react-native-reanimated';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import MaskedView from '@react-native-masked-view/masked-view';
 
 type ProfileHeaderProps = {
   user: UserResponse;
@@ -32,6 +41,39 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     setSelectedTab(tab);
     onOpenFollowModal();
   };
+  const scale = useSharedValue(0);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(0, { duration: 0 }),
+        withTiming(0, { duration: 3000 }),
+        withTiming(4, { duration: 200 }),
+        withTiming(50, { duration: 360 })
+      ),
+      -1,
+      false
+    );
+
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0, { duration: 0 }),
+        withTiming(0.5, { duration: 3000 }),
+        withTiming(1, { duration: 200 }),
+        withTiming(0, { duration: 360 })
+      ),
+      -1,
+      false
+    );
+  }, [scale, opacity]);
+
+  const reflectionStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }, { rotate: '45deg' }],
+      opacity: opacity.value,
+    };
+  });
 
   return (
     <View style={[styles.headerContainer, { backgroundColor }]}>
@@ -56,14 +98,47 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       </View>
 
       <View style={styles.profileColumn}>
-        <Image
-          source={
-            user.iconImageUrl
-              ? { uri: user.iconImageUrl }
-              : require('@/assets/images/profile.png')
-          }
-          style={styles.profileImage}
-        />
+        <View style={styles.profileImageWrapper}>
+          <Image
+            source={
+              user.iconImageUrl
+                ? { uri: user.iconImageUrl }
+                : require('@/assets/images/profile.png')
+            }
+            style={styles.profileImage}
+          />
+
+          {user.streakCount > 0 && (
+            <View style={styles.streakBadge}>
+              <MaskedView
+                style={{ width: 34, height: 34 }}
+                maskElement={
+                  <Icon
+                    name="fire"
+                    size={36}
+                    color="black"
+                    style={{ transform: [{ scaleX: 1.2 }] }}
+                  />
+                }
+              >
+                <Icon
+                  name="fire"
+                  size={40}
+                  color="orange"
+                  style={{ transform: [{ scaleX: 1.2 }] }}
+                />
+                <Animated.View
+                  style={[
+                    StyleSheet.absoluteFill,
+                    styles.reflection,
+                    reflectionStyle,
+                  ]}
+                />
+              </MaskedView>
+              <Text style={styles.streakNumber}>{user.streakCount}</Text>
+            </View>
+          )}
+        </View>
 
         <View style={styles.statsContainer}>
           <Text style={styles.profileName}>{user.name}</Text>
@@ -148,6 +223,38 @@ const getStyles = (colors: typeof Colors.light) =>
       fontSize: 12,
       color: colors.icon,
       textAlign: 'center',
+    },
+    profileImageWrapper: {
+      position: 'relative',
+    },
+    streakBadge: {
+      position: 'absolute',
+      top: -6,
+      right: -10,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'hidden',
+      backgroundColor: 'transparent',
+    },
+    streakNumber: {
+      position: 'absolute',
+      top: 8,
+      left: 8,
+      fontSize: 10,
+      fontWeight: 'bold',
+      color: 'white',
+    },
+    reflection: {
+      position: 'absolute',
+      top: -180,
+      left: 0,
+      width: 30,
+      height: '100%',
+      backgroundColor: 'white',
+      opacity: 0,
     },
   });
 

@@ -26,6 +26,8 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// Bio holds the value of the "bio" field.
 	Bio string `json:"bio,omitempty"`
+	// StreakCount holds the value of the "streak_count" field.
+	StreakCount int `json:"streak_count,omitempty"`
 	// IconImageKey holds the value of the "icon_image_key" field.
 	IconImageKey string `json:"icon_image_key,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -136,7 +138,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldIndex:
+		case user.FieldIndex, user.FieldStreakCount:
 			values[i] = new(sql.NullInt64)
 		case user.FieldEmail, user.FieldName, user.FieldBio, user.FieldIconImageKey:
 			values[i] = new(sql.NullString)
@@ -188,6 +190,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field bio", values[i])
 			} else if value.Valid {
 				u.Bio = value.String
+			}
+		case user.FieldStreakCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field streak_count", values[i])
+			} else if value.Valid {
+				u.StreakCount = int(value.Int64)
 			}
 		case user.FieldIconImageKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -288,6 +296,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("bio=")
 	builder.WriteString(u.Bio)
+	builder.WriteString(", ")
+	builder.WriteString("streak_count=")
+	builder.WriteString(fmt.Sprintf("%v", u.StreakCount))
 	builder.WriteString(", ")
 	builder.WriteString("icon_image_key=")
 	builder.WriteString(u.IconImageKey)

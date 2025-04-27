@@ -12,6 +12,7 @@ export const userResponseSchema = userBaseSchema.extend({
   posts: z.array(postResponseSchema),
   pets: z.array(petSchema),
   dailyTask: dailyTaskSchema,
+  streakCount: z.number(),
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;

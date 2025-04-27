@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldTargetDate holds the string denoting the target_date field in the database.
+	FieldTargetDate = "target_date"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -45,6 +47,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
+	FieldTargetDate,
 	FieldType,
 }
 
@@ -73,6 +76,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultTargetDate holds the default value on creation for the "target_date" field.
+	DefaultTargetDate func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
@@ -88,6 +93,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByTargetDate orders the results by the target_date field.
+func ByTargetDate(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTargetDate, opts...).ToFunc()
 }
 
 // ByType orders the results by the type field.

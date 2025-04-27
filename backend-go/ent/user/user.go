@@ -23,6 +23,8 @@ const (
 	FieldName = "name"
 	// FieldBio holds the string denoting the bio field in the database.
 	FieldBio = "bio"
+	// FieldStreakCount holds the string denoting the streak_count field in the database.
+	FieldStreakCount = "streak_count"
 	// FieldIconImageKey holds the string denoting the icon_image_key field in the database.
 	FieldIconImageKey = "icon_image_key"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -110,6 +112,7 @@ var Columns = []string{
 	FieldEmail,
 	FieldName,
 	FieldBio,
+	FieldStreakCount,
 	FieldIconImageKey,
 	FieldCreatedAt,
 }
@@ -133,6 +136,8 @@ var (
 	NameValidator func(string) error
 	// DefaultBio holds the default value on creation for the "bio" field.
 	DefaultBio string
+	// DefaultStreakCount holds the default value on creation for the "streak_count" field.
+	DefaultStreakCount int
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
@@ -165,6 +170,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByBio orders the results by the bio field.
 func ByBio(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBio, opts...).ToFunc()
+}
+
+// ByStreakCount orders the results by the streak_count field.
+func ByStreakCount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStreakCount, opts...).ToFunc()
 }
 
 // ByIconImageKey orders the results by the icon_image_key field.
