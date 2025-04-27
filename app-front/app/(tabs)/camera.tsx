@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 
 const { height } = Dimensions.get('window');
+
 export type TaskType = 'eating' | 'sleeping' | 'playing';
 
 export const taskTypeMap: Record<TaskType, string> = {
@@ -51,6 +52,7 @@ export default function CameraScreen() {
       }).start();
     }, [slideAnim])
   );
+
   const handleClose = () => {
     Animated.timing(slideAnim, {
       toValue: height,
@@ -62,15 +64,15 @@ export default function CameraScreen() {
   };
 
   const taskButtonColor = showTaskMessage ? 'green' : 'white';
-
-  const dailyTaskDone = currentUser?.dailyTask.post ? true : false;
+  const dailyTaskDone = !!currentUser?.dailyTask?.post;
+  const dailyTaskMessage = currentUser?.dailyTask?.type
+    ? taskTypeMap[currentUser.dailyTask.type as TaskType]
+    : "";
 
   if (!permission) return null;
 
   return (
-    <Animated.View
-      style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
-    >
+    <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
       {!permission.granted ? (
         <View style={styles.permissionOverlay}>
           <Text style={styles.permissionText}>カメラの許可が必要です</Text>
@@ -84,72 +86,71 @@ export default function CameraScreen() {
         <CreatePostModal
           photoUri={photoUri}
           onClose={() => setPhotoUri(null)}
-          dailyTaskId={
-            !dailyTaskDone && showTaskMessage
-              ? currentUser?.dailyTask.id
-              : undefined
-          }
+          dailyTaskId={!dailyTaskDone && showTaskMessage ? currentUser?.dailyTask?.id : undefined}
         />
       ) : (
-        <CameraView
-          ref={cameraRef}
-          style={styles.camera}
-          facing={facing}
-          flash={flashMode}
-        >
-          {currentUser?.dailyTask && currentUser.dailyTask.post == null && (
-            <TouchableOpacity
-              style={[styles.taskButton, { backgroundColor: taskButtonColor }]}
-              onPress={() => setShowTaskMessage(!showTaskMessage)}
-            >
-              <Text style={styles.taskButtonText}>Today’s Task 🐾</Text>
-            </TouchableOpacity>
-          )}
-          {!dailyTaskDone && showTaskMessage && currentUser?.dailyTask && (
-            <View style={styles.taskMessageContainer}>
-              <Text style={styles.taskMessageText}>
-                {taskTypeMap[currentUser.dailyTask.type as TaskType]}
-              </Text>
-            </View>
-          )}
-          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Text style={styles.closeText}>×</Text>
-          </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+          <CameraView
+            ref={cameraRef}
+            style={StyleSheet.absoluteFill}
+            facing={facing}
+            flash={flashMode}
+          />
 
-          <View style={styles.bottomControls}>
-            <TouchableOpacity
-              style={styles.flashButton}
-              onPress={() =>
-                setFlashMode((prev) => (prev === 'off' ? 'on' : 'off'))
-              }
-            >
-              <Ionicons
-                name={flashMode === 'off' ? 'flash-off' : 'flash'}
-                size={30}
-                color={flashMode === 'off' ? '#888' : '#facc15'}
+          {/* Cameraの上に重ねるUI */}
+          <View style={StyleSheet.absoluteFill}>
+            {!!currentUser?.dailyTask && !dailyTaskDone && (
+              <TouchableOpacity
+                style={[styles.taskButton, { backgroundColor: taskButtonColor }]}
+                onPress={() => setShowTaskMessage(!showTaskMessage)}
+              >
+                <Text style={styles.taskButtonText}>Today’s Task 🐾</Text>
+              </TouchableOpacity>
+            )}
+
+            {!dailyTaskDone && showTaskMessage && !!dailyTaskMessage && (
+              <View style={styles.taskMessageContainer}>
+                <Text style={styles.taskMessageText}>{dailyTaskMessage}</Text>
+              </View>
+            )}
+
+            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+              <Text style={styles.closeText}>×</Text>
+            </TouchableOpacity>
+
+            <View style={styles.bottomControls}>
+              <TouchableOpacity
+                style={styles.flashButton}
+                onPress={() => setFlashMode((prev) => (prev === 'off' ? 'on' : 'off'))}
+              >
+                <Ionicons
+                  name={flashMode === 'off' ? 'flash-off' : 'flash'}
+                  size={30}
+                  color={flashMode === 'off' ? '#888' : '#facc15'}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.shutterButton}
+                onPress={async () => {
+                  if (cameraRef.current) {
+                    const photo = await cameraRef.current.takePictureAsync();
+                    setPhotoUri(photo.uri);
+                  }
+                }}
               />
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.shutterButton}
-              onPress={async () => {
-                if (cameraRef.current) {
-                  const photo = await cameraRef.current.takePictureAsync();
-                  setPhotoUri(photo.uri);
+              <TouchableOpacity
+                style={styles.flipButton}
+                onPress={() =>
+                  setFacing((prev) => (prev === 'back' ? 'front' : 'back'))
                 }
-              }}
-            />
-
-            <TouchableOpacity
-              style={styles.flipButton}
-              onPress={() =>
-                setFacing((prev) => (prev === 'back' ? 'front' : 'back'))
-              }
-            >
-              <Text style={styles.flipText}>↺</Text>
-            </TouchableOpacity>
+              >
+                <Text style={styles.flipText}>↺</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </CameraView>
+        </View>
       )}
     </Animated.View>
   );
@@ -188,11 +189,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  flashText: {
-    color: '#fff',
-    fontSize: 16,
-    textAlign: 'center',
-  },
   shutterButton: {
     width: 80,
     height: 80,
@@ -224,7 +220,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
+    zIndex: 2,
   },
   closeText: {
     color: '#fff',
@@ -239,7 +235,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
-    zIndex: 3,
+    zIndex: 2,
   },
   taskButtonText: {
     fontWeight: 'bold',
@@ -252,12 +248,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    zIndex: 5,
+    zIndex: 2,
   },
   taskMessageText: {
     color: '#000',
     fontSize: 20,
-    opacity: 0.4,
+    opacity: 0.6,
     fontWeight: 'bold',
     textAlign: 'center',
     paddingHorizontal: 20,
