@@ -8,6 +8,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
+	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
@@ -38,6 +39,38 @@ func (r *PostRepository) GetAllPosts() ([]*ent.Post, error) {
 		All(context.Background())
 	if err != nil {
 		log.Errorf("Failed to get all posts: %v", err)
+		return nil, err
+	}
+	return posts, nil
+}
+
+func (r *PostRepository) GetFollowsPosts(userID uuid.UUID, cursor *uuid.UUID, limit int) ([]*ent.Post, error) {
+	query := r.db.Post.Query().
+		Where(post.HasUserWith(user.HasFollowersWith(
+			predicate.FollowRelation(user.IDEQ(userID)),
+		))).
+		WithUser().
+		WithComments(func(q *ent.CommentQuery) {
+			q.WithUser()
+		}).
+		WithLikes(func(q *ent.LikeQuery) {
+			q.WithUser()
+		}).
+		WithDailyTask().
+		Where(post.DeletedAtIsNil()).
+		Order(ent.Desc(post.FieldCreatedAt))
+
+	// カーソルが指定されている場合、カーソル以降の投稿を取得
+	if cursor != nil {
+		query = query.Where(post.IDLT(*cursor))
+	}
+
+	// リミットを設定
+	posts, err := query.
+		Limit(limit).
+		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
+		All(context.Background())
+	if err != nil {
 		return nil, err
 	}
 	return posts, nil
