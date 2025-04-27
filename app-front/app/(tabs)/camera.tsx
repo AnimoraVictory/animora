@@ -67,12 +67,14 @@ export default function CameraScreen() {
   const dailyTaskDone = !!currentUser?.dailyTask?.post;
   const dailyTaskMessage = currentUser?.dailyTask?.type
     ? taskTypeMap[currentUser.dailyTask.type as TaskType]
-    : "";
+    : '';
 
   if (!permission) return null;
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
+    <Animated.View
+      style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
+    >
       {!permission.granted ? (
         <View style={styles.permissionOverlay}>
           <Text style={styles.permissionText}>カメラの許可が必要です</Text>
@@ -86,7 +88,11 @@ export default function CameraScreen() {
         <CreatePostModal
           photoUri={photoUri}
           onClose={() => setPhotoUri(null)}
-          dailyTaskId={!dailyTaskDone && showTaskMessage ? currentUser?.dailyTask?.id : undefined}
+          dailyTaskId={
+            !dailyTaskDone && showTaskMessage
+              ? currentUser?.dailyTask?.id
+              : undefined
+          }
         />
       ) : (
         <View style={{ flex: 1 }}>
@@ -101,7 +107,10 @@ export default function CameraScreen() {
           <View style={StyleSheet.absoluteFill}>
             {!!currentUser?.dailyTask && !dailyTaskDone && (
               <TouchableOpacity
-                style={[styles.taskButton, { backgroundColor: taskButtonColor }]}
+                style={[
+                  styles.taskButton,
+                  { backgroundColor: taskButtonColor },
+                ]}
                 onPress={() => setShowTaskMessage(!showTaskMessage)}
               >
                 <Text style={styles.taskButtonText}>Today’s Task 🐾</Text>
@@ -121,7 +130,9 @@ export default function CameraScreen() {
             <View style={styles.bottomControls}>
               <TouchableOpacity
                 style={styles.flashButton}
-                onPress={() => setFlashMode((prev) => (prev === 'off' ? 'on' : 'off'))}
+                onPress={() =>
+                  setFlashMode((prev) => (prev === 'off' ? 'on' : 'off'))
+                }
               >
                 <Ionicons
                   name={flashMode === 'off' ? 'flash-off' : 'flash'}
