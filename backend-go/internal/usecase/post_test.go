@@ -67,18 +67,74 @@ func TestPostUsecase_GetAllPosts(t *testing.T) {
 	}
 }
 
+func TestPostUsecase_GetFollowsPosts(t *testing.T) {
+	postID := uuid.New()
+	testCases := []struct {
+		name          string
+		userId        uuid.UUID
+		cursor        uuid.UUID
+		limit         int
+		mockPosts     []*ent.Post
+		mockError     error
+		expectedPosts []*ent.Post
+		expectedError error
+	}{
+		{
+			name:   "Success",
+			userId: uuid.MustParse("977b7e40-1149-4a5d-955b-28d467c40fc7"),
+			cursor: uuid.MustParse("9feef8eb-6967-4bd9-a8f1-8345d6a08717"),
+			limit:  10,
+			mockPosts: []*ent.Post{
+				{ID: postID, Caption: "Test post"},
+			},
+			mockError: nil,
+			expectedPosts: []*ent.Post{
+				{ID: postID, Caption: "Test post"},
+			},
+			expectedError: nil,
+		},
+		{
+			name:          "Error",
+			userId:        uuid.MustParse("38d85a73-bac6-4bc0-923b-b5aec5ed9075"),
+			cursor:        uuid.MustParse("9feef8eb-6967-4bd9-a8f1-8345d6a08717"),
+			limit:         10,
+			mockPosts:     nil,
+			mockError:     errors.New("database error"),
+			expectedPosts: nil,
+			expectedError: errors.New("database error"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mockRepo := &mock.MockPostRepository{
+				GetFollowsPostsFunc: func(userID uuid.UUID, cursor *uuid.UUID, limit int) ([]*ent.Post, error) {
+					return tc.mockPosts, tc.mockError
+				},
+			}
+
+			usecase := NewPostUsecase(mockRepo)
+
+			posts, err := usecase.GetFollowsPosts(tc.userId, &tc.cursor, tc.limit)
+
+			assert.Equal(t, tc.expectedPosts, posts)
+			assert.Equal(t, tc.expectedError, err)
+		})
+	}
+}
+
 func TestPostUsecase_CreatePost(t *testing.T) {
 	// Test cases
 	testCases := []struct {
-		name           string
-		caption        string
-		userId         string
-		fileKey        string
-		dailyTaskId    *string
-		mockPost       *ent.Post
-		mockError      error
-		expectedPost   *ent.Post
-		expectedError  error
+		name          string
+		caption       string
+		userId        string
+		fileKey       string
+		dailyTaskId   *string
+		mockPost      *ent.Post
+		mockError     error
+		expectedPost  *ent.Post
+		expectedError error
 	}{
 		{
 			name:          "Success",

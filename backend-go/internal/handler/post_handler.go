@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
@@ -261,6 +262,87 @@ func (h *PostHandler) GetAllPosts(c echo.Context) error {
 		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL, commentResponses, likeResponses)
 	}
 
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"posts": postResponses,
+	})
+}
+
+func (h *PostHandler) GetFollowsPosts(c echo.Context) error {
+	userId, err := uuid.Parse(c.QueryParam("userId"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Invalid userID")
+	}
+
+	var cursor *uuid.UUID
+	cursorParam := c.QueryParam("cursor")
+	if cursorParam != "" {
+		cur, err := uuid.Parse(cursorParam)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, "Invalid cursor")
+		}
+		cursor = &cur
+	}
+
+	limitStr := c.QueryParam("limit")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Failed to parse limit")
+	}
+	posts, err := h.postUsecase.GetFollowsPosts(userId, cursor, limit)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "failed to fetch Posts")
+	}
+	postResponses := make([]models.PostResponse, len(posts))
+	for i, post := range posts {
+		imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
+		if err != nil {
+			log.Errorf("Failed to get image URL: %v", err)
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+		var userImageURL string
+		if post.Edges.User.IconImageKey != "" {
+			var err error
+			userImageURL, err = h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
+			if err != nil {
+				log.Errorf("Failed to get user image URL: %v", err)
+				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+					"error": err.Error(),
+				})
+			}
+		}
+
+		commentResponses := make([]models.CommentResponse, len(post.Edges.Comments))
+		for j, comment := range post.Edges.Comments {
+			var commentUserImageURL string
+			if comment.Edges.User.IconImageKey != "" {
+				commentUserImageURL, err = h.storageUsecase.GetUrl(comment.Edges.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get comment user image URL: %v", err)
+					return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+						"error": err.Error(),
+					})
+				}
+			}
+			commentResponses[j] = models.NewCommentResponse(comment, comment.Edges.User, commentUserImageURL)
+		}
+		likeResponses := make([]models.LikeResponse, len(post.Edges.Likes))
+		for j, like := range post.Edges.Likes {
+			var likeUserImageURL string
+			if like.Edges.User.IconImageKey != "" {
+				likeUserImageURL, err = h.storageUsecase.GetUrl(like.Edges.User.IconImageKey)
+				if err != nil {
+					log.Errorf("Failed to get like user image URL: %v", err)
+					return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+						"error": err.Error(),
+					})
+				}
+			}
+			likeResponses[j] = models.NewLikeResponse(like, likeUserImageURL)
+		}
+		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL, commentResponses, likeResponses)
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"posts": postResponses,
 	})
