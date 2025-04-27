@@ -11,6 +11,7 @@ import {
   Platform,
   Animated,
   Easing,
+  Alert,
 } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
@@ -56,6 +57,14 @@ export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
     outputRange: ['0deg', '360deg'],
   });
 
+  const handlePressSubmit = () => {
+    if (!formData.caption.trim()) {
+      Alert.alert('キャプションが空です', 'キャプションを入力してください');
+      return;
+    }
+    handleSubmit();
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.inner}>
@@ -70,7 +79,7 @@ export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
           <TouchableOpacity onPress={onClose}>
             <Ionicons name="arrow-back" size={28} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSubmit} disabled={isPending}>
+          <TouchableOpacity onPress={handlePressSubmit} disabled={isPending}>
             <Text style={styles.postButton}>投稿</Text>
           </TouchableOpacity>
         </View>

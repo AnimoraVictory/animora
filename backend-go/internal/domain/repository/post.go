@@ -7,6 +7,7 @@ import (
 
 type PostRepository interface {
 	GetAllPosts() ([]*ent.Post, error)
+	GetFollowsPosts(userID uuid.UUID, cursor *uuid.UUID, limit int) ([]*ent.Post, error)
 	GetPostsByUser(userId uuid.UUID) ([]*ent.Post, error)
 	CreatePost(caption, userId, fileKey string, dailyTaskId *string) (*ent.Post, error)
 	UpdatePost(postId, caption string) error

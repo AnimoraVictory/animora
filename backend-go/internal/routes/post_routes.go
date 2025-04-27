@@ -14,6 +14,10 @@ func SetupPostRoutes(app *echo.Echo) {
 	// get posts for timeline
 	postGroup.POST("/timeline", postHandler.GetRecommended)
 
+	// get follows' posts
+	postGroup.GET("/follows", postHandler.GetFollowsPosts)
+
+	// get all posts
 	postGroup.GET("/all", postHandler.GetAllPosts)
 
 	// Create a new post

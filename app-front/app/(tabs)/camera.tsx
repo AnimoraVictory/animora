@@ -12,7 +12,6 @@ import { useRouter } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import {
   Animated,
-  Button,
   Dimensions,
   StyleSheet,
   Text,
@@ -78,11 +77,28 @@ export default function CameraScreen() {
       {!permission.granted ? (
         <View style={styles.permissionOverlay}>
           <Text style={styles.permissionText}>カメラの許可が必要です</Text>
-          {permission.canAskAgain ? (
-            <Button title="許可をリクエスト" onPress={requestPermission} />
-          ) : (
-            <Button title="設定を開く" onPress={() => Linking.openSettings()} />
-          )}
+          <View style={styles.permissionButtons}>
+            {permission.canAskAgain ? (
+              <TouchableOpacity
+                style={styles.permissionButton}
+                onPress={requestPermission}
+              >
+                <Text style={styles.permissionButtonText}>
+                  許可をリクエスト
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.permissionButton}
+                onPress={() => Linking.openSettings()}
+              >
+                <Text style={styles.permissionButtonText}>設定を開く</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.backButton} onPress={handleClose}>
+              <Text style={styles.backButtonText}>戻る</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : photoUri ? (
         <CreatePostModal
@@ -175,6 +191,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.6)',
     padding: 16,
+  },
+  permissionButtons: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  permissionButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  permissionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  backButton: {
+    backgroundColor: '#888',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   permissionText: {
     color: '#fff',
