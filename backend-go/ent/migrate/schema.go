@@ -40,6 +40,7 @@ var (
 	DailyTasksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "target_date", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "DATE"}},
 		{Name: "type", Type: field.TypeString},
 		{Name: "post_daily_task", Type: field.TypeUUID, Unique: true, Nullable: true},
 		{Name: "user_daily_tasks", Type: field.TypeUUID},
@@ -52,15 +53,27 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "daily_tasks_posts_daily_task",
-				Columns:    []*schema.Column{DailyTasksColumns[3]},
+				Columns:    []*schema.Column{DailyTasksColumns[4]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "daily_tasks_users_daily_tasks",
-				Columns:    []*schema.Column{DailyTasksColumns[4]},
+				Columns:    []*schema.Column{DailyTasksColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "dailytask_target_date",
+				Unique:  false,
+				Columns: []*schema.Column{DailyTasksColumns[2]},
+			},
+			{
+				Name:    "dailytask_target_date_user_daily_tasks",
+				Unique:  true,
+				Columns: []*schema.Column{DailyTasksColumns[2], DailyTasksColumns[5]},
 			},
 		},
 	}
@@ -233,6 +246,7 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "bio", Type: field.TypeString, Default: ""},
+		{Name: "streak_count", Type: field.TypeInt, Default: 0},
 		{Name: "icon_image_key", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 	}

@@ -23,6 +23,8 @@ type DailyTask struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// タスクの対象日（日付のみ）
+	TargetDate time.Time `json:"target_date,omitempty"`
 	// Type holds the value of the "type" field.
 	Type enum.TaskType `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -73,7 +75,7 @@ func (*DailyTask) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case dailytask.FieldType:
 			values[i] = new(sql.NullString)
-		case dailytask.FieldCreatedAt:
+		case dailytask.FieldCreatedAt, dailytask.FieldTargetDate:
 			values[i] = new(sql.NullTime)
 		case dailytask.FieldID:
 			values[i] = new(uuid.UUID)
@@ -107,6 +109,12 @@ func (dt *DailyTask) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				dt.CreatedAt = value.Time
+			}
+		case dailytask.FieldTargetDate:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field target_date", values[i])
+			} else if value.Valid {
+				dt.TargetDate = value.Time
 			}
 		case dailytask.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -176,6 +184,9 @@ func (dt *DailyTask) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", dt.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(dt.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("target_date=")
+	builder.WriteString(dt.TargetDate.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", dt.Type))

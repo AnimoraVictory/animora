@@ -76,6 +76,11 @@ func Bio(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldBio, v))
 }
 
+// StreakCount applies equality check predicate on the "streak_count" field. It's identical to StreakCountEQ.
+func StreakCount(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakCount, v))
+}
+
 // IconImageKey applies equality check predicate on the "icon_image_key" field. It's identical to IconImageKeyEQ.
 func IconImageKey(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldIconImageKey, v))
@@ -329,6 +334,46 @@ func BioEqualFold(v string) predicate.User {
 // BioContainsFold applies the ContainsFold predicate on the "bio" field.
 func BioContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldBio, v))
+}
+
+// StreakCountEQ applies the EQ predicate on the "streak_count" field.
+func StreakCountEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldStreakCount, v))
+}
+
+// StreakCountNEQ applies the NEQ predicate on the "streak_count" field.
+func StreakCountNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldStreakCount, v))
+}
+
+// StreakCountIn applies the In predicate on the "streak_count" field.
+func StreakCountIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldStreakCount, vs...))
+}
+
+// StreakCountNotIn applies the NotIn predicate on the "streak_count" field.
+func StreakCountNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldStreakCount, vs...))
+}
+
+// StreakCountGT applies the GT predicate on the "streak_count" field.
+func StreakCountGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldStreakCount, v))
+}
+
+// StreakCountGTE applies the GTE predicate on the "streak_count" field.
+func StreakCountGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldStreakCount, v))
+}
+
+// StreakCountLT applies the LT predicate on the "streak_count" field.
+func StreakCountLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldStreakCount, v))
+}
+
+// StreakCountLTE applies the LTE predicate on the "streak_count" field.
+func StreakCountLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldStreakCount, v))
 }
 
 // IconImageKeyEQ applies the EQ predicate on the "icon_image_key" field.

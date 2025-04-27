@@ -78,6 +78,27 @@ func (uu *UserUpdate) SetNillableBio(s *string) *UserUpdate {
 	return uu
 }
 
+// SetStreakCount sets the "streak_count" field.
+func (uu *UserUpdate) SetStreakCount(i int) *UserUpdate {
+	uu.mutation.ResetStreakCount()
+	uu.mutation.SetStreakCount(i)
+	return uu
+}
+
+// SetNillableStreakCount sets the "streak_count" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableStreakCount(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetStreakCount(*i)
+	}
+	return uu
+}
+
+// AddStreakCount adds i to the "streak_count" field.
+func (uu *UserUpdate) AddStreakCount(i int) *UserUpdate {
+	uu.mutation.AddStreakCount(i)
+	return uu
+}
+
 // SetIconImageKey sets the "icon_image_key" field.
 func (uu *UserUpdate) SetIconImageKey(s string) *UserUpdate {
 	uu.mutation.SetIconImageKey(s)
@@ -470,6 +491,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.Bio(); ok {
 		_spec.SetField(user.FieldBio, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.StreakCount(); ok {
+		_spec.SetField(user.FieldStreakCount, field.TypeInt, value)
+	}
+	if value, ok := uu.mutation.AddedStreakCount(); ok {
+		_spec.AddField(user.FieldStreakCount, field.TypeInt, value)
 	}
 	if value, ok := uu.mutation.IconImageKey(); ok {
 		_spec.SetField(user.FieldIconImageKey, field.TypeString, value)
@@ -902,6 +929,27 @@ func (uuo *UserUpdateOne) SetNillableBio(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// SetStreakCount sets the "streak_count" field.
+func (uuo *UserUpdateOne) SetStreakCount(i int) *UserUpdateOne {
+	uuo.mutation.ResetStreakCount()
+	uuo.mutation.SetStreakCount(i)
+	return uuo
+}
+
+// SetNillableStreakCount sets the "streak_count" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableStreakCount(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetStreakCount(*i)
+	}
+	return uuo
+}
+
+// AddStreakCount adds i to the "streak_count" field.
+func (uuo *UserUpdateOne) AddStreakCount(i int) *UserUpdateOne {
+	uuo.mutation.AddStreakCount(i)
+	return uuo
+}
+
 // SetIconImageKey sets the "icon_image_key" field.
 func (uuo *UserUpdateOne) SetIconImageKey(s string) *UserUpdateOne {
 	uuo.mutation.SetIconImageKey(s)
@@ -1324,6 +1372,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.Bio(); ok {
 		_spec.SetField(user.FieldBio, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.StreakCount(); ok {
+		_spec.SetField(user.FieldStreakCount, field.TypeInt, value)
+	}
+	if value, ok := uuo.mutation.AddedStreakCount(); ok {
+		_spec.AddField(user.FieldStreakCount, field.TypeInt, value)
 	}
 	if value, ok := uuo.mutation.IconImageKey(); ok {
 		_spec.SetField(user.FieldIconImageKey, field.TypeString, value)

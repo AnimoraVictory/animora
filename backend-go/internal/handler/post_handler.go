@@ -18,9 +18,10 @@ import (
 )
 
 type PostHandler struct {
-	postUsecase    usecase.PostUsecase
-	storageUsecase usecase.StorageUsecase
-	cacheUsecase   usecase.CacheUsecase
+	postUsecase      usecase.PostUsecase
+	storageUsecase   usecase.StorageUsecase
+	dailyTaskUsecase usecase.DailyTaskUsecase
+	cacheUsecase     usecase.CacheUsecase
 }
 type TimelineRequest struct {
 	UserID uuid.UUID `json:"user_id"`
@@ -28,11 +29,12 @@ type TimelineRequest struct {
 	Limit  int       `json:"limit"`
 }
 
-func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase, cacheUsecase usecase.CacheUsecase) *PostHandler {
+func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.StorageUsecase, dailytaskUsecase usecase.DailyTaskUsecase, cacheUsecase usecase.CacheUsecase) *PostHandler {
 	return &PostHandler{
-		postUsecase:    postUsecase,
-		storageUsecase: storageUsecase,
-		cacheUsecase:   cacheUsecase,
+		postUsecase:      postUsecase,
+		storageUsecase:   storageUsecase,
+		dailyTaskUsecase: dailytaskUsecase,
+		cacheUsecase:     cacheUsecase,
 	}
 }
 
@@ -399,12 +401,24 @@ func (h *PostHandler) CreatePost(c echo.Context) error {
 		})
 	}
 
+	// Postの作成
 	post, err := h.postUsecase.CreatePost(req.Caption, req.UserId, fileKey, req.DailyTaskId)
 	if err != nil {
 		log.Errorf("Failed to create post: failed to create post: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"error": "投稿の作成に失敗しました",
 		})
+	}
+
+	// DailyTaskIdがセットされていればストリークの更新
+	if req.DailyTaskId != nil {
+		err := h.dailyTaskUsecase.UpdateStreakCount(req.UserId)
+		if err != nil {
+			log.Errorf("Failed to update streak: %v", err)
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"error": "ストリークの更新に失敗しました",
+			})
+		}
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{

@@ -4,6 +4,7 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
 	"github.com/aki-13627/animalia/backend-go/internal/domain/repository"
+	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
 )
 
@@ -30,11 +31,31 @@ func (u *UserUsecase) CreateUser(name, email string) (*ent.User, error) {
 }
 
 func (u *UserUsecase) Update(id string, name string, description string, newImageKey string) error {
-	return u.userRepository.Update(id, name, description, newImageKey)
+	userUUID, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	return u.userRepository.Update(userUUID, name, description, newImageKey)
+}
+
+func (u *UserUsecase) UpdateStreakCount(id string, streakCount int) error {
+	userUUID, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	return u.userRepository.UpdateStreakCount(userUUID, streakCount)
+}
+
+func (u *UserUsecase) GetAll() ([]*ent.User, error) {
+	return u.userRepository.GetAll()
 }
 
 func (u *UserUsecase) GetById(id string) (*ent.User, error) {
-	return u.userRepository.GetById(id)
+	userUUID, err := uuid.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+	return u.userRepository.GetById(userUUID)
 }
 
 func (u *UserUsecase) FindByEmail(email string) (*ent.User, error) {

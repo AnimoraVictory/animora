@@ -71,6 +71,20 @@ func (uc *UserCreate) SetNillableBio(s *string) *UserCreate {
 	return uc
 }
 
+// SetStreakCount sets the "streak_count" field.
+func (uc *UserCreate) SetStreakCount(i int) *UserCreate {
+	uc.mutation.SetStreakCount(i)
+	return uc
+}
+
+// SetNillableStreakCount sets the "streak_count" field if the given value is not nil.
+func (uc *UserCreate) SetNillableStreakCount(i *int) *UserCreate {
+	if i != nil {
+		uc.SetStreakCount(*i)
+	}
+	return uc
+}
+
 // SetIconImageKey sets the "icon_image_key" field.
 func (uc *UserCreate) SetIconImageKey(s string) *UserCreate {
 	uc.mutation.SetIconImageKey(s)
@@ -272,6 +286,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultBio
 		uc.mutation.SetBio(v)
 	}
+	if _, ok := uc.mutation.StreakCount(); !ok {
+		v := user.DefaultStreakCount
+		uc.mutation.SetStreakCount(v)
+	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := user.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)
@@ -307,6 +325,9 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Bio(); !ok {
 		return &ValidationError{Name: "bio", err: errors.New(`ent: missing required field "User.bio"`)}
+	}
+	if _, ok := uc.mutation.StreakCount(); !ok {
+		return &ValidationError{Name: "streak_count", err: errors.New(`ent: missing required field "User.streak_count"`)}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
@@ -362,6 +383,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Bio(); ok {
 		_spec.SetField(user.FieldBio, field.TypeString, value)
 		_node.Bio = value
+	}
+	if value, ok := uc.mutation.StreakCount(); ok {
+		_spec.SetField(user.FieldStreakCount, field.TypeInt, value)
+		_node.StreakCount = value
 	}
 	if value, ok := uc.mutation.IconImageKey(); ok {
 		_spec.SetField(user.FieldIconImageKey, field.TypeString, value)
@@ -587,6 +612,24 @@ func (u *UserUpsert) UpdateBio() *UserUpsert {
 	return u
 }
 
+// SetStreakCount sets the "streak_count" field.
+func (u *UserUpsert) SetStreakCount(v int) *UserUpsert {
+	u.Set(user.FieldStreakCount, v)
+	return u
+}
+
+// UpdateStreakCount sets the "streak_count" field to the value that was provided on create.
+func (u *UserUpsert) UpdateStreakCount() *UserUpsert {
+	u.SetExcluded(user.FieldStreakCount)
+	return u
+}
+
+// AddStreakCount adds v to the "streak_count" field.
+func (u *UserUpsert) AddStreakCount(v int) *UserUpsert {
+	u.Add(user.FieldStreakCount, v)
+	return u
+}
+
 // SetIconImageKey sets the "icon_image_key" field.
 func (u *UserUpsert) SetIconImageKey(v string) *UserUpsert {
 	u.Set(user.FieldIconImageKey, v)
@@ -707,6 +750,27 @@ func (u *UserUpsertOne) SetBio(v string) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateBio() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateBio()
+	})
+}
+
+// SetStreakCount sets the "streak_count" field.
+func (u *UserUpsertOne) SetStreakCount(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetStreakCount(v)
+	})
+}
+
+// AddStreakCount adds v to the "streak_count" field.
+func (u *UserUpsertOne) AddStreakCount(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddStreakCount(v)
+	})
+}
+
+// UpdateStreakCount sets the "streak_count" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateStreakCount() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateStreakCount()
 	})
 }
 
@@ -1002,6 +1066,27 @@ func (u *UserUpsertBulk) SetBio(v string) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateBio() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateBio()
+	})
+}
+
+// SetStreakCount sets the "streak_count" field.
+func (u *UserUpsertBulk) SetStreakCount(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetStreakCount(v)
+	})
+}
+
+// AddStreakCount adds v to the "streak_count" field.
+func (u *UserUpsertBulk) AddStreakCount(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddStreakCount(v)
+	})
+}
+
+// UpdateStreakCount sets the "streak_count" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateStreakCount() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateStreakCount()
 	})
 }
 

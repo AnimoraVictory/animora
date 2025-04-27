@@ -62,6 +62,11 @@ func CreatedAt(v time.Time) predicate.DailyTask {
 	return predicate.DailyTask(sql.FieldEQ(FieldCreatedAt, v))
 }
 
+// TargetDate applies equality check predicate on the "target_date" field. It's identical to TargetDateEQ.
+func TargetDate(v time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldEQ(FieldTargetDate, v))
+}
+
 // Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
 func Type(v enum.TaskType) predicate.DailyTask {
 	vc := string(v)
@@ -106,6 +111,46 @@ func CreatedAtLT(v time.Time) predicate.DailyTask {
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.DailyTask {
 	return predicate.DailyTask(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// TargetDateEQ applies the EQ predicate on the "target_date" field.
+func TargetDateEQ(v time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldEQ(FieldTargetDate, v))
+}
+
+// TargetDateNEQ applies the NEQ predicate on the "target_date" field.
+func TargetDateNEQ(v time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldNEQ(FieldTargetDate, v))
+}
+
+// TargetDateIn applies the In predicate on the "target_date" field.
+func TargetDateIn(vs ...time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldIn(FieldTargetDate, vs...))
+}
+
+// TargetDateNotIn applies the NotIn predicate on the "target_date" field.
+func TargetDateNotIn(vs ...time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldNotIn(FieldTargetDate, vs...))
+}
+
+// TargetDateGT applies the GT predicate on the "target_date" field.
+func TargetDateGT(v time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldGT(FieldTargetDate, v))
+}
+
+// TargetDateGTE applies the GTE predicate on the "target_date" field.
+func TargetDateGTE(v time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldGTE(FieldTargetDate, v))
+}
+
+// TargetDateLT applies the LT predicate on the "target_date" field.
+func TargetDateLT(v time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldLT(FieldTargetDate, v))
+}
+
+// TargetDateLTE applies the LTE predicate on the "target_date" field.
+func TargetDateLTE(v time.Time) predicate.DailyTask {
+	return predicate.DailyTask(sql.FieldLTE(FieldTargetDate, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.

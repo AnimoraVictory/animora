@@ -41,6 +41,10 @@ func init() {
 	dailytaskDescCreatedAt := dailytaskFields[1].Descriptor()
 	// dailytask.DefaultCreatedAt holds the default value on creation for the created_at field.
 	dailytask.DefaultCreatedAt = dailytaskDescCreatedAt.Default.(func() time.Time)
+	// dailytaskDescTargetDate is the schema descriptor for target_date field.
+	dailytaskDescTargetDate := dailytaskFields[2].Descriptor()
+	// dailytask.DefaultTargetDate holds the default value on creation for the target_date field.
+	dailytask.DefaultTargetDate = dailytaskDescTargetDate.Default.(func() time.Time)
 	// dailytaskDescID is the schema descriptor for id field.
 	dailytaskDescID := dailytaskFields[0].Descriptor()
 	// dailytask.DefaultID holds the default value on creation for the id field.
@@ -155,8 +159,12 @@ func init() {
 	userDescBio := userFields[4].Descriptor()
 	// user.DefaultBio holds the default value on creation for the bio field.
 	user.DefaultBio = userDescBio.Default.(string)
+	// userDescStreakCount is the schema descriptor for streak_count field.
+	userDescStreakCount := userFields[5].Descriptor()
+	// user.DefaultStreakCount holds the default value on creation for the streak_count field.
+	user.DefaultStreakCount = userDescStreakCount.Default.(int)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[6].Descriptor()
+	userDescCreatedAt := userFields[7].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescID is the schema descriptor for id field.
