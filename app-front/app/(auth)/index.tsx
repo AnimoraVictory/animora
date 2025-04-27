@@ -28,7 +28,7 @@ export default function WelcomeScreen() {
     >
       <Image source={icon} style={styles.icon} resizeMode="contain" />
       <Text style={[styles.title, { color: theme.text }]}>
-        Animaliaへようこそ!
+        Animoraへようこそ!
       </Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity

@@ -28,7 +28,7 @@ export default function usePostModal({ post, onClose }: Props) {
     try {
       await fetchApi({
         method: 'DELETE',
-        path: `/posts/delete?id=${post.id}`,
+        path: `posts/delete?id=${post.id}`,
         schema: z.any(),
         options: {},
         token,

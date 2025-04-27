@@ -31,7 +31,7 @@ export default function useProfileEditModal({ onClose }: Props) {
     mutationFn: (data: FormData) => {
       return fetchApi({
         method: 'PUT',
-        path: `/users/update?id=${user?.id}`,
+        path: `users/update?id=${user?.id}`,
         schema: z.any(),
         options: {
           data,

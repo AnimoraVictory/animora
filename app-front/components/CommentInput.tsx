@@ -44,7 +44,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
 
       const response = await fetchApi({
         method: 'POST',
-        path: '/comments',
+        path: 'comments',
         schema: z.object({ comment: commentSchema }),
         options: {
           data: formData,

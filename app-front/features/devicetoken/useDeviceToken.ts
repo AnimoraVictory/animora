@@ -25,7 +25,7 @@ export default function useDeviceToken() {
 
         await fetchApi({
           method: 'POST',
-          path: `/devicetokens/upsert?userId=${user.id}&deviceId=${deviceId}&token=${notificationToken}&platform=${platform}`,
+          path: `devicetokens/upsert?userId=${user.id}&deviceId=${deviceId}&token=${notificationToken}&platform=${platform}`,
           schema: z.any(),
           options: {},
           token,
