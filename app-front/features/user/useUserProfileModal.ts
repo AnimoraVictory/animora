@@ -24,7 +24,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
     queryFn: async () => {
       const res = await fetchApi({
         method: 'GET',
-        path: `/users?email=${email}`,
+        path: `users?email=${email}`,
         schema: z.object({ user: userResponseSchema }),
         options: {},
         token,
@@ -47,7 +47,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
     mutationFn: () =>
       fetchApi({
         method: 'POST',
-        path: `/users/follow?toId=${user?.id}&fromId=${currentUser?.id}`,
+        path: `users/follow?toId=${user?.id}&fromId=${currentUser?.id}`,
         schema: z.any(),
         options: {},
         token,
@@ -71,7 +71,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
     mutationFn: () =>
       fetchApi({
         method: 'DELETE',
-        path: `/users/unfollow?toId=${user?.id}&fromId=${currentUser?.id}`,
+        path: `users/unfollow?toId=${user?.id}&fromId=${currentUser?.id}`,
         schema: z.any(),
         options: {},
         token,
