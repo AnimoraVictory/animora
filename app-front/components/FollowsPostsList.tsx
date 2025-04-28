@@ -56,7 +56,7 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
     queryFn: async ({ pageParam = null }) => {
       return await fetchApi({
         method: 'GET',
-        path: `/posts/follows?userId=${currentUser?.id}&limit=10${
+        path: `posts/follows?userId=${currentUser?.id}&limit=10${
           pageParam ? `&cursor=${pageParam}` : ''
         }`,
         schema: getPostsResponseSchema,

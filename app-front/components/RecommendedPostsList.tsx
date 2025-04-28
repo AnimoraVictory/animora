@@ -56,7 +56,7 @@ export default function RecommendedPostsList({ scrollY, listRef }: Props) {
     queryFn: async ({ pageParam = null }) => {
       return await fetchApi({
         method: 'POST',
-        path: '/posts/timeline',
+        path: 'posts/timeline',
         schema: getPostsResponseSchema,
         options: {
           data: {

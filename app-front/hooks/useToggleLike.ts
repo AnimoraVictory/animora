@@ -17,7 +17,7 @@ const useToggleLike = (postId: string, userId: string) => {
     mutationFn: () =>
       fetchApi({
         method: 'POST',
-        path: `/likes/new?userId=${userId}&postId=${postId}`,
+        path: `likes/new?userId=${userId}&postId=${postId}`,
         schema: z.any(),
         options: {},
         token,
@@ -67,7 +67,7 @@ const useToggleLike = (postId: string, userId: string) => {
     mutationFn: () =>
       fetchApi({
         method: 'DELETE',
-        path: `/likes/delete?userId=${userId}&postId=${postId}`,
+        path: `likes/delete?userId=${userId}&postId=${postId}`,
         schema: z.any(),
         options: {},
         token,

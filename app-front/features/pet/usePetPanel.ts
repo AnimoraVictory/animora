@@ -17,7 +17,7 @@ export default function usePetPanel({ pet }: Props) {
     try {
       await fetchApi({
         method: 'DELETE',
-        path: '/pets/delete',
+        path: 'pets/delete',
         schema: petDeleteResponseSchema,
         options: {
           params: { petId: pet.id },

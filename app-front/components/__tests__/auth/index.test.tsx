@@ -23,7 +23,7 @@ describe('WelcomeScreen', () => {
 
   it('タイトルが表示される', () => {
     const { getByText } = render(<WelcomeScreen />);
-    expect(getByText('Animaliaへようこそ!')).toBeTruthy();
+    expect(getByText('Animoraへようこそ!')).toBeTruthy();
   });
 
   it('ログインボタンが表示される', () => {
