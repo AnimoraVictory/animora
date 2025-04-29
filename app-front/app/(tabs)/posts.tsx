@@ -17,7 +17,7 @@ import RecommendedPostsList from '@/components/RecommendedPostsList';
 import FollowsPostsList from '@/components/FollowsPostsList';
 import DailyTaskPopUp from '@/components/DailyTaskPopUp';
 
-const HEADER_HEIGHT = 130;
+const HEADER_HEIGHT = 140;
 const windowWidth = Dimensions.get('window').width;
 
 export default function PostsScreen() {
