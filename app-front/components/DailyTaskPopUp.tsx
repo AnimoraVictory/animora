@@ -57,10 +57,8 @@ const _DailyTaskPopUp: React.FC<DailyTaskPopUpProps> = ({ dailyTask }) => {
           router.replace('/camera');
         }}
       >
-        <Text style={[styles.title, { color: colors.text }]}>
-          🎯 今日のタスク
-        </Text>
-        <Text style={[styles.content, { color: colors.tint }]}>
+        <Text style={styles.title}>🎯 今日のタスク</Text>
+        <Text style={styles.content}>
           {`「${taskTypeMap[dailyTask?.type as TaskType]}」\nを達成しよう！`}
         </Text>
       </TouchableOpacity>

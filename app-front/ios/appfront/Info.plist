@@ -27,8 +27,8 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>myapp</string>
-				<string>com.aki13627.appfront</string>
+				<string>animora</string>
+				<string>Animora</string>
 			</array>
 		</dict>
 	</array>
@@ -46,17 +46,21 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your camera</string>
+	<string>ペットとの思い出を記録するためにカメラを使用します。</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>近くの飼い主さんの投稿を表示するために現在地情報を使用します。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
+	<string>アプリ内で音声の録音や使用を行うためにマイクへのアクセスが必要です。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your photos</string>
+	<string>写真ライブラリ全体にアクセスし、投稿やプロフィール画像の選択などに使用します。</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
 	</array>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>デイリータスクの更新情報や他の飼い主さんからの通知をお知らせするために使用します。</string>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
