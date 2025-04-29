@@ -126,7 +126,7 @@ existing_user_query = """
 
                     FROM posts P
                     LEFT JOIN users U ON P.user_posts = U.id
-                    WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL
+                    WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL AND P.deleted_at IS NULL
                     ORDER BY P.created_at DESC
                     LIMIT %s
 
@@ -201,7 +201,7 @@ new_user_query = """
                  LEFT JOIN users U ON P.user_posts = U.id
                  LEFT JOIN likes L ON L.post_likes = P.id
                  LEFT JOIN comments C ON C.post_comments = P.id
-                 WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL
+                 WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL AND P.deleted_at IS NULL
                  GROUP BY P.id, P.created_at, P.image_feature, P.text_feature
                  ORDER BY P.created_at DESC
                  LIMIT %s;
@@ -218,7 +218,7 @@ rating_query = """
                     P.image_feature AS image_feature, P.text_feature AS text_feature
                 FROM posts P
                 JOIN users U ON P.user_posts = U.id
-                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL
+                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL AND P.deleted_at IS NULL
 
                 UNION -- 縦結合＋重複削除
 
@@ -229,7 +229,7 @@ rating_query = """
                 FROM likes L
                 JOIN posts P ON L.post_likes = P.id
                 JOIN users U ON L.user_likes = U.id
-                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL
+                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL AND P.deleted_at IS NULL
 
                 UNION
 
@@ -240,5 +240,5 @@ rating_query = """
                 FROM comments C
                 JOIN posts P ON C.post_comments = P.id
                 JOIN users U ON C.user_comments = U.id
-                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL;
+                WHERE P.text_feature IS NOT NULL AND P.image_feature IS NOT NULL AND P.deleted_at IS NULL;
                 """
