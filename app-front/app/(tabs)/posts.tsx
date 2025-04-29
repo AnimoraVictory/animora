@@ -17,7 +17,7 @@ import RecommendedPostsList from '@/components/RecommendedPostsList';
 import FollowsPostsList from '@/components/FollowsPostsList';
 import DailyTaskPopUp from '@/components/DailyTaskPopUp';
 
-const HEADER_HEIGHT = 130;
+const HEADER_HEIGHT = 140;
 const windowWidth = Dimensions.get('window').width;
 
 export default function PostsScreen() {
@@ -79,6 +79,7 @@ export default function PostsScreen() {
           styles(colors).header,
           {
             transform: [{ translateY: headerTranslateY }],
+            height: HEADER_HEIGHT,
             backgroundColor: colors.background,
           },
         ]}
@@ -129,7 +130,7 @@ const styles = (colors: typeof Colors.light) =>
       zIndex: 10,
       justifyContent: 'flex-start',
       alignItems: 'center',
-      paddingTop: 40,
+      paddingTop: 50,
     },
     logo: {
       width: 32,

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app-front",
-    "slug": "app-front",
+    "name": "Animora",
+    "slug": "Animora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,14 +10,21 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "Animalia"
+      "bundleIdentifier": "Animora",
+      "infoPlist": {
+        "NSCameraUsageDescription": "ペットとの思い出を記録するためにカメラを使用します。",
+        "NSPhotoLibraryUsageDescription": "写真ライブラリ全体にアクセスし、投稿やプロフィール画像の選択などに使用します。",
+        "NSUserNotificationUsageDescription": "デイリータスクの更新情報や他の飼い主さんからの通知をお知らせするために使用します。",
+        "NSLocationWhenInUseUsageDescription": "近くの飼い主さんの投稿を表示するために現在地情報を使用します。",
+        "NSMicrophoneUsageDescription": "アプリ内で音声の録音や使用を行うためにマイクへのアクセスが必要です。"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "Animalia"
+      "package": "Animora"
     },
     "web": {
       "bundler": "metro",
