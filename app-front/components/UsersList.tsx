@@ -1,3 +1,4 @@
+import { Colors } from '@/constants/Colors';
 import { UserBase } from '@/features/user/schema';
 import React from 'react';
 import {
@@ -7,6 +8,7 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  useColorScheme,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -22,6 +24,8 @@ export default function UsersList({
   onSelectUser,
   backgroundColor,
 }: Props) {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
   return (
     <FlatList
       data={users}
@@ -41,7 +45,9 @@ export default function UsersList({
             }
             style={styles.avatar}
           />
-          <Text style={styles.userName}>{item.name}</Text>
+          <Text style={[styles.userName, { color: colors.tint }]}>
+            {item.name}
+          </Text>
         </TouchableOpacity>
       )}
     />

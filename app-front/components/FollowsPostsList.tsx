@@ -29,7 +29,7 @@ type Props = {
   listRef: React.RefObject<FlatList<any>>;
 };
 
-const HEADER_HEIGHT = 140;
+const HEADER_HEIGHT = 150;
 
 export default function FollowsPostsList({ scrollY, listRef }: Props) {
   const { user: currentUser, token } = useAuth();

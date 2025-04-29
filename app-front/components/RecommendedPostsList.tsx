@@ -24,7 +24,7 @@ import * as Haptics from 'expo-haptics';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
 
-const HEADER_HEIGHT = 140;
+const HEADER_HEIGHT = 150;
 
 type Props = {
   scrollY: Animated.Value;
@@ -153,7 +153,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     textAlign: 'center',
-    marginTop: 150,
     fontSize: 16,
     color: 'gray',
   },
