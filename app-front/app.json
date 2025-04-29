@@ -16,7 +16,7 @@
         "NSPhotoLibraryUsageDescription": "写真ライブラリ全体にアクセスし、投稿やプロフィール画像の選択などに使用します。",
         "NSUserNotificationUsageDescription": "デイリータスクの更新情報や他の飼い主さんからの通知をお知らせするために使用します。",
         "NSLocationWhenInUseUsageDescription": "近くの飼い主さんの投稿を表示するために現在地情報を使用します。",
-       "NSMicrophoneUsageDescription": "アプリ内で音声の録音や使用を行うためにマイクへのアクセスが必要です。"
+        "NSMicrophoneUsageDescription": "アプリ内で音声の録音や使用を行うためにマイクへのアクセスが必要です。"
       }
     },
     "android": {
