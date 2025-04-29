@@ -42,7 +42,6 @@ async function saveDeviceTokenToStorage() {
     }
 
     if (finalStatus !== 'granted') {
-      console.log('Push通知の許可が得られなかったため、トークンは保存しません');
       return;
     }
 
