@@ -289,3 +289,48 @@ func (h *AuthHandler) Delete(c echo.Context) error {
 		"message": "ユーザーが削除されました",
 	})
 }
+
+func (h *AuthHandler) RequestResetPassword(c echo.Context) error {
+	email := c.QueryParam("email")
+	if email == "" {
+		log.Error("Failed to request reset password: email is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "メールアドレスが必要です",
+		})
+	}
+
+	if err := h.authUsecase.RequestResetPassword(email); err != nil {
+		log.Errorf("Failed to request reset password: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "パスワードのリセットをリクエストできませんでした",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "パスワードのリセットをリクエストしました",
+	})
+}
+
+func (h *AuthHandler) ConfirmResetPassword(c echo.Context) error {
+	email := c.QueryParam("email")
+	code := c.QueryParam("code")
+	newPassword := c.QueryParam("newPassword")
+
+	if email == "" || code == "" || newPassword == "" {
+		log.Error("Failed to confirm reset password: email or code or newPassword is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "メールアドレス、確認コード、新しいパスワードが必要です",
+		})
+	}
+
+	if err := h.authUsecase.ConfirmResetPassword(email, code, newPassword); err != nil {
+		log.Errorf("Failed to confirm reset password: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "パスワードのリセットを確認できませんでした",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "パスワードのリセットが完了しました",
+	})
+}

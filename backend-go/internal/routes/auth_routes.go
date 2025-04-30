@@ -34,4 +34,10 @@ func SetupAuthRoutes(app *echo.Echo) {
 
 	// Delete user
 	authGroup.DELETE("/delete", authHandler.Delete, authMiddleware.Handler)
+
+	// Request reset password
+	authGroup.POST("/request-reset-password", authHandler.RequestResetPassword)
+
+	// Confirm reset password
+	authGroup.POST("/confirm-reset-password", authHandler.ConfirmResetPassword)
 }
