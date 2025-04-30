@@ -27,6 +27,7 @@ import { UserPostList } from '@/components/UserPostList';
 import UsersModal from '@/components/UsersModal';
 import { useModalStack } from '@/providers/ModalStackContext';
 import * as Haptics from 'expo-haptics';
+import { SideMenu } from '@/components/SideMenu';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -54,6 +55,8 @@ const ProfileScreen: React.FC = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isRegisterPetModalVisible, setIsRegisterPetModalVisible] =
     useState(false);
+
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const slideAnimProfile = useRef(new Animated.Value(windowWidth)).current;
   const slideAnimPet = useRef(new Animated.Value(windowWidth)).current;
@@ -163,6 +166,7 @@ const ProfileScreen: React.FC = () => {
         onLogout={handleLogout}
         onOpenFollowModal={openFollowModal}
         setSelectedTab={setSelectedFollowTab}
+        onOpenMenu={() => setMenuOpen(true)}
       />
       <View style={[styles.editButtonsContainer]}>
         <TouchableOpacity
@@ -265,6 +269,7 @@ const ProfileScreen: React.FC = () => {
         selectedTab={selectedFollowTab}
         setSelectedTab={setSelectedFollowTab}
       />
+      <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
     </ThemedView>
   );
 };
