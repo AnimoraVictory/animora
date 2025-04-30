@@ -16,7 +16,7 @@ export default function useAccountSetting() {
       if (!user?.id) throw new Error('ユーザー情報が見つかりません');
       return fetchApi({
         method: 'DELETE',
-        path: `users/delete?id=${user?.id}`,
+        path: `auth/delete?id=${user?.id}`,
         schema: z.any(),
         token,
         options: {},
