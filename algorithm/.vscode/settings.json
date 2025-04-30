@@ -1,0 +1,12 @@
+{
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "python.linting.ruffArgs": [
+    "--select",
+    "F401,F403,F404"
+  ], // 必要なルールだけでもOK
+  "python.analysis.typeCheckingMode": "off", // mypyなどと併用する場合は調整
+  "files.exclude": {
+    "**/__pycache__": true
+  }
+}

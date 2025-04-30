@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------  # 
+# ---------------------------------------------------------------------------------  #
 #                                       MLPモデル                                     #
 # ---------------------------------------------------------------------------------  #
 
@@ -9,24 +9,35 @@ from engine import Engine
 from utils import use_cuda, resume_checkpoint
 from torch import nn
 
+
 class MLP(torch.nn.Module):
     def __init__(self, config):
         super(MLP, self).__init__()
         self.config = config
-        self.num_users = config["num_users"] # ユーザー数
-        self.num_items = config["num_items"] # アイテム数
-        self.latent_dim = config["latent_dim"] # 埋め込みベクトルの次元数(ユーザーとアイテムの特徴数)
+        self.num_users = config["num_users"]  # ユーザー数
+        self.num_items = config["num_items"]  # アイテム数
+        self.latent_dim = config[
+            "latent_dim"
+        ]  # 埋め込みベクトルの次元数(ユーザーとアイテムの特徴数)
 
         # Embedding Layer
-        self.embedding_user = torch.nn.Embedding(num_embeddings=self.num_users, embedding_dim=self.latent_dim)
-        self.embedding_item = torch.nn.Embedding(num_embeddings=self.num_items, embedding_dim=self.latent_dim)
+        self.embedding_user = torch.nn.Embedding(
+            num_embeddings=self.num_users, embedding_dim=self.latent_dim
+        )
+        self.embedding_item = torch.nn.Embedding(
+            num_embeddings=self.num_items, embedding_dim=self.latent_dim
+        )
 
         # MLP Layer
         self.fc_layers = torch.nn.ModuleList()
-        for idx, (in_size, out_size) in enumerate(zip(config["layers"][:-1], config["layers"][1:])):
+        for idx, (in_size, out_size) in enumerate(
+            zip(config["layers"][:-1], config["layers"][1:])
+        ):
             self.fc_layers.append(torch.nn.Linear(in_size, out_size))
 
-        self.affine_output = torch.nn.Linear(in_features=config["layers"][-1], out_features=1)
+        self.affine_output = torch.nn.Linear(
+            in_features=config["layers"][-1], out_features=1
+        )
         self.logistic = torch.nn.Sigmoid()
 
         # 重みの初期化
@@ -45,13 +56,13 @@ class MLP(torch.nn.Module):
         for idx, _ in enumerate(range(len(self.fc_layers))):
             vector = self.fc_layers[idx](vector)
             vector = torch.nn.ReLU()(vector)
-                # 各層でReLUを適用し、非線形性を導入
+            # 各層でReLUを適用し、非線形性を導入
             # vector = torch.nn.BatchNorm1d()(vector)
             # vector = torch.nn.Dropout(p=0.5)(vector)
         logits = self.affine_output(vector)
         rating = self.logistic(logits)
         return rating
-    
+
     def init_weight(self):
         pass
 
@@ -60,11 +71,14 @@ class MLP(torch.nn.Module):
         gmf_model = GMF(config)
         if config["use_cuda"] is True:
             gmf_model.cuda()
-        resume_checkpoint(gmf_model, model_dir=config["pretrain_mf"], device_id=config["device_id"])
+        resume_checkpoint(
+            gmf_model, model_dir=config["pretrain_mf"], device_id=config["device_id"]
+        )
 
         # GMFの埋め込みベクトルをMLPの埋め込みベクトルにコピー
         self.embedding_user.weight.data = gmf_model.embedding_user.weight.data
         self.embedding_item.weight.data = gmf_model.embedding_item.weight.data
+
 
 class MLPEngine(Engine):
     def __init__(self, config):
