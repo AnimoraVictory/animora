@@ -89,6 +89,23 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	})
 }
 
+func (h *UserHandler) Delete(c echo.Context) error {
+	id := c.QueryParam("id")
+	if id == "" {
+		log.Error("Failed to delete user: id is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "ユーザーIDが必要です"})
+	}
+	if err := h.userUsecase.Delete(id); err != nil {
+		log.Errorf("Failed to delete user: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ユーザーの削除に失敗しました",
+		})
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "ユーザーが削除されました",
+	})
+}
+
 func (h *UserHandler) Follow(c echo.Context) error {
 	toId, fromId := c.QueryParam("toId"), c.QueryParam("fromId")
 

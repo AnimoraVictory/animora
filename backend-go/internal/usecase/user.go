@@ -173,6 +173,14 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	return userResponse, nil
 }
 
+func (u *UserUsecase) Delete(id string) error {
+	userUUID, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	return u.userRepository.Delete(userUUID)
+}
+
 func (u *UserUsecase) Follow(toId string, fromId string) error {
 	return u.userRepository.Follow(toId, fromId)
 }

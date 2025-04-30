@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -31,13 +32,13 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("posts", Post.Type),
-		edge.To("comments", Comment.Type),
-		edge.To("likes", Like.Type),
-		edge.To("pets", Pet.Type),
-		edge.To("following", FollowRelation.Type),
-		edge.To("followers", FollowRelation.Type),
-		edge.To("daily_tasks", DailyTask.Type),
-		edge.To("device_tokens", DeviceToken.Type),
+		edge.To("posts", Post.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("comments", Comment.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("likes", Like.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("pets", Pet.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("following", FollowRelation.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("followers", FollowRelation.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("daily_tasks", DailyTask.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("device_tokens", DeviceToken.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
