@@ -23,7 +23,7 @@ const Account: React.FC = () => {
         onPress: async () => {
           try {
             await deleteUserMutation.mutateAsync();
-            router.replace('/');
+            router.replace('/(auth)');
           } catch (err) {
             console.error(err);
             Alert.alert('エラー', 'アカウントの削除に失敗しました');

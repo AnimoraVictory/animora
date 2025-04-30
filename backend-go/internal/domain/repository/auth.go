@@ -13,4 +13,5 @@ type AuthRepository interface {
 	RefreshToken(refreshToken string) (*cognitoidentityprovider.InitiateAuthOutput, error)
 	GetUserEmail(accessToken string) (string, error)
 	SignOut(token string) error
+	Delete(accessToken string) error
 }

@@ -254,3 +254,15 @@ func (r *CognitoRepository) SignOut(accessToken string) error {
 
 	return nil
 }
+
+func (r *CognitoRepository) Delete(accessToken string) error {
+	_, err := r.cognitoClient.DeleteUser(context.TODO(), &cognitoidentityprovider.DeleteUserInput{
+		AccessToken: aws.String(accessToken),
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	return nil
+}

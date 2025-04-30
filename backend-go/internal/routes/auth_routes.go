@@ -31,4 +31,7 @@ func SetupAuthRoutes(app *echo.Echo) {
 
 	// Get session
 	authGroup.GET("/session", authHandler.GetSession)
+
+	// Delete user
+	authGroup.DELETE("/delete", authHandler.Delete, authMiddleware.Handler)
 }

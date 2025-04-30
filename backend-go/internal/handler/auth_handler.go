@@ -256,3 +256,36 @@ func (h *AuthHandler) GetSession(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, user)
 }
+
+func (h *AuthHandler) Delete(c echo.Context) error {
+	id := c.QueryParam("id")
+	// Authorization ヘッダーからIDトークンを取得
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		log.Error("Failed to delete user: token is empty")
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error": "トークンがありません",
+		})
+	}
+	accessToken := authHeader[7:]
+
+	err := h.authUsecase.Delete(accessToken)
+	if err != nil {
+		log.Errorf("Failed to delete user: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ユーザーの削除に失敗しました",
+		})
+	}
+
+	err = h.userUsecase.Delete(id)
+	if err != nil {
+		log.Errorf("Failed to delete dbUser%v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ユーザーの削除に失敗しました",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "ユーザーが削除されました",
+	})
+}
