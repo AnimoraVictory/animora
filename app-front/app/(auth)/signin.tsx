@@ -84,6 +84,14 @@ export default function SignInScreen() {
               ユーザー登録がまだの方はこちら
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.icon }]}
+            onPress={() => router.replace('/request-reset-password')}
+          >
+            <Text style={[styles.buttonText, { color: theme.background }]}>
+              パスワードをお忘れの方はこちら
+            </Text>
+          </TouchableOpacity>
         </View>
       </TouchableWithoutFeedback>
     </ImageBackground>
