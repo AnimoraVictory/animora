@@ -53,8 +53,6 @@ export const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose }) => {
           >
             <Text style={styles.menuItem}>設定</Text>
           </TouchableOpacity>
-
-          <Text style={styles.menuItem}>ヘルプ</Text>
           <TouchableOpacity onPress={onClose}>
             <Text style={styles.menuItem}>閉じる</Text>
           </TouchableOpacity>
