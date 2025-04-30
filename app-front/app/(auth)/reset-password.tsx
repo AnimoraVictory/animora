@@ -47,7 +47,9 @@ export default function ResetPasswordScreen() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.formContainer}>
-          <Text style={[styles.title, { color: theme.text }]}>パスワード再設定</Text>
+          <Text style={[styles.title, { color: theme.text }]}>
+            パスワード再設定
+          </Text>
 
           <FormInput
             label="確認コード"
