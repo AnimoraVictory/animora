@@ -10,9 +10,9 @@ const Account: React.FC = () => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const styles = getStyles(colors);
-  const router = useRouter()
+  const router = useRouter();
 
-  const {deleteUserMutation} = useAccountSetting()
+  const { deleteUserMutation } = useAccountSetting();
 
   const handleDelete = () => {
     Alert.alert('確認', 'アカウントを本当に削除しますか？', [
@@ -23,7 +23,7 @@ const Account: React.FC = () => {
         onPress: async () => {
           try {
             await deleteUserMutation.mutateAsync();
-            router.replace('/')
+            router.replace('/');
           } catch (err) {
             console.error(err);
             Alert.alert('エラー', 'アカウントの削除に失敗しました');
@@ -35,17 +35,20 @@ const Account: React.FC = () => {
 
   return (
     <>
-    <View style={styles.topHeader}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Icon name="chevron-left" size={20} color={colors.text} />
-      </TouchableOpacity>
-      <Text style={styles.headerText}>アカウント</Text>
-    </View>
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-        <Text style={styles.deleteText}>アカウントを削除する</Text>
-      </TouchableOpacity>
-    </View>
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Icon name="chevron-left" size={20} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>アカウント</Text>
+      </View>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Text style={styles.deleteText}>アカウントを削除する</Text>
+        </TouchableOpacity>
+      </View>
     </>
   );
 };
@@ -58,16 +61,16 @@ const getStyles = (colors: typeof Colors.light) =>
       padding: 20,
     },
     topHeader: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 90,
-        zIndex: 10,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        backgroundColor: colors.background,
-      },
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 90,
+      zIndex: 10,
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+    },
     backButton: {
       position: 'absolute',
       top: 0,
@@ -77,13 +80,13 @@ const getStyles = (colors: typeof Colors.light) =>
       paddingLeft: 20,
     },
     headerText: {
-        paddingTop: 60,
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.text,
-      },
+      paddingTop: 60,
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.text,
+    },
     deleteButton: {
-        marginTop: 90,
+      marginTop: 90,
       backgroundColor: 'red',
       paddingVertical: 12,
       borderRadius: 8,
