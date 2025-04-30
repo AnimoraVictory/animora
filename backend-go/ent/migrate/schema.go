@@ -32,7 +32,7 @@ var (
 				Symbol:     "comments_users_comments",
 				Columns:    []*schema.Column{CommentsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -61,7 +61,7 @@ var (
 				Symbol:     "daily_tasks_users_daily_tasks",
 				Columns:    []*schema.Column{DailyTasksColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -97,7 +97,7 @@ var (
 				Symbol:     "device_tokens_users_device_tokens",
 				Columns:    []*schema.Column{DeviceTokensColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -125,13 +125,13 @@ var (
 				Symbol:     "follow_relations_users_following",
 				Columns:    []*schema.Column{FollowRelationsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "follow_relations_users_followers",
 				Columns:    []*schema.Column{FollowRelationsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -165,7 +165,7 @@ var (
 				Symbol:     "likes_users_likes",
 				Columns:    []*schema.Column{LikesColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -198,7 +198,7 @@ var (
 				Symbol:     "pets_users_pets",
 				Columns:    []*schema.Column{PetsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -223,7 +223,7 @@ var (
 				Symbol:     "posts_users_posts",
 				Columns:    []*schema.Column{PostsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}

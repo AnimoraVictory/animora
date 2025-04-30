@@ -3,12 +3,11 @@ import {
   verifyEmailFormSchema,
   VerifyEmailForm,
   VerifyEmailResponse,
-  verifyEmailResponseSchema,
 } from './schema';
 import { fetchApi } from '@/utils/api';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { z } from 'zod';
 export const useVerifyEmailScreen = () => {
   const router = useRouter();
 
@@ -22,7 +21,7 @@ export const useVerifyEmailScreen = () => {
       return fetchApi({
         method: 'POST',
         path: 'auth/verify-email',
-        schema: verifyEmailResponseSchema,
+        schema: z.any(),
         options: {
           data: parsedData,
         },

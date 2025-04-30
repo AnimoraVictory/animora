@@ -40,3 +40,15 @@ func (u *AuthUsecase) GetUserEmail(accessToken string) (string, error) {
 func (u *AuthUsecase) SignOut(accessToken string) error {
 	return u.authRepository.SignOut(accessToken)
 }
+
+func (u *AuthUsecase) Delete(accessToken string) error {
+	return u.authRepository.Delete(accessToken)
+}
+
+func (u *AuthUsecase) RequestResetPassword(email string) error {
+	return u.authRepository.RequestResetPassword(email)
+}
+
+func (u *AuthUsecase) ConfirmResetPassword(email, code, newPassword string) error {
+	return u.authRepository.ConfirmResetPassword(email, code, newPassword)
+}

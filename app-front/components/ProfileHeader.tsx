@@ -25,6 +25,7 @@ type ProfileHeaderProps = {
   onLogout: () => void;
   onOpenFollowModal: () => void;
   setSelectedTab: (tab: 'follows' | 'followers') => void;
+  onOpenMenu: () => void;
 };
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -32,6 +33,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onLogout,
   onOpenFollowModal,
   setSelectedTab,
+  onOpenMenu,
 }) => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -78,22 +80,23 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   return (
     <View style={[styles.headerContainer, { backgroundColor }]}>
       <View style={styles.topRow}>
-        <TouchableOpacity onPress={onLogout}>
-          <TouchableOpacity
-            onPress={() => {
-              Alert.alert(
-                'ログアウト確認',
-                '本当にログアウトしますか？',
-                [
-                  { text: 'キャンセル', style: 'cancel' },
-                  { text: 'はい', onPress: onLogout },
-                ],
-                { cancelable: true }
-              );
-            }}
-          >
-            <Text style={styles.logoutText}>ログアウト</Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={onOpenMenu}>
+          <Icon name="bars" size={22} color={colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            Alert.alert(
+              'ログアウト確認',
+              '本当にログアウトしますか？',
+              [
+                { text: 'キャンセル', style: 'cancel' },
+                { text: 'はい', onPress: onLogout },
+              ],
+              { cancelable: true }
+            );
+          }}
+        >
+          <Text style={styles.logoutText}>ログアウト</Text>
         </TouchableOpacity>
       </View>
 
@@ -173,9 +176,10 @@ const getStyles = (colors: typeof Colors.light) =>
       paddingBottom: 8,
     },
     topRow: {
-      flexDirection: 'row-reverse',
-      paddingRight: 20,
-      paddingTop: 8,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
     },
     logoutText: {
       color: colors.tint,

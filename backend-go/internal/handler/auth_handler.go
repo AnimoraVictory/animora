@@ -256,3 +256,81 @@ func (h *AuthHandler) GetSession(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, user)
 }
+
+func (h *AuthHandler) Delete(c echo.Context) error {
+	id := c.QueryParam("id")
+	// Authorization ヘッダーからIDトークンを取得
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		log.Error("Failed to delete user: token is empty")
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"error": "トークンがありません",
+		})
+	}
+	accessToken := authHeader[7:]
+
+	err := h.authUsecase.Delete(accessToken)
+	if err != nil {
+		log.Errorf("Failed to delete user: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ユーザーの削除に失敗しました",
+		})
+	}
+
+	err = h.userUsecase.Delete(id)
+	if err != nil {
+		log.Errorf("Failed to delete dbUser%v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ユーザーの削除に失敗しました",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "ユーザーが削除されました",
+	})
+}
+
+func (h *AuthHandler) RequestResetPassword(c echo.Context) error {
+	email := c.QueryParam("email")
+	if email == "" {
+		log.Error("Failed to request reset password: email is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "メールアドレスが必要です",
+		})
+	}
+
+	if err := h.authUsecase.RequestResetPassword(email); err != nil {
+		log.Errorf("Failed to request reset password: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "パスワードのリセットをリクエストできませんでした",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "パスワードのリセットをリクエストしました",
+	})
+}
+
+func (h *AuthHandler) ConfirmResetPassword(c echo.Context) error {
+	email := c.QueryParam("email")
+	code := c.QueryParam("code")
+	newPassword := c.QueryParam("newPassword")
+
+	if email == "" || code == "" || newPassword == "" {
+		log.Error("Failed to confirm reset password: email or code or newPassword is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": "メールアドレス、確認コード、新しいパスワードが必要です",
+		})
+	}
+
+	if err := h.authUsecase.ConfirmResetPassword(email, code, newPassword); err != nil {
+		log.Errorf("Failed to confirm reset password: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "パスワードのリセットを確認できませんでした",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "パスワードのリセットが完了しました",
+	})
+}

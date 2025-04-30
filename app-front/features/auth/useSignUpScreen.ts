@@ -1,8 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { fetchApi } from '@/utils/api';
-import { SignUpForm, signUpResponseSchema } from './schema';
+import { SignUpForm } from './schema';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { z } from 'zod';
 
 export const useSignUpScreen = () => {
   const router = useRouter();
@@ -11,7 +12,7 @@ export const useSignUpScreen = () => {
       await fetchApi({
         method: 'POST',
         path: 'auth/signup',
-        schema: signUpResponseSchema,
+        schema: z.any(),
         options: {
           data: data,
           headers: {
