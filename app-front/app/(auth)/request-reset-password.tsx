@@ -41,7 +41,9 @@ export default function RequestResetPasswordScreen() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.formContainer}>
-          <Text style={[styles.title, { color: theme.text }]}>パスワード再設定</Text>
+          <Text style={[styles.title, { color: theme.text }]}>
+            パスワード再設定
+          </Text>
 
           <FormInput
             label="メールアドレス"
@@ -56,7 +58,9 @@ export default function RequestResetPasswordScreen() {
             style={[styles.button, { borderColor: theme.tint }]}
             onPress={handleRequest}
           >
-            <Text style={[styles.buttonText, { color: theme.tint }]}>確認コードを送信</Text>
+            <Text style={[styles.buttonText, { color: theme.tint }]}>
+              確認コードを送信
+            </Text>
           </TouchableOpacity>
         </View>
       </TouchableWithoutFeedback>
