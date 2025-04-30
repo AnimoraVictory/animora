@@ -115,6 +115,10 @@ func (r *UserRepository) UpdateStreakCount(id uuid.UUID, streak int) error {
 		Save(context.Background())
 	return err
 }
+func (r *UserRepository) Delete(id uuid.UUID) error {
+	err := r.db.User.DeleteOneID(id).Exec(context.Background())
+	return err
+}
 
 func (r *UserRepository) Follow(toId string, fromId string) error {
 	fromUUID, err := uuid.Parse(fromId)

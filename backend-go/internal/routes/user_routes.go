@@ -14,6 +14,8 @@ func SetupUserRoutes(app *echo.Echo) {
 
 	userGroup.PUT("/update", userHandler.UpdateUser)
 
+	userGroup.DELETE("/delete", userHandler.Delete)
+
 	userGroup.POST("/follow", userHandler.Follow)
 
 	userGroup.DELETE("/unfollow", userHandler.Unfollow)
