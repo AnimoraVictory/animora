@@ -62,6 +62,12 @@ export default function RequestResetPasswordScreen() {
               確認コードを送信
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.icon }]}
+            onPress={() => router.back()}
+          >
+            <Text style={[styles.buttonText, { color: theme.background }]}>戻る</Text>
+          </TouchableOpacity>
         </View>
       </TouchableWithoutFeedback>
     </ImageBackground>
