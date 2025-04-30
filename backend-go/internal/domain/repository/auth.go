@@ -14,4 +14,6 @@ type AuthRepository interface {
 	GetUserEmail(accessToken string) (string, error)
 	SignOut(token string) error
 	Delete(accessToken string) error
+	RequestResetPassword(email string) error
+	ConfirmResetPassword(email, code, newPassword string) error
 }
