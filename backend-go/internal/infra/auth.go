@@ -254,3 +254,47 @@ func (r *CognitoRepository) SignOut(accessToken string) error {
 
 	return nil
 }
+
+func (r *CognitoRepository) Delete(accessToken string) error {
+	_, err := r.cognitoClient.DeleteUser(context.TODO(), &cognitoidentityprovider.DeleteUserInput{
+		AccessToken: aws.String(accessToken),
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	return nil
+}
+
+func (r *CognitoRepository) RequestResetPassword(email string) error {
+	secretHash := r.GenerateHash(email)
+	_, err := r.cognitoClient.ForgotPassword(context.TODO(), &cognitoidentityprovider.ForgotPasswordInput{
+		ClientId:   aws.String(os.Getenv("AWS_COGNITO_CLIENT_ID")),
+		Username:   aws.String(email),
+		SecretHash: aws.String(secretHash),
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to reset password: %w", err)
+	}
+
+	return nil
+}
+
+func (r *CognitoRepository) ConfirmResetPassword(email, code, newPassword string) error {
+	secretHash := r.GenerateHash(email)
+	_, err := r.cognitoClient.ConfirmForgotPassword(context.TODO(), &cognitoidentityprovider.ConfirmForgotPasswordInput{
+		ClientId:         aws.String(os.Getenv("AWS_COGNITO_CLIENT_ID")),
+		Username:         aws.String(email),
+		ConfirmationCode: aws.String(code),
+		Password:         aws.String(newPassword),
+		SecretHash:       aws.String(secretHash),
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to confirm reset password: %w", err)
+	}
+
+	return nil
+}

@@ -108,7 +108,11 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
                 renderItem={({ item }) => (
                   <View style={styles.commentItem}>
                     <Image
-                      source={{ uri: item.user.iconImageUrl ?? '' }}
+                      source={
+                        item.user.iconImageUrl
+                          ? { uri: item.user.iconImageUrl }
+                          : require('@/assets/images/profile.png')
+                      }
                       style={styles.avatar}
                     />
                     <View style={styles.commentContent}>
