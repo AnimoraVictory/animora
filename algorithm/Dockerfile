@@ -1,33 +1,44 @@
-FROM python:3.12-slim
+ARG FUNCTION_DIR="/function"
 
-# --- 環境変数 ---
-ENV POETRY_VERSION=1.8.4 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    PYTHONUNBUFFERED=1 \
-    PATH="/root/.local/bin:$PATH"
+FROM --platform=linux/amd64 python:3.12-slim AS builder
+ARG FUNCTION_DIR
 
-# --- システム依存のパッケージ ---
+# --- ビルド環境のセットアップ ---
+WORKDIR ${FUNCTION_DIR}
+
+# パッケージをインストールするために必要な依存関係
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl build-essential libssl-dev libpq-dev python3-dev \
-    libffi-dev libbz2-dev liblzma-dev libreadline-dev libsqlite3-dev \
-    xz-utils tk-dev zlib1g-dev wget git \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# --- Poetryのインストール ---
-RUN curl -sSL https://install.python-poetry.org | python3 - --version $POETRY_VERSION
+# 依存関係をインストール - ビルド時のみ必要なもの
+COPY requirements.txt .
 
-# --- 作業ディレクトリ作成 --- 
-WORKDIR /app
+# Torch関連のパッケージを最小限にするためのインストール
+# CPU版のPyTorchをインストール（CUDA機能は必要なさそうだが、コードが使用している場合に備えて互換性のためにインストール）
+RUN pip install --no-cache-dir \
+    torch==2.7.0 --index-url https://download.pytorch.org/whl/cpu \
+    # その他の依存関係は通常通りインストール
+    && grep -v "torch==" requirements.txt | grep -v "nvidia-" | pip install --no-cache-dir -r /dev/stdin
 
-# --- Poetryファイルを先にコピーしてインストール ---
-COPY pyproject.toml poetry.lock* /app/
-RUN poetry install --no-root
+# --- 実行用の軽量イメージ ---
+FROM --platform=linux/amd64 python:3.12-slim
+ARG FUNCTION_DIR
 
-# --- アプリケーション本体をコピー ---
-COPY . /app
+# 作業ディレクトリを設定
+WORKDIR ${FUNCTION_DIR}
 
-# --- ポート開放 ---
+COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/python3.12/site-packages/
+COPY . .
+
+RUN pip install \
+    --target ${FUNCTION_DIR} \
+    awslambdaric
+
+# ポート設定
 EXPOSE 8000
 
-# --- FastAPI アプリ起動 ---
-CMD ["sh", "-c", "uvicorn $TARGET_APP --host 0.0.0.0 --port 8000"]
+ENTRYPOINT [ "python", "-m", "awslambdaric" ]
+
+CMD ["recommend_system.main.handler"]

@@ -8,6 +8,7 @@ import json
 from common.utils.database import get_connection
 from recommend_system.utils.config import new_user_threshold, existing_user_threshold
 
+
 # ----------------------------------
 # PostgreSQLからユーザーIDに対応するindexを取得する関数
 # ----------------------------------

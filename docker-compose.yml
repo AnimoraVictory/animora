@@ -17,10 +17,34 @@ services:
       start_period: 40s
     # restart: always
 
+  # search_engine:
+  #   build:
+  #     context: ./algorithm
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./.env:/app/.env
+  #   environment:
+  #     - TARGET_APP=recommend_system.main:app
+  #     - DB_USER=myuser
+  #     - DB_PASSWORD=mypass
+  #     - DB_NAME=mydatabase
+  #     - DB_HOST=db
+  #     - DB_PORT=5432
+  #     - HF_TOKEN=${HF_TOKEN}
+  #     - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+  #   depends_on:
+  #     - db
+
   db:
     build:
       context: ./db
       dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypass
+      - POSTGRES_DB=mydatabase
     ports:
       - "5432:5432"
     volumes:
