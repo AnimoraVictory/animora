@@ -10,6 +10,7 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  Alert,
 } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/providers/AuthContext';
@@ -173,7 +174,13 @@ const ProfileScreen: React.FC = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.editButton}
-          onPress={openRegisterPetModal}
+          onPress={() => {
+            if (user.pets && user.pets.length > 0) {
+              Alert.alert('登録上限', '現在ペットの登録は1匹までです');
+              return;
+            }
+            openRegisterPetModal();
+          }}
         >
           <Text style={styles.buttonText}>ペットを登録する</Text>
         </TouchableOpacity>
