@@ -142,7 +142,11 @@ def recommend_timeline(request: TimelineRequest):
         num_item = config["num_items"]
 
         # PostgreSQLから候補投稿画像を取得
-        candidates = get_candidate_posts(query, num_item)
+        params = {
+            "current_user_id": request.user_id,
+            "num_item": num_item,
+        }
+        candidates = get_candidate_posts(query, params)
         print(f"取得した候補数: {len(candidates)}")
         recommended = get_recommended_timeline(
             user_index, candidates, model, device, is_existing_user
