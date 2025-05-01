@@ -72,12 +72,16 @@ describe('SignUpScreen', () => {
       fireEvent.press(getAllByText('サインアップ')[1]);
     });
 
-    expect(await findByText('有効なメールアドレスを入力してください')).toBeTruthy();
+    expect(
+      await findByText('有効なメールアドレスを入力してください')
+    ).toBeTruthy();
     expect(await findByText('パスワードは8文字以上必要です')).toBeTruthy();
   });
 
   it('正しく入力すると mutate 関数が呼ばれる', async () => {
-    const { getByLabelText, getAllByText, getByTestId } = render(<SignUpScreen />);
+    const { getByLabelText, getAllByText, getByTestId } = render(
+      <SignUpScreen />
+    );
 
     await act(async () => {
       fireEvent.press(getByTestId('check-agree'));
@@ -109,7 +113,9 @@ describe('SignUpScreen', () => {
       onError?.(new Error('エラー'));
     });
 
-    const { getByLabelText, getAllByText, getByTestId } = render(<SignUpScreen />);
+    const { getByLabelText, getAllByText, getByTestId } = render(
+      <SignUpScreen />
+    );
 
     await act(async () => {
       fireEvent.press(getByTestId('check-agree'));
