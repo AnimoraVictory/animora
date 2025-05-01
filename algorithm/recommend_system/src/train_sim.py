@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------  # 
+# ---------------------------------------------------------------------------------  #
 #                       学習プロセス(擬似シミュレーションデータ)                            #
 # ---------------------------------------------------------------------------------  #
 
@@ -8,6 +8,7 @@ import random
 from recommend_system.components.mmneumf import MultiModalNeuMFEngine
 from recommend_system.components.data import SampleGenerator
 from recommend_system.utils.config import sim_config
+
 
 # ----------------------------------
 # 擬似シミュレーションデータの生成関数
@@ -25,15 +26,26 @@ def generate_sim_data(num_users, num_items, num_records):
     """
     data = []
     for _ in range(num_records):
-        userId = random.randint(0, num_users-1)
-        itemId = random.randint(0, num_items-1)
-        rating = 1.0 # implicit feedbackなので、インタラクションがあったとみなす
+        userId = random.randint(0, num_users - 1)
+        itemId = random.randint(0, num_items - 1)
+        rating = 1.0  # implicit feedbackなので、インタラクションがあったとみなす
         created_at = random.randint(1600000000, 1700000000)
         image_feature = [random.random() for _ in range(768)]
         text_feature = [random.random() for _ in range(768)]
         data.append((userId, itemId, rating, created_at, image_feature, text_feature))
-    df = pd.DataFrame(data, columns=["user_id", "post_id", "rating", "created_at", "image_feature", "text_feature"])
+    df = pd.DataFrame(
+        data,
+        columns=[
+            "user_id",
+            "post_id",
+            "rating",
+            "created_at",
+            "image_feature",
+            "text_feature",
+        ],
+    )
     return df
+
 
 if __name__ == "__main__":
     # ----------------------------------
@@ -41,7 +53,7 @@ if __name__ == "__main__":
     # ----------------------------------
     num_users = sim_config["num_users"]
     num_items = sim_config["num_items"]
-    num_records = 1000 # 生成するレコード数
+    num_records = 1000  # 生成するレコード数
 
     simulation_df = generate_sim_data(num_users, num_items, num_records)
     print(f"Simulation data generated: {simulation_df.shape[0]} records.")
@@ -61,8 +73,9 @@ if __name__ == "__main__":
     for epoch in range(sim_config["num_epoch"]):
         print(f"Epoch {epoch}/{sim_config['num_epoch']}")
         print("-" * 80)
-        train_loader = sample_generator.instance_a_train_loader(sim_config["num_negative"], sim_config["batch_size"])
+        train_loader = sample_generator.instance_a_train_loader(
+            sim_config["num_negative"], sim_config["batch_size"]
+        )
         engine.train_an_epoch(train_loader, epoch_id=epoch)
         hit_ratio, ndcg = engine.evaluate(evaluate_data, epoch_id=epoch)
         engine.save_sim(hit_ratio, ndcg)
-

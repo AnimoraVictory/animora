@@ -8,6 +8,7 @@ import json
 from common.utils.database import get_connection
 from recommend_system.utils.config import new_user_threshold, existing_user_threshold
 
+
 # ----------------------------------
 # PostgreSQLからユーザーIDに対応するindexを取得する関数
 # ----------------------------------
@@ -32,14 +33,14 @@ def get_user_id(user_id):
 # ----------------------------------
 # PostgreSQLから候補投稿を取得する関数
 # ----------------------------------
-def get_candidate_posts(query, num_item):
+def get_candidate_posts(query, params):
     """
     学習の際に存在しなかった新規ユーザー -> 閾値より高い投稿を時系列順に並べて返す
     学習済みのユーザー -> モデルを使ってスコアを計算し、閾値より高い投稿を時系列順に並べて返す
     """
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(query, (num_item, ))
+    cur.execute(query, params)
     rows = cur.fetchall()
 
     # カラム名のリスト
