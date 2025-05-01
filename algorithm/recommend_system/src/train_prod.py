@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------  # 
+# ---------------------------------------------------------------------------------  #
 #                               学習プロセス(実投稿データ)                               #
 # ---------------------------------------------------------------------------------  #
 
@@ -40,8 +40,8 @@ if __name__ == "__main__":
     # 3. プロダクション用の設定(config)
     # ----------------------------------
     # データから実際のユーザー数・アイテム数を取得
-    print(f"ユーザー数: {prod_df["user_id"].max()}")
-    print(f"アイテム数: {prod_df["post_id"].max()}")
+    print(f"ユーザー数: {prod_df['user_id'].max()}")
+    print(f"アイテム数: {prod_df['post_id'].max()}")
     prod_config["num_users"] = int(prod_df["user_id"].max() + 1)
     prod_config["num_items"] = int(prod_df["post_id"].max() + 1)
 
@@ -60,7 +60,9 @@ if __name__ == "__main__":
     for epoch in range(prod_config["num_epoch"]):
         print(f"Epoch {epoch}/{prod_config['num_epoch']}")
         print("-" * 80)
-        train_loader = sample_generator.instance_a_train_loader(prod_config["num_negative"], prod_config["batch_size"])
+        train_loader = sample_generator.instance_a_train_loader(
+            prod_config["num_negative"], prod_config["batch_size"]
+        )
         engine.train_an_epoch(train_loader, epoch_id=epoch)
         hit_ratio, ndcg = engine.evaluate(evaluate_data, epoch_id=epoch)
         engine.save_prod(hit_ratio, ndcg)
@@ -81,4 +83,3 @@ if __name__ == "__main__":
     except Exception as e:
         traceback.print_exc()
         print("Failed to reload model", str(e))
-
