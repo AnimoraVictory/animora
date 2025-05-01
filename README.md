@@ -64,3 +64,33 @@ make codegen
 ```sh
 make run
 ```
+
+## algorithm
+
+下記の手順により、アルゴリズムをデプロイ可能である。
+
+1. AWS CLIを`animora`というプロファイルでセットアップする。
+
+    ```sh
+    aws configure --profile animora
+    ```
+
+2. 下記のコマンドによりcdkをインストールする。
+
+    ```sh
+    cd cdk
+    npm i
+    ```
+
+3. 下記のコマンドを実行する。
+
+    ```sh
+    cd cdk
+    cdk bootstrap --profile animora
+    ```
+
+4. 下記のコマンドを実行する。
+
+    ```sh
+    ./deploy.sh
+    ```

@@ -1,0 +1,43 @@
+# Git関連
+.git/
+.gitignore
+
+# Python関連
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.venv/
+venv/
+ENV/
+env/
+
+# エディタ関連
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS関連
+.DS_Store
+
+# その他
+Dockerfile
+.dockerignore
+README.md
+setup.sh
+Makefile
+LICENSE
+
+# プロジェクト固有
+archive/
+uv.lock
+.python-version 
