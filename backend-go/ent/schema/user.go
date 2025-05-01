@@ -38,6 +38,8 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("following", FollowRelation.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("followers", FollowRelation.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("blocking", BlockRelation.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("blocked_by", BlockRelation.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("daily_tasks", DailyTask.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("device_tokens", DeviceToken.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}

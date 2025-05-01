@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/aki-13627/animalia/backend-go/ent/blockrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
@@ -32,6 +33,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// BlockRelation is the client for interacting with the BlockRelation builders.
+	BlockRelation *BlockRelationClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// DailyTask is the client for interacting with the DailyTask builders.
@@ -61,6 +64,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.BlockRelation = NewBlockRelationClient(c.config)
 	c.Comment = NewCommentClient(c.config)
 	c.DailyTask = NewDailyTaskClient(c.config)
 	c.DeviceToken = NewDeviceTokenClient(c.config)
@@ -162,6 +166,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:            ctx,
 		config:         cfg,
+		BlockRelation:  NewBlockRelationClient(cfg),
 		Comment:        NewCommentClient(cfg),
 		DailyTask:      NewDailyTaskClient(cfg),
 		DeviceToken:    NewDeviceTokenClient(cfg),
@@ -190,6 +195,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:            ctx,
 		config:         cfg,
+		BlockRelation:  NewBlockRelationClient(cfg),
 		Comment:        NewCommentClient(cfg),
 		DailyTask:      NewDailyTaskClient(cfg),
 		DeviceToken:    NewDeviceTokenClient(cfg),
@@ -205,7 +211,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Comment.
+//		BlockRelation.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -228,8 +234,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Comment, c.DailyTask, c.DeviceToken, c.FollowRelation, c.Like, c.Pet, c.Post,
-		c.TaskType, c.User,
+		c.BlockRelation, c.Comment, c.DailyTask, c.DeviceToken, c.FollowRelation,
+		c.Like, c.Pet, c.Post, c.TaskType, c.User,
 	} {
 		n.Use(hooks...)
 	}
@@ -239,8 +245,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Comment, c.DailyTask, c.DeviceToken, c.FollowRelation, c.Like, c.Pet, c.Post,
-		c.TaskType, c.User,
+		c.BlockRelation, c.Comment, c.DailyTask, c.DeviceToken, c.FollowRelation,
+		c.Like, c.Pet, c.Post, c.TaskType, c.User,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -249,6 +255,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *BlockRelationMutation:
+		return c.BlockRelation.mutate(ctx, m)
 	case *CommentMutation:
 		return c.Comment.mutate(ctx, m)
 	case *DailyTaskMutation:
@@ -269,6 +277,171 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// BlockRelationClient is a client for the BlockRelation schema.
+type BlockRelationClient struct {
+	config
+}
+
+// NewBlockRelationClient returns a client for the BlockRelation from the given config.
+func NewBlockRelationClient(c config) *BlockRelationClient {
+	return &BlockRelationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `blockrelation.Hooks(f(g(h())))`.
+func (c *BlockRelationClient) Use(hooks ...Hook) {
+	c.hooks.BlockRelation = append(c.hooks.BlockRelation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `blockrelation.Intercept(f(g(h())))`.
+func (c *BlockRelationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BlockRelation = append(c.inters.BlockRelation, interceptors...)
+}
+
+// Create returns a builder for creating a BlockRelation entity.
+func (c *BlockRelationClient) Create() *BlockRelationCreate {
+	mutation := newBlockRelationMutation(c.config, OpCreate)
+	return &BlockRelationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BlockRelation entities.
+func (c *BlockRelationClient) CreateBulk(builders ...*BlockRelationCreate) *BlockRelationCreateBulk {
+	return &BlockRelationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BlockRelationClient) MapCreateBulk(slice any, setFunc func(*BlockRelationCreate, int)) *BlockRelationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BlockRelationCreateBulk{err: fmt.Errorf("calling to BlockRelationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BlockRelationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BlockRelationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BlockRelation.
+func (c *BlockRelationClient) Update() *BlockRelationUpdate {
+	mutation := newBlockRelationMutation(c.config, OpUpdate)
+	return &BlockRelationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BlockRelationClient) UpdateOne(br *BlockRelation) *BlockRelationUpdateOne {
+	mutation := newBlockRelationMutation(c.config, OpUpdateOne, withBlockRelation(br))
+	return &BlockRelationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BlockRelationClient) UpdateOneID(id uuid.UUID) *BlockRelationUpdateOne {
+	mutation := newBlockRelationMutation(c.config, OpUpdateOne, withBlockRelationID(id))
+	return &BlockRelationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BlockRelation.
+func (c *BlockRelationClient) Delete() *BlockRelationDelete {
+	mutation := newBlockRelationMutation(c.config, OpDelete)
+	return &BlockRelationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BlockRelationClient) DeleteOne(br *BlockRelation) *BlockRelationDeleteOne {
+	return c.DeleteOneID(br.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BlockRelationClient) DeleteOneID(id uuid.UUID) *BlockRelationDeleteOne {
+	builder := c.Delete().Where(blockrelation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BlockRelationDeleteOne{builder}
+}
+
+// Query returns a query builder for BlockRelation.
+func (c *BlockRelationClient) Query() *BlockRelationQuery {
+	return &BlockRelationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBlockRelation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BlockRelation entity by its id.
+func (c *BlockRelationClient) Get(ctx context.Context, id uuid.UUID) (*BlockRelation, error) {
+	return c.Query().Where(blockrelation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BlockRelationClient) GetX(ctx context.Context, id uuid.UUID) *BlockRelation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFrom queries the from edge of a BlockRelation.
+func (c *BlockRelationClient) QueryFrom(br *BlockRelation) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := br.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blockrelation.Table, blockrelation.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, blockrelation.FromTable, blockrelation.FromColumn),
+		)
+		fromV = sqlgraph.Neighbors(br.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTo queries the to edge of a BlockRelation.
+func (c *BlockRelationClient) QueryTo(br *BlockRelation) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := br.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blockrelation.Table, blockrelation.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, blockrelation.ToTable, blockrelation.ToColumn),
+		)
+		fromV = sqlgraph.Neighbors(br.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BlockRelationClient) Hooks() []Hook {
+	return c.hooks.BlockRelation
+}
+
+// Interceptors returns the client interceptors.
+func (c *BlockRelationClient) Interceptors() []Interceptor {
+	return c.inters.BlockRelation
+}
+
+func (c *BlockRelationClient) mutate(ctx context.Context, m *BlockRelationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BlockRelationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BlockRelationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BlockRelationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BlockRelationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BlockRelation mutation op: %q", m.Op())
 	}
 }
 
@@ -1764,6 +1937,38 @@ func (c *UserClient) QueryFollowers(u *User) *FollowRelationQuery {
 	return query
 }
 
+// QueryBlocking queries the blocking edge of a User.
+func (c *UserClient) QueryBlocking(u *User) *BlockRelationQuery {
+	query := (&BlockRelationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(blockrelation.Table, blockrelation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BlockingTable, user.BlockingColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBlockedBy queries the blocked_by edge of a User.
+func (c *UserClient) QueryBlockedBy(u *User) *BlockRelationQuery {
+	query := (&BlockRelationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(blockrelation.Table, blockrelation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BlockedByTable, user.BlockedByColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryDailyTasks queries the daily_tasks edge of a User.
 func (c *UserClient) QueryDailyTasks(u *User) *DailyTaskQuery {
 	query := (&DailyTaskClient{config: c.config}).Query()
@@ -1824,11 +2029,11 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Comment, DailyTask, DeviceToken, FollowRelation, Like, Pet, Post, TaskType,
-		User []ent.Hook
+		BlockRelation, Comment, DailyTask, DeviceToken, FollowRelation, Like, Pet, Post,
+		TaskType, User []ent.Hook
 	}
 	inters struct {
-		Comment, DailyTask, DeviceToken, FollowRelation, Like, Pet, Post, TaskType,
-		User []ent.Interceptor
+		BlockRelation, Comment, DailyTask, DeviceToken, FollowRelation, Like, Pet, Post,
+		TaskType, User []ent.Interceptor
 	}
 )

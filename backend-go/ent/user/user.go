@@ -41,6 +41,10 @@ const (
 	EdgeFollowing = "following"
 	// EdgeFollowers holds the string denoting the followers edge name in mutations.
 	EdgeFollowers = "followers"
+	// EdgeBlocking holds the string denoting the blocking edge name in mutations.
+	EdgeBlocking = "blocking"
+	// EdgeBlockedBy holds the string denoting the blocked_by edge name in mutations.
+	EdgeBlockedBy = "blocked_by"
 	// EdgeDailyTasks holds the string denoting the daily_tasks edge name in mutations.
 	EdgeDailyTasks = "daily_tasks"
 	// EdgeDeviceTokens holds the string denoting the device_tokens edge name in mutations.
@@ -89,6 +93,20 @@ const (
 	FollowersInverseTable = "follow_relations"
 	// FollowersColumn is the table column denoting the followers relation/edge.
 	FollowersColumn = "user_followers"
+	// BlockingTable is the table that holds the blocking relation/edge.
+	BlockingTable = "block_relations"
+	// BlockingInverseTable is the table name for the BlockRelation entity.
+	// It exists in this package in order to avoid circular dependency with the "blockrelation" package.
+	BlockingInverseTable = "block_relations"
+	// BlockingColumn is the table column denoting the blocking relation/edge.
+	BlockingColumn = "user_blocking"
+	// BlockedByTable is the table that holds the blocked_by relation/edge.
+	BlockedByTable = "block_relations"
+	// BlockedByInverseTable is the table name for the BlockRelation entity.
+	// It exists in this package in order to avoid circular dependency with the "blockrelation" package.
+	BlockedByInverseTable = "block_relations"
+	// BlockedByColumn is the table column denoting the blocked_by relation/edge.
+	BlockedByColumn = "user_blocked_by"
 	// DailyTasksTable is the table that holds the daily_tasks relation/edge.
 	DailyTasksTable = "daily_tasks"
 	// DailyTasksInverseTable is the table name for the DailyTask entity.
@@ -271,6 +289,34 @@ func ByFollowers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByBlockingCount orders the results by blocking count.
+func ByBlockingCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBlockingStep(), opts...)
+	}
+}
+
+// ByBlocking orders the results by blocking terms.
+func ByBlocking(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBlockingStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBlockedByCount orders the results by blocked_by count.
+func ByBlockedByCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBlockedByStep(), opts...)
+	}
+}
+
+// ByBlockedBy orders the results by blocked_by terms.
+func ByBlockedBy(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBlockedByStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByDailyTasksCount orders the results by daily_tasks count.
 func ByDailyTasksCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -338,6 +384,20 @@ func newFollowersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FollowersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, FollowersTable, FollowersColumn),
+	)
+}
+func newBlockingStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BlockingInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BlockingTable, BlockingColumn),
+	)
+}
+func newBlockedByStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BlockedByInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BlockedByTable, BlockedByColumn),
 	)
 }
 func newDailyTasksStep() *sqlgraph.Step {

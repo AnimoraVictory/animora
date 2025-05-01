@@ -14,6 +14,4 @@ type UserRepository interface {
 	Update(id uuid.UUID, name string, description string, iconImageKey string) error
 	UpdateStreakCount(id uuid.UUID, streak int) error
 	Delete(id uuid.UUID) error
-	Follow(toId string, fromId string) error
-	Unfollow(toId string, fromId string) error
 }
