@@ -21,7 +21,12 @@ type Props = {
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const UserProfileMenu: React.FC<Props> = ({ visible, onClose, onBlock, isBlocking }) => {
+const UserProfileMenu: React.FC<Props> = ({
+  visible,
+  onClose,
+  onBlock,
+  isBlocking,
+}) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const modalHeight = SCREEN_HEIGHT * 0.3;
 
@@ -65,11 +70,16 @@ const UserProfileMenu: React.FC<Props> = ({ visible, onClose, onBlock, isBlockin
         useNativeDriver: true,
       }).start();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+    >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
@@ -79,7 +89,9 @@ const UserProfileMenu: React.FC<Props> = ({ visible, onClose, onBlock, isBlockin
       >
         <View style={styles.handle} />
         <TouchableOpacity style={styles.menuItem} onPress={onBlock}>
-          <Text style={styles.menuText}>{isBlocking ? 'ブロック解除' : 'このユーザーをブロック'}</Text>
+          <Text style={styles.menuText}>
+            {isBlocking ? 'ブロック解除' : 'このユーザーをブロック'}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={onClose}>
           <Text style={[styles.menuText, { color: 'gray' }]}>キャンセル</Text>
