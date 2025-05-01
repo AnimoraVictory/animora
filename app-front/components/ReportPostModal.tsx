@@ -27,7 +27,6 @@ const reportReasons = [
   '虚偽の情報を提供する行為、または他人になりすます行為',
   '本サービスの健全な運営を妨げる行為',
   '法令または公序良俗に違反する行為',
-  'その他、当社が不適切と判断する行為',
 ];
 
 const ReportPostModal: React.FC<Props> = ({
