@@ -13,10 +13,11 @@ import {
   Easing,
   Alert,
 } from 'react-native';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/providers/AuthContext';
 import { useCreatePostModal } from '@/features/post/useCreatePostModal';
+import { Filter } from 'glin-profanity';
 
 type Props = {
   photoUri: string;
@@ -25,6 +26,8 @@ type Props = {
 };
 
 export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
+  const filter = useMemo(() => new Filter({ allLanguages: true }), []);
+
   const { user } = useAuth();
 
   const { formData, onChangeFormData, handleSubmit, isPending } =
@@ -60,6 +63,14 @@ export function CreatePostModal({ photoUri, onClose, dailyTaskId }: Props) {
   const handlePressSubmit = () => {
     if (!formData.caption.trim()) {
       Alert.alert('キャプションが空です', 'キャプションを入力してください');
+      return;
+    }
+
+    if (filter.isProfane(formData.caption)) {
+      Alert.alert(
+        '不適切な内容です',
+        'キャプションに不適切な言葉が含まれています。'
+      );
       return;
     }
     handleSubmit();

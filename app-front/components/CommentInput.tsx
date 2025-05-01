@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   TextInput,
@@ -16,6 +16,7 @@ import { fetchApi } from '@/utils/api';
 import { commentSchema } from '@/features/comment/schema';
 import { useAuth } from '@/providers/AuthContext';
 import { z } from 'zod';
+import { Filter } from 'glin-profanity';
 
 type CommentInputProps = {
   postId: string;
@@ -28,6 +29,7 @@ const CommentInput: React.FC<CommentInputProps> = ({
   queryKey,
   onNewComment,
 }) => {
+  const filter = useMemo(() => new Filter({ allLanguages: true }), []);
   const { user: currentUser, token } = useAuth();
   const [content, setContent] = useState('');
   const colorScheme = useColorScheme();
@@ -69,6 +71,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
   const handleSubmit = () => {
     if (!content || content.trim().length < 1) {
       Alert.alert('エラー', 'コメントは1文字以上必要です。');
+      return;
+    }
+    if (filter.isProfane(content)) {
+      Alert.alert('不適切な内容です', 'コメントに不適切な言葉が含まれています。');
       return;
     }
     createCommentMutation.mutate({ content: content.trim() });
