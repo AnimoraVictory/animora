@@ -12,10 +12,16 @@ import { Ionicons } from '@expo/vector-icons';
 type Props = {
   checked: boolean;
   onToggle: () => void;
-  size?: number; // ← 追加
+  size?: number;
+  testID?: string;
 };
 
-export const CheckButton = ({ checked, onToggle, size = 24 }: Props) => {
+export const CheckButton = ({
+  checked,
+  onToggle,
+  size = 24,
+  testID,
+}: Props) => {
   const radius = size / 2 - 2;
   const circumference = 2 * Math.PI * radius;
   const progress = useRef(new Animated.Value(0)).current;
@@ -40,7 +46,7 @@ export const CheckButton = ({ checked, onToggle, size = 24 }: Props) => {
   });
 
   return (
-    <TouchableOpacity onPress={onToggle}>
+    <TouchableOpacity onPress={onToggle} testID={testID}>
       <View style={[styles.wrapper, { width: size, height: size }]}>
         <Svg width={size} height={size}>
           {/* 背景円 */}

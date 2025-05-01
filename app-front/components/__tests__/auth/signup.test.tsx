@@ -1,24 +1,23 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import SignUpScreen from '../../../app/(auth)/signup'; // パスは環境に応じて調整
+import SignUpScreen from '../../../app/(auth)/signup'; // パスは調整
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 
 jest.spyOn(Alert, 'alert');
+jest.spyOn(console, 'error').mockImplementation(() => {}); // 警告抑制
 
-// console.errorのモック
-jest.spyOn(console, 'error').mockImplementation(() => {});
-
-// Routerのモック
+// Router モック
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
 
-// カラースキームのモック
+// カラースキームモック
 jest.mock('@/hooks/useColorScheme', () => ({
   useColorScheme: () => 'light',
 }));
 
+// React Query のモック
 const mockMutate = jest.fn();
 jest.mock('@tanstack/react-query', () => ({
   useMutation: () => ({ mutate: mockMutate, isPending: false }),
@@ -34,7 +33,7 @@ describe('SignUpScreen', () => {
 
   it('サインアップタイトルが表示される', () => {
     const { getAllByText } = render(<SignUpScreen />);
-    expect(getAllByText('サインアップ')[0]).toBeTruthy(); // タイトル部分
+    expect(getAllByText('サインアップ')[0]).toBeTruthy();
   });
 
   it('入力欄が表示される（Name, Email, Password）', () => {
@@ -45,7 +44,9 @@ describe('SignUpScreen', () => {
   });
 
   it('未入力でサインアップを押すとバリデーションエラーが出る', async () => {
-    const { getAllByText, findByText } = render(<SignUpScreen />);
+    const { getAllByText, findByText, getByTestId } = render(<SignUpScreen />);
+    fireEvent.press(getByTestId('check-agree')); // チェックボックスをオンにする
+
     await act(async () => {
       fireEvent.press(getAllByText('サインアップ')[1]);
     });
@@ -57,11 +58,16 @@ describe('SignUpScreen', () => {
   });
 
   it('正しく入力すると mutate 関数が呼ばれる', async () => {
-    const { getByLabelText, getAllByText } = render(<SignUpScreen />);
+    const { getByLabelText, getAllByText, getByTestId } = render(
+      <SignUpScreen />
+    );
+    fireEvent.press(getByTestId('check-agree'));
+
+    fireEvent.changeText(getByLabelText('Name'), '山田太郎');
+    fireEvent.changeText(getByLabelText('Email'), 'taro@example.com');
+    fireEvent.changeText(getByLabelText('Password'), 'Abc12345');
+
     await act(async () => {
-      fireEvent.changeText(getByLabelText('Name'), '山田太郎');
-      fireEvent.changeText(getByLabelText('Email'), 'taro@example.com');
-      fireEvent.changeText(getByLabelText('Password'), 'Abc12345');
       fireEvent.press(getAllByText('サインアップ')[1]);
     });
 
@@ -72,23 +78,26 @@ describe('SignUpScreen', () => {
           email: 'taro@example.com',
           password: 'Abc12345',
         },
-        {
-          onSuccess: expect.any(Function),
-          onError: expect.any(Function),
-        }
+        expect.any(Object)
       );
     });
   });
 
   it('サインアップ失敗時にアラートを表示する', async () => {
-    mockMutate.mockImplementation((data) => {
-      Alert.alert('サインアップエラー', 'ユーザーの登録に失敗しました');
+    mockMutate.mockImplementation((_data, { onError }) => {
+      onError?.(new Error('エラー'));
     });
-    const { getByLabelText, getAllByText } = render(<SignUpScreen />);
-    act(() => {
-      fireEvent.changeText(getByLabelText('Name'), '田中花子');
-      fireEvent.changeText(getByLabelText('Email'), 'hanako@example.com');
-      fireEvent.changeText(getByLabelText('Password'), 'Abc12345');
+
+    const { getByLabelText, getAllByText, getByTestId } = render(
+      <SignUpScreen />
+    );
+    fireEvent.press(getByTestId('check-agree'));
+
+    fireEvent.changeText(getByLabelText('Name'), '田中花子');
+    fireEvent.changeText(getByLabelText('Email'), 'hanako@example.com');
+    fireEvent.changeText(getByLabelText('Password'), 'Abc12345');
+
+    await act(async () => {
       fireEvent.press(getAllByText('サインアップ')[1]);
     });
 
