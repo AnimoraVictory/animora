@@ -188,17 +188,16 @@ const UserProfileModal: React.FC<Props> = ({
   });
 
   const isBlocked = useMemo(() => {
-    return currentUser?.blockedByUsers?.some(
-      (user) => user.email === email
-    ) ?? false;
+    return (
+      currentUser?.blockedByUsers?.some((user) => user.email === email) ?? false
+    );
   }, [currentUser?.blockedByUsers, email]);
-  
+
   const isBlocking = useMemo(() => {
-    return currentUser?.blockingUsers?.some(
-      (user) => user.email === email
-    ) ?? false;
+    return (
+      currentUser?.blockingUsers?.some((user) => user.email === email) ?? false
+    );
   }, [currentUser?.blockingUsers, email]);
-  
 
   if (!user || isLoading) {
     return (
@@ -318,10 +317,16 @@ const UserProfileModal: React.FC<Props> = ({
                     postListWidth.current = e.nativeEvent.layout.width;
                   }}
                 >
-                  <UserPostList posts={!isBlocked ? user.posts : []} colorScheme={colorScheme} />
+                  <UserPostList
+                    posts={!isBlocked ? user.posts : []}
+                    colorScheme={colorScheme}
+                  />
                 </View>
                 <View style={{ width: windowWidth }}>
-                  <UserPetList pets={!isBlocked ? user.pets : []} colorScheme={colorScheme} />
+                  <UserPetList
+                    pets={!isBlocked ? user.pets : []}
+                    colorScheme={colorScheme}
+                  />
                 </View>
               </ScrollView>
             </Pressable>

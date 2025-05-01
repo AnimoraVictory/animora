@@ -117,7 +117,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
         ['userProfile', email],
         (prev: UserResponse | undefined) => prev
       );
-     await refetchUser();
+      await refetchUser();
     },
     onError: (error) => {
       console.error(error);
@@ -125,7 +125,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
     },
   });
 
-  console.log(user?.id)
+  console.log(user?.id);
 
   const unBlockMutation = useMutation({
     mutationFn: () => {
@@ -146,7 +146,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
         ['userProfile', email],
         (prev: UserResponse | undefined) => prev
       );
-      await refetchUser()
+      await refetchUser();
     },
     onError: (error) => {
       console.error(error);
