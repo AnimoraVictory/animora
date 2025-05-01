@@ -64,7 +64,7 @@ const PostMenu: React.FC<Props> = ({ visible, onClose, onReport }) => {
         useNativeDriver: true,
       }).start();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   return (
