@@ -32,6 +32,8 @@ type UserResponse struct {
 	FollowsCount   int                `json:"followsCount"`
 	DailyTask      DailyTaskResponse  `json:"dailyTask"`
 	StreakCount    int                `json:"streakCount"`
+	BlockingUsers  []UserBaseResponse `json:"blockingUsers"`
+	BlockedByUsers []UserBaseResponse `json:"blockedByUsers"`
 }
 
 // NewPetResponse converts a Pet to a PetResponse
@@ -42,6 +44,8 @@ func NewUserResponse(
 	pets []PetResponse,
 	followers []UserBaseResponse,
 	follows []UserBaseResponse,
+	blockingUsers []UserBaseResponse,
+	blockedByUsers []UserBaseResponse,
 	dailyTask DailyTaskResponse) UserResponse {
 	return UserResponse{
 		ID:             user.ID,
@@ -56,6 +60,8 @@ func NewUserResponse(
 		FollowsCount:   len(follows),
 		DailyTask:      dailyTask,
 		StreakCount:    user.StreakCount,
+		BlockingUsers:  blockingUsers,
+		BlockedByUsers: blockedByUsers,
 	}
 }
 

@@ -629,6 +629,52 @@ func HasFollowersWith(preds ...predicate.FollowRelation) predicate.User {
 	})
 }
 
+// HasBlocking applies the HasEdge predicate on the "blocking" edge.
+func HasBlocking() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BlockingTable, BlockingColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBlockingWith applies the HasEdge predicate on the "blocking" edge with a given conditions (other predicates).
+func HasBlockingWith(preds ...predicate.BlockRelation) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newBlockingStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBlockedBy applies the HasEdge predicate on the "blocked_by" edge.
+func HasBlockedBy() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BlockedByTable, BlockedByColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBlockedByWith applies the HasEdge predicate on the "blocked_by" edge with a given conditions (other predicates).
+func HasBlockedByWith(preds ...predicate.BlockRelation) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newBlockedByStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasDailyTasks applies the HasEdge predicate on the "daily_tasks" edge.
 func HasDailyTasks() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
