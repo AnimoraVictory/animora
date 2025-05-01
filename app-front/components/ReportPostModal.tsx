@@ -37,7 +37,7 @@ const ReportPostModal: React.FC<Props> = ({
   userId,
 }) => {
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
-  const { sendReportMutation} = useReportPost();
+  const { sendReportMutation } = useReportPost();
 
   const onSubmit = async () => {
     if (!selectedReason) {
@@ -80,7 +80,7 @@ const ReportPostModal: React.FC<Props> = ({
         useNativeDriver: true,
       }).start();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -109,14 +109,14 @@ const ReportPostModal: React.FC<Props> = ({
   return (
     <Modal visible={visible} animationType="none" transparent>
       <View style={styles.overlay}>
-      {sendReportMutation.isPending && (
+        {sendReportMutation.isPending && (
           <View style={styles.loadingOverlay}>
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
               <FontAwesome5 name="paw" size={48} color="#fff" />
             </Animated.View>
           </View>
         )}
-      <Animated.View
+        <Animated.View
           style={[
             styles.modal,
             {

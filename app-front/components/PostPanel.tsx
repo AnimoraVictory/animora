@@ -196,9 +196,7 @@ export const PostPanel = ({ post }: Props) => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => setIsMenuVisible((prev) => !prev)}
-            >
+            <TouchableOpacity onPress={() => setIsMenuVisible((prev) => !prev)}>
               <Ionicons
                 name="ellipsis-vertical"
                 size={20}
