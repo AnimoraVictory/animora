@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -86,10 +88,18 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 		})
 	}
 
+	algorithmApiURL, err := url.Parse(os.Getenv("ALGORITHM_API_URL"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to parse algorithm API URL",
+		})
+	}
+	algorithmApiURL.Path = "/timeline"
+
 	// POSTリクエストを作成
 	req, err := http.NewRequest(
 		"POST",
-		"https://animalia-lnzk.onrender.com/timeline",
+		algorithmApiURL.String(),
 		bytes.NewBuffer(jsonBodyForFastAPI),
 	)
 	if err != nil {
