@@ -11,6 +11,8 @@ import (
 	"github.com/aki-13627/animalia/backend-go/internal/handler"
 	"github.com/aki-13627/animalia/backend-go/internal/infra"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ses"
 	_ "github.com/lib/pq"
 )
 
@@ -30,6 +32,18 @@ func InjectDB() *ent.Client {
 		}
 	}
 	return client
+}
+
+func InjectSES() *ses.SES {
+	sess, err := session.NewSession()
+	if err != nil {
+		log.Fatalf("Failed to create AWS session: %v", err)
+	}
+
+	// SESクライアントを作成
+	sesClient := ses.New(sess)
+
+	return sesClient
 }
 
 func InjectCognitoRepository() repository.AuthRepository {
@@ -82,6 +96,11 @@ func InjectDeviceTokenRepository() repository.DeviceTokenRepository {
 	return deviceTokenRepostory
 }
 
+func InjectMailerRepository() repository.MailerRepository {
+	mailerRepository := infra.NewMailerRepository(InjectSES())
+	return mailerRepository
+}
+
 func InjectAuthUsecase() usecase.AuthUsecase {
 	authUsecase := usecase.NewAuthUsecase(InjectCognitoRepository(), InjectUserRepository())
 	return *authUsecase
@@ -131,6 +150,11 @@ func InjectDeviceTokenUsecase() usecase.DeviceTokenUsecase {
 	return *deviceTokenUsecase
 }
 
+func InjectReportUsecase() usecase.ReportUsecase {
+	reportUsecase := usecase.NewReportUsecase(InjectMailerRepository())
+	return *reportUsecase
+}
+
 func InjectAuthHandler() handler.AuthHandler {
 	authHandler := handler.NewAuthHandler(InjectAuthUsecase(), InjectUserUsecase(), InjectStorageUsecase(), InjectDailyTaskUsecase())
 	return *authHandler
@@ -172,6 +196,11 @@ func InjectLambdaHandler() handler.LambdaHandler {
 func InjectDeviceTokenHandler() handler.DeviceTokenHandler {
 	deviceTokenHandler := handler.NewDeviceTokenHandler(InjectDeviceTokenUsecase())
 	return *deviceTokenHandler
+}
+
+func InjectReportHandler() handler.ReportHandler {
+	reportHandler := handler.NewReportHandler(InjectReportUsecase())
+	return *reportHandler
 }
 
 func InjectAuthMiddleware() middlewares.AuthMiddleware {

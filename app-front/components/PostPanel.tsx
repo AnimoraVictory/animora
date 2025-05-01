@@ -19,6 +19,9 @@ import { useModalStack } from '@/providers/ModalStackContext';
 import { TaskType, taskTypeMap } from '@/app/(tabs)/camera';
 import { PostResponse } from '@/features/post/schema/response';
 import usePostsScreen from '@/features/post/usePostsScreen';
+import PostMenu from './PostMenu';
+import ReportPostModal from './ReportPostModal';
+import { useAuth } from '@/providers/AuthContext';
 
 type Props = {
   post: PostResponse;
@@ -26,9 +29,13 @@ type Props = {
 
 export const PostPanel = ({ post }: Props) => {
   const { push, pop } = useModalStack();
+  const { user } = useAuth();
 
   const { likedByCurrentUser, handleToggleLike, isLoadingLike, handleLike } =
     usePostsScreen({ post });
+
+  const [isReportVisible, setIsReportVisible] = useState<boolean>(false);
+  const [isMenuVisible, setIsMenuVisible] = useState<boolean>(false);
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isUserModalVisible, setIsUserModalVisible] = useState<boolean>(false);
@@ -166,24 +173,39 @@ export const PostPanel = ({ post }: Props) => {
               </Text>
             </View>
           )}
-          <TouchableOpacity style={styles.header} onPress={openUserProfile}>
-            <Image
-              source={
-                post.user.iconImageUrl
-                  ? { uri: post.user.iconImageUrl }
-                  : require('@/assets/images/profile.png')
-              }
-              style={styles.avatar}
-            />
-            <View style={styles.userInfo}>
-              <Text style={[styles.userName, { color: colors.text }]}>
-                {post.user.name}
-              </Text>
-              <Text style={[styles.postTime, { color: colors.icon }]}>
-                {formattedDateTime}
-              </Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={openUserProfile}
+              style={styles.userInfoWrapper}
+            >
+              <Image
+                source={
+                  post.user.iconImageUrl
+                    ? { uri: post.user.iconImageUrl }
+                    : require('@/assets/images/profile.png')
+                }
+                style={styles.avatar}
+              />
+              <View style={styles.userInfo}>
+                <Text style={[styles.userName, { color: colors.text }]}>
+                  {post.user.name}
+                </Text>
+                <Text style={[styles.postTime, { color: colors.icon }]}>
+                  {formattedDateTime}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setIsMenuVisible((prev) => !prev)}
+            >
+              <Ionicons
+                name="ellipsis-vertical"
+                size={20}
+                color={colors.text}
+              />
+            </TouchableOpacity>
+          </View>
           <Animated.View
             style={[
               styles.imageGlowWrapper,
@@ -248,6 +270,20 @@ export const PostPanel = ({ post }: Props) => {
         visible={isUserModalVisible}
         onClose={closeUserProfile}
         slideAnim={slideAnimUser}
+      />
+      <PostMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        onReport={() => {
+          setIsMenuVisible(false);
+          setIsReportVisible(true); // ← 通報モーダルを開く処理
+        }}
+      />
+      <ReportPostModal
+        visible={isReportVisible}
+        onClose={() => setIsReportVisible(false)}
+        postId={post.id}
+        userId={user?.id ?? ''}
       />
     </>
   );
@@ -324,6 +360,11 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 10,
     alignItems: 'center',
+  },
+  userInfoWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
 });
 

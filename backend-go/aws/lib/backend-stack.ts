@@ -47,6 +47,13 @@ export class BackendStack extends cdk.Stack {
       ],
     });
 
+    const sesPolicy = new cdk.aws_iam.PolicyStatement({
+      actions: ["ses:SendEmail"],
+      resources: ["*"],
+    });
+
+    apiFnRole.addToPolicy(sesPolicy);
+
     apiFnRole.addToPolicy(
       new cdk.aws_iam.PolicyStatement({
         actions: [
@@ -133,8 +140,7 @@ export class BackendStack extends cdk.Stack {
         runtime: lambda.Runtime.PROVIDED_AL2023,
         handler: "bootstrap",
         timeout: cdk.Duration.seconds(10),
-        environment: {
-        },
+        environment: {},
         code: lambda.Code.fromAsset(
           path.join(__dirname, "../../bin/dailytask-push-notification")
         ),
