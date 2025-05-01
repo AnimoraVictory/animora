@@ -13,6 +13,8 @@ export const userResponseSchema = userBaseSchema.extend({
   pets: z.array(petSchema),
   dailyTask: dailyTaskSchema,
   streakCount: z.number(),
+  blockingUsers: z.array(userBaseSchema),
+  blockedByUsers: z.array(userBaseSchema),
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;

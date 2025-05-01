@@ -4,6 +4,7 @@ import { fetchApi } from '@/utils/api';
 import { z } from 'zod';
 import { useCallback, useMemo } from 'react';
 import { UserResponse, userResponseSchema } from './schema/response';
+import { Alert } from 'react-native';
 
 type Props = {
   email: string;
@@ -12,7 +13,7 @@ type Props = {
 
 export default function useUserProfileModal({ email, visible }: Props) {
   const queryClient = useQueryClient();
-  const { user: currentUser, token } = useAuth();
+  const { user: currentUser, token, refetch: refetchUser } = useAuth();
 
   const {
     data: user,
@@ -39,7 +40,9 @@ export default function useUserProfileModal({ email, visible }: Props) {
   }, [currentUser?.id, user?.id]);
 
   const isFollowing = useMemo(() => {
-    if (!user) return false;
+    if (!user) {
+      return false;
+    }
     return user.followers.some((f) => f.id === currentUser?.id);
   }, [user, currentUser?.id]);
 
@@ -56,7 +59,9 @@ export default function useUserProfileModal({ email, visible }: Props) {
       queryClient.setQueryData(
         ['userProfile', email],
         (prev: UserResponse | undefined) => {
-          if (!prev) return prev;
+          if (!prev) {
+            return prev;
+          }
           return {
             ...prev,
             followers: [...prev.followers, currentUser],
@@ -80,7 +85,9 @@ export default function useUserProfileModal({ email, visible }: Props) {
       queryClient.setQueryData(
         ['userProfile', email],
         (prev: UserResponse | undefined) => {
-          if (!prev) return prev;
+          if (!prev) {
+            return prev;
+          }
           return {
             ...prev,
             followers: prev.followers.filter((f) => f.id !== currentUser?.id),
@@ -88,6 +95,62 @@ export default function useUserProfileModal({ email, visible }: Props) {
           };
         }
       );
+    },
+  });
+
+  const blockMutation = useMutation({
+    mutationFn: () => {
+      if (!user?.id || !currentUser?.id) {
+        return Promise.reject(new Error('user.idまたはcurrentUser.idが未定義'));
+      }
+
+      return fetchApi({
+        method: 'POST',
+        path: `users/block?toId=${user.id}&fromId=${currentUser.id}`,
+        schema: z.any(),
+        options: {},
+        token,
+      });
+    },
+    onSuccess: async () => {
+      queryClient.setQueryData(
+        ['userProfile', email],
+        (prev: UserResponse | undefined) => prev
+      );
+      await refetchUser();
+    },
+    onError: (error) => {
+      console.error(error);
+      Alert.alert('ブロックに失敗しました');
+    },
+  });
+
+  console.log(user?.id);
+
+  const unBlockMutation = useMutation({
+    mutationFn: () => {
+      if (!user?.id || !currentUser?.id) {
+        return Promise.reject(new Error('user.idまたはcurrentUser.idが未定義'));
+      }
+
+      return fetchApi({
+        method: 'DELETE',
+        path: `users/unblock?toId=${user.id}&fromId=${currentUser.id}`,
+        schema: z.any(),
+        options: {},
+        token,
+      });
+    },
+    onSuccess: async () => {
+      queryClient.setQueryData(
+        ['userProfile', email],
+        (prev: UserResponse | undefined) => prev
+      );
+      await refetchUser();
+    },
+    onError: (error) => {
+      console.error(error);
+      Alert.alert('ブロック解除に失敗しました');
     },
   });
 
@@ -107,5 +170,7 @@ export default function useUserProfileModal({ email, visible }: Props) {
     isMe,
     isFollowing,
     handlePressFollowButton,
+    blockMutation,
+    unBlockMutation,
   };
 }

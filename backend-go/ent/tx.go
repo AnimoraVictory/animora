@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// BlockRelation is the client for interacting with the BlockRelation builders.
+	BlockRelation *BlockRelationClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
 	// DailyTask is the client for interacting with the DailyTask builders.
@@ -161,6 +163,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.BlockRelation = NewBlockRelationClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
 	tx.DailyTask = NewDailyTaskClient(tx.config)
 	tx.DeviceToken = NewDeviceTokenClient(tx.config)
@@ -179,7 +182,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Comment.QueryXXX(), the query will be executed
+// applies a query, for example: BlockRelation.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
