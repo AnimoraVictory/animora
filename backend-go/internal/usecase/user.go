@@ -175,8 +175,8 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	}
 
 	blockingUsers := make([]models.UserBaseResponse, 0)
-	for _, blockingRelation := range user.Edges.BlockedBy {
-		blockingUser := blockingRelation.Edges.From
+	for _, blockingRelation := range user.Edges.Blocking {
+		blockingUser := blockingRelation.Edges.To
 		imageUrl := ""
 		if blockingUser.IconImageKey != "" {
 			url, err := u.storageRepository.GetUrl(blockingUser.IconImageKey)
@@ -190,8 +190,8 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 	}
 
 	blockedByUsers := make([]models.UserBaseResponse, 0)
-	for _, blockedByRelation := range user.Edges.Blocking {
-		blockedByUser := blockedByRelation.Edges.To
+	for _, blockedByRelation := range user.Edges.BlockedBy {
+		blockedByUser := blockedByRelation.Edges.From
 		imageUrl := ""
 		if blockedByUser.IconImageKey != "" {
 			url, err := u.storageRepository.GetUrl(blockedByUser.IconImageKey)
