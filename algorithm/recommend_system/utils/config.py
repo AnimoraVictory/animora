@@ -126,9 +126,18 @@ existing_user_query = """
 
                     FROM posts P
                     LEFT JOIN users U ON P.user_posts = U.id
-                    WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL AND P.deleted_at IS NULL
+                    WHERE 
+                        P.image_feature IS NOT NULL 
+                        AND P.text_feature IS NOT NULL 
+                        AND P.deleted_at IS NULL
+                        AND NOT EXISTS (
+                            SELECT 1 FROM block_relations B
+                            WHERE 
+                                (B.user_blocked_by = %(current_user_id)s AND B.user_blocking = P.user_posts)
+                                OR (B.user_blocked_by = P.user_posts AND B.user_blocking = %(current_user_id)s)
+                        )
                     ORDER BY P.created_at DESC
-                    LIMIT %s
+                    LIMIT %(num_item)s;
 
                     """
 existing_user_threshold = 0.2
@@ -201,10 +210,19 @@ new_user_query = """
                  LEFT JOIN users U ON P.user_posts = U.id
                  LEFT JOIN likes L ON L.post_likes = P.id
                  LEFT JOIN comments C ON C.post_comments = P.id
-                 WHERE P.image_feature IS NOT NULL AND P.text_feature IS NOT NULL AND P.deleted_at IS NULL
+                 WHERE 
+                    P.image_feature IS NOT NULL 
+                    AND P.text_feature IS NOT NULL 
+                    AND P.deleted_at IS NULL
+                    AND NOT EXISTS (
+                        SELECT 1 FROM block_relations B
+                        WHERE 
+                            (B.user_blocked_by = %(current_user_id)s AND B.user_blocking = P.user_posts)
+                            OR (B.user_blocked_by = P.user_posts AND B.user_blocking = %(current_user_id)s)
+                    )
                  GROUP BY P.id, P.created_at, P.image_feature, P.text_feature
                  ORDER BY P.created_at DESC
-                 LIMIT %s;
+                 LIMIT %(num_item)s;
                  """
 new_user_threshold = 2
 
