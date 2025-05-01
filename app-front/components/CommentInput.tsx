@@ -74,7 +74,10 @@ const CommentInput: React.FC<CommentInputProps> = ({
       return;
     }
     if (filter.isProfane(content)) {
-      Alert.alert('不適切な内容です', 'コメントに不適切な言葉が含まれています。');
+      Alert.alert(
+        '不適切な内容です',
+        'コメントに不適切な言葉が含まれています。'
+      );
       return;
     }
     createCommentMutation.mutate({ content: content.trim() });
