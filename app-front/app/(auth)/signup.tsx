@@ -139,7 +139,11 @@ export default function SignUpScreen() {
               }}
             >
               <View style={styles.checkboxContainer}>
-                <CheckButton checked={isChecked} onToggle={handleToggleCheck} />
+                <CheckButton
+                  checked={isChecked}
+                  onToggle={handleToggleCheck}
+                  testID="check-agree"
+                />
                 <Text style={{ marginLeft: 8, color: theme.text }}>
                   利用規約及びプライバシーポリシーに同意します
                 </Text>
