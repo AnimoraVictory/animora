@@ -143,6 +143,7 @@ export default function SignUpScreen() {
                   checked={isChecked}
                   onToggle={handleToggleCheck}
                   testID="check-agree"
+                  testOnlyChecked={process.env.NODE_ENV === 'test'}
                 />
                 <Text style={{ marginLeft: 8, color: theme.text }}>
                   利用規約及びプライバシーポリシーに同意します

@@ -14,6 +14,7 @@ type Props = {
   onToggle: () => void;
   size?: number;
   testID?: string;
+  testOnlyChecked?: boolean;
 };
 
 export const CheckButton = ({
@@ -21,12 +22,14 @@ export const CheckButton = ({
   onToggle,
   size = 24,
   testID,
+  testOnlyChecked,
 }: Props) => {
   const radius = size / 2 - 2;
   const circumference = 2 * Math.PI * radius;
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (testOnlyChecked) return;
     if (checked) {
       Animated.timing(progress, {
         toValue: 1,
