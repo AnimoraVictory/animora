@@ -6,7 +6,7 @@ require (
 	entgo.io/ent v0.14.4
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.192.0
 	github.com/aws/aws-lambda-go v1.46.0
-	github.com/aws/aws-sdk-go-v2 v1.25.1
+	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.27.0
 	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.35.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.50.0
@@ -27,26 +27,30 @@ require (
 	github.com/stretchr/testify v1.10.0
 )
 
+require github.com/jmespath/go-jmespath v0.4.0 // indirect
+
 require (
 	ariga.io/atlas v0.32.0 // indirect
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/aws/aws-sdk-go v1.55.7
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.0 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.15.0 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.1 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.1 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ses v1.30.2
 	github.com/aws/aws-sdk-go-v2/service/sso v1.19.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.22.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.27.0 // indirect
-	github.com/aws/smithy-go v1.20.1 // indirect
+	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/cdklabs/awscdk-asset-awscli-go/awscliv1/v2 v2.2.229 // indirect
 	github.com/cdklabs/awscdk-asset-node-proxy-agent-go/nodeproxyagentv6/v2 v2.1.0 // indirect
@@ -72,7 +76,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect

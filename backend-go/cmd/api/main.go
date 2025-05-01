@@ -101,6 +101,7 @@ func main() {
 	routes.SetupLikeRoutes(app)
 	routes.SetupCommentRoutes(app)
 	routes.SetupDeviceTokenRoutes(app)
+	routes.SetupReportRoutes(app)
 	log.Println("API routes setup completed")
 
 	// Get port from environment variable or use default

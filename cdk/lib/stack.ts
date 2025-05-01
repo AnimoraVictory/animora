@@ -108,6 +108,13 @@ export class AnimoraStack extends cdk.Stack {
       ],
     });
 
+    const sesPolicy = new cdk.aws_iam.PolicyStatement({
+      actions: ["ses:SendEmail"],
+      resources: ["*"],
+    });
+
+    apiFnRole.addToPolicy(sesPolicy);
+
     apiFnRole.addToPolicy(
       new cdk.aws_iam.PolicyStatement({
         actions: [
