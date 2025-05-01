@@ -84,7 +84,7 @@ export default function CameraScreen() {
                 onPress={requestPermission}
               >
                 <Text style={styles.permissionButtonText}>
-                  許可をリクエスト
+                  次へ
                 </Text>
               </TouchableOpacity>
             ) : (
@@ -95,9 +95,6 @@ export default function CameraScreen() {
                 <Text style={styles.permissionButtonText}>設定を開く</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity style={styles.backButton} onPress={handleClose}>
-              <Text style={styles.backButtonText}>戻る</Text>
-            </TouchableOpacity>
           </View>
         </View>
       ) : photoUri ? (
