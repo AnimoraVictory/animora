@@ -126,60 +126,38 @@ func (h *UserHandler) Unfollow(c echo.Context) error {
 	})
 }
 
-func (h *UserHandler) GetFollowsCount(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
-		log.Error("Failed to get follows count: id is empty")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "ユーザーIDが必要です"})
+func (h *UserHandler) Block(c echo.Context) error {
+	fromId, toId := c.QueryParam("fromId"), c.QueryParam("toId")
+	if fromId == "" || toId == "" {
+		log.Error("Failed to block: fromId or toId is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "情報が不足しています"})
 	}
-	count, err := h.userUsecase.FollowsCount(id)
-	if err != nil {
-		log.Errorf("Failed to get follows count: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "フォロー中数の取得に失敗しました"})
+	if err := h.userUsecase.Block(fromId, toId); err != nil {
+		log.Errorf("Failed to block: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ブロックに失敗しました",
+		})
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"followed_count": count})
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "ブロックしました",
+	})
 }
 
-func (h *UserHandler) GetFollowerCount(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
-		log.Error("Failed to get follower count: id is empty")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "ユーザーIDが必要です"})
+func (h *UserHandler) Unblock(c echo.Context) error {
+	fromId, toId := c.QueryParam("fromId"), c.QueryParam("toId")
+	if fromId == "" || toId == "" {
+		log.Error("Failed to unblock: fromId or toId is empty")
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "情報が不足しています"})
 	}
-	count, err := h.userUsecase.FollowerCount(id)
-	if err != nil {
-		log.Errorf("Failed to get follower count: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "フォロワー数の取得に失敗しました"})
+	if err := h.userUsecase.Unblock(fromId, toId); err != nil {
+		log.Errorf("Failed to unblock: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": "ブロック解除に失敗しました",
+		})
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"follower_count": count})
-}
-
-func (h *UserHandler) GetFollowsUsers(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
-		log.Error("Failed to get follows users: id is empty")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "ユーザーIDが必要です"})
-	}
-	users, err := h.userUsecase.FollowingUsers(id)
-	if err != nil {
-		log.Errorf("Failed to get follows users: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "フォロー中のユーザー一覧取得に失敗しました"})
-	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"followed_users": users})
-}
-
-func (h *UserHandler) GetFollowerUsers(c echo.Context) error {
-	id := c.QueryParam("id")
-	if id == "" {
-		log.Error("Failed to get follower users: id is empty")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": "ユーザーIDが必要です"})
-	}
-	users, err := h.userUsecase.Followers(id)
-	if err != nil {
-		log.Errorf("Failed to get follower users: %v", err)
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"error": "フォロワーの取得に失敗しました"})
-	}
-	return c.JSON(http.StatusOK, map[string]interface{}{"follower_users": users})
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "ブロックを解除しました",
+	})
 }
 
 func (h *UserHandler) GetUser(c echo.Context) error {

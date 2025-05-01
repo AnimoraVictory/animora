@@ -24,6 +24,7 @@ import { useModalStack } from '@/providers/ModalStackContext';
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import useUserProfileModal from '@/features/user/useUserProfileModal';
+import { useAuth } from '@/providers/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +46,7 @@ const UserProfileModal: React.FC<Props> = ({
   slideAnim,
   prevModalIdx,
 }) => {
+  const { user: currentUser } = useAuth();
   const [selectedFollowTab, setSelectedFollowTab] = useState<
     'follows' | 'followers'
   >('follows');
@@ -72,6 +74,8 @@ const UserProfileModal: React.FC<Props> = ({
     handlePressFollowButton,
     isMe,
     isFollowing,
+    blockMutation,
+    unBlockMutation,
   } = useUserProfileModal({
     email,
     visible,
@@ -104,12 +108,10 @@ const UserProfileModal: React.FC<Props> = ({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponderCapture: (_, gestureState) => {
           const { dx, dy } = gestureState;
-          const isHorizontalSwipe =
-            Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.5;
-          return isHorizontalSwipe;
+          return Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.5;
         },
         onPanResponderRelease: (e, gestureState) => {
-          const dx = gestureState.dx;
+          const { dx } = gestureState;
           const startX = e.nativeEvent.pageX;
           if (!isTop(modalKey)) {
             return;
@@ -184,6 +186,18 @@ const UserProfileModal: React.FC<Props> = ({
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
+
+  const isBlocked = useMemo(() => {
+    return (
+      currentUser?.blockedByUsers?.some((user) => user.email === email) ?? false
+    );
+  }, [currentUser?.blockedByUsers, email]);
+
+  const isBlocking = useMemo(() => {
+    return (
+      currentUser?.blockingUsers?.some((user) => user.email === email) ?? false
+    );
+  }, [currentUser?.blockingUsers, email]);
 
   if (!user || isLoading) {
     return (
@@ -265,6 +279,10 @@ const UserProfileModal: React.FC<Props> = ({
               onOpenFollowModal={onOpenFollowModal}
               setSelectedTab={setSelectedFollowTab}
               isFollowing={isFollowing}
+              isBlocked={isBlocked}
+              isBlocking={isBlocking}
+              blockMutation={blockMutation}
+              unBlockMutation={unBlockMutation}
             />
             <ProfileTabSelector
               selectedTab={selectedTab}
@@ -299,10 +317,16 @@ const UserProfileModal: React.FC<Props> = ({
                     postListWidth.current = e.nativeEvent.layout.width;
                   }}
                 >
-                  <UserPostList posts={user.posts} colorScheme={colorScheme} />
+                  <UserPostList
+                    posts={!isBlocked ? user.posts : []}
+                    colorScheme={colorScheme}
+                  />
                 </View>
                 <View style={{ width: windowWidth }}>
-                  <UserPetList pets={user.pets} colorScheme={colorScheme} />
+                  <UserPetList
+                    pets={!isBlocked ? user.pets : []}
+                    colorScheme={colorScheme}
+                  />
                 </View>
               </ScrollView>
             </Pressable>

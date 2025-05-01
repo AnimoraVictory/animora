@@ -8,6 +8,40 @@ import (
 )
 
 var (
+	// BlockRelationsColumns holds the columns for the "block_relations" table.
+	BlockRelationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_blocking", Type: field.TypeUUID},
+		{Name: "user_blocked_by", Type: field.TypeUUID},
+	}
+	// BlockRelationsTable holds the schema information for the "block_relations" table.
+	BlockRelationsTable = &schema.Table{
+		Name:       "block_relations",
+		Columns:    BlockRelationsColumns,
+		PrimaryKey: []*schema.Column{BlockRelationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "block_relations_users_blocking",
+				Columns:    []*schema.Column{BlockRelationsColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "block_relations_users_blocked_by",
+				Columns:    []*schema.Column{BlockRelationsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "blockrelation_user_blocking_user_blocked_by",
+				Unique:  true,
+				Columns: []*schema.Column{BlockRelationsColumns[2], BlockRelationsColumns[3]},
+			},
+		},
+	}
 	// CommentsColumns holds the columns for the "comments" table.
 	CommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -258,6 +292,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BlockRelationsTable,
 		CommentsTable,
 		DailyTasksTable,
 		DeviceTokensTable,
@@ -271,6 +306,8 @@ var (
 )
 
 func init() {
+	BlockRelationsTable.ForeignKeys[0].RefTable = UsersTable
+	BlockRelationsTable.ForeignKeys[1].RefTable = UsersTable
 	CommentsTable.ForeignKeys[0].RefTable = PostsTable
 	CommentsTable.ForeignKeys[1].RefTable = UsersTable
 	DailyTasksTable.ForeignKeys[0].RefTable = PostsTable

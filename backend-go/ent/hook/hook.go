@@ -9,6 +9,18 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent"
 )
 
+// The BlockRelationFunc type is an adapter to allow the use of ordinary
+// function as BlockRelation mutator.
+type BlockRelationFunc func(context.Context, *ent.BlockRelationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BlockRelationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BlockRelationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BlockRelationMutation", m)
+}
+
 // The CommentFunc type is an adapter to allow the use of ordinary
 // function as Comment mutator.
 type CommentFunc func(context.Context, *ent.CommentMutation) (ent.Value, error)

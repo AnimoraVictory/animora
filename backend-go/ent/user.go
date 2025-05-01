@@ -52,13 +52,17 @@ type UserEdges struct {
 	Following []*FollowRelation `json:"following,omitempty"`
 	// Followers holds the value of the followers edge.
 	Followers []*FollowRelation `json:"followers,omitempty"`
+	// Blocking holds the value of the blocking edge.
+	Blocking []*BlockRelation `json:"blocking,omitempty"`
+	// BlockedBy holds the value of the blocked_by edge.
+	BlockedBy []*BlockRelation `json:"blocked_by,omitempty"`
 	// DailyTasks holds the value of the daily_tasks edge.
 	DailyTasks []*DailyTask `json:"daily_tasks,omitempty"`
 	// DeviceTokens holds the value of the device_tokens edge.
 	DeviceTokens []*DeviceToken `json:"device_tokens,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [8]bool
+	loadedTypes [10]bool
 }
 
 // PostsOrErr returns the Posts value or an error if the edge
@@ -115,10 +119,28 @@ func (e UserEdges) FollowersOrErr() ([]*FollowRelation, error) {
 	return nil, &NotLoadedError{edge: "followers"}
 }
 
+// BlockingOrErr returns the Blocking value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) BlockingOrErr() ([]*BlockRelation, error) {
+	if e.loadedTypes[6] {
+		return e.Blocking, nil
+	}
+	return nil, &NotLoadedError{edge: "blocking"}
+}
+
+// BlockedByOrErr returns the BlockedBy value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) BlockedByOrErr() ([]*BlockRelation, error) {
+	if e.loadedTypes[7] {
+		return e.BlockedBy, nil
+	}
+	return nil, &NotLoadedError{edge: "blocked_by"}
+}
+
 // DailyTasksOrErr returns the DailyTasks value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) DailyTasksOrErr() ([]*DailyTask, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[8] {
 		return e.DailyTasks, nil
 	}
 	return nil, &NotLoadedError{edge: "daily_tasks"}
@@ -127,7 +149,7 @@ func (e UserEdges) DailyTasksOrErr() ([]*DailyTask, error) {
 // DeviceTokensOrErr returns the DeviceTokens value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) DeviceTokensOrErr() ([]*DeviceToken, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[9] {
 		return e.DeviceTokens, nil
 	}
 	return nil, &NotLoadedError{edge: "device_tokens"}
@@ -250,6 +272,16 @@ func (u *User) QueryFollowing() *FollowRelationQuery {
 // QueryFollowers queries the "followers" edge of the User entity.
 func (u *User) QueryFollowers() *FollowRelationQuery {
 	return NewUserClient(u.config).QueryFollowers(u)
+}
+
+// QueryBlocking queries the "blocking" edge of the User entity.
+func (u *User) QueryBlocking() *BlockRelationQuery {
+	return NewUserClient(u.config).QueryBlocking(u)
+}
+
+// QueryBlockedBy queries the "blocked_by" edge of the User entity.
+func (u *User) QueryBlockedBy() *BlockRelationQuery {
+	return NewUserClient(u.config).QueryBlockedBy(u)
 }
 
 // QueryDailyTasks queries the "daily_tasks" edge of the User entity.
