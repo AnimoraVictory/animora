@@ -30,8 +30,8 @@ func (h *ReportHandler) SendReport(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
 
-	from := "aki.kaku0627@gmail.com"
-	to := "aki.kaku0627@gmail.com"
+	from := "animalia0406@gmail.com"
+	to := "animalia0406@gmail.com"
 	subject := "【通報】ユーザーからの通報がありました"
 	body := fmt.Sprintf("Post ID: %s\nUser ID: %s\nReason: %s", req.PostID, req.UserID, req.Reason)
 
