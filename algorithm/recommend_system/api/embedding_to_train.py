@@ -31,6 +31,7 @@ from common.src.multimodal_feature_extractor import update_post_features
 # ----------------------------------
 app = FastAPI()
 
+
 # ----------------------------------
 # / エンドポイント
 # ----------------------------------
@@ -50,7 +51,8 @@ def embed_vector_and_retrain_model():
         traceback.print_exc()
         print("Model retraining failed", str(e))
         raise HTTPException(status_code=500, detail="Model retraining failed")
-    
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
