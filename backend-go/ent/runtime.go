@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/aki-13627/animalia/backend-go/ent/blockrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
@@ -21,6 +22,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	blockrelationFields := schema.BlockRelation{}.Fields()
+	_ = blockrelationFields
+	// blockrelationDescCreatedAt is the schema descriptor for created_at field.
+	blockrelationDescCreatedAt := blockrelationFields[1].Descriptor()
+	// blockrelation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	blockrelation.DefaultCreatedAt = blockrelationDescCreatedAt.Default.(func() time.Time)
+	// blockrelationDescID is the schema descriptor for id field.
+	blockrelationDescID := blockrelationFields[0].Descriptor()
+	// blockrelation.DefaultID holds the default value on creation for the id field.
+	blockrelation.DefaultID = blockrelationDescID.Default.(func() uuid.UUID)
 	commentFields := schema.Comment{}.Fields()
 	_ = commentFields
 	// commentDescContent is the schema descriptor for content field.

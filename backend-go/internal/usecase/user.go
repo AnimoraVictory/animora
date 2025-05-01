@@ -14,15 +14,23 @@ type UserUsecase struct {
 	postRepository           repository.PostRepository
 	petRepository            repository.PetRepository
 	followRelationRepository repository.FollowRelationRepository
+	blockRelationRepository  repository.BlockRelationRepository
 }
 
-func NewUserUsecase(userRepository repository.UserRepository, storageRepository repository.StorageRepository, postRepository repository.PostRepository, petRepository repository.PetRepository, followRelationRepository repository.FollowRelationRepository) *UserUsecase {
+func NewUserUsecase(
+	userRepository repository.UserRepository,
+	storageRepository repository.StorageRepository,
+	postRepository repository.PostRepository,
+	petRepository repository.PetRepository,
+	followRelationRepository repository.FollowRelationRepository,
+	blockRelationRepository repository.BlockRelationRepository) *UserUsecase {
 	return &UserUsecase{
 		userRepository:           userRepository,
 		storageRepository:        storageRepository,
 		postRepository:           postRepository,
 		petRepository:            petRepository,
 		followRelationRepository: followRelationRepository,
+		blockRelationRepository:  blockRelationRepository,
 	}
 }
 
@@ -166,10 +174,40 @@ func (u *UserUsecase) GetByEmail(email string) (models.UserResponse, error) {
 		follows = append(follows, models.NewUserBaseResponse(follow, imageUrl))
 	}
 
+	blockingUsers := make([]models.UserBaseResponse, 0)
+	for _, blockingRelation := range user.Edges.BlockedBy {
+		blockingUser := blockingRelation.Edges.From
+		imageUrl := ""
+		if blockingUser.IconImageKey != "" {
+			url, err := u.storageRepository.GetUrl(blockingUser.IconImageKey)
+			if err != nil {
+				log.Warnf("Failed to get icon URL for blocking user %s: %v", blockingUser.Name, err)
+			} else {
+				imageUrl = url
+			}
+		}
+		blockingUsers = append(blockingUsers, models.NewUserBaseResponse(blockingUser, imageUrl))
+	}
+
+	blockedByUsers := make([]models.UserBaseResponse, 0)
+	for _, blockedByRelation := range user.Edges.Blocking {
+		blockedByUser := blockedByRelation.Edges.To
+		imageUrl := ""
+		if blockedByUser.IconImageKey != "" {
+			url, err := u.storageRepository.GetUrl(blockedByUser.IconImageKey)
+			if err != nil {
+				log.Warnf("Failed to get icon URL for blocked by user %s: %v", blockedByUser.Name, err)
+			} else {
+				imageUrl = url
+			}
+		}
+		blockedByUsers = append(blockedByUsers, models.NewUserBaseResponse(blockedByUser, imageUrl))
+	}
+
 	dailyTask := user.Edges.DailyTasks[0]
 	dailyTaskResoponse := models.NewDailyTaskResponse(dailyTask)
 
-	userResponse := models.NewUserResponse(user, iconURL, postResponses, petResponses, followers, follows, dailyTaskResoponse)
+	userResponse := models.NewUserResponse(user, iconURL, postResponses, petResponses, followers, follows, blockingUsers, blockedByUsers, dailyTaskResoponse)
 	return userResponse, nil
 }
 
@@ -182,25 +220,30 @@ func (u *UserUsecase) Delete(id string) error {
 }
 
 func (u *UserUsecase) Follow(toId string, fromId string) error {
-	return u.userRepository.Follow(toId, fromId)
+	return u.followRelationRepository.Follow(toId, fromId)
 }
 
 func (u *UserUsecase) Unfollow(toId string, fromId string) error {
-	return u.userRepository.Unfollow(toId, fromId)
+	return u.followRelationRepository.Unfollow(toId, fromId)
 }
 
-func (u *UserUsecase) FollowsCount(id string) (int, error) {
-	return u.followRelationRepository.CountFollows(id)
+func (u *UserUsecase) Block(fromId, toId string) error {
+	// 1. from → to のフォロー解除
+	err := u.followRelationRepository.Unfollow(fromId, toId)
+	if err != nil && !ent.IsNotFound(err) {
+		return err
+	}
+
+	// 2. to → from のフォロー解除（逆方向も解除）
+	err = u.followRelationRepository.Unfollow(toId, fromId)
+	if err != nil && !ent.IsNotFound(err) {
+		return err
+	}
+
+	// 3. ブロック作成
+	return u.blockRelationRepository.Create(fromId, toId)
 }
 
-func (u *UserUsecase) FollowerCount(id string) (int, error) {
-	return u.followRelationRepository.CountFollowers(id)
-}
-
-func (u *UserUsecase) FollowingUsers(id string) ([]*ent.User, error) {
-	return u.followRelationRepository.Followings(id)
-}
-
-func (u *UserUsecase) Followers(id string) ([]*ent.User, error) {
-	return u.followRelationRepository.Followers(id)
+func (u *UserUsecase) Unblock(fromId, toId string) error {
+	return u.blockRelationRepository.Delete(fromId, toId)
 }

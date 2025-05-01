@@ -18,11 +18,7 @@ func SetupUserRoutes(app *echo.Echo) {
 
 	userGroup.DELETE("/unfollow", userHandler.Unfollow)
 
-	userGroup.GET("/follower_count", userHandler.GetFollowerCount)
+	userGroup.POST("/block", userHandler.Block)
 
-	userGroup.GET("/follows_count", userHandler.GetFollowsCount)
-
-	userGroup.GET("/follower_users", userHandler.GetFollowerUsers)
-
-	userGroup.GET("/follows_users", userHandler.GetFollowsUsers)
+	userGroup.DELETE("/unblock", userHandler.Unblock)
 }

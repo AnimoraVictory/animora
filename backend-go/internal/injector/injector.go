@@ -82,6 +82,11 @@ func InjectDeviceTokenRepository() repository.DeviceTokenRepository {
 	return deviceTokenRepostory
 }
 
+func InjectBlockRelationRepository() repository.BlockRelationRepository {
+	blockRelationRepository := infra.NewBlockRelationRepository(InjectDB())
+	return blockRelationRepository
+}
+
 func InjectAuthUsecase() usecase.AuthUsecase {
 	authUsecase := usecase.NewAuthUsecase(InjectCognitoRepository(), InjectUserRepository())
 	return *authUsecase
@@ -103,7 +108,7 @@ func InjectStorageUsecase() usecase.StorageUsecase {
 }
 
 func InjectUserUsecase() usecase.UserUsecase {
-	userUsecase := usecase.NewUserUsecase(InjectUserRepository(), InjectStorageRepository(), InjectPostRepository(), InjectPetRepository(), InjectFollowRelationRepository())
+	userUsecase := usecase.NewUserUsecase(InjectUserRepository(), InjectStorageRepository(), InjectPostRepository(), InjectPetRepository(), InjectFollowRelationRepository(), InjectBlockRelationRepository())
 	return *userUsecase
 }
 

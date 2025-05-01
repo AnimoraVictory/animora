@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/aki-13627/animalia/backend-go/ent/blockrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
@@ -81,6 +82,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			blockrelation.Table:  blockrelation.ValidColumn,
 			comment.Table:        comment.ValidColumn,
 			dailytask.Table:      dailytask.ValidColumn,
 			devicetoken.Table:    devicetoken.ValidColumn,
