@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/blockrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
@@ -223,6 +224,36 @@ func (uu *UserUpdate) AddFollowers(f ...*FollowRelation) *UserUpdate {
 	return uu.AddFollowerIDs(ids...)
 }
 
+// AddBlockingIDs adds the "blocking" edge to the BlockRelation entity by IDs.
+func (uu *UserUpdate) AddBlockingIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddBlockingIDs(ids...)
+	return uu
+}
+
+// AddBlocking adds the "blocking" edges to the BlockRelation entity.
+func (uu *UserUpdate) AddBlocking(b ...*BlockRelation) *UserUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.AddBlockingIDs(ids...)
+}
+
+// AddBlockedByIDs adds the "blocked_by" edge to the BlockRelation entity by IDs.
+func (uu *UserUpdate) AddBlockedByIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddBlockedByIDs(ids...)
+	return uu
+}
+
+// AddBlockedBy adds the "blocked_by" edges to the BlockRelation entity.
+func (uu *UserUpdate) AddBlockedBy(b ...*BlockRelation) *UserUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.AddBlockedByIDs(ids...)
+}
+
 // AddDailyTaskIDs adds the "daily_tasks" edge to the DailyTask entity by IDs.
 func (uu *UserUpdate) AddDailyTaskIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddDailyTaskIDs(ids...)
@@ -382,6 +413,48 @@ func (uu *UserUpdate) RemoveFollowers(f ...*FollowRelation) *UserUpdate {
 		ids[i] = f[i].ID
 	}
 	return uu.RemoveFollowerIDs(ids...)
+}
+
+// ClearBlocking clears all "blocking" edges to the BlockRelation entity.
+func (uu *UserUpdate) ClearBlocking() *UserUpdate {
+	uu.mutation.ClearBlocking()
+	return uu
+}
+
+// RemoveBlockingIDs removes the "blocking" edge to BlockRelation entities by IDs.
+func (uu *UserUpdate) RemoveBlockingIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveBlockingIDs(ids...)
+	return uu
+}
+
+// RemoveBlocking removes "blocking" edges to BlockRelation entities.
+func (uu *UserUpdate) RemoveBlocking(b ...*BlockRelation) *UserUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.RemoveBlockingIDs(ids...)
+}
+
+// ClearBlockedBy clears all "blocked_by" edges to the BlockRelation entity.
+func (uu *UserUpdate) ClearBlockedBy() *UserUpdate {
+	uu.mutation.ClearBlockedBy()
+	return uu
+}
+
+// RemoveBlockedByIDs removes the "blocked_by" edge to BlockRelation entities by IDs.
+func (uu *UserUpdate) RemoveBlockedByIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveBlockedByIDs(ids...)
+	return uu
+}
+
+// RemoveBlockedBy removes "blocked_by" edges to BlockRelation entities.
+func (uu *UserUpdate) RemoveBlockedBy(b ...*BlockRelation) *UserUpdate {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.RemoveBlockedByIDs(ids...)
 }
 
 // ClearDailyTasks clears all "daily_tasks" edges to the DailyTask entity.
@@ -777,6 +850,96 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.BlockingCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockingTable,
+			Columns: []string{user.BlockingColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedBlockingIDs(); len(nodes) > 0 && !uu.mutation.BlockingCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockingTable,
+			Columns: []string{user.BlockingColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.BlockingIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockingTable,
+			Columns: []string{user.BlockingColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.BlockedByCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedByTable,
+			Columns: []string{user.BlockedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedBlockedByIDs(); len(nodes) > 0 && !uu.mutation.BlockedByCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedByTable,
+			Columns: []string{user.BlockedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.BlockedByIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedByTable,
+			Columns: []string{user.BlockedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if uu.mutation.DailyTasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -1074,6 +1237,36 @@ func (uuo *UserUpdateOne) AddFollowers(f ...*FollowRelation) *UserUpdateOne {
 	return uuo.AddFollowerIDs(ids...)
 }
 
+// AddBlockingIDs adds the "blocking" edge to the BlockRelation entity by IDs.
+func (uuo *UserUpdateOne) AddBlockingIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddBlockingIDs(ids...)
+	return uuo
+}
+
+// AddBlocking adds the "blocking" edges to the BlockRelation entity.
+func (uuo *UserUpdateOne) AddBlocking(b ...*BlockRelation) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.AddBlockingIDs(ids...)
+}
+
+// AddBlockedByIDs adds the "blocked_by" edge to the BlockRelation entity by IDs.
+func (uuo *UserUpdateOne) AddBlockedByIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddBlockedByIDs(ids...)
+	return uuo
+}
+
+// AddBlockedBy adds the "blocked_by" edges to the BlockRelation entity.
+func (uuo *UserUpdateOne) AddBlockedBy(b ...*BlockRelation) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.AddBlockedByIDs(ids...)
+}
+
 // AddDailyTaskIDs adds the "daily_tasks" edge to the DailyTask entity by IDs.
 func (uuo *UserUpdateOne) AddDailyTaskIDs(ids ...uuid.UUID) *UserUpdateOne {
 	uuo.mutation.AddDailyTaskIDs(ids...)
@@ -1233,6 +1426,48 @@ func (uuo *UserUpdateOne) RemoveFollowers(f ...*FollowRelation) *UserUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return uuo.RemoveFollowerIDs(ids...)
+}
+
+// ClearBlocking clears all "blocking" edges to the BlockRelation entity.
+func (uuo *UserUpdateOne) ClearBlocking() *UserUpdateOne {
+	uuo.mutation.ClearBlocking()
+	return uuo
+}
+
+// RemoveBlockingIDs removes the "blocking" edge to BlockRelation entities by IDs.
+func (uuo *UserUpdateOne) RemoveBlockingIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveBlockingIDs(ids...)
+	return uuo
+}
+
+// RemoveBlocking removes "blocking" edges to BlockRelation entities.
+func (uuo *UserUpdateOne) RemoveBlocking(b ...*BlockRelation) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.RemoveBlockingIDs(ids...)
+}
+
+// ClearBlockedBy clears all "blocked_by" edges to the BlockRelation entity.
+func (uuo *UserUpdateOne) ClearBlockedBy() *UserUpdateOne {
+	uuo.mutation.ClearBlockedBy()
+	return uuo
+}
+
+// RemoveBlockedByIDs removes the "blocked_by" edge to BlockRelation entities by IDs.
+func (uuo *UserUpdateOne) RemoveBlockedByIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveBlockedByIDs(ids...)
+	return uuo
+}
+
+// RemoveBlockedBy removes "blocked_by" edges to BlockRelation entities.
+func (uuo *UserUpdateOne) RemoveBlockedBy(b ...*BlockRelation) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.RemoveBlockedByIDs(ids...)
 }
 
 // ClearDailyTasks clears all "daily_tasks" edges to the DailyTask entity.
@@ -1651,6 +1886,96 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(followrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.BlockingCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockingTable,
+			Columns: []string{user.BlockingColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedBlockingIDs(); len(nodes) > 0 && !uuo.mutation.BlockingCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockingTable,
+			Columns: []string{user.BlockingColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.BlockingIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockingTable,
+			Columns: []string{user.BlockingColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.BlockedByCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedByTable,
+			Columns: []string{user.BlockedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedBlockedByIDs(); len(nodes) > 0 && !uuo.mutation.BlockedByCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedByTable,
+			Columns: []string{user.BlockedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.BlockedByIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.BlockedByTable,
+			Columns: []string{user.BlockedByColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(blockrelation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

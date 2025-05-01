@@ -41,7 +41,7 @@ func TestUserUsecase_Delete(t *testing.T) {
 			mockPostRepo := &mock.MockPostRepository{}
 			mockPetRepo := &mock.MockPetRepository{}
 
-			usecase := NewUserUsecase(mockUserRepo, mockStorageRepo, mockPostRepo, mockPetRepo, nil)
+			usecase := NewUserUsecase(mockUserRepo, mockStorageRepo, mockPostRepo, mockPetRepo, nil, nil)
 			err := usecase.Delete(tc.id)
 			if tc.expectedError != nil {
 				assert.Equal(t, tc.expectedError, err)

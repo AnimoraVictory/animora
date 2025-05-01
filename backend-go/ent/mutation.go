@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/aki-13627/animalia/backend-go/ent/blockrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
@@ -35,6 +36,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeBlockRelation  = "BlockRelation"
 	TypeComment        = "Comment"
 	TypeDailyTask      = "DailyTask"
 	TypeDeviceToken    = "DeviceToken"
@@ -45,6 +47,464 @@ const (
 	TypeTaskType       = "TaskType"
 	TypeUser           = "User"
 )
+
+// BlockRelationMutation represents an operation that mutates the BlockRelation nodes in the graph.
+type BlockRelationMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	created_at    *time.Time
+	clearedFields map[string]struct{}
+	from          *uuid.UUID
+	clearedfrom   bool
+	to            *uuid.UUID
+	clearedto     bool
+	done          bool
+	oldValue      func(context.Context) (*BlockRelation, error)
+	predicates    []predicate.BlockRelation
+}
+
+var _ ent.Mutation = (*BlockRelationMutation)(nil)
+
+// blockrelationOption allows management of the mutation configuration using functional options.
+type blockrelationOption func(*BlockRelationMutation)
+
+// newBlockRelationMutation creates new mutation for the BlockRelation entity.
+func newBlockRelationMutation(c config, op Op, opts ...blockrelationOption) *BlockRelationMutation {
+	m := &BlockRelationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBlockRelation,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBlockRelationID sets the ID field of the mutation.
+func withBlockRelationID(id uuid.UUID) blockrelationOption {
+	return func(m *BlockRelationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *BlockRelation
+		)
+		m.oldValue = func(ctx context.Context) (*BlockRelation, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().BlockRelation.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBlockRelation sets the old BlockRelation of the mutation.
+func withBlockRelation(node *BlockRelation) blockrelationOption {
+	return func(m *BlockRelationMutation) {
+		m.oldValue = func(context.Context) (*BlockRelation, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BlockRelationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BlockRelationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of BlockRelation entities.
+func (m *BlockRelationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BlockRelationMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BlockRelationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().BlockRelation.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *BlockRelationMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *BlockRelationMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the BlockRelation entity.
+// If the BlockRelation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlockRelationMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *BlockRelationMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetFromID sets the "from" edge to the User entity by id.
+func (m *BlockRelationMutation) SetFromID(id uuid.UUID) {
+	m.from = &id
+}
+
+// ClearFrom clears the "from" edge to the User entity.
+func (m *BlockRelationMutation) ClearFrom() {
+	m.clearedfrom = true
+}
+
+// FromCleared reports if the "from" edge to the User entity was cleared.
+func (m *BlockRelationMutation) FromCleared() bool {
+	return m.clearedfrom
+}
+
+// FromID returns the "from" edge ID in the mutation.
+func (m *BlockRelationMutation) FromID() (id uuid.UUID, exists bool) {
+	if m.from != nil {
+		return *m.from, true
+	}
+	return
+}
+
+// FromIDs returns the "from" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FromID instead. It exists only for internal usage by the builders.
+func (m *BlockRelationMutation) FromIDs() (ids []uuid.UUID) {
+	if id := m.from; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFrom resets all changes to the "from" edge.
+func (m *BlockRelationMutation) ResetFrom() {
+	m.from = nil
+	m.clearedfrom = false
+}
+
+// SetToID sets the "to" edge to the User entity by id.
+func (m *BlockRelationMutation) SetToID(id uuid.UUID) {
+	m.to = &id
+}
+
+// ClearTo clears the "to" edge to the User entity.
+func (m *BlockRelationMutation) ClearTo() {
+	m.clearedto = true
+}
+
+// ToCleared reports if the "to" edge to the User entity was cleared.
+func (m *BlockRelationMutation) ToCleared() bool {
+	return m.clearedto
+}
+
+// ToID returns the "to" edge ID in the mutation.
+func (m *BlockRelationMutation) ToID() (id uuid.UUID, exists bool) {
+	if m.to != nil {
+		return *m.to, true
+	}
+	return
+}
+
+// ToIDs returns the "to" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ToID instead. It exists only for internal usage by the builders.
+func (m *BlockRelationMutation) ToIDs() (ids []uuid.UUID) {
+	if id := m.to; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTo resets all changes to the "to" edge.
+func (m *BlockRelationMutation) ResetTo() {
+	m.to = nil
+	m.clearedto = false
+}
+
+// Where appends a list predicates to the BlockRelationMutation builder.
+func (m *BlockRelationMutation) Where(ps ...predicate.BlockRelation) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BlockRelationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BlockRelationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.BlockRelation, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BlockRelationMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BlockRelationMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (BlockRelation).
+func (m *BlockRelationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BlockRelationMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.created_at != nil {
+		fields = append(fields, blockrelation.FieldCreatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BlockRelationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case blockrelation.FieldCreatedAt:
+		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BlockRelationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case blockrelation.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown BlockRelation field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlockRelationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case blockrelation.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown BlockRelation field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BlockRelationMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BlockRelationMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BlockRelationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown BlockRelation numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BlockRelationMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BlockRelationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BlockRelationMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown BlockRelation nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BlockRelationMutation) ResetField(name string) error {
+	switch name {
+	case blockrelation.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown BlockRelation field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BlockRelationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.from != nil {
+		edges = append(edges, blockrelation.EdgeFrom)
+	}
+	if m.to != nil {
+		edges = append(edges, blockrelation.EdgeTo)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BlockRelationMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case blockrelation.EdgeFrom:
+		if id := m.from; id != nil {
+			return []ent.Value{*id}
+		}
+	case blockrelation.EdgeTo:
+		if id := m.to; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BlockRelationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BlockRelationMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BlockRelationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedfrom {
+		edges = append(edges, blockrelation.EdgeFrom)
+	}
+	if m.clearedto {
+		edges = append(edges, blockrelation.EdgeTo)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BlockRelationMutation) EdgeCleared(name string) bool {
+	switch name {
+	case blockrelation.EdgeFrom:
+		return m.clearedfrom
+	case blockrelation.EdgeTo:
+		return m.clearedto
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BlockRelationMutation) ClearEdge(name string) error {
+	switch name {
+	case blockrelation.EdgeFrom:
+		m.ClearFrom()
+		return nil
+	case blockrelation.EdgeTo:
+		m.ClearTo()
+		return nil
+	}
+	return fmt.Errorf("unknown BlockRelation unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BlockRelationMutation) ResetEdge(name string) error {
+	switch name {
+	case blockrelation.EdgeFrom:
+		m.ResetFrom()
+		return nil
+	case blockrelation.EdgeTo:
+		m.ResetTo()
+		return nil
+	}
+	return fmt.Errorf("unknown BlockRelation edge %s", name)
+}
 
 // CommentMutation represents an operation that mutates the Comment nodes in the graph.
 type CommentMutation struct {
@@ -4870,6 +5330,12 @@ type UserMutation struct {
 	followers            map[uuid.UUID]struct{}
 	removedfollowers     map[uuid.UUID]struct{}
 	clearedfollowers     bool
+	blocking             map[uuid.UUID]struct{}
+	removedblocking      map[uuid.UUID]struct{}
+	clearedblocking      bool
+	blocked_by           map[uuid.UUID]struct{}
+	removedblocked_by    map[uuid.UUID]struct{}
+	clearedblocked_by    bool
 	daily_tasks          map[uuid.UUID]struct{}
 	removeddaily_tasks   map[uuid.UUID]struct{}
 	cleareddaily_tasks   bool
@@ -5628,6 +6094,114 @@ func (m *UserMutation) ResetFollowers() {
 	m.removedfollowers = nil
 }
 
+// AddBlockingIDs adds the "blocking" edge to the BlockRelation entity by ids.
+func (m *UserMutation) AddBlockingIDs(ids ...uuid.UUID) {
+	if m.blocking == nil {
+		m.blocking = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.blocking[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBlocking clears the "blocking" edge to the BlockRelation entity.
+func (m *UserMutation) ClearBlocking() {
+	m.clearedblocking = true
+}
+
+// BlockingCleared reports if the "blocking" edge to the BlockRelation entity was cleared.
+func (m *UserMutation) BlockingCleared() bool {
+	return m.clearedblocking
+}
+
+// RemoveBlockingIDs removes the "blocking" edge to the BlockRelation entity by IDs.
+func (m *UserMutation) RemoveBlockingIDs(ids ...uuid.UUID) {
+	if m.removedblocking == nil {
+		m.removedblocking = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.blocking, ids[i])
+		m.removedblocking[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBlocking returns the removed IDs of the "blocking" edge to the BlockRelation entity.
+func (m *UserMutation) RemovedBlockingIDs() (ids []uuid.UUID) {
+	for id := range m.removedblocking {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BlockingIDs returns the "blocking" edge IDs in the mutation.
+func (m *UserMutation) BlockingIDs() (ids []uuid.UUID) {
+	for id := range m.blocking {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBlocking resets all changes to the "blocking" edge.
+func (m *UserMutation) ResetBlocking() {
+	m.blocking = nil
+	m.clearedblocking = false
+	m.removedblocking = nil
+}
+
+// AddBlockedByIDs adds the "blocked_by" edge to the BlockRelation entity by ids.
+func (m *UserMutation) AddBlockedByIDs(ids ...uuid.UUID) {
+	if m.blocked_by == nil {
+		m.blocked_by = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.blocked_by[ids[i]] = struct{}{}
+	}
+}
+
+// ClearBlockedBy clears the "blocked_by" edge to the BlockRelation entity.
+func (m *UserMutation) ClearBlockedBy() {
+	m.clearedblocked_by = true
+}
+
+// BlockedByCleared reports if the "blocked_by" edge to the BlockRelation entity was cleared.
+func (m *UserMutation) BlockedByCleared() bool {
+	return m.clearedblocked_by
+}
+
+// RemoveBlockedByIDs removes the "blocked_by" edge to the BlockRelation entity by IDs.
+func (m *UserMutation) RemoveBlockedByIDs(ids ...uuid.UUID) {
+	if m.removedblocked_by == nil {
+		m.removedblocked_by = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.blocked_by, ids[i])
+		m.removedblocked_by[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedBlockedBy returns the removed IDs of the "blocked_by" edge to the BlockRelation entity.
+func (m *UserMutation) RemovedBlockedByIDs() (ids []uuid.UUID) {
+	for id := range m.removedblocked_by {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// BlockedByIDs returns the "blocked_by" edge IDs in the mutation.
+func (m *UserMutation) BlockedByIDs() (ids []uuid.UUID) {
+	for id := range m.blocked_by {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetBlockedBy resets all changes to the "blocked_by" edge.
+func (m *UserMutation) ResetBlockedBy() {
+	m.blocked_by = nil
+	m.clearedblocked_by = false
+	m.removedblocked_by = nil
+}
+
 // AddDailyTaskIDs adds the "daily_tasks" edge to the DailyTask entity by ids.
 func (m *UserMutation) AddDailyTaskIDs(ids ...uuid.UUID) {
 	if m.daily_tasks == nil {
@@ -6013,7 +6587,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 10)
 	if m.posts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -6031,6 +6605,12 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.followers != nil {
 		edges = append(edges, user.EdgeFollowers)
+	}
+	if m.blocking != nil {
+		edges = append(edges, user.EdgeBlocking)
+	}
+	if m.blocked_by != nil {
+		edges = append(edges, user.EdgeBlockedBy)
 	}
 	if m.daily_tasks != nil {
 		edges = append(edges, user.EdgeDailyTasks)
@@ -6081,6 +6661,18 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeBlocking:
+		ids := make([]ent.Value, 0, len(m.blocking))
+		for id := range m.blocking {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeBlockedBy:
+		ids := make([]ent.Value, 0, len(m.blocked_by))
+		for id := range m.blocked_by {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeDailyTasks:
 		ids := make([]ent.Value, 0, len(m.daily_tasks))
 		for id := range m.daily_tasks {
@@ -6099,7 +6691,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 10)
 	if m.removedposts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -6117,6 +6709,12 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedfollowers != nil {
 		edges = append(edges, user.EdgeFollowers)
+	}
+	if m.removedblocking != nil {
+		edges = append(edges, user.EdgeBlocking)
+	}
+	if m.removedblocked_by != nil {
+		edges = append(edges, user.EdgeBlockedBy)
 	}
 	if m.removeddaily_tasks != nil {
 		edges = append(edges, user.EdgeDailyTasks)
@@ -6167,6 +6765,18 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeBlocking:
+		ids := make([]ent.Value, 0, len(m.removedblocking))
+		for id := range m.removedblocking {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeBlockedBy:
+		ids := make([]ent.Value, 0, len(m.removedblocked_by))
+		for id := range m.removedblocked_by {
+			ids = append(ids, id)
+		}
+		return ids
 	case user.EdgeDailyTasks:
 		ids := make([]ent.Value, 0, len(m.removeddaily_tasks))
 		for id := range m.removeddaily_tasks {
@@ -6185,7 +6795,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 8)
+	edges := make([]string, 0, 10)
 	if m.clearedposts {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -6203,6 +6813,12 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedfollowers {
 		edges = append(edges, user.EdgeFollowers)
+	}
+	if m.clearedblocking {
+		edges = append(edges, user.EdgeBlocking)
+	}
+	if m.clearedblocked_by {
+		edges = append(edges, user.EdgeBlockedBy)
 	}
 	if m.cleareddaily_tasks {
 		edges = append(edges, user.EdgeDailyTasks)
@@ -6229,6 +6845,10 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedfollowing
 	case user.EdgeFollowers:
 		return m.clearedfollowers
+	case user.EdgeBlocking:
+		return m.clearedblocking
+	case user.EdgeBlockedBy:
+		return m.clearedblocked_by
 	case user.EdgeDailyTasks:
 		return m.cleareddaily_tasks
 	case user.EdgeDeviceTokens:
@@ -6266,6 +6886,12 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeFollowers:
 		m.ResetFollowers()
+		return nil
+	case user.EdgeBlocking:
+		m.ResetBlocking()
+		return nil
+	case user.EdgeBlockedBy:
+		m.ResetBlockedBy()
 		return nil
 	case user.EdgeDailyTasks:
 		m.ResetDailyTasks()

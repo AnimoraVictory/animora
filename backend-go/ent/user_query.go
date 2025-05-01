@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/aki-13627/animalia/backend-go/ent/blockrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/comment"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/devicetoken"
@@ -37,6 +38,8 @@ type UserQuery struct {
 	withPets         *PetQuery
 	withFollowing    *FollowRelationQuery
 	withFollowers    *FollowRelationQuery
+	withBlocking     *BlockRelationQuery
+	withBlockedBy    *BlockRelationQuery
 	withDailyTasks   *DailyTaskQuery
 	withDeviceTokens *DeviceTokenQuery
 	// intermediate query (i.e. traversal path).
@@ -200,6 +203,50 @@ func (uq *UserQuery) QueryFollowers() *FollowRelationQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(followrelation.Table, followrelation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.FollowersTable, user.FollowersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBlocking chains the current query on the "blocking" edge.
+func (uq *UserQuery) QueryBlocking() *BlockRelationQuery {
+	query := (&BlockRelationClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(blockrelation.Table, blockrelation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BlockingTable, user.BlockingColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBlockedBy chains the current query on the "blocked_by" edge.
+func (uq *UserQuery) QueryBlockedBy() *BlockRelationQuery {
+	query := (&BlockRelationClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(blockrelation.Table, blockrelation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.BlockedByTable, user.BlockedByColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -449,6 +496,8 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withPets:         uq.withPets.Clone(),
 		withFollowing:    uq.withFollowing.Clone(),
 		withFollowers:    uq.withFollowers.Clone(),
+		withBlocking:     uq.withBlocking.Clone(),
+		withBlockedBy:    uq.withBlockedBy.Clone(),
 		withDailyTasks:   uq.withDailyTasks.Clone(),
 		withDeviceTokens: uq.withDeviceTokens.Clone(),
 		// clone intermediate query.
@@ -520,6 +569,28 @@ func (uq *UserQuery) WithFollowers(opts ...func(*FollowRelationQuery)) *UserQuer
 		opt(query)
 	}
 	uq.withFollowers = query
+	return uq
+}
+
+// WithBlocking tells the query-builder to eager-load the nodes that are connected to
+// the "blocking" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithBlocking(opts ...func(*BlockRelationQuery)) *UserQuery {
+	query := (&BlockRelationClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withBlocking = query
+	return uq
+}
+
+// WithBlockedBy tells the query-builder to eager-load the nodes that are connected to
+// the "blocked_by" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithBlockedBy(opts ...func(*BlockRelationQuery)) *UserQuery {
+	query := (&BlockRelationClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withBlockedBy = query
 	return uq
 }
 
@@ -623,13 +694,15 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [8]bool{
+		loadedTypes = [10]bool{
 			uq.withPosts != nil,
 			uq.withComments != nil,
 			uq.withLikes != nil,
 			uq.withPets != nil,
 			uq.withFollowing != nil,
 			uq.withFollowers != nil,
+			uq.withBlocking != nil,
+			uq.withBlockedBy != nil,
 			uq.withDailyTasks != nil,
 			uq.withDeviceTokens != nil,
 		}
@@ -691,6 +764,20 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadFollowers(ctx, query, nodes,
 			func(n *User) { n.Edges.Followers = []*FollowRelation{} },
 			func(n *User, e *FollowRelation) { n.Edges.Followers = append(n.Edges.Followers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withBlocking; query != nil {
+		if err := uq.loadBlocking(ctx, query, nodes,
+			func(n *User) { n.Edges.Blocking = []*BlockRelation{} },
+			func(n *User, e *BlockRelation) { n.Edges.Blocking = append(n.Edges.Blocking, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withBlockedBy; query != nil {
+		if err := uq.loadBlockedBy(ctx, query, nodes,
+			func(n *User) { n.Edges.BlockedBy = []*BlockRelation{} },
+			func(n *User, e *BlockRelation) { n.Edges.BlockedBy = append(n.Edges.BlockedBy, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -892,6 +979,68 @@ func (uq *UserQuery) loadFollowers(ctx context.Context, query *FollowRelationQue
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_followers" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadBlocking(ctx context.Context, query *BlockRelationQuery, nodes []*User, init func(*User), assign func(*User, *BlockRelation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.BlockRelation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.BlockingColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_blocking
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_blocking" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_blocking" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadBlockedBy(ctx context.Context, query *BlockRelationQuery, nodes []*User, init func(*User), assign func(*User, *BlockRelation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.BlockRelation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.BlockedByColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_blocked_by
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_blocked_by" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_blocked_by" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

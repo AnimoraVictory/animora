@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
-	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
@@ -68,6 +67,12 @@ func (r *UserRepository) FindByEmail(email string) (*ent.User, error) {
 			func(q *ent.FollowRelationQuery) {
 				q.WithFrom()
 			}).
+		WithBlocking(func(q *ent.BlockRelationQuery) {
+			q.WithTo()
+		}).
+		WithBlockedBy(func(q *ent.BlockRelationQuery) {
+			q.WithFrom()
+		}).
 		WithDailyTasks(func(q *ent.DailyTaskQuery) {
 			q.WithPost(func(pq *ent.PostQuery) {
 				pq.Where(post.DeletedAtIsNil()).
@@ -118,52 +123,4 @@ func (r *UserRepository) UpdateStreakCount(id uuid.UUID, streak int) error {
 func (r *UserRepository) Delete(id uuid.UUID) error {
 	err := r.db.User.DeleteOneID(id).Exec(context.Background())
 	return err
-}
-
-func (r *UserRepository) Follow(toId string, fromId string) error {
-	fromUUID, err := uuid.Parse(fromId)
-	if err != nil {
-		return err
-	}
-
-	toUUID, err := uuid.Parse(toId)
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.FollowRelation.Create().
-		SetFromID(fromUUID).
-		SetToID(toUUID).
-		Save(context.Background())
-	if err != nil {
-		return fmt.Errorf("failed to create follow relation in database: %w", err)
-	}
-
-	return nil
-}
-
-func (r *UserRepository) Unfollow(toId string, fromId string) error {
-	fromUUID, err := uuid.Parse(fromId)
-	if err != nil {
-		return err
-	}
-
-	toUUID, err := uuid.Parse(toId)
-	if err != nil {
-		return err
-	}
-
-	_, err = r.db.FollowRelation.
-		Delete().
-		Where(
-			followrelation.HasFromWith(user.ID(fromUUID)),
-			followrelation.HasToWith(user.ID(toUUID)),
-		).
-		Exec(context.Background())
-
-	if err != nil {
-		return fmt.Errorf("failed to unfollow: %w", err)
-	}
-
-	return nil
 }

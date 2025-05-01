@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
@@ -19,66 +20,50 @@ func NewFollowRelationRepository(db *ent.Client) *FollowRelationRepository {
 	}
 }
 
-func (r *FollowRelationRepository) CountFollows(userId string) (int, error) {
-	userUUID, err := uuid.Parse(userId)
+func (r *FollowRelationRepository) Follow(toId string, fromId string) error {
+	fromUUID, err := uuid.Parse(fromId)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	count, err := r.db.FollowRelation.Query().
-		Where(followrelation.HasFromWith(user.ID(userUUID))).
-		Count(context.Background())
+
+	toUUID, err := uuid.Parse(toId)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return int(count), nil
+
+	_, err = r.db.FollowRelation.Create().
+		SetFromID(fromUUID).
+		SetToID(toUUID).
+		Save(context.Background())
+	if err != nil {
+		return fmt.Errorf("failed to create follow relation in database: %w", err)
+	}
+
+	return nil
 }
 
-func (r *FollowRelationRepository) CountFollowers(userId string) (int, error) {
-	userUUID, err := uuid.Parse(userId)
+func (r *FollowRelationRepository) Unfollow(toId string, fromId string) error {
+	fromUUID, err := uuid.Parse(fromId)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	count, err := r.db.FollowRelation.Query().
-		Where(followrelation.HasToWith(user.ID(userUUID))).
-		Count(context.Background())
-	if err != nil {
-		return 0, err
-	}
-	return int(count), nil
-}
 
-func (r *FollowRelationRepository) Followings(userId string) ([]*ent.User, error) {
-	userUUID, err := uuid.Parse(userId)
+	toUUID, err := uuid.Parse(toId)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	followings, err := r.db.FollowRelation.Query().
-		Where(followrelation.HasFromWith(user.ID(userUUID))).
-		All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	users := make([]*ent.User, len(followings))
-	for i, following := range followings {
-		users[i] = following.Edges.To
-	}
-	return users, nil
-}
 
-func (r *FollowRelationRepository) Followers(userId string) ([]*ent.User, error) {
-	userUUID, err := uuid.Parse(userId)
+	_, err = r.db.FollowRelation.
+		Delete().
+		Where(
+			followrelation.HasFromWith(user.ID(fromUUID)),
+			followrelation.HasToWith(user.ID(toUUID)),
+		).
+		Exec(context.Background())
+
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to unfollow: %w", err)
 	}
-	followers, err := r.db.FollowRelation.Query().
-		Where(followrelation.HasToWith(user.ID(userUUID))).
-		All(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	users := make([]*ent.User, len(followers))
-	for i, follower := range followers {
-		users[i] = follower.Edges.From
-	}
-	return users, nil
+
+	return nil
 }
