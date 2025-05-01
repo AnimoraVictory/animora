@@ -64,10 +64,16 @@ const PostMenu: React.FC<Props> = ({ visible, onClose, onReport }) => {
         useNativeDriver: true,
       }).start();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+    >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay} />
       </TouchableWithoutFeedback>
