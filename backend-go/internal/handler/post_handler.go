@@ -94,12 +94,12 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 			"error": "failed to parse algorithm API URL",
 		})
 	}
-	algorithmApiURL.Path = "/timeline"
+	requestUrl := algorithmApiURL.JoinPath("timeline")
 
 	// POSTリクエストを作成
 	req, err := http.NewRequest(
 		"POST",
-		algorithmApiURL.String(),
+		requestUrl.String(),
 		bytes.NewBuffer(jsonBodyForFastAPI),
 	)
 	if err != nil {
