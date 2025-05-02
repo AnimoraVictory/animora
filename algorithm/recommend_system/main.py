@@ -108,6 +108,13 @@ app = FastAPI(lifespan=lifespan)
 
 
 # ----------------------------------
+# / エンドポイント
+# ----------------------------------
+@app.get("/")
+def root():
+    return {"message": "Service is up and running"}
+
+# ----------------------------------
 # /reload エンドポイント
 # ----------------------------------
 @app.post("/reload")
