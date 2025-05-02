@@ -125,8 +125,6 @@ export default function useUserProfileModal({ email, visible }: Props) {
     },
   });
 
-  console.log(user?.id);
-
   const unBlockMutation = useMutation({
     mutationFn: () => {
       if (!user?.id || !currentUser?.id) {
