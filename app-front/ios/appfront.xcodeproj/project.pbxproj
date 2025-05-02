@@ -423,7 +423,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = animora;
+				PRODUCT_BUNDLE_IDENTIFIER = Animora;
 				PRODUCT_NAME = Animora;
 				SWIFT_OBJC_BRIDGING_HEADER = "appfront/appfront-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
