@@ -23,5 +23,8 @@ new AnimoraStack(app, `AnimoraStack-${process.env.NAME}`, {
 
 // レコメンドシステムスタックを作成
 new RecommendStack(app, `AnimoraRecommend-${process.env.NAME}`, {
-  env: { region: process.env.AWS_REGION },
+  env: {
+    account: process.env.AWS_ACCOUNT_ID,
+    region: process.env.AWS_REGION
+  },
 });

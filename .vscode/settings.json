@@ -2,5 +2,21 @@
   "cSpell.words": [
     "Animalia"
   ],
-  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "python.analysis.extraPaths": [
+    "/Users/Shared/Desktop/KOCHI/Graduation-Research-1/Machine_Learning/src/utils/",
+    "/Users/Shared/Desktop/KOCHI/Graduation-Research-1/Machine_Learning/src/",
+    "/home/ubuntu/.local/lib/python3.8/site-packages/",
+    "/home/azureuser/deep-learning-with-pytorch/.venv/lib/python3.12/site-packages/",
+    "/home/azureuser/data-science/pytorch_advanced/.venv/lib/python3.12/site-packages/",
+    "/home/azureuser/topico_mmm/.venv/lib/python3.11/site-packages/",
+    "/home/azureuser/app-dev/.venv/lib/python3.12/site-packages/",
+    "/home/azureuser/animalia/algorithm/.venv/lib/python3.12/site-packages/",
+    "/home/azureuser/animalia/algorithm/.venv/lib/python3.12/site-packages/tensorboardX/",
+    "./algorithm/recommend_system/01_heuristic/generate_recommendation"
+  ],
 }
