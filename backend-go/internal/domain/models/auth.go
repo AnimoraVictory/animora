@@ -31,7 +31,7 @@ type UserResponse struct {
 	FollowersCount int                `json:"followersCount"`
 	FollowsCount   int                `json:"followsCount"`
 	DailyTask      DailyTaskResponse  `json:"dailyTask"`
-	StreakCount    int                `json:"streakCount"`
+	StreakCount    uint32             `json:"streakCount"`
 	BlockingUsers  []UserBaseResponse `json:"blockingUsers"`
 	BlockedByUsers []UserBaseResponse `json:"blockedByUsers"`
 }

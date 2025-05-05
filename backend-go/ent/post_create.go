@@ -29,15 +29,15 @@ type PostCreate struct {
 }
 
 // SetIndex sets the "index" field.
-func (pc *PostCreate) SetIndex(i int) *PostCreate {
-	pc.mutation.SetIndex(i)
+func (pc *PostCreate) SetIndex(u uint32) *PostCreate {
+	pc.mutation.SetIndex(u)
 	return pc
 }
 
 // SetNillableIndex sets the "index" field if the given value is not nil.
-func (pc *PostCreate) SetNillableIndex(i *int) *PostCreate {
-	if i != nil {
-		pc.SetIndex(*i)
+func (pc *PostCreate) SetNillableIndex(u *uint32) *PostCreate {
+	if u != nil {
+		pc.SetIndex(*u)
 	}
 	return pc
 }
@@ -203,11 +203,6 @@ func (pc *PostCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *PostCreate) check() error {
-	if v, ok := pc.mutation.Index(); ok {
-		if err := post.IndexValidator(v); err != nil {
-			return &ValidationError{Name: "index", err: fmt.Errorf(`ent: validator failed for field "Post.index": %w`, err)}
-		}
-	}
 	if _, ok := pc.mutation.Caption(); !ok {
 		return &ValidationError{Name: "caption", err: errors.New(`ent: missing required field "Post.caption"`)}
 	}
@@ -267,7 +262,7 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := pc.mutation.Index(); ok {
-		_spec.SetField(post.FieldIndex, field.TypeInt, value)
+		_spec.SetField(post.FieldIndex, field.TypeUint32, value)
 		_node.Index = value
 	}
 	if value, ok := pc.mutation.Caption(); ok {

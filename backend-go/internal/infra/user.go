@@ -41,7 +41,7 @@ func (r *UserRepository) Create(name, email string) (*ent.User, error) {
 	user, err := r.db.User.Create().
 		SetName(name).
 		SetEmail(email).
-		SetIndex(userCount).
+		SetIndex(uint32(userCount)).
 		Save(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user in database: %w", err)
@@ -114,7 +114,7 @@ func (r *UserRepository) Update(id uuid.UUID, name string, description string, i
 	return err
 }
 
-func (r *UserRepository) UpdateStreakCount(id uuid.UUID, streak int) error {
+func (r *UserRepository) UpdateStreakCount(id uuid.UUID, streak uint32) error {
 	_, err := r.db.User.UpdateOneID(id).
 		SetStreakCount(streak).
 		Save(context.Background())

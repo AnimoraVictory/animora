@@ -46,7 +46,7 @@ func (u *UserUsecase) Update(id string, name string, description string, newImag
 	return u.userRepository.Update(userUUID, name, description, newImageKey)
 }
 
-func (u *UserUsecase) UpdateStreakCount(id string, streakCount int) error {
+func (u *UserUsecase) UpdateStreakCount(id string, streakCount uint32) error {
 	userUUID, err := uuid.Parse(id)
 	if err != nil {
 		return err

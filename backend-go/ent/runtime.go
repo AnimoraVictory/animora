@@ -132,10 +132,6 @@ func init() {
 	pet.DefaultID = petDescID.Default.(func() uuid.UUID)
 	postFields := schema.Post{}.Fields()
 	_ = postFields
-	// postDescIndex is the schema descriptor for index field.
-	postDescIndex := postFields[1].Descriptor()
-	// post.IndexValidator is a validator for the "index" field. It is called by the builders before save.
-	post.IndexValidator = postDescIndex.Validators[0].(func(int) error)
 	// postDescCaption is the schema descriptor for caption field.
 	postDescCaption := postFields[2].Descriptor()
 	// post.CaptionValidator is a validator for the "caption" field. It is called by the builders before save.
@@ -154,10 +150,6 @@ func init() {
 	post.DefaultID = postDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
-	// userDescIndex is the schema descriptor for index field.
-	userDescIndex := userFields[1].Descriptor()
-	// user.IndexValidator is a validator for the "index" field. It is called by the builders before save.
-	user.IndexValidator = userDescIndex.Validators[0].(func(int) error)
 	// userDescEmail is the schema descriptor for email field.
 	userDescEmail := userFields[2].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
@@ -173,7 +165,7 @@ func init() {
 	// userDescStreakCount is the schema descriptor for streak_count field.
 	userDescStreakCount := userFields[5].Descriptor()
 	// user.DefaultStreakCount holds the default value on creation for the streak_count field.
-	user.DefaultStreakCount = userDescStreakCount.Default.(int)
+	user.DefaultStreakCount = userDescStreakCount.Default.(uint32)
 	// userDescCreatedAt is the schema descriptor for created_at field.
 	userDescCreatedAt := userFields[7].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.

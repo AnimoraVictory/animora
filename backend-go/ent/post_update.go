@@ -272,7 +272,7 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if pu.mutation.IndexCleared() {
-		_spec.ClearField(post.FieldIndex, field.TypeInt)
+		_spec.ClearField(post.FieldIndex, field.TypeUint32)
 	}
 	if value, ok := pu.mutation.Caption(); ok {
 		_spec.SetField(post.FieldCaption, field.TypeString, value)
@@ -726,7 +726,7 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 		}
 	}
 	if puo.mutation.IndexCleared() {
-		_spec.ClearField(post.FieldIndex, field.TypeInt)
+		_spec.ClearField(post.FieldIndex, field.TypeUint32)
 	}
 	if value, ok := puo.mutation.Caption(); ok {
 		_spec.SetField(post.FieldCaption, field.TypeString, value)

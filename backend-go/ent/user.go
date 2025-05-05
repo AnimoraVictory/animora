@@ -19,7 +19,7 @@ type User struct {
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
 	// Index holds the value of the "index" field.
-	Index int `json:"index,omitempty"`
+	Index uint32 `json:"index,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Name holds the value of the "name" field.
@@ -27,7 +27,7 @@ type User struct {
 	// Bio holds the value of the "bio" field.
 	Bio string `json:"bio,omitempty"`
 	// StreakCount holds the value of the "streak_count" field.
-	StreakCount int `json:"streak_count,omitempty"`
+	StreakCount uint32 `json:"streak_count,omitempty"`
 	// IconImageKey holds the value of the "icon_image_key" field.
 	IconImageKey string `json:"icon_image_key,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -193,7 +193,7 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field index", values[i])
 			} else if value.Valid {
-				u.Index = int(value.Int64)
+				u.Index = uint32(value.Int64)
 			}
 		case user.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -217,7 +217,7 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field streak_count", values[i])
 			} else if value.Valid {
-				u.StreakCount = int(value.Int64)
+				u.StreakCount = uint32(value.Int64)
 			}
 		case user.FieldIconImageKey:
 			if value, ok := values[i].(*sql.NullString); !ok {

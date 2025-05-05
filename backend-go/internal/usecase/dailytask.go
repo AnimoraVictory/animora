@@ -47,7 +47,7 @@ func (u *DailyTaskUsecase) UpdateStreakCount(userId string) error {
 }
 
 // 次のstreakCountを計算する
-func (u *DailyTaskUsecase) GetNextStreakCount(prevTask *models.DailyTaskWithEdges) (int, error) {
+func (u *DailyTaskUsecase) GetNextStreakCount(prevTask *models.DailyTaskWithEdges) (uint32, error) {
 	if prevTask == nil {
 		// ユーザーにとって最初のタスク
 		return 1, nil

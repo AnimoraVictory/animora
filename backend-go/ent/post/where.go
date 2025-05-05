@@ -57,7 +57,7 @@ func IDLTE(id uuid.UUID) predicate.Post {
 }
 
 // Index applies equality check predicate on the "index" field. It's identical to IndexEQ.
-func Index(v int) predicate.Post {
+func Index(v uint32) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldIndex, v))
 }
 
@@ -82,42 +82,42 @@ func DeletedAt(v time.Time) predicate.Post {
 }
 
 // IndexEQ applies the EQ predicate on the "index" field.
-func IndexEQ(v int) predicate.Post {
+func IndexEQ(v uint32) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldIndex, v))
 }
 
 // IndexNEQ applies the NEQ predicate on the "index" field.
-func IndexNEQ(v int) predicate.Post {
+func IndexNEQ(v uint32) predicate.Post {
 	return predicate.Post(sql.FieldNEQ(FieldIndex, v))
 }
 
 // IndexIn applies the In predicate on the "index" field.
-func IndexIn(vs ...int) predicate.Post {
+func IndexIn(vs ...uint32) predicate.Post {
 	return predicate.Post(sql.FieldIn(FieldIndex, vs...))
 }
 
 // IndexNotIn applies the NotIn predicate on the "index" field.
-func IndexNotIn(vs ...int) predicate.Post {
+func IndexNotIn(vs ...uint32) predicate.Post {
 	return predicate.Post(sql.FieldNotIn(FieldIndex, vs...))
 }
 
 // IndexGT applies the GT predicate on the "index" field.
-func IndexGT(v int) predicate.Post {
+func IndexGT(v uint32) predicate.Post {
 	return predicate.Post(sql.FieldGT(FieldIndex, v))
 }
 
 // IndexGTE applies the GTE predicate on the "index" field.
-func IndexGTE(v int) predicate.Post {
+func IndexGTE(v uint32) predicate.Post {
 	return predicate.Post(sql.FieldGTE(FieldIndex, v))
 }
 
 // IndexLT applies the LT predicate on the "index" field.
-func IndexLT(v int) predicate.Post {
+func IndexLT(v uint32) predicate.Post {
 	return predicate.Post(sql.FieldLT(FieldIndex, v))
 }
 
 // IndexLTE applies the LTE predicate on the "index" field.
-func IndexLTE(v int) predicate.Post {
+func IndexLTE(v uint32) predicate.Post {
 	return predicate.Post(sql.FieldLTE(FieldIndex, v))
 }
 
