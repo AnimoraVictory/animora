@@ -1,0 +1,15 @@
+hatano-task:
+  id: "a3cb4962-6c1a-4aa2-bbb4-006a45b9794c"
+  created_at: <%= Time.current %>
+  target_date: <%= 1.day.from_now %>
+  type: "eating"
+  post_daily_task: "9a3a407d-edc6-49e8-9448-68a592be14cf" # post1
+  user_daily_tasks: "86552ff6-f820-4aa2-b372-866dc38b4a4b" # hatano
+
+kaku-task:
+  id: "5595db5e-0c6e-4bf1-9c07-4c22529c7809"
+  created_at: <%= Time.current %>
+  target_date: <%= 1.day.from_now %>
+  type: "eating"
+  post_daily_task: "7887785f-f37b-4796-82fe-1bb33df22e77" # post2
+  user_daily_tasks: "2a9165fe-8f3b-4e41-a846-e1fc73f32fae" # kaku

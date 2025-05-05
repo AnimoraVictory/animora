@@ -1,0 +1,14 @@
+comment1:
+  id: "57dd3803-c2fb-45f7-a1df-01e282b47b7c"
+  content: "He looks so happy! What breed is he?"
+  post_comments: "9a3a407d-edc6-49e8-9448-68a592be14cf" # post1
+  user_comments: "86552ff6-f820-4aa2-b372-866dc38b4a4b" # hatano
+  created_at: <%= Time.current %>
+
+comment2:
+  id: "7887785f-f37b-4796-82fe-1bb33df22e77" 
+  content: "Luna's New Toy"
+  post_comments: "7887785f-f37b-4796-82fe-1bb33df22e77" # post2
+  user_comments: "2a9165fe-8f3b-4e41-a846-e1fc73f32fae" # kaku
+  created_at: <%= Time.current %>
+

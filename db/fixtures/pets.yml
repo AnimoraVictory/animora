@@ -1,0 +1,19 @@
+hatano-pet:
+  id: "8f236828-320c-4ff9-a7ec-b306829f05e8"
+  name: "Max"
+  birth_day: "2023-01-15"
+  type: "dog"
+  species: "saluki"
+  image_key: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"
+  user_pets: "86552ff6-f820-4aa2-b372-866dc38b4a4b" # hatano
+  created_at: <%= Time.current %>
+
+kaku-pet:
+  id: "475cc3a6-baa1-4a9e-a3a8-c0eaa8c6c7c1"
+  name: "Luna"
+  birth_day: "2022-05-10"
+  type: "cat"
+  species: "siamese"
+  image_key: "pets/26c4d55c-c16b-49b7-a4ef-5daa6ef2777f-BAB51C25-2C0A-4EC9-B7F5-96CAE90B0C48.jpg"
+  user_pets: "2a9165fe-8f3b-4e41-a846-e1fc73f32fae" # kaku
+  created_at: <%= Time.current %>

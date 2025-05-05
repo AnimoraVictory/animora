@@ -7,7 +7,6 @@ import (
 
 	"github.com/aki-13627/animalia/backend-go/ent"
 	"github.com/aki-13627/animalia/backend-go/internal/routes"
-	"github.com/aki-13627/animalia/backend-go/internal/seed"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -48,11 +47,6 @@ func main() {
 		app.Logger.SetLevel(2)
 	} else {
 		app.Logger.SetLevel(1)
-	}
-
-	isSeed := os.Getenv("SEED")
-	if isSeed == "true" {
-		seed.SeedData(client)
 	}
 
 	// Set up middleware
