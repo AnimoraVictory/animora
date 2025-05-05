@@ -48,7 +48,7 @@ func (r *DailyTaskRepository) GetLastDailyTask(userId uuid.UUID) (*models.DailyT
 		Limit(1).
 		WithPost().
 		WithUser().
-		Only(context.Background())
+		First(context.Background())
 	if ent.IsNotFound(err) {
 		return nil, nil
 	}
@@ -68,7 +68,7 @@ func (r *DailyTaskRepository) GetPreviousDailyTask(userId uuid.UUID) (*models.Da
 		Limit(1).
 		WithPost().
 		WithUser().
-		Only(context.Background())
+		First(context.Background())
 	if ent.IsNotFound(err) {
 		return nil, nil
 	}
