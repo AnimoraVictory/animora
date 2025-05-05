@@ -7,6 +7,8 @@ codegen:
 create-model:
 	go run -mod=mod entgo.io/ent/cmd/ent new $(NAME)
 
+build-all: build-api build-dailytask build-dailytask-push-notification build-health-check
+
 build-api:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin/api/bootstrap ./cmd/lambda/api
 
