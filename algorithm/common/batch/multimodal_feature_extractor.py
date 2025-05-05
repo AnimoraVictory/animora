@@ -10,7 +10,7 @@ from io import BytesIO
 from PIL import Image
 from psycopg2.extras import DictCursor
 from dotenv import load_dotenv, find_dotenv
-from common.utils.database import get_connection
+from common.database.connection import get_connection
 from common.utils.preprocess import compute_text_embeddings, compute_image_embeddings
 from common.utils.s3 import get_presigned_url
 

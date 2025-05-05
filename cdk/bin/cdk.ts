@@ -2,6 +2,7 @@
 import * as cdk from "aws-cdk-lib";
 import { AnimoraStack } from "../lib/stack";
 import { InfraStack } from "../lib/ecr-stack";
+import { RecommendStack } from "../lib/recommend-stack";
 import * as dotenv from "dotenv";
 import path = require("path");
 
@@ -18,4 +19,9 @@ const ecrStack = new InfraStack(app, `AnimoraInfra-${process.env.NAME}`, {
 new AnimoraStack(app, `AnimoraStack-${process.env.NAME}`, {
   env: { region: process.env.AWS_REGION },
   ecrRepositoryName: ecrStack.algorithmRepo.repositoryName,
+});
+
+// レコメンドシステムスタックを作成
+new RecommendStack(app, `AnimoraRecommend-${process.env.NAME}`, {
+  env: { region: process.env.AWS_REGION },
 });
