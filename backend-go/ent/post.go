@@ -13,7 +13,6 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	pgvector "github.com/pgvector/pgvector-go"
 )
 
 // Post is the model entity for the Post schema.
@@ -31,8 +30,6 @@ type Post struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt time.Time `json:"deleted_at,omitempty"`
-	// ImageFeature holds the value of the "image_feature" field.
-	ImageFeature pgvector.Vector `json:"image_feature,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PostQuery when eager-loading is set.
 	Edges        PostEdges `json:"edges"`
@@ -100,8 +97,6 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case post.FieldImageFeature:
-			values[i] = new(pgvector.Vector)
 		case post.FieldIndex:
 			values[i] = new(sql.NullInt64)
 		case post.FieldCaption, post.FieldImageKey:
@@ -162,12 +157,6 @@ func (po *Post) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				po.DeletedAt = value.Time
-			}
-		case post.FieldImageFeature:
-			if value, ok := values[i].(*pgvector.Vector); !ok {
-				return fmt.Errorf("unexpected type %T for field image_feature", values[i])
-			} else if value != nil {
-				po.ImageFeature = *value
 			}
 		case post.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -246,9 +235,6 @@ func (po *Post) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("deleted_at=")
 	builder.WriteString(po.DeletedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("image_feature=")
-	builder.WriteString(fmt.Sprintf("%v", po.ImageFeature))
 	builder.WriteByte(')')
 	return builder.String()
 }

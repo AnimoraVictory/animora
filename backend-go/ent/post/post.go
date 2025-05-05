@@ -25,8 +25,6 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldImageFeature holds the string denoting the image_feature field in the database.
-	FieldImageFeature = "image_feature"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeComments holds the string denoting the comments edge name in mutations.
@@ -75,7 +73,6 @@ var Columns = []string{
 	FieldImageKey,
 	FieldCreatedAt,
 	FieldDeletedAt,
-	FieldImageFeature,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "posts"
@@ -143,11 +140,6 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
-}
-
-// ByImageFeature orders the results by the image_feature field.
-func ByImageFeature(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldImageFeature, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

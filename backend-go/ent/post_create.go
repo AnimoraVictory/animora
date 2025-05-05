@@ -18,7 +18,6 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/post"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	pgvector "github.com/pgvector/pgvector-go"
 )
 
 // PostCreate is the builder for creating a Post entity.
@@ -79,20 +78,6 @@ func (pc *PostCreate) SetDeletedAt(t time.Time) *PostCreate {
 func (pc *PostCreate) SetNillableDeletedAt(t *time.Time) *PostCreate {
 	if t != nil {
 		pc.SetDeletedAt(*t)
-	}
-	return pc
-}
-
-// SetImageFeature sets the "image_feature" field.
-func (pc *PostCreate) SetImageFeature(pg pgvector.Vector) *PostCreate {
-	pc.mutation.SetImageFeature(pg)
-	return pc
-}
-
-// SetNillableImageFeature sets the "image_feature" field if the given value is not nil.
-func (pc *PostCreate) SetNillableImageFeature(pg *pgvector.Vector) *PostCreate {
-	if pg != nil {
-		pc.SetImageFeature(*pg)
 	}
 	return pc
 }
@@ -301,10 +286,6 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_spec.SetField(post.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = value
 	}
-	if value, ok := pc.mutation.ImageFeature(); ok {
-		_spec.SetField(post.FieldImageFeature, field.TypeOther, value)
-		_node.ImageFeature = value
-	}
 	if nodes := pc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -476,24 +457,6 @@ func (u *PostUpsert) ClearDeletedAt() *PostUpsert {
 	return u
 }
 
-// SetImageFeature sets the "image_feature" field.
-func (u *PostUpsert) SetImageFeature(v pgvector.Vector) *PostUpsert {
-	u.Set(post.FieldImageFeature, v)
-	return u
-}
-
-// UpdateImageFeature sets the "image_feature" field to the value that was provided on create.
-func (u *PostUpsert) UpdateImageFeature() *PostUpsert {
-	u.SetExcluded(post.FieldImageFeature)
-	return u
-}
-
-// ClearImageFeature clears the value of the "image_feature" field.
-func (u *PostUpsert) ClearImageFeature() *PostUpsert {
-	u.SetNull(post.FieldImageFeature)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -605,27 +568,6 @@ func (u *PostUpsertOne) UpdateDeletedAt() *PostUpsertOne {
 func (u *PostUpsertOne) ClearDeletedAt() *PostUpsertOne {
 	return u.Update(func(s *PostUpsert) {
 		s.ClearDeletedAt()
-	})
-}
-
-// SetImageFeature sets the "image_feature" field.
-func (u *PostUpsertOne) SetImageFeature(v pgvector.Vector) *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.SetImageFeature(v)
-	})
-}
-
-// UpdateImageFeature sets the "image_feature" field to the value that was provided on create.
-func (u *PostUpsertOne) UpdateImageFeature() *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.UpdateImageFeature()
-	})
-}
-
-// ClearImageFeature clears the value of the "image_feature" field.
-func (u *PostUpsertOne) ClearImageFeature() *PostUpsertOne {
-	return u.Update(func(s *PostUpsert) {
-		s.ClearImageFeature()
 	})
 }
 
@@ -907,27 +849,6 @@ func (u *PostUpsertBulk) UpdateDeletedAt() *PostUpsertBulk {
 func (u *PostUpsertBulk) ClearDeletedAt() *PostUpsertBulk {
 	return u.Update(func(s *PostUpsert) {
 		s.ClearDeletedAt()
-	})
-}
-
-// SetImageFeature sets the "image_feature" field.
-func (u *PostUpsertBulk) SetImageFeature(v pgvector.Vector) *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.SetImageFeature(v)
-	})
-}
-
-// UpdateImageFeature sets the "image_feature" field to the value that was provided on create.
-func (u *PostUpsertBulk) UpdateImageFeature() *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.UpdateImageFeature()
-	})
-}
-
-// ClearImageFeature clears the value of the "image_feature" field.
-func (u *PostUpsertBulk) ClearImageFeature() *PostUpsertBulk {
-	return u.Update(func(s *PostUpsert) {
-		s.ClearImageFeature()
 	})
 }
 

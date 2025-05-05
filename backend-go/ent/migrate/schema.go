@@ -60,7 +60,7 @@ var (
 				Symbol:     "comments_posts_comments",
 				Columns:    []*schema.Column{CommentsColumns[3]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "comments_users_comments",
@@ -193,7 +193,7 @@ var (
 				Symbol:     "likes_posts_likes",
 				Columns:    []*schema.Column{LikesColumns[2]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "likes_users_likes",
@@ -244,7 +244,6 @@ var (
 		{Name: "image_key", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "image_feature", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "vector(768)"}},
 		{Name: "user_posts", Type: field.TypeUUID},
 	}
 	// PostsTable holds the schema information for the "posts" table.
@@ -255,7 +254,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "posts_users_posts",
-				Columns:    []*schema.Column{PostsColumns[7]},
+				Columns:    []*schema.Column{PostsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

@@ -9,7 +9,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/google/uuid"
-	pgvector "github.com/pgvector/pgvector-go"
 )
 
 // ID filters vertices based on their ID field.
@@ -80,11 +79,6 @@ func CreatedAt(v time.Time) predicate.Post {
 // DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
 func DeletedAt(v time.Time) predicate.Post {
 	return predicate.Post(sql.FieldEQ(FieldDeletedAt, v))
-}
-
-// ImageFeature applies equality check predicate on the "image_feature" field. It's identical to ImageFeatureEQ.
-func ImageFeature(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldImageFeature, v))
 }
 
 // IndexEQ applies the EQ predicate on the "index" field.
@@ -355,56 +349,6 @@ func DeletedAtIsNil() predicate.Post {
 // DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
 func DeletedAtNotNil() predicate.Post {
 	return predicate.Post(sql.FieldNotNull(FieldDeletedAt))
-}
-
-// ImageFeatureEQ applies the EQ predicate on the "image_feature" field.
-func ImageFeatureEQ(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldImageFeature, v))
-}
-
-// ImageFeatureNEQ applies the NEQ predicate on the "image_feature" field.
-func ImageFeatureNEQ(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldNEQ(FieldImageFeature, v))
-}
-
-// ImageFeatureIn applies the In predicate on the "image_feature" field.
-func ImageFeatureIn(vs ...pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldIn(FieldImageFeature, vs...))
-}
-
-// ImageFeatureNotIn applies the NotIn predicate on the "image_feature" field.
-func ImageFeatureNotIn(vs ...pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldNotIn(FieldImageFeature, vs...))
-}
-
-// ImageFeatureGT applies the GT predicate on the "image_feature" field.
-func ImageFeatureGT(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldGT(FieldImageFeature, v))
-}
-
-// ImageFeatureGTE applies the GTE predicate on the "image_feature" field.
-func ImageFeatureGTE(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldGTE(FieldImageFeature, v))
-}
-
-// ImageFeatureLT applies the LT predicate on the "image_feature" field.
-func ImageFeatureLT(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldLT(FieldImageFeature, v))
-}
-
-// ImageFeatureLTE applies the LTE predicate on the "image_feature" field.
-func ImageFeatureLTE(v pgvector.Vector) predicate.Post {
-	return predicate.Post(sql.FieldLTE(FieldImageFeature, v))
-}
-
-// ImageFeatureIsNil applies the IsNil predicate on the "image_feature" field.
-func ImageFeatureIsNil() predicate.Post {
-	return predicate.Post(sql.FieldIsNull(FieldImageFeature))
-}
-
-// ImageFeatureNotNil applies the NotNil predicate on the "image_feature" field.
-func ImageFeatureNotNil() predicate.Post {
-	return predicate.Post(sql.FieldNotNull(FieldImageFeature))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

@@ -3913,7 +3913,6 @@ type PostMutation struct {
 	image_key         *string
 	created_at        *time.Time
 	deleted_at        *time.Time
-	image_feature     *pgvector.Vector
 	clearedFields     map[string]struct{}
 	user              *uuid.UUID
 	cleareduser       bool
@@ -4261,55 +4260,6 @@ func (m *PostMutation) ResetDeletedAt() {
 	delete(m.clearedFields, post.FieldDeletedAt)
 }
 
-// SetImageFeature sets the "image_feature" field.
-func (m *PostMutation) SetImageFeature(pg pgvector.Vector) {
-	m.image_feature = &pg
-}
-
-// ImageFeature returns the value of the "image_feature" field in the mutation.
-func (m *PostMutation) ImageFeature() (r pgvector.Vector, exists bool) {
-	v := m.image_feature
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldImageFeature returns the old "image_feature" field's value of the Post entity.
-// If the Post object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PostMutation) OldImageFeature(ctx context.Context) (v pgvector.Vector, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldImageFeature is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldImageFeature requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldImageFeature: %w", err)
-	}
-	return oldValue.ImageFeature, nil
-}
-
-// ClearImageFeature clears the value of the "image_feature" field.
-func (m *PostMutation) ClearImageFeature() {
-	m.image_feature = nil
-	m.clearedFields[post.FieldImageFeature] = struct{}{}
-}
-
-// ImageFeatureCleared returns if the "image_feature" field was cleared in this mutation.
-func (m *PostMutation) ImageFeatureCleared() bool {
-	_, ok := m.clearedFields[post.FieldImageFeature]
-	return ok
-}
-
-// ResetImageFeature resets all changes to the "image_feature" field.
-func (m *PostMutation) ResetImageFeature() {
-	m.image_feature = nil
-	delete(m.clearedFields, post.FieldImageFeature)
-}
-
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *PostMutation) SetUserID(id uuid.UUID) {
 	m.user = &id
@@ -4530,7 +4480,7 @@ func (m *PostMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PostMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 5)
 	if m.index != nil {
 		fields = append(fields, post.FieldIndex)
 	}
@@ -4545,9 +4495,6 @@ func (m *PostMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, post.FieldDeletedAt)
-	}
-	if m.image_feature != nil {
-		fields = append(fields, post.FieldImageFeature)
 	}
 	return fields
 }
@@ -4567,8 +4514,6 @@ func (m *PostMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case post.FieldDeletedAt:
 		return m.DeletedAt()
-	case post.FieldImageFeature:
-		return m.ImageFeature()
 	}
 	return nil, false
 }
@@ -4588,8 +4533,6 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case post.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case post.FieldImageFeature:
-		return m.OldImageFeature(ctx)
 	}
 	return nil, fmt.Errorf("unknown Post field %s", name)
 }
@@ -4633,13 +4576,6 @@ func (m *PostMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
-		return nil
-	case post.FieldImageFeature:
-		v, ok := value.(pgvector.Vector)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetImageFeature(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Post field %s", name)
@@ -4692,9 +4628,6 @@ func (m *PostMutation) ClearedFields() []string {
 	if m.FieldCleared(post.FieldDeletedAt) {
 		fields = append(fields, post.FieldDeletedAt)
 	}
-	if m.FieldCleared(post.FieldImageFeature) {
-		fields = append(fields, post.FieldImageFeature)
-	}
 	return fields
 }
 
@@ -4714,9 +4647,6 @@ func (m *PostMutation) ClearField(name string) error {
 		return nil
 	case post.FieldDeletedAt:
 		m.ClearDeletedAt()
-		return nil
-	case post.FieldImageFeature:
-		m.ClearImageFeature()
 		return nil
 	}
 	return fmt.Errorf("unknown Post nullable field %s", name)
@@ -4740,9 +4670,6 @@ func (m *PostMutation) ResetField(name string) error {
 		return nil
 	case post.FieldDeletedAt:
 		m.ResetDeletedAt()
-		return nil
-	case post.FieldImageFeature:
-		m.ResetImageFeature()
 		return nil
 	}
 	return fmt.Errorf("unknown Post field %s", name)
