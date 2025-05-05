@@ -12,6 +12,7 @@ recommend_system/base/
 recommend_system/models/
 search_engine/images
 
+
 # Pythonキャッシュ
 *.pyc
 *.pyo

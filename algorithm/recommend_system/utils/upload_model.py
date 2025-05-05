@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------  #
+# ---------------------------------------------------------------------------------  # 
 #                    　　　  データベースへモデルをアップロードする                          #
 # ---------------------------------------------------------------------------------  #
 
@@ -11,8 +11,8 @@ from dotenv import load_dotenv, find_dotenv
 
 _ = load_dotenv(find_dotenv())
 
-TARGET_DIR = "/tmp/checkpoints/"
-LATEST_MODEL_PATH = "/tmp/latest.model"
+TARGET_DIR = "recommend_system/models/checkpoints/"
+LATEST_MODEL_PATH = "recommend_system/models/latest.model"
 S3_BUCKET = os.getenv("AWS_S3_BUCKET_NAME")
 S3_KEY = "models/latest.model"
 
@@ -35,7 +35,6 @@ def get_latest_model_file():
 
     return os.path.join(TARGET_DIR, latest_file) if latest_file else None
 
-
 def upload_latest_model():
     """
     最新のモデルファイルを'latest.model'としてアップロードする関数
@@ -44,7 +43,7 @@ def upload_latest_model():
     if model_path is None:
         print("最新モデルが見つかりません")
         return
-
+    
     print(f"最新モデル: {model_path}")
 
     # コピーしてlatest.modelにリネーム
@@ -54,7 +53,6 @@ def upload_latest_model():
     s3 = boto3.client("s3")
     s3.upload_file(LATEST_MODEL_PATH, S3_BUCKET, S3_KEY)
     print("latest.modelをアップロードしました")
-
 
 if __name__ == "__main__":
     # 最新のモデルをアップロード
