@@ -107,6 +107,9 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
       keyExtractor={(item) => item.id}
       style={{ backgroundColor: colors.middleBackground }}
       renderItem={({ item }) => <PostPanel post={item} />}
+      onViewableItemsChanged={({ changed, viewableItems }) => {
+        console.log(`[debug] viewableItems: ${JSON.stringify(viewableItems)}`);
+      }}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}

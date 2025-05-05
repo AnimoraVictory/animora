@@ -260,18 +260,6 @@ var (
 			},
 		},
 	}
-	// TaskTypesColumns holds the columns for the "task_types" table.
-	TaskTypesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "type", Type: field.TypeString},
-		{Name: "text_feature", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"postgres": "vector(768)"}},
-	}
-	// TaskTypesTable holds the schema information for the "task_types" table.
-	TaskTypesTable = &schema.Table{
-		Name:       "task_types",
-		Columns:    TaskTypesColumns,
-		PrimaryKey: []*schema.Column{TaskTypesColumns[0]},
-	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -299,7 +287,6 @@ var (
 		LikesTable,
 		PetsTable,
 		PostsTable,
-		TaskTypesTable,
 		UsersTable,
 	}
 )
