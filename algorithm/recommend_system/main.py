@@ -9,9 +9,9 @@ from mangum import Mangum
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import torch
-from recommend_system.components.mmneumf import MultiModalNeuMF
-from recommend_system.src.download_model import download_latest_model
-from recommend_system.api.recommend_timeline import (
+from recommend_system.neumf.mmneumf import MultiModalNeuMF
+from recommend_system.utils.download_model import download_latest_model
+from recommend_system.batch.generate_recommendations import (
     get_user_id,
     get_candidate_posts,
     get_recommended_timeline,
