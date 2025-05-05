@@ -7,9 +7,9 @@ import traceback
 import pandas as pd
 import json
 import requests
-from recommend_system.neumf.mmneumf import MultiModalNeuMFEngine
-from recommend_system.neumf.data import SampleGenerator
-from common.utils.database import get_sqlalchemy_connection
+from recommend_system.neucf.mmneumf import MultiModalNeuMFEngine
+from recommend_system.neucf.data import SampleGenerator
+from common.database.connection import get_sqlalchemy_connection
 from recommend_system.utils.config import prod_config, rating_query
 from recommend_system.utils.upload_model import upload_latest_model
 
