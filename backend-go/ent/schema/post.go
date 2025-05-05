@@ -4,12 +4,10 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/pgvector/pgvector-go"
 )
 
 // Post holds the schema definition for the Post entity.
@@ -26,11 +24,6 @@ func (Post) Fields() []ent.Field {
 		field.String("image_key").NotEmpty(),
 		field.Time("created_at").Default(time.Now),
 		field.Time("deleted_at").Optional(),
-
-		field.Other("image_feature", pgvector.Vector{}).
-			SchemaType(map[string]string{
-				dialect.Postgres: "vector(768)",
-			}).Optional(),
 	}
 }
 
