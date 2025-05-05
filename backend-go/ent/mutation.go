@@ -3907,8 +3907,8 @@ type PostMutation struct {
 	op                Op
 	typ               string
 	id                *uuid.UUID
-	index             *int
-	addindex          *int
+	index             *uint32
+	addindex          *int32
 	caption           *string
 	image_key         *string
 	created_at        *time.Time
@@ -4034,13 +4034,13 @@ func (m *PostMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // SetIndex sets the "index" field.
-func (m *PostMutation) SetIndex(i int) {
-	m.index = &i
+func (m *PostMutation) SetIndex(u uint32) {
+	m.index = &u
 	m.addindex = nil
 }
 
 // Index returns the value of the "index" field in the mutation.
-func (m *PostMutation) Index() (r int, exists bool) {
+func (m *PostMutation) Index() (r uint32, exists bool) {
 	v := m.index
 	if v == nil {
 		return
@@ -4051,7 +4051,7 @@ func (m *PostMutation) Index() (r int, exists bool) {
 // OldIndex returns the old "index" field's value of the Post entity.
 // If the Post object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PostMutation) OldIndex(ctx context.Context) (v int, err error) {
+func (m *PostMutation) OldIndex(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIndex is only allowed on UpdateOne operations")
 	}
@@ -4065,17 +4065,17 @@ func (m *PostMutation) OldIndex(ctx context.Context) (v int, err error) {
 	return oldValue.Index, nil
 }
 
-// AddIndex adds i to the "index" field.
-func (m *PostMutation) AddIndex(i int) {
+// AddIndex adds u to the "index" field.
+func (m *PostMutation) AddIndex(u int32) {
 	if m.addindex != nil {
-		*m.addindex += i
+		*m.addindex += u
 	} else {
-		m.addindex = &i
+		m.addindex = &u
 	}
 }
 
 // AddedIndex returns the value that was added to the "index" field in this mutation.
-func (m *PostMutation) AddedIndex() (r int, exists bool) {
+func (m *PostMutation) AddedIndex() (r int32, exists bool) {
 	v := m.addindex
 	if v == nil {
 		return
@@ -4543,7 +4543,7 @@ func (m *PostMutation) OldField(ctx context.Context, name string) (ent.Value, er
 func (m *PostMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case post.FieldIndex:
-		v, ok := value.(int)
+		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4608,7 +4608,7 @@ func (m *PostMutation) AddedField(name string) (ent.Value, bool) {
 func (m *PostMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case post.FieldIndex:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5229,13 +5229,13 @@ type UserMutation struct {
 	op                   Op
 	typ                  string
 	id                   *uuid.UUID
-	index                *int
-	addindex             *int
+	index                *uint32
+	addindex             *int32
 	email                *string
 	name                 *string
 	bio                  *string
-	streak_count         *int
-	addstreak_count      *int
+	streak_count         *uint32
+	addstreak_count      *int32
 	icon_image_key       *string
 	created_at           *time.Time
 	clearedFields        map[string]struct{}
@@ -5379,13 +5379,13 @@ func (m *UserMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // SetIndex sets the "index" field.
-func (m *UserMutation) SetIndex(i int) {
-	m.index = &i
+func (m *UserMutation) SetIndex(u uint32) {
+	m.index = &u
 	m.addindex = nil
 }
 
 // Index returns the value of the "index" field in the mutation.
-func (m *UserMutation) Index() (r int, exists bool) {
+func (m *UserMutation) Index() (r uint32, exists bool) {
 	v := m.index
 	if v == nil {
 		return
@@ -5396,7 +5396,7 @@ func (m *UserMutation) Index() (r int, exists bool) {
 // OldIndex returns the old "index" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldIndex(ctx context.Context) (v int, err error) {
+func (m *UserMutation) OldIndex(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIndex is only allowed on UpdateOne operations")
 	}
@@ -5410,17 +5410,17 @@ func (m *UserMutation) OldIndex(ctx context.Context) (v int, err error) {
 	return oldValue.Index, nil
 }
 
-// AddIndex adds i to the "index" field.
-func (m *UserMutation) AddIndex(i int) {
+// AddIndex adds u to the "index" field.
+func (m *UserMutation) AddIndex(u int32) {
 	if m.addindex != nil {
-		*m.addindex += i
+		*m.addindex += u
 	} else {
-		m.addindex = &i
+		m.addindex = &u
 	}
 }
 
 // AddedIndex returns the value that was added to the "index" field in this mutation.
-func (m *UserMutation) AddedIndex() (r int, exists bool) {
+func (m *UserMutation) AddedIndex() (r int32, exists bool) {
 	v := m.addindex
 	if v == nil {
 		return
@@ -5557,13 +5557,13 @@ func (m *UserMutation) ResetBio() {
 }
 
 // SetStreakCount sets the "streak_count" field.
-func (m *UserMutation) SetStreakCount(i int) {
-	m.streak_count = &i
+func (m *UserMutation) SetStreakCount(u uint32) {
+	m.streak_count = &u
 	m.addstreak_count = nil
 }
 
 // StreakCount returns the value of the "streak_count" field in the mutation.
-func (m *UserMutation) StreakCount() (r int, exists bool) {
+func (m *UserMutation) StreakCount() (r uint32, exists bool) {
 	v := m.streak_count
 	if v == nil {
 		return
@@ -5574,7 +5574,7 @@ func (m *UserMutation) StreakCount() (r int, exists bool) {
 // OldStreakCount returns the old "streak_count" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldStreakCount(ctx context.Context) (v int, err error) {
+func (m *UserMutation) OldStreakCount(ctx context.Context) (v uint32, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStreakCount is only allowed on UpdateOne operations")
 	}
@@ -5588,17 +5588,17 @@ func (m *UserMutation) OldStreakCount(ctx context.Context) (v int, err error) {
 	return oldValue.StreakCount, nil
 }
 
-// AddStreakCount adds i to the "streak_count" field.
-func (m *UserMutation) AddStreakCount(i int) {
+// AddStreakCount adds u to the "streak_count" field.
+func (m *UserMutation) AddStreakCount(u int32) {
 	if m.addstreak_count != nil {
-		*m.addstreak_count += i
+		*m.addstreak_count += u
 	} else {
-		m.addstreak_count = &i
+		m.addstreak_count = &u
 	}
 }
 
 // AddedStreakCount returns the value that was added to the "streak_count" field in this mutation.
-func (m *UserMutation) AddedStreakCount() (r int, exists bool) {
+func (m *UserMutation) AddedStreakCount() (r int32, exists bool) {
 	v := m.addstreak_count
 	if v == nil {
 		return
@@ -6348,7 +6348,7 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldIndex:
-		v, ok := value.(int)
+		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6376,7 +6376,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetBio(v)
 		return nil
 	case user.FieldStreakCount:
-		v, ok := value.(int)
+		v, ok := value.(uint32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6432,14 +6432,14 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldIndex:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddIndex(v)
 		return nil
 	case user.FieldStreakCount:
-		v, ok := value.(int)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

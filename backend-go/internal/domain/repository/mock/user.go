@@ -14,7 +14,7 @@ type MockUserRepository struct {
 	GetAllFunc            func() ([]*ent.User, error)
 	GetByIdFunc           func(id uuid.UUID) (*ent.User, error)
 	UpdateFunc            func(id uuid.UUID, name string, description string, iconImageKey string) error
-	UpdateStreakCountFunc func(id uuid.UUID, streak int) error
+	UpdateStreakCountFunc func(id uuid.UUID, streak uint32) error
 	DeleteFunc            func(id uuid.UUID) error
 	FollowFunc            func(toId string, fromId string) error
 	UnfollowFunc          func(toId string, fromId string) error
@@ -54,7 +54,7 @@ func (m *MockUserRepository) Update(id uuid.UUID, name string, description strin
 }
 
 // UpdateStreakCount calls the mocked UpdateStreakCountFunc
-func (m *MockUserRepository) UpdateStreakCount(id uuid.UUID, streak int) error {
+func (m *MockUserRepository) UpdateStreakCount(id uuid.UUID, streak uint32) error {
 	return m.UpdateStreakCountFunc(id, streak)
 }
 

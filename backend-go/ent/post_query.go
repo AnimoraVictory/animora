@@ -409,7 +409,7 @@ func (pq *PostQuery) WithDailyTask(opts ...func(*DailyTaskQuery)) *PostQuery {
 // Example:
 //
 //	var v []struct {
-//		Index int `json:"index,omitempty"`
+//		Index uint32 `json:"index,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -432,7 +432,7 @@ func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Index int `json:"index,omitempty"`
+//		Index uint32 `json:"index,omitempty"`
 //	}
 //
 //	client.Post.Query().

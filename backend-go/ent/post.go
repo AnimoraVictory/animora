@@ -21,7 +21,7 @@ type Post struct {
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
 	// Index holds the value of the "index" field.
-	Index int `json:"index,omitempty"`
+	Index uint32 `json:"index,omitempty"`
 	// Caption holds the value of the "caption" field.
 	Caption string `json:"caption,omitempty"`
 	// ImageKey holds the value of the "image_key" field.
@@ -132,7 +132,7 @@ func (po *Post) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field index", values[i])
 			} else if value.Valid {
-				po.Index = int(value.Int64)
+				po.Index = uint32(value.Int64)
 			}
 		case post.FieldCaption:
 			if value, ok := values[i].(*sql.NullString); !ok {

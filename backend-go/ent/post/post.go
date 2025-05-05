@@ -97,8 +97,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// IndexValidator is a validator for the "index" field. It is called by the builders before save.
-	IndexValidator func(int) error
 	// CaptionValidator is a validator for the "caption" field. It is called by the builders before save.
 	CaptionValidator func(string) error
 	// ImageKeyValidator is a validator for the "image_key" field. It is called by the builders before save.

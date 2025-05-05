@@ -239,7 +239,7 @@ var (
 	// PostsColumns holds the columns for the "posts" table.
 	PostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "index", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "index", Type: field.TypeUint32, Unique: true, Nullable: true},
 		{Name: "caption", Type: field.TypeString},
 		{Name: "image_key", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
@@ -275,11 +275,11 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "index", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "index", Type: field.TypeUint32, Unique: true, Nullable: true},
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "bio", Type: field.TypeString, Default: ""},
-		{Name: "streak_count", Type: field.TypeInt, Default: 0},
+		{Name: "streak_count", Type: field.TypeUint32, Default: 0},
 		{Name: "icon_image_key", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 	}

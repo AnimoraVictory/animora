@@ -139,7 +139,7 @@ func (r *PostRepository) CreatePost(caption, userID, fileKey string, dailyTaskId
 		SetCaption(caption).
 		SetImageKey(fileKey).
 		SetUserID(userUUID).
-		SetIndex(postCount)
+		SetIndex(uint32(postCount))
 
 	if dailyTaskId != nil {
 		dailyTaskUUID, err := uuid.Parse(*dailyTaskId)

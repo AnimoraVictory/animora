@@ -622,7 +622,7 @@ func (uq *UserQuery) WithDeviceTokens(opts ...func(*DeviceTokenQuery)) *UserQuer
 // Example:
 //
 //	var v []struct {
-//		Index int `json:"index,omitempty"`
+//		Index uint32 `json:"index,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -645,7 +645,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Index int `json:"index,omitempty"`
+//		Index uint32 `json:"index,omitempty"`
 //	}
 //
 //	client.User.Query().

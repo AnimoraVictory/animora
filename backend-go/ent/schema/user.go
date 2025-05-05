@@ -19,11 +19,11 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
-		field.Int("index").Immutable().NonNegative().Unique().Optional(),
+		field.Uint32("index").Immutable().Unique().Optional(),
 		field.String("email").NotEmpty().Unique(),
 		field.String("name").NotEmpty(),
 		field.String("bio").Default(""),
-		field.Int("streak_count").Default(0),
+		field.Uint32("streak_count").Default(0),
 		field.String("icon_image_key").Optional(),
 		field.Time("created_at").Default(time.Now),
 	}

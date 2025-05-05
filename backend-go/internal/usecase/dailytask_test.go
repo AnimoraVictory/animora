@@ -52,7 +52,7 @@ func TestDailyTaskUsecase_GetNextStreakCount(t *testing.T) {
 	testCases := []struct {
 		name           string
 		prevTask       *models.DailyTaskWithEdges
-		expectedResult int
+		expectedResult uint32
 		expectedError  error
 	}{
 		{
@@ -240,7 +240,7 @@ func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
 		name          string
 		users         []*ent.User
 		lastTasks     map[uuid.UUID]*models.DailyTaskWithEdges
-		expectedCalls map[uuid.UUID]int
+		expectedCalls map[uuid.UUID]uint32
 		mockError     error
 		expectedError error
 	}{
@@ -260,7 +260,7 @@ func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
 				},
 				mockUsers[2].ID: nil, // タスクなし
 			},
-			expectedCalls: map[uuid.UUID]int{
+			expectedCalls: map[uuid.UUID]uint32{
 				mockUsers[1].ID: 0, // ストリークリセット
 			},
 			mockError:     nil,
@@ -270,7 +270,7 @@ func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
 			name:          "[失敗]ユーザー取得でエラーが発生する場合",
 			users:         nil,
 			lastTasks:     map[uuid.UUID]*models.DailyTaskWithEdges{},
-			expectedCalls: map[uuid.UUID]int{},
+			expectedCalls: map[uuid.UUID]uint32{},
 			mockError:     assert.AnError,
 			expectedError: assert.AnError,
 		},
@@ -278,7 +278,7 @@ func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			updatedUsers := make(map[uuid.UUID]int)
+			updatedUsers := make(map[uuid.UUID]uint32)
 
 			mockUserRepo := &mock.MockUserRepository{
 				GetAllFunc: func() ([]*ent.User, error) {
@@ -287,7 +287,7 @@ func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
 					}
 					return tc.users, nil
 				},
-				UpdateStreakCountFunc: func(userId uuid.UUID, count int) error {
+				UpdateStreakCountFunc: func(userId uuid.UUID, count uint32) error {
 					updatedUsers[userId] = count
 					return nil
 				},

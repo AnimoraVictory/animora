@@ -12,6 +12,6 @@ type UserRepository interface {
 	GetAll() ([]*ent.User, error)
 	GetById(id uuid.UUID) (*ent.User, error)
 	Update(id uuid.UUID, name string, description string, iconImageKey string) error
-	UpdateStreakCount(id uuid.UUID, streak int) error
+	UpdateStreakCount(id uuid.UUID, streak uint32) error
 	Delete(id uuid.UUID) error
 }

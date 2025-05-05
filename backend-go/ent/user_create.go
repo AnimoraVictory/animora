@@ -33,15 +33,15 @@ type UserCreate struct {
 }
 
 // SetIndex sets the "index" field.
-func (uc *UserCreate) SetIndex(i int) *UserCreate {
-	uc.mutation.SetIndex(i)
+func (uc *UserCreate) SetIndex(u uint32) *UserCreate {
+	uc.mutation.SetIndex(u)
 	return uc
 }
 
 // SetNillableIndex sets the "index" field if the given value is not nil.
-func (uc *UserCreate) SetNillableIndex(i *int) *UserCreate {
-	if i != nil {
-		uc.SetIndex(*i)
+func (uc *UserCreate) SetNillableIndex(u *uint32) *UserCreate {
+	if u != nil {
+		uc.SetIndex(*u)
 	}
 	return uc
 }
@@ -73,15 +73,15 @@ func (uc *UserCreate) SetNillableBio(s *string) *UserCreate {
 }
 
 // SetStreakCount sets the "streak_count" field.
-func (uc *UserCreate) SetStreakCount(i int) *UserCreate {
-	uc.mutation.SetStreakCount(i)
+func (uc *UserCreate) SetStreakCount(u uint32) *UserCreate {
+	uc.mutation.SetStreakCount(u)
 	return uc
 }
 
 // SetNillableStreakCount sets the "streak_count" field if the given value is not nil.
-func (uc *UserCreate) SetNillableStreakCount(i *int) *UserCreate {
-	if i != nil {
-		uc.SetStreakCount(*i)
+func (uc *UserCreate) SetNillableStreakCount(u *uint32) *UserCreate {
+	if u != nil {
+		uc.SetStreakCount(*u)
 	}
 	return uc
 }
@@ -333,11 +333,6 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if v, ok := uc.mutation.Index(); ok {
-		if err := user.IndexValidator(v); err != nil {
-			return &ValidationError{Name: "index", err: fmt.Errorf(`ent: validator failed for field "User.index": %w`, err)}
-		}
-	}
 	if _, ok := uc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
 	}
@@ -400,7 +395,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := uc.mutation.Index(); ok {
-		_spec.SetField(user.FieldIndex, field.TypeInt, value)
+		_spec.SetField(user.FieldIndex, field.TypeUint32, value)
 		_node.Index = value
 	}
 	if value, ok := uc.mutation.Email(); ok {
@@ -416,7 +411,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.Bio = value
 	}
 	if value, ok := uc.mutation.StreakCount(); ok {
-		_spec.SetField(user.FieldStreakCount, field.TypeInt, value)
+		_spec.SetField(user.FieldStreakCount, field.TypeUint32, value)
 		_node.StreakCount = value
 	}
 	if value, ok := uc.mutation.IconImageKey(); ok {
@@ -676,7 +671,7 @@ func (u *UserUpsert) UpdateBio() *UserUpsert {
 }
 
 // SetStreakCount sets the "streak_count" field.
-func (u *UserUpsert) SetStreakCount(v int) *UserUpsert {
+func (u *UserUpsert) SetStreakCount(v uint32) *UserUpsert {
 	u.Set(user.FieldStreakCount, v)
 	return u
 }
@@ -688,7 +683,7 @@ func (u *UserUpsert) UpdateStreakCount() *UserUpsert {
 }
 
 // AddStreakCount adds v to the "streak_count" field.
-func (u *UserUpsert) AddStreakCount(v int) *UserUpsert {
+func (u *UserUpsert) AddStreakCount(v uint32) *UserUpsert {
 	u.Add(user.FieldStreakCount, v)
 	return u
 }
@@ -817,14 +812,14 @@ func (u *UserUpsertOne) UpdateBio() *UserUpsertOne {
 }
 
 // SetStreakCount sets the "streak_count" field.
-func (u *UserUpsertOne) SetStreakCount(v int) *UserUpsertOne {
+func (u *UserUpsertOne) SetStreakCount(v uint32) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetStreakCount(v)
 	})
 }
 
 // AddStreakCount adds v to the "streak_count" field.
-func (u *UserUpsertOne) AddStreakCount(v int) *UserUpsertOne {
+func (u *UserUpsertOne) AddStreakCount(v uint32) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.AddStreakCount(v)
 	})
@@ -1133,14 +1128,14 @@ func (u *UserUpsertBulk) UpdateBio() *UserUpsertBulk {
 }
 
 // SetStreakCount sets the "streak_count" field.
-func (u *UserUpsertBulk) SetStreakCount(v int) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetStreakCount(v uint32) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetStreakCount(v)
 	})
 }
 
 // AddStreakCount adds v to the "streak_count" field.
-func (u *UserUpsertBulk) AddStreakCount(v int) *UserUpsertBulk {
+func (u *UserUpsertBulk) AddStreakCount(v uint32) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.AddStreakCount(v)
 	})

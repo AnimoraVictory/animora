@@ -57,7 +57,7 @@ func IDLTE(id uuid.UUID) predicate.User {
 }
 
 // Index applies equality check predicate on the "index" field. It's identical to IndexEQ.
-func Index(v int) predicate.User {
+func Index(v uint32) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldIndex, v))
 }
 
@@ -77,7 +77,7 @@ func Bio(v string) predicate.User {
 }
 
 // StreakCount applies equality check predicate on the "streak_count" field. It's identical to StreakCountEQ.
-func StreakCount(v int) predicate.User {
+func StreakCount(v uint32) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldStreakCount, v))
 }
 
@@ -92,42 +92,42 @@ func CreatedAt(v time.Time) predicate.User {
 }
 
 // IndexEQ applies the EQ predicate on the "index" field.
-func IndexEQ(v int) predicate.User {
+func IndexEQ(v uint32) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldIndex, v))
 }
 
 // IndexNEQ applies the NEQ predicate on the "index" field.
-func IndexNEQ(v int) predicate.User {
+func IndexNEQ(v uint32) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldIndex, v))
 }
 
 // IndexIn applies the In predicate on the "index" field.
-func IndexIn(vs ...int) predicate.User {
+func IndexIn(vs ...uint32) predicate.User {
 	return predicate.User(sql.FieldIn(FieldIndex, vs...))
 }
 
 // IndexNotIn applies the NotIn predicate on the "index" field.
-func IndexNotIn(vs ...int) predicate.User {
+func IndexNotIn(vs ...uint32) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldIndex, vs...))
 }
 
 // IndexGT applies the GT predicate on the "index" field.
-func IndexGT(v int) predicate.User {
+func IndexGT(v uint32) predicate.User {
 	return predicate.User(sql.FieldGT(FieldIndex, v))
 }
 
 // IndexGTE applies the GTE predicate on the "index" field.
-func IndexGTE(v int) predicate.User {
+func IndexGTE(v uint32) predicate.User {
 	return predicate.User(sql.FieldGTE(FieldIndex, v))
 }
 
 // IndexLT applies the LT predicate on the "index" field.
-func IndexLT(v int) predicate.User {
+func IndexLT(v uint32) predicate.User {
 	return predicate.User(sql.FieldLT(FieldIndex, v))
 }
 
 // IndexLTE applies the LTE predicate on the "index" field.
-func IndexLTE(v int) predicate.User {
+func IndexLTE(v uint32) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldIndex, v))
 }
 
@@ -337,42 +337,42 @@ func BioContainsFold(v string) predicate.User {
 }
 
 // StreakCountEQ applies the EQ predicate on the "streak_count" field.
-func StreakCountEQ(v int) predicate.User {
+func StreakCountEQ(v uint32) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldStreakCount, v))
 }
 
 // StreakCountNEQ applies the NEQ predicate on the "streak_count" field.
-func StreakCountNEQ(v int) predicate.User {
+func StreakCountNEQ(v uint32) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldStreakCount, v))
 }
 
 // StreakCountIn applies the In predicate on the "streak_count" field.
-func StreakCountIn(vs ...int) predicate.User {
+func StreakCountIn(vs ...uint32) predicate.User {
 	return predicate.User(sql.FieldIn(FieldStreakCount, vs...))
 }
 
 // StreakCountNotIn applies the NotIn predicate on the "streak_count" field.
-func StreakCountNotIn(vs ...int) predicate.User {
+func StreakCountNotIn(vs ...uint32) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldStreakCount, vs...))
 }
 
 // StreakCountGT applies the GT predicate on the "streak_count" field.
-func StreakCountGT(v int) predicate.User {
+func StreakCountGT(v uint32) predicate.User {
 	return predicate.User(sql.FieldGT(FieldStreakCount, v))
 }
 
 // StreakCountGTE applies the GTE predicate on the "streak_count" field.
-func StreakCountGTE(v int) predicate.User {
+func StreakCountGTE(v uint32) predicate.User {
 	return predicate.User(sql.FieldGTE(FieldStreakCount, v))
 }
 
 // StreakCountLT applies the LT predicate on the "streak_count" field.
-func StreakCountLT(v int) predicate.User {
+func StreakCountLT(v uint32) predicate.User {
 	return predicate.User(sql.FieldLT(FieldStreakCount, v))
 }
 
 // StreakCountLTE applies the LTE predicate on the "streak_count" field.
-func StreakCountLTE(v int) predicate.User {
+func StreakCountLTE(v uint32) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldStreakCount, v))
 }
 

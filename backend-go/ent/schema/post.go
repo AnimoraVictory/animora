@@ -19,7 +19,7 @@ type Post struct {
 func (Post) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
-		field.Int("index").Immutable().NonNegative().Unique().Optional(),
+		field.Uint32("index").Immutable().Unique().Optional(),
 		field.String("caption").NotEmpty(),
 		field.String("image_key").NotEmpty(),
 		field.Time("created_at").Default(time.Now),
