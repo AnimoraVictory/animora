@@ -1,0 +1,16 @@
+post1:
+  id: "9a3a407d-edc6-49e8-9448-68a592be14cf"
+  index: 0
+  caption: "Max's first day at the park"
+  user_posts: "86552ff6-f820-4aa2-b372-866dc38b4a4b" # hatano
+  image_key: "posts/98578a83-1d7d-4c25-aeea-c9b392e484e4-photo.jpg"
+  created_at: <%= Time.current %>
+
+post2:
+  id: "7887785f-f37b-4796-82fe-1bb33df22e77"
+  index: 1
+  caption: "Luna's New Toy"
+  user_posts: "2a9165fe-8f3b-4e41-a846-e1fc73f32fae" # kaku
+  image_key: "posts/98578a83-1d7d-4c25-aeea-c9b392e484e4-photo.jpg"
+  created_at: <%= Time.current %>
+

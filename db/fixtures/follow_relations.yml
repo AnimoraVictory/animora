@@ -1,0 +1,12 @@
+hatano-kaku:
+  id: "43bfd6f6-d8c9-43ab-bdbd-dc8bca6c8fe8"
+  user_following: "86552ff6-f820-4aa2-b372-866dc38b4a4b" # hatano
+  user_followers: "2a9165fe-8f3b-4e41-a846-e1fc73f32fae" # kaku
+  created_at: <%= Time.current %>
+
+kaku-hatano:
+  id: "59e4b95b-5b95-4d86-9033-248a887ce67e"
+  user_following: "2a9165fe-8f3b-4e41-a846-e1fc73f32fae" # kaku
+  user_followers: "86552ff6-f820-4aa2-b372-866dc38b4a4b" # hatano
+  created_at: <%= Time.current %>
+

@@ -20,7 +20,6 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/like"
 	"github.com/aki-13627/animalia/backend-go/ent/pet"
 	"github.com/aki-13627/animalia/backend-go/ent/post"
-	"github.com/aki-13627/animalia/backend-go/ent/tasktype"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 )
 
@@ -90,7 +89,6 @@ func checkColumn(table, column string) error {
 			like.Table:           like.ValidColumn,
 			pet.Table:            pet.ValidColumn,
 			post.Table:           post.ValidColumn,
-			tasktype.Table:       tasktype.ValidColumn,
 			user.Table:           user.ValidColumn,
 		})
 	})

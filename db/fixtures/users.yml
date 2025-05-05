@@ -1,0 +1,19 @@
+hatano:
+  id: "86552ff6-f820-4aa2-b372-866dc38b4a4b"
+  index: 1
+  email: "tanomitsu2002@gmail.com"
+  name: "Mitsuru Hatano"
+  bio: "I'm a software engineer"
+  streak_count: 0
+  icon_image_key: "profile/a806f6f3-0b7c-44a1-95e3-46d39b0aefcc-57F1EED2-58FE-405C-B568-168538F8811A.jpg"
+  created_at: <%= Time.current %>
+
+kaku:
+  id: "2a9165fe-8f3b-4e41-a846-e1fc73f32fae"
+  index: 2
+  email: "aki.kaku0627@gmail.com"
+  name: "Akihiro Kaku"
+  bio: "I'm a software engineer"
+  streak_count: 0
+  icon_image_key: "profile/a806f6f3-0b7c-44a1-95e3-46d39b0aefcc-57F1EED2-58FE-405C-B568-168538F8811A.jpg"
+  created_at: <%= Time.current %>

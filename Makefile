@@ -1,6 +1,6 @@
 include .env
 
-.PHONY: run run-seed run-all seed build psql down codegen
+.PHONY: run run-all seed build psql down codegen seed
 
 run-all: up-adminer run
 
@@ -9,9 +9,6 @@ run: build
 
 run-attach: build
 	docker compose up api
-
-run-seed: build
-	SEED=true docker compose up api
 
 build:
 	docker compose build api
@@ -30,3 +27,6 @@ down:
 
 psql:
 	psql $(DATABASE_URL)
+
+seed:
+	cd db && bundle exec ruby seeds.rb
