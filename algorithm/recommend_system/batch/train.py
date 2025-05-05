@@ -6,14 +6,19 @@
 import traceback
 import pandas as pd
 import json
-import subprocess
 import requests
 from recommend_system.neumf.mmneumf import MultiModalNeuMFEngine
 from recommend_system.neumf.data import SampleGenerator
 from common.utils.database import get_sqlalchemy_connection
 from recommend_system.utils.config import prod_config, rating_query
+from recommend_system.utils.upload_model import upload_latest_model
 
-if __name__ == "__main__":
+def parse_feature(x):
+    if isinstance(x, str):
+        return json.loads(x)
+    return x
+
+def retrain_model():
     # ----------------------------------
     # 1. PostgreSQLから実データを取得
     # ----------------------------------
@@ -26,11 +31,6 @@ if __name__ == "__main__":
     # ----------------------------------
     # 2. 特徴量のパース(JSON -> List)
     # ----------------------------------
-    def parse_feature(x):
-        if isinstance(x, str):
-            return json.loads(x)
-        return x
-
     prod_df["image_feature"] = prod_df["image_feature"].map(parse_feature)
     prod_df["text_feature"] = prod_df["text_feature"].map(parse_feature)
 
@@ -66,8 +66,8 @@ if __name__ == "__main__":
     # ----------------------------------
     # 6. 最新モデルのアップロードとモデルのリロード
     # ----------------------------------
-    # upload_model.pyを実行
-    subprocess.run(["python", "recommend_system/utils/upload_model.py"], check=True)
+    # 最新モデルをアップロード
+    upload_latest_model()
 
     # 推論APIの /reload を叩く
     try:

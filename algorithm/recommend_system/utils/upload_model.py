@@ -53,7 +53,3 @@ def upload_latest_model():
     s3 = boto3.client("s3")
     s3.upload_file(LATEST_MODEL_PATH, S3_BUCKET, S3_KEY)
     print("latest.modelをアップロードしました")
-
-if __name__ == "__main__":
-    # 最新のモデルをアップロード
-    upload_latest_model()
