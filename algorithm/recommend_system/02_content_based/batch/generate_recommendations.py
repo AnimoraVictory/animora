@@ -13,8 +13,8 @@ from glide import (
     Logger, LogLevel, NodeAddress, RequestError, TimeoutError,
 )
 from common.database.query_runner import execute_query_from_file
-from recommend_system.strategies.base import BaseRecommender
-from recommend_system.strategies.heuristic import HeuristicRecommender
+from recommend_system.recommendation.strategies.base import BaseRecommender
+from recommend_system.heuristic.heuristic import HeuristicRecommender
 from dotenv import load_dotenv, find_dotenv
 
 _ = load_dotenv(find_dotenv())

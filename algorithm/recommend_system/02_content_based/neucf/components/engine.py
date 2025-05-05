@@ -6,8 +6,8 @@
 from datetime import datetime
 import torch
 from tensorboardX import SummaryWriter
-from recommend_system.neumf.utils import save_checkpoint, use_optimizer
-from recommend_system.neumf.metrics import MetronAtK
+from recommend_system.recommendation.neucf.components.utils import save_checkpoint, use_optimizer
+from recommend_system.recommendation.neucf.components.metrics import MetronAtK
 
 
 class Engine(object):

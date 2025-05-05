@@ -4,10 +4,9 @@
 from datetime import datetime, timezone
 import math
 import pandas as pd
-from recommend_system.strategies.base import BaseRecommender
-from common.database.query_runner import execute_query_from_file
+from database.query_runner import execute_query_from_file
 
-class HeuristicRecommender(BaseRecommender):
+class HeuristicRecommender:
     """
     Heuristic レコメンドシステムの実装
     score = a * popularity_score + (1 - a) * recency_score
@@ -15,7 +14,7 @@ class HeuristicRecommender(BaseRecommender):
         recency_score: 投稿からの経過時間
     """
     def __init__(self):
-        super().__init__()
+        pass
 
     def recommend(self, user_id: str) -> list[str]:
         """

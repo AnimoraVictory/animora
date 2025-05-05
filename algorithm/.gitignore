@@ -8,8 +8,7 @@
 data/
 
 # 不要なファイル
-recommend_system/base/
-recommend_system/models/
+recommend_system/recommendation/neucf/models/
 search_engine/images
 
 

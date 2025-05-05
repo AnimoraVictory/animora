@@ -6,8 +6,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from recommend_system.neumf.engine import Engine
-from recommend_system.neumf.utils import use_cuda
+from recommend_system.recommendation.neucf.components.engine import Engine
+from recommend_system.recommendation.neucf.components.utils import use_cuda
 
 
 class MultiModalNeuMF(nn.Module):
