@@ -10,9 +10,9 @@ PODS:
     - React-Core
   - EXNotifications (0.29.14):
     - ExpoModulesCore
-  - Expo (52.0.39):
+  - Expo (52.0.46):
     - ExpoModulesCore
-  - ExpoAsset (11.0.4):
+  - ExpoAsset (11.0.5):
     - ExpoModulesCore
   - ExpoBlur (14.0.3):
     - ExpoModulesCore
@@ -22,7 +22,7 @@ PODS:
     - ZXingObjC/PDF417
   - ExpoDevice (7.0.3):
     - ExpoModulesCore
-  - ExpoFileSystem (18.0.11):
+  - ExpoFileSystem (18.0.12):
     - ExpoModulesCore
   - ExpoFont (13.0.4):
     - ExpoModulesCore
@@ -2283,12 +2283,12 @@ SPEC CHECKSUMS:
   EXConstants: fcfc75800824ac2d5c592b5bc74130bad17b146b
   EXImageLoader: e5da974e25b13585c196b658a440720c075482d5
   EXNotifications: 9d3d17e52c95f377750d4a2ae553a716313dd4aa
-  Expo: dc113fa18a3212dfdab60fc543b052ef4299f8a9
-  ExpoAsset: 4033893dfb333b444bf45e951351254137b658d5
+  Expo: a6ff273c618506b12129a0d06f2a08201bfbcf43
+  ExpoAsset: 48386d40d53a8c1738929b3ed509bcad595b5516
   ExpoBlur: 392c1207f71d0ecf22371621c1fbd44ba84d9742
   ExpoCamera: 0a3e78de7b1ca8c438ee6784fa6f22c5b1b36966
   ExpoDevice: d36ab4186b6799a28fd449bb9a1c77455f23fd1a
-  ExpoFileSystem: 2d804c73034c0d65eb2a640e0a77627033b69edc
+  ExpoFileSystem: 42d363d3b96f9afab980dcef60d5657a4443c655
   ExpoFont: f354e926f8feae5e831ec8087f36652b44a0b188
   ExpoHaptics: 8d199b2f33245ea85289ff6c954c7ee7c00a5b5d
   ExpoHead: caaccab2474a1b1f3be62eb1d493f9d30c704f94

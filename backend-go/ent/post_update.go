@@ -18,7 +18,6 @@ import (
 	"github.com/aki-13627/animalia/backend-go/ent/predicate"
 	"github.com/aki-13627/animalia/backend-go/ent/user"
 	"github.com/google/uuid"
-	pgvector "github.com/pgvector/pgvector-go"
 )
 
 // PostUpdate is the builder for updating Post entities.
@@ -93,26 +92,6 @@ func (pu *PostUpdate) SetNillableDeletedAt(t *time.Time) *PostUpdate {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (pu *PostUpdate) ClearDeletedAt() *PostUpdate {
 	pu.mutation.ClearDeletedAt()
-	return pu
-}
-
-// SetImageFeature sets the "image_feature" field.
-func (pu *PostUpdate) SetImageFeature(pg pgvector.Vector) *PostUpdate {
-	pu.mutation.SetImageFeature(pg)
-	return pu
-}
-
-// SetNillableImageFeature sets the "image_feature" field if the given value is not nil.
-func (pu *PostUpdate) SetNillableImageFeature(pg *pgvector.Vector) *PostUpdate {
-	if pg != nil {
-		pu.SetImageFeature(*pg)
-	}
-	return pu
-}
-
-// ClearImageFeature clears the value of the "image_feature" field.
-func (pu *PostUpdate) ClearImageFeature() *PostUpdate {
-	pu.mutation.ClearImageFeature()
 	return pu
 }
 
@@ -309,12 +288,6 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pu.mutation.DeletedAtCleared() {
 		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := pu.mutation.ImageFeature(); ok {
-		_spec.SetField(post.FieldImageFeature, field.TypeOther, value)
-	}
-	if pu.mutation.ImageFeatureCleared() {
-		_spec.ClearField(post.FieldImageFeature, field.TypeOther)
 	}
 	if pu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -546,26 +519,6 @@ func (puo *PostUpdateOne) ClearDeletedAt() *PostUpdateOne {
 	return puo
 }
 
-// SetImageFeature sets the "image_feature" field.
-func (puo *PostUpdateOne) SetImageFeature(pg pgvector.Vector) *PostUpdateOne {
-	puo.mutation.SetImageFeature(pg)
-	return puo
-}
-
-// SetNillableImageFeature sets the "image_feature" field if the given value is not nil.
-func (puo *PostUpdateOne) SetNillableImageFeature(pg *pgvector.Vector) *PostUpdateOne {
-	if pg != nil {
-		puo.SetImageFeature(*pg)
-	}
-	return puo
-}
-
-// ClearImageFeature clears the value of the "image_feature" field.
-func (puo *PostUpdateOne) ClearImageFeature() *PostUpdateOne {
-	puo.mutation.ClearImageFeature()
-	return puo
-}
-
 // SetUserID sets the "user" edge to the User entity by ID.
 func (puo *PostUpdateOne) SetUserID(id uuid.UUID) *PostUpdateOne {
 	puo.mutation.SetUserID(id)
@@ -789,12 +742,6 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 	}
 	if puo.mutation.DeletedAtCleared() {
 		_spec.ClearField(post.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := puo.mutation.ImageFeature(); ok {
-		_spec.SetField(post.FieldImageFeature, field.TypeOther, value)
-	}
-	if puo.mutation.ImageFeatureCleared() {
-		_spec.ClearField(post.FieldImageFeature, field.TypeOther)
 	}
 	if puo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
