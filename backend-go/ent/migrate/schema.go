@@ -60,7 +60,7 @@ var (
 				Symbol:     "comments_posts_comments",
 				Columns:    []*schema.Column{CommentsColumns[3]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "comments_users_comments",
@@ -193,7 +193,7 @@ var (
 				Symbol:     "likes_posts_likes",
 				Columns:    []*schema.Column{LikesColumns[2]},
 				RefColumns: []*schema.Column{PostsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "likes_users_likes",
