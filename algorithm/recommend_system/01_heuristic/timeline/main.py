@@ -67,7 +67,9 @@ async def recommend_timeline(request: TimelineRequest):
         cached = await client.get(request.user_id)
         if cached:
             print(f"Cache hit for user {request.user_id}.")
-            return TimelineResponse(posts=cached)
+            post_ids = json.loads(cached)
+            posts = [Post(id=pid) for pid in post_ids]
+            return TimelineResponse(posts=posts)
         else:
             print(f"Cache miss for user {request.user_id}. Generating recommendations...")
 

@@ -3,10 +3,11 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as apigateway from 'aws-cdk-lib/aws-apigatewayv2';
+import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import { getRequiredEnvVars } from './utils';
 import * as dotenv from "dotenv";
+import { time } from 'console';
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -60,27 +61,23 @@ export class TimelineStack extends cdk.Stack {
             environment: lambdaEnv,
         });
 
-        // API Gateway HTTP API を作成
-        const httpApi = new apigateway.HttpApi(this, "TimelineApi", {
-            description: "HTTP API for /timeline",
+        // API Gateway REST API を作成
+        const restApi = new apigateway.RestApi(this, "TimelineApi", {
+            description: "REST API for /timeline",
         });
 
+        // Lambda統合
+        const integration = new apigateway.LambdaIntegration(timelineLambda);
+
         // /timeline POSTエンドポイントを Lambda に接続
-        httpApi.addRoutes({
-            path: "/timeline",
-            methods: [apigateway.HttpMethod.POST],
-            integration: new integrations.HttpLambdaIntegration("TimelineIntegration", timelineLambda),
-        });
+        const timelineResource = restApi.root.addResource("timeline");
+        timelineResource.addMethod("POST", integration);
     
         // / ルートも追加（ヘルスチェック用）
-        httpApi.addRoutes({
-            path: "/",
-            methods: [apigateway.HttpMethod.GET],
-            integration: new integrations.HttpLambdaIntegration("RootIntegration", timelineLambda),
-        });
+        restApi.root.addMethod("GET", integration);
     
         new cdk.CfnOutput(this, "TimelineApiEndpoint", {
-            value: httpApi.url!,
+            value: restApi.url!,
         });
     }
 }
