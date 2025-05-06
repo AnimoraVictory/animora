@@ -5,6 +5,8 @@ import { InfraStack } from "../lib/ecr-stack";
 import { RecommendStack } from "../lib/recommend-stack";
 import * as dotenv from "dotenv";
 import path = require("path");
+import { NetworkStack } from "../lib/network-stack";
+import { TimelineStack } from "../lib/timeline-stack";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -21,10 +23,31 @@ new AnimoraStack(app, `AnimoraStack-${process.env.NAME}`, {
   ecrRepositoryName: ecrStack.algorithmRepo.repositoryName,
 });
 
+// ネットワークスタックを作成
+const network = new NetworkStack(app, `NetworkStack-${process.env.NAME}`, {
+  env: {
+    account: process.env.AWS_ACCOUNT_ID,
+    region: process.env.AWS_REGION
+  }
+})
+
 // レコメンドシステムスタックを作成
-new RecommendStack(app, `AnimoraRecommend-${process.env.NAME}`, {
+const recommendStack = new RecommendStack(app, `AnimoraRecommend-${process.env.NAME}`, {
   env: {
     account: process.env.AWS_ACCOUNT_ID,
     region: process.env.AWS_REGION
   },
+  vpc: network.vpc,
 });
+
+// タイムラインスタックを作成
+new TimelineStack(app, `AnimoraTimeline-${process.env.NAME}`, {
+  env: {
+    account: process.env.AWS_ACCOUNT_ID,
+    region: process.env.AWS_REGION
+  },
+  vpc: network.vpc,
+  valkeyEndpoint: recommendStack.valkeyEndpoint, 
+  valkeyPort: recommendStack.valkeyPort,
+}
+)

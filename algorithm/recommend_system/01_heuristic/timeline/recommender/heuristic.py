@@ -4,7 +4,7 @@
 from datetime import datetime, timezone
 import math
 import pandas as pd
-from common.database.query_runner import execute_query_from_file
+from database.query_runner import execute_query_from_file
 
 class HeuristicRecommender:
     """
@@ -24,7 +24,7 @@ class HeuristicRecommender:
             user_id (str): ユーザーID(ブロック関係の取得においてのみ用いる)
         """
         rows = execute_query_from_file(
-            "common/database/queries/heuristic/heuristic_query.sql",
+            "database/queries/heuristic_query.sql",
             params={"current_user_id": user_id}
         )
         candidates = []

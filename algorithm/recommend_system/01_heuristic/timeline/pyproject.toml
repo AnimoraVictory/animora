@@ -1,10 +1,12 @@
 [tool.poetry]
-name = "generate_recommendation"
+name = "timeline"
 version = "0.1.0"
-description = "Generate Recommendation and Cache"
+description = "Present Timeline"
 readme = "README.md"
 authors = ["shuntakochi <shuntakochi@gmail.com>"]
 packages = [
+    { include = "database"},
+    { include = "recommender"}
 ]
 
 [tool.poetry.dependencies]
