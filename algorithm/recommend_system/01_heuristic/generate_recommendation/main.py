@@ -4,11 +4,12 @@
 
 # ライブラリのインポート
 import os
+import json
 import asyncio
 import traceback
 from glide import (
     ClosingError, ConnectionError,
-    GlideClusterClient, GlideClusterClientConfiguration,
+    GlideClient, GlideClientConfiguration,
     Logger, LogLevel, NodeAddress, RequestError, TimeoutError,
 )
 from database.query_runner import execute_query_from_file
@@ -31,24 +32,24 @@ async def handler():
     addresses = [
         NodeAddress(os.getenv("VALKEY_HOST"), int(os.getenv("VALKEY_PORT")))
     ]
-    config = GlideClusterClientConfiguration(addresses=addresses, use_tls=True)
+    config = GlideClientConfiguration(addresses=addresses, use_tls=True)
     client = None
 
     try:
         # ユーザーIDの取得
         rows = execute_query_from_file(
-            "common/database/queries/get_all_users.sql"
+            "database/queries/get_all_users.sql"
         )
-        client = await GlideClusterClient.create(config)
+        client = await GlideClient.create(config)
         for user in rows:
-            user_id = user["id"]
+            user_id = user["user_id"]
 
             # レコメンデーションの生成
             recommender = HeuristicRecommender()
             recommendations = recommender.recommend(user_id)
             
             # レコメンデーションのキャッシュ
-            result = await client.set(user_id, recommendations)
+            result = await client.set(user_id, json.dumps(recommendations))
             if result:
                 print(f"Recommendations for user {user_id} cached successfully.")
             else:

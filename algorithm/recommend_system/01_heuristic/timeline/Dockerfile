@@ -20,4 +20,4 @@ EXPOSE 8000
 ENTRYPOINT [ "python", "-m", "awslambdaric" ]
 
 # Lambda エントリポイント
-CMD ["main.lambda_handler"]
+CMD ["main.handler"]

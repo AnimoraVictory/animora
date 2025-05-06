@@ -30,5 +30,43 @@
         ]
       }
     ]
-  }
+  },
+  "vpc-provider:account=559050247072:filter.vpc-id=vpc-0d976d0197a9f6b86:region=ap-northeast-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-0d976d0197a9f6b86",
+    "vpcCidrBlock": "172.31.0.0/16",
+    "ownerAccountId": "559050247072",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "Public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-08fe7105abc650dee",
+            "cidr": "172.31.32.0/20",
+            "availabilityZone": "ap-northeast-1a",
+            "routeTableId": "rtb-0855ac1e006ec1ae5"
+          },
+          {
+            "subnetId": "subnet-0a97e9bd7e8d828b9",
+            "cidr": "172.31.0.0/20",
+            "availabilityZone": "ap-northeast-1c",
+            "routeTableId": "rtb-0855ac1e006ec1ae5"
+          },
+          {
+            "subnetId": "subnet-0ba01a5699a09636a",
+            "cidr": "172.31.16.0/20",
+            "availabilityZone": "ap-northeast-1d",
+            "routeTableId": "rtb-0855ac1e006ec1ae5"
+          }
+        ]
+      }
+    ]
+  },
+  "availability-zones:account=559050247072:region=ap-northeast-1": [
+    "ap-northeast-1a",
+    "ap-northeast-1c",
+    "ap-northeast-1d"
+  ],
+  "ami:account=559050247072:filters.image-type.0=machine:filters.name.0=amzn-ami-vpc-nat-*:filters.state.0=available:owners.0=amazon:region=ap-northeast-1": "ami-0edcd7bf6bbaf21f1"
 }
