@@ -51,15 +51,16 @@ export class RecommendStack extends cdk.Stack {
     );
 
       // Valkey クラスターのSubnet Group(VPCのプライベートサブネットを使用)
-      const subnetGroup = new elasticache.CfnSubnetGroup(this, "ValkeySubnetGroup", {
-          cacheSubnetGroupName: "valkey-subnet-group",
+      const subnetGroup = new elasticache.CfnSubnetGroup(this, `ValkeySubnetGroup-${env.NAME}`, {
+          cacheSubnetGroupName: `valkey-subnet-group-${env.NAME}`,
           description: "Subnet group for Valkey",
           subnetIds: vpc.privateSubnets.map(subnet => subnet.subnetId),
       });
 
       // Valkeyクラスター(ElastiCache)の作成
-      const valkeyCluster = new elasticache.CfnReplicationGroup(this, "ReplicationGroup", {
+      const valkeyCluster = new elasticache.CfnReplicationGroup(this, `ReplicationGroup-${env.NAME}`, {
         replicationGroupDescription: "Valkey replication group for recommendation system",
+        replicationGroupId: `valkey-${env.NAME}-rg`, 
         engine: "valkey",
         engineVersion: "7.2",
         cacheNodeType: "cache.t3.micro",

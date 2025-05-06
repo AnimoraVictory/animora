@@ -7,17 +7,19 @@ import { Construct } from "constructs";
 import path = require("path");
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { getRequiredEnvVars } from "./utils";
-import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as dotenv from "dotenv";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 export interface AnimoraStackProps extends cdk.StackProps {
-  ecrRepositoryName?: string;
+  readonly vpc: ec2.IVpc;
+  readonly valkeyEndpoint: string;
+  readonly valkeyPort: string;
 }
 
 export class AnimoraStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: AnimoraStackProps) {
+  constructor(scope: Construct, id: string, props: AnimoraStackProps) {
     super(scope, id, props);
 
     const env = getRequiredEnvVars([
@@ -30,73 +32,57 @@ export class AnimoraStack extends cdk.Stack {
       "AWS_S3_BUCKET_NAME",
     ]);
 
-    // ECRリポジトリを参照（別のスタックから）
-    let algorithmRepo: ecr.IRepository;
-    if (props?.ecrRepositoryName) {
-      // 明示的に指定された場合はその名前で参照
-      algorithmRepo = ecr.Repository.fromRepositoryName(
-        this,
-        "ImportedAlgorithmRepo",
-        props.ecrRepositoryName
-      );
-    } else {
-      // スタックのエクスポート値から参照
-      const repoName = cdk.Fn.importValue(`AlgorithmRepoName-${env.NAME}`);
-      algorithmRepo = ecr.Repository.fromRepositoryName(
-        this,
-        "ImportedAlgorithmRepo",
-        repoName.toString()
-      );
-    }
+    const lambdaEnv = {
+      ...env,
+      VALKEY_HOST: props.valkeyEndpoint,
+      VALKEY_PORT: props.valkeyPort,
+    };
 
-    const algorithmFnRole = new Role(this, "AlgorithmFunctionRole", {
-      assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
-      managedPolicies: [
-        ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AWSLambdaBasicExecutionRole"
-        ),
-      ],
+    // セキュリティグループ(Valkeyへアクセス許可)
+    const sg = new ec2.SecurityGroup(this, "TimelineLambdaSG", {
+      vpc: props?.vpc,
+      description: "Security group for Timeline Lambda",
+      allowAllOutbound: true,
     });
+    sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(6379));
 
-    algorithmFnRole.addToPolicy(
-      new cdk.aws_iam.PolicyStatement({
-        actions: ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
-        resources: [
-          `arn:aws:s3:::${env.AWS_S3_BUCKET_NAME}`,
-          `arn:aws:s3:::${env.AWS_S3_BUCKET_NAME}/*`,
-        ],
-      })
-    );
-
-    const algorithmLambda = new lambda.DockerImageFunction(
+    // Lambda関数の作成
+    const timelineLambda = new lambda.DockerImageFunction(
       this,
-      "AlgorithmFunction",
+      "TimelineLambda",
       {
-        code: lambda.DockerImageCode.fromEcr(algorithmRepo, {
-          tagOrDigest: "latest",
-        }),
-        role: algorithmFnRole,
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(
+            __dirname,
+            "../../algorithm/recommend_system/01_heuristic/timeline/"
+          )
+        ),
         timeout: cdk.Duration.seconds(30),
         memorySize: 512,
-        environment: {
-          ...env,
-          TARGET_APP: "recommend_system.main:app",
-        },
+        vpc: props.vpc,
+        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+        securityGroups: [sg],
+        environment: lambdaEnv,
       }
     );
 
-    const algorithmApi = new apigw.LambdaRestApi(this, "AlgorithmAPI", {
-      handler: algorithmLambda,
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigw.Cors.ALL_ORIGINS,
-        allowMethods: apigw.Cors.ALL_METHODS,
-        allowHeaders: [
-          "Content-Type",
-          "X-Amz-Date",
-          "Authorization",
-          "X-Api-Key",
-        ],
-      },
+    // API Gateway REST API を作成
+    const restApi = new apigw.RestApi(this, "TimelineApi", {
+      description: "REST API for /timeline",
+    });
+
+    // Lambda統合
+    const integration = new apigw.LambdaIntegration(timelineLambda);
+
+    // /timeline POSTエンドポイントを Lambda に接続
+    const timelineResource = restApi.root.addResource("timeline");
+    timelineResource.addMethod("POST", integration);
+
+    // / ルートも追加（ヘルスチェック用）
+    restApi.root.addMethod("GET", integration);
+
+    new cdk.CfnOutput(this, "TimelineApiEndpoint", {
+      value: restApi.url!,
     });
 
     const apiFnRole = new Role(this, "ApiFunctionRole", {
@@ -138,7 +124,7 @@ export class AnimoraStack extends cdk.Stack {
       ),
       environment: {
         ...env,
-        ALGORITHM_API_URL: algorithmApi.url,
+        ALGORITHM_API_URL: restApi.url,
       },
       role: apiFnRole,
     });

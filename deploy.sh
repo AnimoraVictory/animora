@@ -10,12 +10,9 @@ fi
 
 # create ecr repository
 cd cdk
-cdk deploy "AnimoraInfra-${NAME}" --profile animalia --require-approval never
 
-# push docker image
-cd ..
-./deploy-ecr.sh
+cdk deploy "NetworkStack-${NAME}" --profile animalia --require-approval never
 
-# deploy lambda functions
-cd cdk
+cdk deploy "AnimoraRecommend-${NAME}" --profile animalia --require-approval never
+
 cdk deploy "AnimoraStack-${NAME}" --profile animalia --hotswap-fallback --require-approval never

@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/aki-13627/animalia/backend-go/internal/domain/models"
-	"github.com/aki-13627/animalia/backend-go/internal/domain/models/fastapi"
 	"github.com/aki-13627/animalia/backend-go/internal/usecase"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -123,8 +122,12 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 	// 以降の処理（デコード・変換）はこれまでと同様でOK
 	respBody, _ := io.ReadAll(resp.Body)
 
+	type PostIdsResponse struct {
+		ID string `json:"id"`
+	}
+
 	var result struct {
-		Posts []fastapi.FastAPIPost `json:"posts"`
+		Posts []PostIdsResponse `json:"posts"`
 	}
 
 	if err := json.Unmarshal(respBody, &result); err != nil {
@@ -132,9 +135,17 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 			"error": "invalid response from FastAPI",
 		})
 	}
+	postIds := make([]uuid.UUID, len(result.Posts))
+
+	posts, err := h.postUsecase.GetByIds(postIds)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "failed to get posts",
+		})
+	}
 
 	postResponses := make([]models.PostResponse, len(result.Posts))
-	for i, post := range result.Posts {
+	for i, post := range posts {
 		imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
 		if err != nil {
 			log.Errorf("Failed to get image URL: %v", err)
@@ -144,8 +155,8 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 		}
 
 		var userIconURL *string
-		if post.User.IconImageKey != "" {
-			iconURL, err := h.storageUsecase.GetUrl(post.User.IconImageKey)
+		if post.Edges.User.IconImageKey != "" {
+			iconURL, err := h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
 			if err != nil {
 				log.Errorf("Failed to get user icon URL: %v", err)
 				return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -156,11 +167,11 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 		}
 
 		// コメント
-		commentResponses := make([]models.CommentResponse, len(post.Comments))
-		for j, comment := range post.Comments {
+		commentResponses := make([]models.CommentResponse, len(post.Edges.Comments))
+		for j, comment := range post.Edges.Comments {
 			var commentUserIconURL string
-			if comment.User.IconImageKey != "" {
-				url, err := h.storageUsecase.GetUrl(comment.User.IconImageKey)
+			if comment.Edges.User.IconImageKey != "" {
+				url, err := h.storageUsecase.GetUrl(comment.Edges.User.IconImageKey)
 				if err != nil {
 					log.Errorf("Failed to get comment user icon URL: %v", err)
 					return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -170,15 +181,15 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 				commentUserIconURL = url
 			}
 
-			commentResponses[j] = fastapi.NewCommentResponseFromFastAPI(comment, commentUserIconURL)
+			commentResponses[j] = models.NewCommentResponse(comment, comment.Edges.User, commentUserIconURL)
 		}
 
 		// いいね
-		likeResponses := make([]models.LikeResponse, len(post.Likes))
-		for j, like := range post.Likes {
+		likeResponses := make([]models.LikeResponse, len(post.Edges.Likes))
+		for j, like := range post.Edges.Likes {
 			var likeUserIconURL string
-			if like.User.IconImageKey != "" {
-				url, err := h.storageUsecase.GetUrl(like.User.IconImageKey)
+			if like.Edges.User.IconImageKey != "" {
+				url, err := h.storageUsecase.GetUrl(like.Edges.User.IconImageKey)
 				if err != nil {
 					log.Errorf("Failed to get like user icon URL: %v", err)
 					return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -187,10 +198,10 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 				}
 				likeUserIconURL = url
 			}
-			likeResponses[j] = fastapi.NewLikeResponseFromFastAPI(like, likeUserIconURL)
+			likeResponses[j] = models.NewLikeResponse(like, likeUserIconURL)
 		}
 
-		postResponses[i] = fastapi.NewPostResponseFromFastAPI(post, imageURL, userIconURL, commentResponses, likeResponses)
+		postResponses[i] = models.NewPostResponse(post, imageURL, *userIconURL, commentResponses, likeResponses)
 	}
 
 	h.cacheUsecase.ClearPostResponses(reqBody.UserID)
