@@ -41,7 +41,7 @@ const recommendStack = new RecommendStack(app, `AnimoraRecommend-${process.env.N
 });
 
 // タイムラインスタックを作成
-new TimelineStack(app, `AnimoraTimeline-${process.env.NAME}`, {
+new TimelineStack(app, `AnimoraRecommendTimeline-${process.env.NAME}`, {
   env: {
     account: process.env.AWS_ACCOUNT_ID,
     region: process.env.AWS_REGION
