@@ -39,6 +39,10 @@ func NewPostHandler(postUsecase usecase.PostUsecase, storageUsecase usecase.Stor
 	}
 }
 
+type PostIdsResponse struct {
+	ID string `json:"id"`
+}
+
 func (h *PostHandler) GetRecommended(c echo.Context) error {
 	var reqBody TimelineRequest
 	if err := c.Bind(&reqBody); err != nil {
@@ -122,10 +126,6 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 	// 以降の処理（デコード・変換）はこれまでと同様でOK
 	respBody, _ := io.ReadAll(resp.Body)
 
-	type PostIdsResponse struct {
-		ID string `json:"id"`
-	}
-
 	var result struct {
 		Posts []PostIdsResponse `json:"posts"`
 	}
@@ -136,6 +136,15 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 		})
 	}
 	postIds := make([]uuid.UUID, len(result.Posts))
+	for i, p := range result.Posts {
+		u, err := uuid.Parse(p.ID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": "invalid post ID format",
+			})
+		}
+		postIds[i] = u
+	}
 
 	posts, err := h.postUsecase.GetByIds(postIds)
 	if err != nil {
@@ -144,7 +153,7 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 		})
 	}
 
-	postResponses := make([]models.PostResponse, len(result.Posts))
+	postResponses := make([]models.PostResponse, len(posts))
 	for i, post := range posts {
 		imageURL, err := h.storageUsecase.GetUrl(post.ImageKey)
 		if err != nil {
@@ -154,16 +163,16 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 			})
 		}
 
-		var userIconURL *string
+		var userImageURL string
 		if post.Edges.User.IconImageKey != "" {
-			iconURL, err := h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
+			var err error
+			userImageURL, err = h.storageUsecase.GetUrl(post.Edges.User.IconImageKey)
 			if err != nil {
-				log.Errorf("Failed to get user icon URL: %v", err)
-				return c.JSON(http.StatusInternalServerError, map[string]string{
-					"error": "failed to get user icon URL",
+				log.Errorf("Failed to get user image URL: %v", err)
+				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+					"error": err.Error(),
 				})
 			}
-			userIconURL = &iconURL
 		}
 
 		// コメント
@@ -201,7 +210,7 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 			likeResponses[j] = models.NewLikeResponse(like, likeUserIconURL)
 		}
 
-		postResponses[i] = models.NewPostResponse(post, imageURL, *userIconURL, commentResponses, likeResponses)
+		postResponses[i] = models.NewPostResponse(post, imageURL, userImageURL, commentResponses, likeResponses)
 	}
 
 	h.cacheUsecase.ClearPostResponses(reqBody.UserID)

@@ -9,6 +9,7 @@ import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { getRequiredEnvVars } from "./utils";
 import * as dotenv from "dotenv";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as ecrAssets from "aws-cdk-lib/aws-ecr-assets";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -38,13 +39,34 @@ export class AnimoraStack extends cdk.Stack {
       VALKEY_PORT: props.valkeyPort,
     };
 
-    // セキュリティグループ(Valkeyへアクセス許可)
-    const sg = new ec2.SecurityGroup(this, "TimelineLambdaSG", {
-      vpc: props?.vpc,
+    // TimelineLambdaSG を作成
+    const timelineSg = new ec2.SecurityGroup(this, "TimelineLambdaSG", {
+      vpc: props.vpc,
       description: "Security group for Timeline Lambda",
-      allowAllOutbound: true,
+      allowAllOutbound: true, // Lambda→外への送信は許可
     });
-    sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(6379));
+    timelineSg.addEgressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(Number(props.valkeyPort)),
+      "Allow outbound to Valkey"
+    );
+
+    // Valkey の SG をインポート
+    const valkeySgId = cdk.Fn.importValue(
+      `AnimoraRecommend-${env.NAME}:ValkeySG`
+    );
+    const valkeySg = ec2.SecurityGroup.fromSecurityGroupId(
+      this,
+      "ImportedValkeySG",
+      valkeySgId
+    );
+
+    // ValkeySG に対して、TimelineLambdaSG からの TCP/6379 Ingress を許可
+    valkeySg.addIngressRule(
+      timelineSg,
+      ec2.Port.tcp(Number(props.valkeyPort)),
+      "Allow Timeline Lambda to connect to Valkey"
+    );
 
     // Lambda関数の作成
     const timelineLambda = new lambda.DockerImageFunction(
@@ -55,13 +77,14 @@ export class AnimoraStack extends cdk.Stack {
           path.join(
             __dirname,
             "../../algorithm/recommend_system/01_heuristic/timeline/"
-          )
+          ),
+          { platform: ecrAssets.Platform.LINUX_AMD64 }
         ),
         timeout: cdk.Duration.seconds(30),
         memorySize: 512,
         vpc: props.vpc,
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
-        securityGroups: [sg],
+        securityGroups: [timelineSg],
         environment: lambdaEnv,
       }
     );
