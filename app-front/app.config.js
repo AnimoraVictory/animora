@@ -12,7 +12,7 @@ export default {
     newArchEnabled: true,
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'Animora',
+      bundleIdentifier: 'animora',
       infoPlist: {
         NSCameraUsageDescription:
           'ペットとの思い出を記録するためにカメラを使用します。',
@@ -31,7 +31,7 @@ export default {
         foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#ffffff',
       },
-      package: 'Animora',
+      package: 'com.animora.app',
     },
     web: {
       bundler: 'metro',
@@ -59,7 +59,7 @@ export default {
         origin: false,
       },
       eas: {
-        projectId: 'dbd30010-12ff-42de-befb-e1f2ae8ce27a',
+        "projectId": "9620deb2-9d31-4c2b-ac91-d41231661941"
       },
       API_URL: process.env.API_URL,
     },

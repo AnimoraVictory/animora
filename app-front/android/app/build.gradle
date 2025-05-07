@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.aki13627.appfront'
+    namespace "com.animora"
     defaultConfig {
-        applicationId 'com.aki13627.appfront'
+        applicationId 'com.animora.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

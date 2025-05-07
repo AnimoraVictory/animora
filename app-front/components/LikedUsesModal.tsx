@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -9,7 +9,6 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
-  PanResponder,
 } from 'react-native';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
@@ -17,7 +16,7 @@ import UserProfileModal from './UserProfileModal';
 import { useModalStack } from '@/providers/ModalStackContext';
 import { Like } from '@/features/like/schema';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 type Props = {
   visible: boolean;
@@ -39,8 +38,7 @@ const LikedUserModal: React.FC<Props> = ({
     null
   );
   const slideAnimProfile = useRef(new Animated.Value(width)).current;
-  const { push, pop, isTop } = useModalStack();
-  const modalKey = `${prevModalIdx + 1}`;
+  const { push, pop } = useModalStack();
 
   const openUserProfile = (email: string) => {
     setSelectedUserEmail(email);
@@ -64,61 +62,19 @@ const LikedUserModal: React.FC<Props> = ({
     });
   };
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => false,
-        onMoveShouldSetPanResponder: (_, gestureState) => {
-          const isVerticalSwipe =
-            Math.abs(gestureState.dy) > 1 &&
-            Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
-          return isVerticalSwipe && gestureState.dy > 1 && isTop(modalKey);
-        },
-        onPanResponderMove: (_, gestureState) => {
-          if (gestureState.dy > 0) {
-            slideAnim.setValue(gestureState.dy);
-          }
-        },
-        onPanResponderRelease: (_, gestureState) => {
-          if (gestureState.dy > 100) {
-            Animated.timing(slideAnim, {
-              toValue: height,
-              duration: 200,
-              useNativeDriver: true,
-            }).start(() => onClose());
-          } else {
-            Animated.spring(slideAnim, {
-              toValue: 0,
-              useNativeDriver: true,
-            }).start();
-          }
-        },
-      }),
-    [modalKey, isTop, slideAnim, onClose]
-  );
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
   return (
-    <Modal visible={visible} transparent animationType="none">
-      <Animated.View
-        style={[
-          styles.overlay,
-          {
-            backgroundColor: colors.middleBackground,
-            transform: [{ translateY: slideAnim }],
-          },
-        ]}
-        {...panResponder.panHandlers}
-      >
+    <Modal visible={visible} transparent animationType="slide">
+      <View style={[styles.overlay, { backgroundColor: colors.middleBackground }]}>
         <View style={[styles.header, { backgroundColor: colors.background }]}>
           <TouchableOpacity style={styles.backButton} onPress={onClose}>
             <Text style={styles.backText}>＜</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.tint }]}>
-            いいねしたユーザー
-          </Text>
+          <Text style={[styles.title, { color: colors.tint }]}>いいねしたユーザー</Text>
         </View>
+
         <FlatList
           data={likes}
           keyExtractor={(item) => item.id}
@@ -145,7 +101,7 @@ const LikedUserModal: React.FC<Props> = ({
             </TouchableOpacity>
           )}
         />
-      </Animated.View>
+      </View>
 
       {selectedUserEmail && (
         <UserProfileModal

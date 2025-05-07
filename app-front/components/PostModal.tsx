@@ -9,6 +9,7 @@ import {
   Dimensions,
   Animated,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -103,8 +104,10 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
 
   return (
     <Modal visible={visible} transparent animationType="fade">
+      <View style={{backgroundColor: colors.middleBackground}}>
+      <ScrollView contentContainerStyle={{ minHeight: height, paddingBottom: 300}}>
       <View
-        style={[styles.modal, { backgroundColor: colors.middleBackground }]}
+        style={[styles.modal,]}
       >
         <View style={styles.topBar}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -182,6 +185,8 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
         <Text style={[styles.caption, { color: colors.text }]}>
           {post.caption}
         </Text>
+      </View>
+      </ScrollView>
       </View>
       {isCommentModalVisible && (
         <CommentsModal

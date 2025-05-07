@@ -21,6 +21,7 @@ import { ModalStackProvider } from '@/providers/ModalStackContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Notifications from 'expo-notifications';
 import * as SecureStore from 'expo-secure-store';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 // SplashScreen が自動で隠れないように設定
 SplashScreen.preventAutoHideAsync();
@@ -46,10 +47,11 @@ async function saveDeviceTokenToStorage() {
     }
 
     const { data: expoPushToken } = await Notifications.getExpoPushTokenAsync({
-      projectId: 'dbd30010-12ff-42de-befb-e1f2ae8ce27a',
+      projectId: "9620deb2-9d31-4c2b-ac91-d41231661941",
     });
 
     if (expoPushToken) {
+      console.log('expoPushToken', expoPushToken);
       await SecureStore.setItemAsync('notificationToken', expoPushToken);
     }
   } catch (error) {
@@ -97,6 +99,10 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+
+  useEffect(() => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }, []);
 
   useEffect(() => {
     saveDeviceTokenToStorage();
