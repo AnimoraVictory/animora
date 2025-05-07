@@ -10,7 +10,7 @@ LEFT JOIN users U ON P.user_posts = U.id
 LEFT JOIN likes L ON L.post_likes = P.id
 LEFT JOIN comments C ON C.post_comments = P.id
 WHERE 
-    P.deleted_at IS NOT NULL
+    P.deleted_at IS NULL
     AND NOT EXISTS (
         SELECT 1 FROM block_relations B
         WHERE 
