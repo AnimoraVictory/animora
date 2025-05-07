@@ -47,6 +47,7 @@ export default function PostsScreen() {
 
   useEffect(() => {
     upsertDeviceToken(deviceId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const icon =

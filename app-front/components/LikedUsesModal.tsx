@@ -67,12 +67,16 @@ const LikedUserModal: React.FC<Props> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={[styles.overlay, { backgroundColor: colors.middleBackground }]}>
+      <View
+        style={[styles.overlay, { backgroundColor: colors.middleBackground }]}
+      >
         <View style={[styles.header, { backgroundColor: colors.background }]}>
           <TouchableOpacity style={styles.backButton} onPress={onClose}>
             <Text style={styles.backText}>＜</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.tint }]}>いいねしたユーザー</Text>
+          <Text style={[styles.title, { color: colors.tint }]}>
+            いいねしたユーザー
+          </Text>
         </View>
 
         <FlatList

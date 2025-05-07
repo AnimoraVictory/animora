@@ -1,13 +1,6 @@
 import { TaskType, taskTypeMap } from '@/app/(tabs)/camera';
 import React, { useEffect, useRef } from 'react';
-import {
-  StyleSheet,
-  Text,
-  useColorScheme,
-  Animated,
-  TouchableOpacity,
-} from 'react-native';
-import { Colors } from '@/constants/Colors';
+import { StyleSheet, Text, Animated, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { DailyTask } from '@/features/dailytask/schema';
 

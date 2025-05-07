@@ -47,7 +47,7 @@ async function saveDeviceTokenToStorage() {
     }
 
     const { data: expoPushToken } = await Notifications.getExpoPushTokenAsync({
-      projectId: "9620deb2-9d31-4c2b-ac91-d41231661941",
+      projectId: '9620deb2-9d31-4c2b-ac91-d41231661941',
     });
 
     if (expoPushToken) {

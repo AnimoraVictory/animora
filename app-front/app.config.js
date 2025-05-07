@@ -59,7 +59,7 @@ export default {
         origin: false,
       },
       eas: {
-        "projectId": "9620deb2-9d31-4c2b-ac91-d41231661941"
+        projectId: '9620deb2-9d31-4c2b-ac91-d41231661941',
       },
       API_URL: process.env.API_URL,
     },
