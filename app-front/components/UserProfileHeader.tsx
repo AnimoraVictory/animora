@@ -258,6 +258,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     gap: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileImage: {
     width: 64,
@@ -266,13 +268,15 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   rightBox: {
-    flex: 1,
     justifyContent: 'center',
     flexDirection: 'column',
+    alignSelf: 'center',
   },
   followRow: {
     flexDirection: 'row',
     marginBottom: 8,
+    justifyContent: 'center',
+    flexWrap: 'wrap',
   },
   followBox: {
     marginRight: 16,

@@ -35,3 +35,7 @@ func (u *PostUsecase) UpdatePost(postId, caption string) error {
 func (u *PostUsecase) DeletePost(postId string) error {
 	return u.postRepository.DeletePost(postId)
 }
+
+func (u *PostUsecase) GetByIds(postIds []uuid.UUID) ([]*ent.Post, error) {
+	return u.postRepository.GetByIds(postIds)
+}

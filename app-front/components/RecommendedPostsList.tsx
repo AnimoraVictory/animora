@@ -84,16 +84,6 @@ export default function RecommendedPostsList({ scrollY, listRef }: Props) {
     );
   }
 
-  if (isError) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ThemedText style={styles.errorText}>
-          ポストが取得できませんでした
-        </ThemedText>
-      </View>
-    );
-  }
-
   return (
     <Animated.FlatList
       keyboardShouldPersistTaps="handled"
@@ -136,6 +126,15 @@ export default function RecommendedPostsList({ scrollY, listRef }: Props) {
               size="small"
               color={colorScheme === 'light' ? '#000' : '#fff'}
             />
+          </View>
+        ) : null
+      }
+      ListEmptyComponent={
+        isError ? (
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.errorText}>
+              ポストが取得できませんでした。下にスワイプして再取得してください。
+            </ThemedText>
           </View>
         ) : null
       }

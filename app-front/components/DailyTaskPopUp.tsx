@@ -1,13 +1,6 @@
 import { TaskType, taskTypeMap } from '@/app/(tabs)/camera';
 import React, { useEffect, useRef } from 'react';
-import {
-  StyleSheet,
-  Text,
-  useColorScheme,
-  Animated,
-  TouchableOpacity,
-} from 'react-native';
-import { Colors } from '@/constants/Colors';
+import { StyleSheet, Text, Animated, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { DailyTask } from '@/features/dailytask/schema';
 
@@ -17,8 +10,6 @@ type DailyTaskPopUpProps = {
 
 const _DailyTaskPopUp: React.FC<DailyTaskPopUpProps> = ({ dailyTask }) => {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
   const glowAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.loop(
@@ -37,18 +28,19 @@ const _DailyTaskPopUp: React.FC<DailyTaskPopUpProps> = ({ dailyTask }) => {
     ).start();
   }, [glowAnim]);
 
-  const bgColor = glowAnim.interpolate({
+  const animatedShadowOpacity = glowAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [colors.card, 'rgba(255, 255, 255, 0.6)'], // 例えば暗→明
+    outputRange: [0.3, 0.9], // 数値にする！
   });
   return (
     <Animated.View
       style={[
         styles.container,
         {
-          backgroundColor: bgColor,
-          borderWidth: 1,
-          borderColor: colors.tint,
+          shadowColor: 'ffffff',
+          shadowOffset: { width: 0, height: 0 },
+          shadowRadius: 15,
+          shadowOpacity: animatedShadowOpacity,
         },
       ]}
     >
@@ -82,6 +74,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 5,
+    backgroundColor: 'white',
+    opacity: 0.8,
   },
   title: {
     fontSize: 18,

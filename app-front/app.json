@@ -10,13 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "Animora",
+      "bundleIdentifier": "animora",
       "infoPlist": {
         "NSCameraUsageDescription": "ペットとの思い出を記録するためにカメラを使用します。",
         "NSPhotoLibraryUsageDescription": "写真ライブラリ全体にアクセスし、投稿やプロフィール画像の選択などに使用します。",
         "NSUserNotificationUsageDescription": "デイリータスクの更新情報や他の飼い主さんからの通知をお知らせするために使用します。",
         "NSLocationWhenInUseUsageDescription": "近くの飼い主さんの投稿を表示するために現在地情報を使用します。",
-        "NSMicrophoneUsageDescription": "アプリ内で音声の録音や使用を行うためにマイクへのアクセスが必要です。"
+        "NSMicrophoneUsageDescription": "アプリ内で音声の録音や使用を行うためにマイクへのアクセスが必要です。",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -24,7 +25,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "Animora"
+      "package": "com.animora.app"
     },
     "web": {
       "bundler": "metro",
@@ -52,8 +53,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "dbd30010-12ff-42de-befb-e1f2ae8ce27a"
+        "projectId": "9620deb2-9d31-4c2b-ac91-d41231661941"
       }
-    }
+    },
+    "owner": "aki13627"
   }
 }

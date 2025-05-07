@@ -9,6 +9,7 @@ import {
   Dimensions,
   Animated,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
@@ -103,85 +104,93 @@ const PostModal: React.FC<Props> = ({ post, visible, onClose }) => {
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View
-        style={[styles.modal, { backgroundColor: colors.middleBackground }]}
-      >
-        <View style={styles.topBar}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={[styles.closeText, { color: colors.tint }]}>×</Text>
-          </TouchableOpacity>
-          {isMyPost && (
-            <TouchableOpacity
-              style={styles.menuButton}
-              onPress={() => setMenuVisible(true)}
-            >
-              <Text style={[styles.menuText, { color: colors.tint }]}>⋯</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+      <View style={{ backgroundColor: colors.middleBackground }}>
+        <ScrollView
+          contentContainerStyle={{ minHeight: height, paddingBottom: 300 }}
+        >
+          <View style={[styles.modal]}>
+            <View style={styles.topBar}>
+              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                <Text style={[styles.closeText, { color: colors.tint }]}>
+                  ×
+                </Text>
+              </TouchableOpacity>
+              {isMyPost && (
+                <TouchableOpacity
+                  style={styles.menuButton}
+                  onPress={() => setMenuVisible(true)}
+                >
+                  <Text style={[styles.menuText, { color: colors.tint }]}>
+                    ⋯
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
 
-        {menuVisible && (
-          <View style={styles.menuOverlay}>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={handleDeleteButton}
-            >
-              <Text>削除</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => setMenuVisible(false)}
-            >
-              <Text>閉じる</Text>
-            </TouchableOpacity>
+            {menuVisible && (
+              <View style={styles.menuOverlay}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleDeleteButton}
+                >
+                  <Text>削除</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => setMenuVisible(false)}
+                >
+                  <Text>閉じる</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <View style={styles.header}>
+              <Image
+                source={
+                  post.user.iconImageUrl
+                    ? { uri: post.user.iconImageUrl }
+                    : require('@/assets/images/profile.png')
+                }
+                style={styles.avatar}
+              />
+              <Text style={[styles.userName, { color: colors.text }]}>
+                {post.user.name}
+              </Text>
+            </View>
+
+            <Image source={{ uri: post.imageUrl }} style={styles.image} />
+
+            <View style={styles.reactionRow}>
+              <TouchableOpacity
+                style={styles.reactionItem}
+                onPress={onOpenLikeModal}
+              >
+                <Ionicons name="heart" size={20} color={colors.text} />
+                <Text style={[styles.reactionText, { color: colors.text }]}>
+                  {post.likes.length}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.reactionItem, { marginLeft: 16 }]}
+                onPress={onOpenCommentModal}
+              >
+                <Ionicons
+                  name="chatbox-ellipses-outline"
+                  size={20}
+                  color={colors.text}
+                />
+                <Text style={[styles.reactionText, { color: colors.text }]}>
+                  {post.comments.length}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.caption, { color: colors.text }]}>
+              {post.caption}
+            </Text>
           </View>
-        )}
-
-        <View style={styles.header}>
-          <Image
-            source={
-              post.user.iconImageUrl
-                ? { uri: post.user.iconImageUrl }
-                : require('@/assets/images/profile.png')
-            }
-            style={styles.avatar}
-          />
-          <Text style={[styles.userName, { color: colors.text }]}>
-            {post.user.name}
-          </Text>
-        </View>
-
-        <Image source={{ uri: post.imageUrl }} style={styles.image} />
-
-        <View style={styles.reactionRow}>
-          <TouchableOpacity
-            style={styles.reactionItem}
-            onPress={onOpenLikeModal}
-          >
-            <Ionicons name="heart" size={20} color={colors.text} />
-            <Text style={[styles.reactionText, { color: colors.text }]}>
-              {post.likes.length}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.reactionItem, { marginLeft: 16 }]}
-            onPress={onOpenCommentModal}
-          >
-            <Ionicons
-              name="chatbox-ellipses-outline"
-              size={20}
-              color={colors.text}
-            />
-            <Text style={[styles.reactionText, { color: colors.text }]}>
-              {post.comments.length}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={[styles.caption, { color: colors.text }]}>
-          {post.caption}
-        </Text>
+        </ScrollView>
       </View>
       {isCommentModalVisible && (
         <CommentsModal

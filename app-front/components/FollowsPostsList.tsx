@@ -84,21 +84,6 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
       </View>
     );
   }
-
-  if (isError) {
-    return (
-      <View
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: colors.middleBackground },
-        ]}
-      >
-        <ThemedText style={{ color: 'gray' }}>
-          投稿を取得できませんでした
-        </ThemedText>
-      </View>
-    );
-  }
   return (
     <Animated.FlatList
       keyboardShouldPersistTaps="handled"
@@ -129,6 +114,21 @@ export default function FollowsPostsList({ scrollY, listRef }: Props) {
           fetchNextPage();
         }
       }}
+      ListEmptyComponent={
+        isError ? (
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.errorText}>
+              投稿の取得に失敗しました。下にスワイプして再取得してください。
+            </ThemedText>
+          </View>
+        ) : (
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.errorText}>
+              フォロー中のユーザーの投稿がありません。ユーザーをフォローしてみましょう！
+            </ThemedText>
+          </View>
+        )
+      }
       initialNumToRender={10}
       maxToRenderPerBatch={10}
       windowSize={5}
@@ -147,5 +147,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: 'gray',
   },
 });

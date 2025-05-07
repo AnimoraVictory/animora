@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -16,6 +16,8 @@ import { PostTabSelector, PostTabType } from '@/components/PostsTabSelector';
 import RecommendedPostsList from '@/components/RecommendedPostsList';
 import FollowsPostsList from '@/components/FollowsPostsList';
 import DailyTaskPopUp from '@/components/DailyTaskPopUp';
+import useDeviceToken from '@/features/devicetoken/useDeviceToken';
+import * as Device from 'expo-device';
 
 const HEADER_HEIGHT = 140;
 const windowWidth = Dimensions.get('window').width;
@@ -32,11 +34,21 @@ export default function PostsScreen() {
   const [selectedTab, setSelectedTab] = useState<PostTabType>('recommended');
   const isDailyTaskDone = !!currentUser?.dailyTask?.post;
 
+  const { upsertDeviceToken } = useDeviceToken();
+
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, HEADER_HEIGHT],
     outputRange: [0, -HEADER_HEIGHT],
     extrapolate: 'clamp',
   });
+
+  const deviceId =
+    Device.osInternalBuildId ?? Device.modelId ?? 'unknown-device';
+
+  useEffect(() => {
+    upsertDeviceToken(deviceId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const icon =
     colorScheme === 'light'

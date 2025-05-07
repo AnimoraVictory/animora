@@ -8,6 +8,7 @@ import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as elasticache from 'aws-cdk-lib/aws-elasticache';
 import { getRequiredEnvVars } from './utils';
 import * as dotenv from "dotenv";
+import * as ecrAssets from "aws-cdk-lib/aws-ecr-assets";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -51,15 +52,16 @@ export class RecommendStack extends cdk.Stack {
     );
 
       // Valkey クラスターのSubnet Group(VPCのプライベートサブネットを使用)
-      const subnetGroup = new elasticache.CfnSubnetGroup(this, "ValkeySubnetGroup", {
-          cacheSubnetGroupName: "valkey-subnet-group",
+      const subnetGroup = new elasticache.CfnSubnetGroup(this, `ValkeySubnetGroup-${env.NAME}`, {
+          cacheSubnetGroupName: `valkey-subnet-group-${env.NAME}`,
           description: "Subnet group for Valkey",
           subnetIds: vpc.privateSubnets.map(subnet => subnet.subnetId),
       });
 
       // Valkeyクラスター(ElastiCache)の作成
-      const valkeyCluster = new elasticache.CfnReplicationGroup(this, "ReplicationGroup", {
+      const valkeyCluster = new elasticache.CfnReplicationGroup(this, `ReplicationGroup-${env.NAME}`, {
         replicationGroupDescription: "Valkey replication group for recommendation system",
+        replicationGroupId: `valkey-${env.NAME}-rg`, 
         engine: "valkey",
         engineVersion: "7.2",
         cacheNodeType: "cache.t3.micro",
@@ -80,17 +82,25 @@ export class RecommendStack extends cdk.Stack {
       
       // Lambda 関数
       const genrecommendationLambda = new lambda.DockerImageFunction(this, "GenRecommendationFunction", {
-          code: lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../algorithm/recommend_system/01_heuristic/generate_recommendation/")),
-          memorySize: 512,
-          timeout: cdk.Duration.minutes(5),
-          environment: {
-            ...env,
-            VALKEY_HOST: valkeyCluster.attrPrimaryEndPointAddress,
-            VALKEY_PORT: "6379",
-          },
-          vpc,
-          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
-          securityGroups: [valkeySg],
+        code: lambda.DockerImageCode.fromImageAsset(
+          path.join(__dirname, "../../algorithm/recommend_system/01_heuristic/generate_recommendation/"),
+          { platform: ecrAssets.Platform.LINUX_AMD64,  }
+        ),
+        memorySize: 512,
+        timeout: cdk.Duration.minutes(5),
+        environment: {
+          ...env,
+          VALKEY_HOST: valkeyCluster.attrPrimaryEndPointAddress,
+          VALKEY_PORT: "6379",
+        },
+        vpc,
+        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+        securityGroups: [valkeySg],
+      });
+
+      new cdk.CfnOutput(this, "ValkeySecurityGroupId", {
+        exportName: `AnimoraRecommend-${env.NAME}:ValkeySG`,
+        value: valkeySg.securityGroupId,
       });
 
       // EventBridge ルールで1時間に1回 Lambda を実行

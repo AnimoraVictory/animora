@@ -124,6 +124,25 @@ func (r *PostRepository) GetLikedPosts(userID uuid.UUID) ([]*ent.Post, error) {
 	return posts, nil
 }
 
+func (r *PostRepository) GetByIds(postIds []uuid.UUID) ([]*ent.Post, error) {
+	posts, err := r.db.Post.Query().
+		WithUser().
+		WithComments(func(q *ent.CommentQuery) {
+			q.WithUser()
+		}).
+		WithLikes(func(q *ent.LikeQuery) {
+			q.WithUser()
+		}).
+		WithDailyTask().
+		Where(post.IDIn(postIds...)).
+		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
+		All(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return posts, nil
+}
+
 func (r *PostRepository) CreatePost(caption, userID, fileKey string, dailyTaskId *string) (*ent.Post, error) {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
