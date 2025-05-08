@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import {
   Modal,
   View,
@@ -20,8 +20,12 @@ type Props = {
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const PostMenu: React.FC<Props> = ({ visible, onClose, onReport, slideAnim }) => {
-
+const PostMenu: React.FC<Props> = ({
+  visible,
+  onClose,
+  onReport,
+  slideAnim,
+}) => {
   const modalHeight = SCREEN_HEIGHT * 0.25;
 
   const panResponder = useRef(

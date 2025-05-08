@@ -172,7 +172,7 @@ export const PostPanel = ({ post }: Props) => {
       toValue: 0,
       duration: 300,
       useNativeDriver: true,
-    }).start(()=> setIsReportVisible(true));
+    }).start(() => setIsReportVisible(true));
   };
 
   const handleOpenMenuModal = () => {
@@ -189,15 +189,15 @@ export const PostPanel = ({ post }: Props) => {
       toValue: SCLEEN_HEIGHT,
       duration: 300,
       useNativeDriver: true,
-    }).start(()=> setIsMenuVisible(false));
-  }
+    }).start(() => setIsMenuVisible(false));
+  };
 
   const handleCloseReportModal = () => {
     Animated.timing(slideAnimReport, {
       toValue: SCLEEN_HEIGHT,
       duration: 300,
       useNativeDriver: true,
-    }).start(()=> setIsReportVisible(false));
+    }).start(() => setIsReportVisible(false));
   };
 
   return (
