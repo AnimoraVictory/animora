@@ -167,16 +167,21 @@ export const PostPanel = ({ post }: Props) => {
   const slideAnimReport = useRef(new Animated.Value(300)).current;
 
   const handleOpenReportModal = () => {
-    setIsMenuVisible(false);
-
-    setTimeout(() => {
-      setIsReportVisible(true);
-    }, 0);
-    Animated.timing(slideAnimReport, {
-      toValue: 0,
+    Animated.timing(slideAnimMenu, {
+      toValue: SCLEEN_HEIGHT,
       duration: 300,
       useNativeDriver: true,
-    }).start();
+    }).start(() => {
+      setIsMenuVisible(false);
+      setTimeout(() => {
+        setIsReportVisible(true);
+      }, 0);
+      Animated.timing(slideAnimReport, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
   };
 
   const handleOpenMenuModal = () => {
