@@ -9,6 +9,8 @@ import {
   ScrollView,
   Animated,
   Easing,
+  PanResponder,
+  Dimensions,
 } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useReportPost } from '@/features/report/useReportPost';
@@ -18,6 +20,7 @@ type Props = {
   onClose: () => void;
   postId: string;
   userId: string;
+  slideAnim: Animated.Value;
 };
 
 const reportReasons = [
@@ -29,11 +32,14 @@ const reportReasons = [
   '法令または公序良俗に違反する行為',
 ];
 
+const SCLEEN_HEIGHT = Dimensions.get('window').height;
+
 const ReportPostModal: React.FC<Props> = ({
   visible,
   onClose,
   postId,
   userId,
+  slideAnim,
 }) => {
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const { sendReportMutation } = useReportPost();
@@ -68,19 +74,38 @@ const ReportPostModal: React.FC<Props> = ({
     setSelectedReason(null);
   };
 
-  const slideAnim = useRef(new Animated.Value(300)).current;
+  const ModalHeight = SCLEEN_HEIGHT * 0.8;
 
-  useEffect(() => {
-    if (visible) {
-      slideAnim.setValue(300);
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          slideAnim.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const displacementThreshold = 50;
+        const velocityThreshold = 1.5;
+        if (
+          gestureState.dy > displacementThreshold ||
+          gestureState.vy > velocityThreshold
+        ) {
+          Animated.timing(slideAnim, {
+            toValue: ModalHeight,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(onClose);
+        } else {
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            bounciness: 0,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   const spinAnim = useRef(new Animated.Value(0)).current;
 
@@ -116,12 +141,8 @@ const ReportPostModal: React.FC<Props> = ({
           </View>
         )}
         <Animated.View
-          style={[
-            styles.modal,
-            {
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
+          style={[styles.modal, { transform: [{ translateY: slideAnim }] }]}
+          {...panResponder.panHandlers}
         >
           <View style={styles.header}>
             <Text style={styles.headerText}>通報</Text>

@@ -15,12 +15,12 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   onReport: () => void;
+  slideAnim: Animated.Value;
 };
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-const PostMenu: React.FC<Props> = ({ visible, onClose, onReport }) => {
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+const PostMenu: React.FC<Props> = ({ visible, onClose, onReport, slideAnim }) => {
 
   const modalHeight = SCREEN_HEIGHT * 0.25;
 
@@ -40,7 +40,7 @@ const PostMenu: React.FC<Props> = ({ visible, onClose, onReport }) => {
           gestureState.vy > velocityThreshold
         ) {
           Animated.timing(slideAnim, {
-            toValue: SCREEN_HEIGHT,
+            toValue: modalHeight,
             duration: 200,
             useNativeDriver: true,
           }).start(onClose);
@@ -54,18 +54,6 @@ const PostMenu: React.FC<Props> = ({ visible, onClose, onReport }) => {
       },
     })
   ).current;
-
-  useEffect(() => {
-    if (visible) {
-      slideAnim.setValue(modalHeight); // 初期値を設定
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
 
   return (
     <Modal

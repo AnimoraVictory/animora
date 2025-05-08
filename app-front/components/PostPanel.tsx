@@ -27,6 +27,8 @@ type Props = {
   post: PostResponse;
 };
 
+const SCLEEN_HEIGHT = Dimensions.get('window').height;
+
 export const PostPanel = ({ post }: Props) => {
   const { push, pop } = useModalStack();
   const { user } = useAuth();
@@ -161,6 +163,42 @@ export const PostPanel = ({ post }: Props) => {
       }),
     ]).start(handleLike);
   };
+  const slideAnimMenu = useRef(new Animated.Value(SCLEEN_HEIGHT)).current;
+  const slideAnimReport = useRef(new Animated.Value(300)).current;
+
+  const handleOpenReportModal = () => {
+    setIsMenuVisible(false);
+    Animated.timing(slideAnimReport, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(()=> setIsReportVisible(true));
+  };
+
+  const handleOpenMenuModal = () => {
+    setIsMenuVisible(true);
+    Animated.timing(slideAnimMenu, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleCloseMenuModal = () => {
+    Animated.timing(slideAnimMenu, {
+      toValue: SCLEEN_HEIGHT,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(()=> setIsMenuVisible(false));
+  }
+
+  const handleCloseReportModal = () => {
+    Animated.timing(slideAnimReport, {
+      toValue: SCLEEN_HEIGHT,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(()=> setIsReportVisible(false));
+  };
 
   return (
     <>
@@ -196,7 +234,7 @@ export const PostPanel = ({ post }: Props) => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setIsMenuVisible((prev) => !prev)}>
+            <TouchableOpacity onPress={handleOpenMenuModal}>
               <Ionicons
                 name="ellipsis-vertical"
                 size={20}
@@ -271,17 +309,16 @@ export const PostPanel = ({ post }: Props) => {
       />
       <PostMenu
         visible={isMenuVisible}
-        onClose={() => setIsMenuVisible(false)}
-        onReport={() => {
-          setIsMenuVisible(false);
-          setIsReportVisible(true); // ← 通報モーダルを開く処理
-        }}
+        onClose={handleCloseMenuModal}
+        onReport={handleOpenReportModal}
+        slideAnim={slideAnimMenu}
       />
       <ReportPostModal
         visible={isReportVisible}
-        onClose={() => setIsReportVisible(false)}
+        onClose={handleCloseReportModal}
         postId={post.id}
         userId={user?.id ?? ''}
+        slideAnim={slideAnimReport}
       />
     </>
   );
