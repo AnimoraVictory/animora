@@ -206,7 +206,9 @@ export class AnimoraStack extends cdk.Stack {
         runtime: lambda.Runtime.PROVIDED_AL2023,
         handler: "bootstrap",
         timeout: cdk.Duration.seconds(10),
-        environment: {},
+        environment: {
+          ...env,
+        },
         code: lambda.Code.fromAsset(
           path.join(
             __dirname,

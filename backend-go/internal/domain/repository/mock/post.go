@@ -16,7 +16,7 @@ type MockPostRepository struct {
 	UpdatePostFunc      func(postId, caption string) error
 	DeletePostFunc      func(postId string) error
 	GetByIdFunc         func(postId uuid.UUID) (*ent.Post, error)
-	GetByIdsFunc        func(postIds []uuid.UUID) ([]*ent.Post, error)
+	GetByIdsFunc        func(postIds []uuid.UUID, userID uuid.UUID) ([]*ent.Post, error)
 }
 
 // Ensure MockPostRepository implements the PostRepository interface
@@ -57,6 +57,6 @@ func (m *MockPostRepository) GetById(postId uuid.UUID) (*ent.Post, error) {
 	return m.GetByIdFunc(postId)
 }
 
-func (m *MockPostRepository) GetByIds(postIds []uuid.UUID) ([]*ent.Post, error) {
-	return m.GetByIdsFunc(postIds)
+func (m *MockPostRepository) GetByIds(postIds []uuid.UUID, userID uuid.UUID) ([]*ent.Post, error) {
+	return m.GetByIdsFunc(postIds, userID)
 }

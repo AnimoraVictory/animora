@@ -13,5 +13,5 @@ type PostRepository interface {
 	UpdatePost(postId, caption string) error
 	DeletePost(postId string) error
 	GetById(postId uuid.UUID) (*ent.Post, error)
-	GetByIds(postIds []uuid.UUID) ([]*ent.Post, error)
+	GetByIds(postIds []uuid.UUID, userID uuid.UUID) ([]*ent.Post, error)
 }

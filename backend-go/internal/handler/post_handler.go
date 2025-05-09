@@ -146,7 +146,7 @@ func (h *PostHandler) GetRecommended(c echo.Context) error {
 		postIds[i] = u
 	}
 
-	posts, err := h.postUsecase.GetByIds(postIds)
+	posts, err := h.postUsecase.GetByIds(postIds, reqBody.UserID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "failed to get posts",
