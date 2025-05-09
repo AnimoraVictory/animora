@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/aki-13627/animalia/backend-go/ent"
+	"github.com/aki-13627/animalia/backend-go/ent/blockrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/dailytask"
 	"github.com/aki-13627/animalia/backend-go/ent/followrelation"
 	"github.com/aki-13627/animalia/backend-go/ent/like"
@@ -124,7 +125,7 @@ func (r *PostRepository) GetLikedPosts(userID uuid.UUID) ([]*ent.Post, error) {
 	return posts, nil
 }
 
-func (r *PostRepository) GetByIds(postIds []uuid.UUID) ([]*ent.Post, error) {
+func (r *PostRepository) GetByIds(postIds []uuid.UUID, userID uuid.UUID) ([]*ent.Post, error) {
 	posts, err := r.db.Post.Query().
 		WithUser().
 		WithComments(func(q *ent.CommentQuery) {
@@ -134,7 +135,15 @@ func (r *PostRepository) GetByIds(postIds []uuid.UUID) ([]*ent.Post, error) {
 			q.WithUser()
 		}).
 		WithDailyTask().
-		Where(post.IDIn(postIds...)).
+		Where(
+			post.IDIn(postIds...),
+			post.DeletedAtIsNil(),
+			// ブロック関係のないユーザーのみ
+			post.HasUserWith(
+				user.Not(user.HasBlockingWith(blockrelation.HasToWith(user.ID(userID)))),    // 投稿者が自分をブロックしていない
+				user.Not(user.HasBlockedByWith(blockrelation.HasFromWith(user.ID(userID)))), // 自分が投稿者をブロックしていない
+			),
+		).
 		Select(post.FieldID, post.FieldCaption, post.FieldImageKey, post.FieldCreatedAt).
 		All(context.Background())
 	if err != nil {

@@ -97,7 +97,7 @@ func (u *DailyTaskUsecase) UpdateStreakCounts() error {
 		}
 
 		// 最後のタスクで投稿していなければ、streakCountをリセット
-		if lastTask.Post == nil {
+		if lastTask.Edges.Post == nil {
 			u.userRepository.UpdateStreakCount(user.ID, 0)
 		}
 	}
