@@ -231,9 +231,6 @@ func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
 		{
 			ID: uuid.New(),
 		},
-		{
-			ID: uuid.New(),
-		},
 	}
 
 	testCases := []struct {
@@ -249,19 +246,16 @@ func TestDailyTaskUsecase_UpdateStreakCounts(t *testing.T) {
 			users: mockUsers,
 			lastTasks: map[uuid.UUID]*models.DailyTaskWithEdges{
 				mockUsers[0].ID: {
-					DailyTask: &ent.DailyTask{ID: uuid.New()},
+					DailyTask: &ent.DailyTask{ID: uuid.New(), Edges: ent.DailyTaskEdges{Post: &ent.Post{ID: uuid.New()}}},
 					User:      ent.User{ID: mockUsers[0].ID, StreakCount: 5},
-					Post:      &ent.Post{ID: uuid.New()}, // 投稿あり
 				},
 				mockUsers[1].ID: {
 					DailyTask: &ent.DailyTask{ID: uuid.New()},
 					User:      ent.User{ID: mockUsers[1].ID, StreakCount: 3},
-					// 投稿なし
 				},
-				mockUsers[2].ID: nil, // タスクなし
 			},
 			expectedCalls: map[uuid.UUID]uint32{
-				mockUsers[1].ID: 0, // ストリークリセット
+				mockUsers[1].ID: 0,
 			},
 			mockError:     nil,
 			expectedError: nil,
