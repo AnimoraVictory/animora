@@ -13,7 +13,7 @@ from glide import (
     Logger, LogLevel, NodeAddress, RequestError, TimeoutError,
 )
 from database.query_runner import execute_query_from_file
-from recommender.heuristic import HeuristicRecommender
+from recommender.heuristic_rec import HeuristicRecommender
 from dotenv import load_dotenv, find_dotenv
 
 _ = load_dotenv(find_dotenv())
