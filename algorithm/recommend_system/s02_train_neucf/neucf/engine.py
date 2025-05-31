@@ -5,8 +5,8 @@
 # ライブラリのインポート
 from datetime import datetime
 import torch
-from neucf.components.utils import save_checkpoint, use_optimizer
-from neucf.components.metrics import MetronAtK
+from neucf.utils import save_checkpoint, use_optimizer
+from neucf.metrics import MetronAtK
 
 
 class Engine(object):
