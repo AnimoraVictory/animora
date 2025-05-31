@@ -7,7 +7,7 @@ import boto3
 import torch
 from io import BytesIO
 from utils.settings import S3_BUCKET, S3_KEY, DEVICE
-from neucf.components.mmneucf import MultiModalNeuCF
+from neucf.mmneucf import MultiModalNeuCF
 from database.query_runner import execute_query_from_file
 
 # ----------------------------------

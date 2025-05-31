@@ -6,7 +6,7 @@
 import torch
 import pandas as pd
 from database.query_runner import execute_query_from_file
-from neucf.components.mmneucf import MultiModalNeuCF
+from neucf.mmneucf import MultiModalNeuCF
 from utils.settings import DEVICE
 
 class NeuCFRecommender:

@@ -5,8 +5,8 @@
 # ライブラリのインポート
 import pandas as pd
 import json
-from neucf.components.mmneucf import MultiModalNeuCFEngine
-from neucf.components.data import SampleGenerator
+from neucf.mmneucf import MultiModalNeuCFEngine
+from neucf.data import SampleGenerator
 from database.connection import get_sqlalchemy_connection
 from database.query_runner import execute_query_from_file
 from utils.settings import train_config

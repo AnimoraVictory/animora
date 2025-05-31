@@ -6,8 +6,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from neucf.components.engine import Engine
-from neucf.components.utils import use_cuda
+from neucf.engine import Engine
+from neucf.utils import use_cuda
 
 
 class MultiModalNeuCF(nn.Module):
