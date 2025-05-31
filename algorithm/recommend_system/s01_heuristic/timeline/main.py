@@ -15,7 +15,7 @@ from glide import (
     GlideClient, GlideClientConfiguration,
     Logger, LogLevel, NodeAddress, 
 )
-from recommender.heuristic import HeuristicRecommender
+from recommender.recommender import HeuristicRecommender
 from dotenv import load_dotenv, find_dotenv
 
 _ = load_dotenv(find_dotenv())
